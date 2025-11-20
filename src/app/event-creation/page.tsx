@@ -56,7 +56,7 @@ export default function EventCreationPage() {
     <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background px-6 py-12">
       <div className="flex w-full max-w-5xl flex-col gap-8 rounded-3xl bg-[#2a2a2d] p-8 text-white shadow-2xl lg:flex-row">
         <section className="flex flex-col gap-4 rounded-2xl bg-[#1f1f21] p-6 lg:w-80 lg:shrink-0">
-          <div className="relative aspect-3/4 w-full overflow-hidden rounded-2xl border border-white/10 bg-[#111]">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/10 bg-[#111]">
             {coverPreview ? (
               <img
                 src={coverPreview}
