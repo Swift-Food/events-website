@@ -4,20 +4,36 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { Edit } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
+import { EventCreationProvider, useEventCreation } from "@/context/EventCreationContext";
 
-export default function EventCreationPage() {
-  const [eventName, setEventName] = useState("");
-  const [start, setStart] = useState("2025-11-20T15:00");
-  const [end, setEnd] = useState("2025-11-20T16:00");
-  const [location, setLocation] = useState("");
-  const [tickets, setTickets] = useState<"free" | "paid">("free");
-  const [ticketPrice, setTicketPrice] = useState("25");
-  const [requireApproval, setRequireApproval] = useState(false);
-  const [capacity, setCapacity] = useState("Unlimited");
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  const [coverName, setCoverName] = useState("invite-cover.png");
+function EventCreationForm() {
+  const {
+    eventName,
+    setEventName,
+    start,
+    setStart,
+    end,
+    setEnd,
+    location,
+    setLocation,
+    tickets,
+    setTickets,
+    ticketPrice,
+    setTicketPrice,
+    requireApproval,
+    setRequireApproval,
+    capacity,
+    setCapacity,
+    coverPreview,
+    setCoverPreview,
+    coverName,
+    setCoverName,
+    clearForm,
+  } = useEventCreation();
+
+  // Local state for UI only
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
@@ -140,6 +156,16 @@ export default function EventCreationPage() {
     setIsDescriptionModalOpen(true);
   };
 
+  const handleClearForm = () => {
+    if (confirm("Are you sure you want to clear the entire form? This action cannot be undone.")) {
+      clearForm();
+      // Also clear local file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
   return (
     <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background px-6 py-12">
       <div className="flex w-full max-w-5xl flex-col gap-8 rounded-3xl bg-[#2a2a2d] p-8 text-white shadow-2xl lg:flex-row">
@@ -207,14 +233,25 @@ export default function EventCreationPage() {
         </section>
 
         <section className="flex-1 space-y-6">
-          <div className="space-y-1">
-            <input
-              type="text"
-              value={eventName}
-              onChange={(e) => setEventName(e.target.value)}
-              placeholder="Event Name"
-              className="w-full bg-transparent text-4xl font-semibold text-white outline-none placeholder:text-white/30"
-            />
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 space-y-1">
+              <input
+                type="text"
+                value={eventName}
+                onChange={(e) => setEventName(e.target.value)}
+                placeholder="Event Name"
+                className="w-full bg-transparent text-4xl font-semibold text-white outline-none placeholder:text-white/30"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleClearForm}
+              className="flex items-center gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-400 transition hover:bg-red-500/20 hover:border-red-500/50"
+              title="Clear entire form"
+            >
+              <Trash2 className="h-5 w-5" />
+              <span className="hidden sm:inline">Clear Form</span>
+            </button>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-[#1f1f21] p-4">
@@ -441,5 +478,13 @@ export default function EventCreationPage() {
         onClose={() => setIsDescriptionModalOpen(false)}
       />
     </div>
+  );
+}
+
+export default function EventCreationPage() {
+  return (
+    <EventCreationProvider>
+      <EventCreationForm />
+    </EventCreationProvider>
   );
 }

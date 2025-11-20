@@ -1,17 +1,27 @@
-'use client'
+"use client";
 
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 
-const Tiptap = () => {
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: '<p>Hello World! 🌎️</p>',
-    // Don't render immediately on the server to avoid SSR issues
-    immediatelyRender: false,
-  })
-
-  return <EditorContent editor={editor} />
+interface TiptapProps {
+  content?: string;
+  onChange?: (content: string) => void;
 }
 
-export default Tiptap
+const Tiptap = ({ content = "", onChange }: TiptapProps) => {
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content,
+    // Don't render immediately on the server to avoid SSR issues
+    immediatelyRender: false,
+    onUpdate: ({ editor }) => {
+      if (onChange) {
+        onChange(editor.getHTML());
+      }
+    },
+  });
+
+  return <EditorContent editor={editor} />;
+};
+
+export default Tiptap;
