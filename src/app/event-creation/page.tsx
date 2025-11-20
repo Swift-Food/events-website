@@ -1,7 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import Cropper from "react-easy-crop";
+import type { Area } from "react-easy-crop";
 
 export default function EventCreationPage() {
   const [eventName, setEventName] = useState("");
@@ -15,6 +17,11 @@ export default function EventCreationPage() {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverName, setCoverName] = useState("invite-cover.png");
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const formatDate = (value: string) => {
@@ -36,8 +43,81 @@ export default function EventCreationPage() {
     const file = event.target.files?.[0];
     if (!file) return;
     const objectURL = URL.createObjectURL(file);
-    setCoverPreview(objectURL);
+    setImageToCrop(objectURL);
     setCoverName(file.name);
+    setIsCropModalOpen(true);
+  };
+
+  const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const createImage = (url: string): Promise<HTMLImageElement> =>
+    new Promise((resolve, reject) => {
+      const image = new Image();
+      image.addEventListener("load", () => resolve(image));
+      image.addEventListener("error", (error) => reject(error));
+      image.src = url;
+    });
+
+  const getCroppedImg = async (imageSrc: string, pixelCrop: Area): Promise<string> => {
+    const image = await createImage(imageSrc);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+      throw new Error("Failed to get canvas context");
+    }
+
+    canvas.width = pixelCrop.width;
+    canvas.height = pixelCrop.height;
+
+    ctx.drawImage(
+      image,
+      pixelCrop.x,
+      pixelCrop.y,
+      pixelCrop.width,
+      pixelCrop.height,
+      0,
+      0,
+      pixelCrop.width,
+      pixelCrop.height
+    );
+
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          throw new Error("Failed to create blob");
+        }
+        const croppedImageUrl = URL.createObjectURL(blob);
+        resolve(croppedImageUrl);
+      }, "image/jpeg");
+    });
+  };
+
+  const handleCropSave = async () => {
+    if (!imageToCrop || !croppedAreaPixels) return;
+
+    try {
+      const croppedImage = await getCroppedImg(imageToCrop, croppedAreaPixels);
+      setCoverPreview(croppedImage);
+      setIsCropModalOpen(false);
+      setImageToCrop(null);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+    } catch (e) {
+      console.error("Error cropping image:", e);
+    }
+  };
+
+  const handleCropCancel = () => {
+    setIsCropModalOpen(false);
+    setImageToCrop(null);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleImageRemove = () => {
@@ -281,6 +361,58 @@ export default function EventCreationPage() {
           </button>
         </section>
       </div>
+
+      {isCropModalOpen && imageToCrop && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="w-full max-w-3xl rounded-3xl bg-[#2a2a2d] p-6 text-white">
+            <h2 className="mb-4 text-2xl font-semibold">Crop Image</h2>
+
+            <div className="relative h-[500px] w-full rounded-2xl bg-black">
+              <Cropper
+                image={imageToCrop}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            </div>
+
+            <div className="mt-4 flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <label className="text-sm text-white/70">Zoom</label>
+                <input
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  value={zoom}
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className="flex-1"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleCropCancel}
+                  className="flex-1 rounded-full bg-white/10 py-3 text-center font-medium transition hover:bg-white/20"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCropSave}
+                  className="flex-1 rounded-full bg-white py-3 text-center font-semibold text-black transition hover:bg-white/80"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
