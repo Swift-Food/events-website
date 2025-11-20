@@ -8,15 +8,13 @@ export default function EventCreationPage() {
   const [start, setStart] = useState("2025-11-20T15:00");
   const [end, setEnd] = useState("2025-11-20T16:00");
   const [location, setLocation] = useState("");
-  const [description, setDescription] = useState(
-    ",kasdla asdlkjasdlkasd kaSlkdasd kj"
-  );
   const [tickets, setTickets] = useState<"free" | "paid">("free");
   const [ticketPrice, setTicketPrice] = useState("25");
   const [requireApproval, setRequireApproval] = useState(false);
   const [capacity, setCapacity] = useState("Unlimited");
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverName, setCoverName] = useState("invite-cover.png");
+  const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const formatDate = (value: string) => {
@@ -48,6 +46,10 @@ export default function EventCreationPage() {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  const handleDescriptionClick = () => {
+    setIsDescriptionModalOpen(true);
   };
 
   return (
@@ -162,12 +164,13 @@ export default function EventCreationPage() {
 
           <div className="rounded-2xl border border-white/10 bg-[#1f1f21] p-4">
             <label className="text-sm text-white/50">Event Description</label>
-            <textarea
-              rows={4}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="mt-2 w-full rounded-xl bg-white/5 px-3 py-2 text-white outline-none"
-            />
+            <button
+              type="button"
+              onClick={handleDescriptionClick}
+              className="mt-2 w-full rounded-xl border border-white/20 bg-transparent px-4 py-3 text-left text-white transition hover:border-white/50"
+            >
+              Edit Description
+            </button>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-[#1f1f21] p-4 space-y-4">
