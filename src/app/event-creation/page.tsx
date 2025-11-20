@@ -16,7 +16,7 @@ const timezones: Timezone[] = [
 ];
 
 export default function EventCreationPage() {
-  const [eventName, setEventName] = useState("Event Name");
+  const [eventName, setEventName] = useState("");
   const [start, setStart] = useState("2025-11-20T15:00");
   const [end, setEnd] = useState("2025-11-20T16:00");
   const [timezone, setTimezone] = useState<Timezone>(timezones[0]);
@@ -55,10 +55,10 @@ export default function EventCreationPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-[#1d1d1f] px-6 py-12">
-      <div className="grid w-full max-w-5xl gap-8 rounded-3xl bg-[#2a2a2d] p-8 text-white shadow-2xl lg:grid-cols-[340px,1fr]">
-        <section className="space-y-4 rounded-2xl bg-[#1f1f21] p-6">
-          <div className="relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-[#111]">
+    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background px-6 py-12">
+      <div className="flex w-full max-w-5xl flex-col gap-8 rounded-3xl bg-[#2a2a2d] p-8 text-white shadow-2xl lg:flex-row">
+        <section className="flex flex-col gap-4 rounded-2xl bg-[#1f1f21] p-6 lg:w-80 lg:shrink-0">
+          <div className="relative aspect-3/4 w-full overflow-hidden rounded-2xl border border-white/10 bg-[#111]">
             {coverPreview ? (
               <img
                 src={coverPreview}
@@ -66,7 +66,7 @@ export default function EventCreationPage() {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex aspect-square w-full flex-col items-center justify-center gap-2 bg-[#f9f8f6] text-black">
+              <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-[#f9f8f6] text-black">
                 <span className="text-3xl font-serif">You Are Invited</span>
                 <span className="text-sm text-black/60">
                   Upload a cover image
@@ -109,14 +109,14 @@ export default function EventCreationPage() {
           </div>
         </section>
 
-        <section className="space-y-6">
+        <section className="flex-1 space-y-6">
           <div className="space-y-1">
-            <p className="text-sm text-white/60">Personal Calendar · Public</p>
             <input
               type="text"
               value={eventName}
               onChange={(e) => setEventName(e.target.value)}
-              className="w-full bg-transparent text-4xl font-semibold text-white outline-none"
+              placeholder="Event Name"
+              className="w-full bg-transparent text-4xl font-semibold text-white outline-none placeholder:text-white/30"
             />
           </div>
 
