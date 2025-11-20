@@ -1,25 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useMemo, useState } from "react";
-
-type Timezone = {
-  label: string;
-  value: string;
-};
-
-const timezones: Timezone[] = [
-  { label: "GMT+00:00 London", value: "Europe/London" },
-  { label: "GMT-05:00 New York", value: "America/New_York" },
-  { label: "GMT+01:00 Berlin", value: "Europe/Berlin" },
-  { label: "GMT+08:00 Singapore", value: "Asia/Singapore" },
-];
+import { useMemo, useRef, useState } from "react";
 
 export default function EventCreationPage() {
   const [eventName, setEventName] = useState("");
   const [start, setStart] = useState("2025-11-20T15:00");
   const [end, setEnd] = useState("2025-11-20T16:00");
-  const [timezone, setTimezone] = useState<Timezone>(timezones[0]);
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState(
     ",kasdla asdlkjasdlkasd kaSlkdasd kj"
@@ -30,6 +17,7 @@ export default function EventCreationPage() {
   const [capacity, setCapacity] = useState("Unlimited");
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverName, setCoverName] = useState("invite-cover.png");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const formatDate = (value: string) => {
     try {
@@ -54,6 +42,14 @@ export default function EventCreationPage() {
     setCoverName(file.name);
   };
 
+  const handleImageRemove = () => {
+    setCoverPreview(null);
+    setCoverName("invite-cover.png");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background px-6 py-12">
       <div className="flex w-full max-w-5xl flex-col gap-8 rounded-3xl bg-[#2a2a2d] p-8 text-white shadow-2xl lg:flex-row">
@@ -73,17 +69,29 @@ export default function EventCreationPage() {
                 </span>
               </div>
             )}
-            <label
-              htmlFor="cover-upload"
-              className="absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-black shadow-lg transition hover:bg-white"
-            >
-              Change cover
-            </label>
+            <div className="absolute bottom-4 right-4 flex flex-wrap gap-3">
+              <label
+                htmlFor="cover-upload"
+                className="rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-black shadow-lg transition hover:bg-white"
+              >
+                Change cover
+              </label>
+              {coverPreview && (
+                <button
+                  type="button"
+                  onClick={handleImageRemove}
+                  className="rounded-full bg-black/70 px-4 py-2 text-sm font-medium text-white shadow-lg transition hover:bg-black"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
             <input
               id="cover-upload"
               type="file"
               accept="image/*"
               className="sr-only"
+              ref={fileInputRef}
               onChange={handleImageChange}
             />
           </div>
@@ -102,7 +110,6 @@ export default function EventCreationPage() {
                 <p className="text-base text-white">{formattedEnd}</p>
               </div>
             </div>
-            <div className="mt-3 text-xs text-white/50">{timezone.label}</div>
             <div className="mt-4 text-xs text-white/60">
               Cover: <span className="text-white">{coverName}</span>
             </div>
@@ -140,26 +147,6 @@ export default function EventCreationPage() {
                 className="mt-2 w-full rounded-xl bg-white/5 px-3 py-2 text-white outline-none"
               />
             </div>
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-[#1f1f21] p-4">
-            <label className="text-sm text-white/50">Timezone</label>
-            <select
-              value={timezone.value}
-              onChange={(e) =>
-                setTimezone(
-                  timezones.find((tz) => tz.value === e.target.value) ||
-                    timezones[0]
-                )
-              }
-              className="mt-2 w-full rounded-xl bg-white/5 px-3 py-2 text-white outline-none"
-            >
-              {timezones.map((tz) => (
-                <option key={tz.value} value={tz.value} className="text-black">
-                  {tz.label}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-[#1f1f21] p-4">
