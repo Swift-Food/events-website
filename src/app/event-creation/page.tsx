@@ -4,6 +4,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
+import { Edit } from "lucide-react";
 
 export default function EventCreationPage() {
   const [eventName, setEventName] = useState("");
@@ -48,9 +49,12 @@ export default function EventCreationPage() {
     setIsCropModalOpen(true);
   };
 
-  const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  }, []);
+  const onCropComplete = useCallback(
+    (_croppedArea: Area, croppedAreaPixels: Area) => {
+      setCroppedAreaPixels(croppedAreaPixels);
+    },
+    []
+  );
 
   const createImage = (url: string): Promise<HTMLImageElement> =>
     new Promise((resolve, reject) => {
@@ -60,7 +64,10 @@ export default function EventCreationPage() {
       image.src = url;
     });
 
-  const getCroppedImg = async (imageSrc: string, pixelCrop: Area): Promise<string> => {
+  const getCroppedImg = async (
+    imageSrc: string,
+    pixelCrop: Area
+  ): Promise<string> => {
     const image = await createImage(imageSrc);
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -213,7 +220,13 @@ export default function EventCreationPage() {
             <div className="flex gap-4">
               <div className="flex flex-col items-center py-3">
                 <div className="h-3 w-3 rounded-full bg-white"></div>
-                <div className="my-2 w-px flex-1" style={{ backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.5) 0, rgba(255,255,255,0.5) 2px, transparent 2px, transparent 6px)' }}></div>
+                <div
+                  className="my-2 w-px flex-1"
+                  style={{
+                    backgroundImage:
+                      "repeating-linear-gradient(to bottom, rgba(255,255,255,0.5) 0, rgba(255,255,255,0.5) 2px, transparent 2px, transparent 6px)",
+                  }}
+                ></div>
                 <div className="h-3 w-3 rounded-full border-2 border-white/50"></div>
               </div>
 
@@ -222,14 +235,18 @@ export default function EventCreationPage() {
                   <label className="text-sm text-white/50 w-12">Start</label>
                   <input
                     type="date"
-                    value={start.split('T')[0]}
-                    onChange={(e) => setStart(e.target.value + 'T' + start.split('T')[1])}
+                    value={start.split("T")[0]}
+                    onChange={(e) =>
+                      setStart(e.target.value + "T" + start.split("T")[1])
+                    }
                     className="flex-1 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
                   />
                   <input
                     type="time"
-                    value={start.split('T')[1]}
-                    onChange={(e) => setStart(start.split('T')[0] + 'T' + e.target.value)}
+                    value={start.split("T")[1]}
+                    onChange={(e) =>
+                      setStart(start.split("T")[0] + "T" + e.target.value)
+                    }
                     className="w-32 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
                   />
                 </div>
@@ -238,14 +255,18 @@ export default function EventCreationPage() {
                   <label className="text-sm text-white/50 w-12">End</label>
                   <input
                     type="date"
-                    value={end.split('T')[0]}
-                    onChange={(e) => setEnd(e.target.value + 'T' + end.split('T')[1])}
+                    value={end.split("T")[0]}
+                    onChange={(e) =>
+                      setEnd(e.target.value + "T" + end.split("T")[1])
+                    }
                     className="flex-1 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
                   />
                   <input
                     type="time"
-                    value={end.split('T')[1]}
-                    onChange={(e) => setEnd(end.split('T')[0] + 'T' + e.target.value)}
+                    value={end.split("T")[1]}
+                    onChange={(e) =>
+                      setEnd(end.split("T")[0] + "T" + e.target.value)
+                    }
                     className="w-32 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
                   />
                 </div>
@@ -254,7 +275,9 @@ export default function EventCreationPage() {
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-[#1f1f21] p-4">
-            <label className="text-sm text-white/50">Add Event Location</label>
+            <label className="text-md text-white font-semibold">
+              Add Event Location
+            </label>
             <input
               type="text"
               placeholder="Offline location or virtual link"
@@ -264,16 +287,14 @@ export default function EventCreationPage() {
             />
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#1f1f21] p-4">
-            <label className="text-sm text-white/50">Event Description</label>
-            <button
-              type="button"
-              onClick={handleDescriptionClick}
-              className="mt-2 w-full rounded-xl border border-white/20 bg-transparent px-4 py-3 text-left text-white transition hover:border-white/50"
-            >
-              Edit Description
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleDescriptionClick}
+            className="flex w-full items-center gap-2 rounded-2xl border border-white/10 bg-[#1f1f21] px-4 py-3 text-white text-md transition hover:bg-[#25252a] font-semibold"
+          >
+            <Edit className="h-5 w-5" />
+            <span>Edit Description</span>
+          </button>
 
           <div className="rounded-2xl border border-white/10 bg-[#1f1f21] p-4 space-y-4">
             <div className="flex items-center justify-between">
