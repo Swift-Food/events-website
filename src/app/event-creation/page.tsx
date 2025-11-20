@@ -129,25 +129,47 @@ export default function EventCreationPage() {
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-[#1f1f21] p-4">
-              <label className="text-sm text-white/50">Start</label>
-              <input
-                type="datetime-local"
-                value={start}
-                onChange={(e) => setStart(e.target.value)}
-                className="mt-2 w-full rounded-xl bg-white/5 px-3 py-2 text-white outline-none"
-              />
-            </div>
+          <div className="rounded-2xl border border-white/10 bg-[#1f1f21] p-4">
+            <div className="flex gap-4">
+              <div className="flex flex-col items-center py-3">
+                <div className="h-3 w-3 rounded-full bg-white"></div>
+                <div className="my-2 w-px flex-1" style={{ backgroundImage: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.5) 0, rgba(255,255,255,0.5) 2px, transparent 2px, transparent 6px)' }}></div>
+                <div className="h-3 w-3 rounded-full border-2 border-white/50"></div>
+              </div>
 
-            <div className="rounded-2xl border border-white/10 bg-[#1f1f21] p-4">
-              <label className="text-sm text-white/50">End</label>
-              <input
-                type="datetime-local"
-                value={end}
-                onChange={(e) => setEnd(e.target.value)}
-                className="mt-2 w-full rounded-xl bg-white/5 px-3 py-2 text-white outline-none"
-              />
+              <div className="flex flex-1 flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <label className="text-sm text-white/50 w-12">Start</label>
+                  <input
+                    type="date"
+                    value={start.split('T')[0]}
+                    onChange={(e) => setStart(e.target.value + 'T' + start.split('T')[1])}
+                    className="flex-1 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
+                  />
+                  <input
+                    type="time"
+                    value={start.split('T')[1]}
+                    onChange={(e) => setStart(start.split('T')[0] + 'T' + e.target.value)}
+                    className="w-32 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <label className="text-sm text-white/50 w-12">End</label>
+                  <input
+                    type="date"
+                    value={end.split('T')[0]}
+                    onChange={(e) => setEnd(e.target.value + 'T' + end.split('T')[1])}
+                    className="flex-1 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
+                  />
+                  <input
+                    type="time"
+                    value={end.split('T')[1]}
+                    onChange={(e) => setEnd(end.split('T')[0] + 'T' + e.target.value)}
+                    className="w-32 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
