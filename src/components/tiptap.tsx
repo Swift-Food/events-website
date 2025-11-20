@@ -140,8 +140,110 @@ const Tiptap = ({ content = "", onChange }: TiptapProps) => {
       </div>
 
       <div className="min-h-[300px] rounded-xl border border-white/10 bg-[#131315] p-4">
-        <EditorContent editor={editor} className="prose prose-invert max-w-none" />
+        <EditorContent
+          editor={editor}
+          className="tiptap-editor"
+        />
       </div>
+
+      <style jsx global>{`
+        .tiptap-editor {
+          color: white;
+        }
+
+        .tiptap-editor .ProseMirror {
+          outline: none;
+          min-height: 280px;
+        }
+
+        .tiptap-editor h1 {
+          font-size: 2.25rem;
+          font-weight: 700;
+          line-height: 2.5rem;
+          margin-top: 1rem;
+          margin-bottom: 1rem;
+          color: white;
+        }
+
+        .tiptap-editor h2 {
+          font-size: 1.875rem;
+          font-weight: 600;
+          line-height: 2.25rem;
+          margin-top: 0.875rem;
+          margin-bottom: 0.875rem;
+          color: white;
+        }
+
+        .tiptap-editor h3 {
+          font-size: 1.5rem;
+          font-weight: 600;
+          line-height: 2rem;
+          margin-top: 0.75rem;
+          margin-bottom: 0.75rem;
+          color: white;
+        }
+
+        .tiptap-editor p {
+          font-size: 1rem;
+          line-height: 1.75rem;
+          margin-top: 0.5rem;
+          margin-bottom: 0.5rem;
+          color: rgba(255, 255, 255, 0.9);
+        }
+
+        .tiptap-editor ul {
+          list-style-type: disc;
+          padding-left: 1.5rem;
+          margin-top: 0.5rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .tiptap-editor ol {
+          list-style-type: decimal;
+          padding-left: 1.5rem;
+          margin-top: 0.5rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .tiptap-editor li {
+          margin-top: 0.25rem;
+          margin-bottom: 0.25rem;
+          color: rgba(255, 255, 255, 0.9);
+        }
+
+        .tiptap-editor hr {
+          border: none;
+          border-top: 2px solid rgba(255, 255, 255, 0.2);
+          margin-top: 1.5rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .tiptap-editor blockquote {
+          border-left: 4px solid rgba(255, 255, 255, 0.3);
+          padding-left: 1rem;
+          margin-left: 0;
+          margin-top: 1rem;
+          margin-bottom: 1rem;
+          font-style: italic;
+          color: rgba(255, 255, 255, 0.7);
+        }
+
+        .tiptap-editor strong {
+          font-weight: 700;
+        }
+
+        .tiptap-editor em {
+          font-style: italic;
+        }
+
+        .tiptap-editor code {
+          background-color: rgba(255, 255, 255, 0.1);
+          padding: 0.125rem 0.25rem;
+          border-radius: 0.25rem;
+          font-family: monospace;
+          font-size: 0.875rem;
+        }
+      `}</style>
     </div>
   );
 };
