@@ -5,6 +5,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
 import { Edit } from "lucide-react";
+import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
 
 export default function EventCreationPage() {
   const [eventName, setEventName] = useState("");
@@ -434,6 +435,11 @@ export default function EventCreationPage() {
           </div>
         </div>
       )}
+
+      <EventDescriptionModal
+        isOpen={isDescriptionModalOpen}
+        onClose={() => setIsDescriptionModalOpen(false)}
+      />
     </div>
   );
 }
