@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import Tiptap from "@/components/tiptap";
+import Tiptap from "@/components/Tiptap";
 import { useEventCreation } from "@/context/EventCreationContext";
 
 interface EventDescriptionModalProps {
@@ -16,6 +16,11 @@ export default function EventDescriptionModal({
 }: EventDescriptionModalProps) {
   const { description, setDescription } = useEventCreation();
   const [localDescription, setLocalDescription] = useState(description);
+
+  // Update localDescription whenever the modal opens or description changes
+  useEffect(() => {
+    setLocalDescription(description);
+  }, [isOpen, description]);
 
   if (!isOpen) return null;
 

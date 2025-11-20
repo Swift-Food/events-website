@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
@@ -20,6 +21,13 @@ const Tiptap = ({ content = "", onChange }: TiptapProps) => {
       }
     },
   });
+
+  // Update editor content when the content prop changes
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [editor, content]);
 
   return <EditorContent editor={editor} />;
 };
