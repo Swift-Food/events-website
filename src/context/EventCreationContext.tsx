@@ -7,6 +7,7 @@ import {
   ReactNode,
   useCallback,
   useMemo,
+  useEffect,
 } from "react";
 import type { Dispatch, SetStateAction } from "react";
 
@@ -171,6 +172,10 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     ticketPrice,
     tickets,
   ]);
+
+  useEffect(() => {
+    persistEventDraft();
+  }, [persistEventDraft]);
 
   const clearForm = () => {
     const newTimes = getDefaultTimes();
