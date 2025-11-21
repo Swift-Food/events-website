@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import Link from "@tiptap/extension-link";
 import {
   Heading1,
   Heading2,
@@ -12,6 +13,8 @@ import {
   List,
   ListOrdered,
   Quote,
+  Link2,
+  Link2Off,
 } from "lucide-react";
 
 interface TiptapProps {
@@ -21,7 +24,18 @@ interface TiptapProps {
 
 const Tiptap = ({ content = "", onChange }: TiptapProps) => {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      Link.configure({
+        openOnClick: false,
+        linkOnPaste: true,
+        shouldAutoLink: (url) => /^https?:\/\//.test(url),
+        HTMLAttributes: {
+          class:
+            "text-blue-400 underline decoration-blue-400/70 hover:text-blue-300",
+        },
+      }),
+    ],
     content,
     // Don't render immediately on the server to avoid SSR issues
     immediatelyRender: false,
@@ -42,6 +56,35 @@ const Tiptap = ({ content = "", onChange }: TiptapProps) => {
   if (!editor) {
     return null;
   }
+
+  const setLink = () => {
+    if (!editor) return;
+    const previousUrl = editor.getAttributes("link").href as string | undefined;
+    const url = window.prompt("Enter a URL", previousUrl ?? "https://");
+
+    if (url === null) {
+      return;
+    }
+
+    const trimmedUrl = url.trim();
+
+    if (trimmedUrl === "") {
+      editor.chain().focus().unsetLink().run();
+      return;
+    }
+
+    editor
+      .chain()
+      .focus()
+      .extendMarkRange("link")
+      .setLink({ href: trimmedUrl })
+      .run();
+  };
+
+  const unsetLink = () => {
+    if (!editor) return;
+    editor.chain().focus().unsetLink().run();
+  };
 
   const ToolbarButton = ({
     onClick,
@@ -72,7 +115,9 @@ const Tiptap = ({ content = "", onChange }: TiptapProps) => {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/20 bg-[#2a2a2d] p-3">
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 1 }).run()
+          }
           isActive={editor.isActive("heading", { level: 1 })}
           title="Heading 1"
         >
@@ -80,7 +125,9 @@ const Tiptap = ({ content = "", onChange }: TiptapProps) => {
         </ToolbarButton>
 
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+          }
           isActive={editor.isActive("heading", { level: 2 })}
           title="Heading 2"
         >
@@ -88,7 +135,9 @@ const Tiptap = ({ content = "", onChange }: TiptapProps) => {
         </ToolbarButton>
 
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
           isActive={editor.isActive("heading", { level: 3 })}
           title="Heading 3"
         >
@@ -137,13 +186,28 @@ const Tiptap = ({ content = "", onChange }: TiptapProps) => {
         >
           <Quote className="h-5 w-5" />
         </ToolbarButton>
+
+        <div className="w-px bg-white/10" />
+
+        <ToolbarButton
+          onClick={setLink}
+          isActive={editor.isActive("link")}
+          title="Add Link"
+        >
+          <Link2 className="h-5 w-5" />
+        </ToolbarButton>
+
+        <ToolbarButton
+          onClick={unsetLink}
+          isActive={editor.isActive("link")}
+          title="Remove Link"
+        >
+          <Link2Off className="h-5 w-5" />
+        </ToolbarButton>
       </div>
 
       <div className="min-h-[300px] rounded-xl border border-white/10 bg-[#131315] p-4">
-        <EditorContent
-          editor={editor}
-          className="tiptap-editor"
-        />
+        <EditorContent editor={editor} className="tiptap-editor" />
       </div>
 
       <style jsx global>{`
@@ -242,6 +306,17 @@ const Tiptap = ({ content = "", onChange }: TiptapProps) => {
           border-radius: 0.25rem;
           font-family: monospace;
           font-size: 0.875rem;
+        }
+
+        .tiptap-editor a {
+          color: #60a5fa;
+          text-decoration: underline;
+          transition: color 150ms;
+          cursor: pointer;
+        }
+
+        .tiptap-editor a:hover {
+          color: #93c5fd;
         }
       `}</style>
     </div>
