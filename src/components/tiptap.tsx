@@ -231,7 +231,10 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
       )}
 
       <div className="min-h-[300px] rounded-xl border border-white/10 bg-[#131315] p-4">
-        <EditorContent editor={editor} className="tiptap-editor" />
+        <EditorContent
+          editor={editor}
+          className={`tiptap-editor ${!editable ? "tiptap-view-mode" : ""}`}
+        />
       </div>
 
       <style jsx global>{`
@@ -341,6 +344,10 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
 
         .tiptap-editor a:hover {
           color: #93c5fd;
+        }
+
+        .tiptap-view-mode a {
+          cursor: pointer !important;
         }
       `}</style>
     </div>
