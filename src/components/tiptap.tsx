@@ -134,9 +134,9 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="flex h-full flex-col space-y-4">
       {editable && (
-        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/20 bg-[#2a2a2d] p-3">
+        <div className="flex flex-shrink-0 flex-wrap items-center gap-2 rounded-xl border border-white/20 bg-[#2a2a2d] p-3">
         <ToolbarButton
           onClick={() =>
             editor.chain().focus().toggleHeading({ level: 1 }).run()
@@ -230,7 +230,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
         </div>
       )}
 
-      <div className="min-h-[300px] rounded-xl border border-white/10 bg-[#131315] p-4">
+      <div className="flex-1 overflow-y-auto rounded-xl border border-white/10 bg-[#131315] p-4">
         <EditorContent
           editor={editor}
           className={`tiptap-editor ${!editable ? "tiptap-view-mode" : ""}`}
@@ -244,7 +244,6 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
 
         .tiptap-editor .ProseMirror {
           outline: none;
-          min-height: 280px;
         }
 
         .tiptap-editor h1 {

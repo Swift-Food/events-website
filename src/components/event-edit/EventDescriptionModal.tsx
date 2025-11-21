@@ -38,17 +38,21 @@ export default function EventDescriptionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-      <div className="w-full max-w-4xl rounded-3xl bg-[#2a2a2d] p-6 text-white">
-        <div className="mb-4 flex items-center justify-between">
+      <div className="flex h-[90vh] w-full max-w-4xl flex-col rounded-3xl bg-[#2a2a2d] p-6 text-white">
+        <div className="mb-4 flex flex-shrink-0 items-center justify-between">
           <h2 className="text-2xl font-semibold">
-            {isEditMode ? "Edit Event Description" : "Preview Event Description"}
+            {isEditMode
+              ? "Edit Event Description"
+              : "Preview Event Description"}
           </h2>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setIsEditMode(!isEditMode)}
               className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium transition hover:bg-white/20"
-              aria-label={isEditMode ? "Switch to preview mode" : "Switch to edit mode"}
+              aria-label={
+                isEditMode ? "Switch to preview mode" : "Switch to edit mode"
+              }
             >
               {isEditMode ? (
                 <>
@@ -73,7 +77,7 @@ export default function EventDescriptionModal({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-[#1f1f21] p-4">
+        <div className="flex-1 overflow-hidden rounded-2xl border border-white/10 bg-[#1f1f21] p-4">
           <Tiptap
             content={localDescription}
             onChange={setLocalDescription}
@@ -81,7 +85,7 @@ export default function EventDescriptionModal({
           />
         </div>
 
-        <div className="mt-4 flex justify-end gap-3">
+        <div className="mt-4 flex flex-shrink-0 justify-end gap-3">
           <button
             type="button"
             onClick={handleCancel}
