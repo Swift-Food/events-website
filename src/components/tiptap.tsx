@@ -4,10 +4,13 @@ import { useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
+import UnderlineExtension from "@tiptap/extension-underline";
 import {
+  Bold,
   Heading1,
   Heading2,
   Heading3,
+  Italic,
   Type,
   Minus,
   List,
@@ -15,6 +18,7 @@ import {
   Quote,
   Link2,
   Link2Off,
+  Underline as UnderlineIcon,
 } from "lucide-react";
 
 interface TiptapProps {
@@ -27,6 +31,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
   const editor = useEditor({
     extensions: [
       StarterKit,
+      UnderlineExtension,
       Link.configure({
         openOnClick: !editable,
         linkOnPaste: true,
@@ -137,96 +142,120 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
     <div className="flex h-full flex-col space-y-4">
       {editable && (
         <div className="flex flex-shrink-0 flex-wrap items-center gap-2 rounded-xl border border-white/20 bg-[#2a2a2d] p-3">
-        <ToolbarButton
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 1 }).run()
-          }
-          isActive={editor.isActive("heading", { level: 1 })}
-          title="Heading 1"
-        >
-          <Heading1 className="h-5 w-5" />
-        </ToolbarButton>
+          <ToolbarButton
+            onClick={() =>
+              editor.chain().focus().toggleHeading({ level: 1 }).run()
+            }
+            isActive={editor.isActive("heading", { level: 1 })}
+            title="Heading 1"
+          >
+            <Heading1 className="h-5 w-5" />
+          </ToolbarButton>
 
-        <ToolbarButton
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 2 }).run()
-          }
-          isActive={editor.isActive("heading", { level: 2 })}
-          title="Heading 2"
-        >
-          <Heading2 className="h-5 w-5" />
-        </ToolbarButton>
+          <ToolbarButton
+            onClick={() =>
+              editor.chain().focus().toggleHeading({ level: 2 }).run()
+            }
+            isActive={editor.isActive("heading", { level: 2 })}
+            title="Heading 2"
+          >
+            <Heading2 className="h-5 w-5" />
+          </ToolbarButton>
 
-        <ToolbarButton
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 3 }).run()
-          }
-          isActive={editor.isActive("heading", { level: 3 })}
-          title="Heading 3"
-        >
-          <Heading3 className="h-5 w-5" />
-        </ToolbarButton>
+          <ToolbarButton
+            onClick={() =>
+              editor.chain().focus().toggleHeading({ level: 3 }).run()
+            }
+            isActive={editor.isActive("heading", { level: 3 })}
+            title="Heading 3"
+          >
+            <Heading3 className="h-5 w-5" />
+          </ToolbarButton>
 
-        <ToolbarButton
-          onClick={() => editor.chain().focus().setParagraph().run()}
-          isActive={editor.isActive("paragraph")}
-          title="Paragraph"
-        >
-          <Type className="h-5 w-5" />
-        </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().setParagraph().run()}
+            isActive={editor.isActive("paragraph")}
+            title="Paragraph"
+          >
+            <Type className="h-5 w-5" />
+          </ToolbarButton>
 
-        <div className="w-px bg-white/10" />
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            isActive={editor.isActive("bold")}
+            title="Bold"
+          >
+            <Bold className="h-5 w-5" />
+          </ToolbarButton>
 
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          isActive={editor.isActive("bulletList")}
-          title="Bullet List"
-        >
-          <List className="h-5 w-5" />
-        </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            isActive={editor.isActive("italic")}
+            title="Italic"
+          >
+            <Italic className="h-5 w-5" />
+          </ToolbarButton>
 
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          isActive={editor.isActive("orderedList")}
-          title="Numbered List"
-        >
-          <ListOrdered className="h-5 w-5" />
-        </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            isActive={editor.isActive("underline")}
+            title="Underline"
+          >
+            <UnderlineIcon className="h-5 w-5" />
+          </ToolbarButton>
 
-        <div className="w-px bg-white/10" />
+          <div className="w-px bg-white/10" />
 
-        <ToolbarButton
-          onClick={() => editor.chain().focus().setHorizontalRule().run()}
-          title="Divider"
-        >
-          <Minus className="h-5 w-5" />
-        </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            isActive={editor.isActive("bulletList")}
+            title="Bullet List"
+          >
+            <List className="h-5 w-5" />
+          </ToolbarButton>
 
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          isActive={editor.isActive("blockquote")}
-          title="Blockquote"
-        >
-          <Quote className="h-5 w-5" />
-        </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            isActive={editor.isActive("orderedList")}
+            title="Numbered List"
+          >
+            <ListOrdered className="h-5 w-5" />
+          </ToolbarButton>
 
-        <div className="w-px bg-white/10" />
+          <div className="w-px bg-white/10" />
 
-        <ToolbarButton
-          onClick={setLink}
-          isActive={editor.isActive("link")}
-          title="Add Link"
-        >
-          <Link2 className="h-5 w-5" />
-        </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().setHorizontalRule().run()}
+            title="Divider"
+          >
+            <Minus className="h-5 w-5" />
+          </ToolbarButton>
 
-        <ToolbarButton
-          onClick={unsetLink}
-          isActive={editor.isActive("link")}
-          title="Remove Link"
-        >
-          <Link2Off className="h-5 w-5" />
-        </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            isActive={editor.isActive("blockquote")}
+            title="Blockquote"
+          >
+            <Quote className="h-5 w-5" />
+          </ToolbarButton>
+
+          <div className="w-px bg-white/10" />
+
+          <ToolbarButton
+            onClick={setLink}
+            isActive={editor.isActive("link")}
+            title="Add Link"
+          >
+            <Link2 className="h-5 w-5" />
+          </ToolbarButton>
+
+          <ToolbarButton
+            onClick={unsetLink}
+            isActive={editor.isActive("link")}
+            title="Remove Link"
+          >
+            <Link2Off className="h-5 w-5" />
+          </ToolbarButton>
         </div>
       )}
 
