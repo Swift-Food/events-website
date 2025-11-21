@@ -32,10 +32,20 @@ const Tiptap = ({ content = "", onChange }: TiptapProps) => {
         shouldAutoLink: (url) => /^https?:\/\//.test(url),
         HTMLAttributes: {
           class:
-            "text-blue-400 underline decoration-blue-400/70 hover:text-blue-300",
+            "text-blue-400 underline decoration-blue-400/70 hover:text-blue-300 cursor-text",
         },
       }),
     ],
+    editorProps: {
+      handleClick(view, pos, event) {
+        const target = event.target as HTMLElement | null;
+        if (target && target.closest("a")) {
+          event.preventDefault();
+          return true;
+        }
+        return false;
+      },
+    },
     content,
     // Don't render immediately on the server to avoid SSR issues
     immediatelyRender: false,
@@ -312,7 +322,7 @@ const Tiptap = ({ content = "", onChange }: TiptapProps) => {
           color: #60a5fa;
           text-decoration: underline;
           transition: color 150ms;
-          cursor: pointer;
+          cursor: text;
         }
 
         .tiptap-editor a:hover {
