@@ -1,43 +1,68 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useCallback,
+  useMemo,
+} from "react";
+import type { Dispatch, SetStateAction } from "react";
 
 interface EventCreationContextType {
   // Event details
   eventName: string;
-  setEventName: (value: string) => void;
+  setEventName: Dispatch<SetStateAction<string>>;
   start: string;
-  setStart: (value: string) => void;
+  setStart: Dispatch<SetStateAction<string>>;
   end: string;
-  setEnd: (value: string) => void;
+  setEnd: Dispatch<SetStateAction<string>>;
   location: string;
-  setLocation: (value: string) => void;
+  setLocation: Dispatch<SetStateAction<string>>;
   description: string;
-  setDescription: (value: string) => void;
+  setDescription: Dispatch<SetStateAction<string>>;
 
   // Ticketing
   tickets: "free" | "paid";
-  setTickets: (value: "free" | "paid") => void;
+  setTickets: Dispatch<SetStateAction<"free" | "paid">>;
   ticketPrice: string;
-  setTicketPrice: (value: string) => void;
+  setTicketPrice: Dispatch<SetStateAction<string>>;
   requireApproval: boolean;
-  setRequireApproval: (value: boolean) => void;
+  setRequireApproval: Dispatch<SetStateAction<boolean>>;
   capacity: string;
-  setCapacity: (value: string) => void;
+  setCapacity: Dispatch<SetStateAction<string>>;
 
   // Cover image
   coverPreview: string | null;
-  setCoverPreview: (value: string | null) => void;
+  setCoverPreview: Dispatch<SetStateAction<string | null>>;
   coverName: string;
-  setCoverName: (value: string) => void;
+  setCoverName: Dispatch<SetStateAction<string>>;
 
   // Form actions
   clearForm: () => void;
+  persistEventDraft: () => void;
 }
 
-const EventCreationContext = createContext<EventCreationContextType | undefined>(
-  undefined
-);
+const EventCreationContext = createContext<
+  EventCreationContextType | undefined
+>(undefined);
+
+const STORAGE_KEY = "eventCreationDraft";
+
+type EventDraft = {
+  eventName: string;
+  start: string;
+  end: string;
+  location: string;
+  description: string;
+  tickets: "free" | "paid";
+  ticketPrice: string;
+  requireApproval: boolean;
+  capacity: string;
+  coverPreview: string | null;
+  coverName: string;
+};
 
 // Helper to get default start/end times
 const getDefaultTimes = () => {
@@ -64,22 +89,88 @@ const getDefaultTimes = () => {
 export function EventCreationProvider({ children }: { children: ReactNode }) {
   const defaultTimes = getDefaultTimes();
 
+  const loadDraft = () => {
+    if (typeof window === "undefined") {
+      return {};
+    }
+
+    try {
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      return stored ? (JSON.parse(stored) as Partial<EventDraft>) : {};
+    } catch (error) {
+      console.warn("Failed to parse event draft", error);
+      return {};
+    }
+  };
+
+  const storedDraft = useMemo<Partial<EventDraft>>(() => loadDraft(), []);
+
   // Event details
-  const [eventName, setEventName] = useState("");
-  const [start, setStart] = useState(defaultTimes.start);
-  const [end, setEnd] = useState(defaultTimes.end);
-  const [location, setLocation] = useState("");
-  const [description, setDescription] = useState("");
+  const [eventName, setEventName] = useState(storedDraft.eventName ?? "");
+  const [start, setStart] = useState(storedDraft.start ?? defaultTimes.start);
+  const [end, setEnd] = useState(storedDraft.end ?? defaultTimes.end);
+  const [location, setLocation] = useState(storedDraft.location ?? "");
+  const [description, setDescription] = useState(storedDraft.description ?? "");
 
   // Ticketing
-  const [tickets, setTickets] = useState<"free" | "paid">("free");
-  const [ticketPrice, setTicketPrice] = useState("25");
-  const [requireApproval, setRequireApproval] = useState(false);
-  const [capacity, setCapacity] = useState("Unlimited");
+  const [tickets, setTickets] = useState<"free" | "paid">(
+    storedDraft.tickets === "paid" ? "paid" : "free"
+  );
+  const [ticketPrice, setTicketPrice] = useState(
+    storedDraft.ticketPrice ?? "25"
+  );
+  const [requireApproval, setRequireApproval] = useState(
+    storedDraft.requireApproval ?? false
+  );
+  const [capacity, setCapacity] = useState(storedDraft.capacity ?? "Unlimited");
 
   // Cover image
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  const [coverName, setCoverName] = useState("invite-cover.png");
+  const [coverPreview, setCoverPreview] = useState<string | null>(
+    typeof storedDraft.coverPreview === "string"
+      ? storedDraft.coverPreview
+      : null
+  );
+  const [coverName, setCoverName] = useState(
+    storedDraft.coverName ?? "invite-cover.png"
+  );
+
+  const persistEventDraft = useCallback(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const payload: EventDraft = {
+      eventName,
+      start,
+      end,
+      location,
+      description,
+      tickets,
+      ticketPrice,
+      requireApproval,
+      capacity,
+      coverPreview,
+      coverName,
+    };
+
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (error) {
+      console.warn("Failed to save event draft to storage", error);
+    }
+  }, [
+    capacity,
+    coverName,
+    coverPreview,
+    description,
+    end,
+    eventName,
+    location,
+    requireApproval,
+    start,
+    ticketPrice,
+    tickets,
+  ]);
 
   const clearForm = () => {
     const newTimes = getDefaultTimes();
@@ -94,6 +185,9 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     setCapacity("Unlimited");
     setCoverPreview(null);
     setCoverName("invite-cover.png");
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(STORAGE_KEY);
+    }
   };
 
   return (
@@ -122,6 +216,7 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
         coverName,
         setCoverName,
         clearForm,
+        persistEventDraft,
       }}
     >
       {children}

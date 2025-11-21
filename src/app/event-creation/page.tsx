@@ -1,12 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
 import { Edit, Trash2 } from "lucide-react";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
-import { EventCreationProvider, useEventCreation } from "@/context/EventCreationContext";
+import {
+  EventCreationProvider,
+  useEventCreation,
+} from "@/context/EventCreationContext";
 
 function EventCreationForm() {
   const {
@@ -31,6 +34,7 @@ function EventCreationForm() {
     coverName,
     setCoverName,
     clearForm,
+    persistEventDraft,
   } = useEventCreation();
 
   // Local state for UI only
@@ -56,6 +60,17 @@ function EventCreationForm() {
 
   const formattedStart = useMemo(() => formatDate(start), [start]);
   const formattedEnd = useMemo(() => formatDate(end), [end]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      persistEventDraft();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [persistEventDraft]);
+
+  const handleBlurSave = useCallback(() => {
+    persistEventDraft();
+  }, [persistEventDraft]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -157,7 +172,11 @@ function EventCreationForm() {
   };
 
   const handleClearForm = () => {
-    if (confirm("Are you sure you want to clear the entire form? This action cannot be undone.")) {
+    if (
+      confirm(
+        "Are you sure you want to clear the entire form? This action cannot be undone."
+      )
+    ) {
       clearForm();
       // Also clear local file input
       if (fileInputRef.current) {
@@ -176,6 +195,7 @@ function EventCreationForm() {
                 src={coverPreview}
                 alt="Event cover"
                 className="h-full w-full object-cover"
+                onBlur={handleBlurSave}
               />
             ) : (
               <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-[#f9f8f6] text-black">
@@ -278,6 +298,7 @@ function EventCreationForm() {
                       setStart(e.target.value + "T" + start.split("T")[1])
                     }
                     className="flex-1 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
+                    onBlur={handleBlurSave}
                   />
                   <input
                     type="time"
@@ -286,6 +307,7 @@ function EventCreationForm() {
                       setStart(start.split("T")[0] + "T" + e.target.value)
                     }
                     className="w-32 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
+                    onBlur={handleBlurSave}
                   />
                 </div>
 
@@ -298,6 +320,7 @@ function EventCreationForm() {
                       setEnd(e.target.value + "T" + end.split("T")[1])
                     }
                     className="flex-1 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
+                    onBlur={handleBlurSave}
                   />
                   <input
                     type="time"
@@ -306,6 +329,7 @@ function EventCreationForm() {
                       setEnd(end.split("T")[0] + "T" + e.target.value)
                     }
                     className="w-32 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
+                    onBlur={handleBlurSave}
                   />
                 </div>
               </div>
@@ -322,6 +346,7 @@ function EventCreationForm() {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               className="mt-2 w-full rounded-xl bg-white/5 px-3 py-2 text-white outline-none"
+              onBlur={handleBlurSave}
             />
           </div>
 
@@ -375,6 +400,7 @@ function EventCreationForm() {
                 onChange={(e) => setTicketPrice(e.target.value)}
                 className="w-full rounded-xl bg-white/5 px-3 py-2 text-white outline-none"
                 placeholder="Ticket price"
+                onBlur={handleBlurSave}
               />
             )}
             <div className="flex items-center justify-between border-t border-white/10 pt-4">
@@ -408,6 +434,7 @@ function EventCreationForm() {
                 value={capacity}
                 onChange={(e) => setCapacity(e.target.value)}
                 className="w-40 rounded-xl bg-white/5 px-3 py-2 text-right text-white outline-none"
+                onBlur={handleBlurSave}
               />
             </div>
           </div>
