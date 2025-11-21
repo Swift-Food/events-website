@@ -186,6 +186,8 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
             <Type className="h-5 w-5" />
           </ToolbarButton>
 
+          <div className="w-px bg-white/10" />
+
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleBold().run()}
             isActive={editor.isActive("bold")}
