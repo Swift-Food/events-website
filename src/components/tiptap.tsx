@@ -20,28 +20,33 @@ import {
 interface TiptapProps {
   content?: string;
   onChange?: (content: string) => void;
+  editable?: boolean;
 }
 
-const Tiptap = ({ content = "", onChange }: TiptapProps) => {
+const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
   const editor = useEditor({
     extensions: [
       StarterKit,
       Link.configure({
-        openOnClick: false,
+        openOnClick: !editable,
         linkOnPaste: true,
         shouldAutoLink: (url) => /^https?:\/\//.test(url),
         HTMLAttributes: {
-          class:
-            "text-blue-400 underline decoration-blue-400/70 hover:text-blue-300 cursor-text",
+          class: editable
+            ? "text-blue-400 underline decoration-blue-400/70 hover:text-blue-300 cursor-text"
+            : "text-blue-400 underline decoration-blue-400/70 hover:text-blue-300 cursor-pointer",
         },
       }),
     ],
+    editable,
     editorProps: {
       handleClick(view, pos, event) {
-        const target = event.target as HTMLElement | null;
-        if (target && target.closest("a")) {
-          event.preventDefault();
-          return true;
+        if (editable) {
+          const target = event.target as HTMLElement | null;
+          if (target && target.closest("a")) {
+            event.preventDefault();
+            return true;
+          }
         }
         return false;
       },
@@ -62,6 +67,13 @@ const Tiptap = ({ content = "", onChange }: TiptapProps) => {
       editor.commands.setContent(content);
     }
   }, [editor, content]);
+
+  // Update editor editable state when the editable prop changes
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(editable);
+    }
+  }, [editor, editable]);
 
   if (!editor) {
     return null;
@@ -123,7 +135,8 @@ const Tiptap = ({ content = "", onChange }: TiptapProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/20 bg-[#2a2a2d] p-3">
+      {editable && (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/20 bg-[#2a2a2d] p-3">
         <ToolbarButton
           onClick={() =>
             editor.chain().focus().toggleHeading({ level: 1 }).run()
@@ -214,7 +227,8 @@ const Tiptap = ({ content = "", onChange }: TiptapProps) => {
         >
           <Link2Off className="h-5 w-5" />
         </ToolbarButton>
-      </div>
+        </div>
+      )}
 
       <div className="min-h-[300px] rounded-xl border border-white/10 bg-[#131315] p-4">
         <EditorContent editor={editor} className="tiptap-editor" />
