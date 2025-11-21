@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -28,6 +28,8 @@ interface TiptapProps {
 }
 
 const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
+  const [, setForceUpdate] = useState(0);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -63,6 +65,10 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
       if (onChange) {
         onChange(editor.getHTML());
       }
+    },
+    onSelectionUpdate: () => {
+      // Force re-render when selection changes to update toolbar button states
+      setForceUpdate((prev) => prev + 1);
     },
   });
 
