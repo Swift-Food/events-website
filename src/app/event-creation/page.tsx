@@ -178,8 +178,8 @@ function EventCreationForm() {
   return (
     <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background px-6 py-12">
       <div className="flex w-full max-w-6xl flex-col gap-6 text-foreground lg:flex-row">
-        <section className="flex flex-col gap-5 rounded-3xl bg-white/10 backdrop-blur-2xl shadow-2xl shadow-white/5 p-7 lg:w-96 lg:shrink-0">
-          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-black/20 backdrop-blur-sm shadow-lg">
+        <section className="flex flex-col gap-5 rounded-3xl bg-card-background backdrop-blur-2xl shadow-2xl shadow-white/5 p-7 lg:w-96 lg:shrink-0">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background backdrop-blur-sm shadow-lg">
             {coverPreview ? (
               <img
                 src={coverPreview}
@@ -220,7 +220,7 @@ function EventCreationForm() {
               onChange={handleImageChange}
             />
           </div>
-          <div className="rounded-2xl bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl p-5 text-sm shadow-lg">
+          <div className="rounded-2xl bg-card-background backdrop-blur-xl p-5 text-sm shadow-lg">
             <div className="flex items-center justify-between text-muted-foreground">
               <div>
                 <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground/60">
@@ -263,14 +263,14 @@ function EventCreationForm() {
             </button>
           </div>
 
-          <div className="rounded-3xl bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl p-6 shadow-xl">
+          <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
             <div className="flex gap-5">
               <div className="flex flex-col items-center py-3">
                 <div className="h-3.5 w-3.5 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
                 <div
-                  className="my-2 w-0.5 flex-1 rounded-full bg-gradient-to-b from-primary/50 to-primary/10"
+                  className="my-2 w-0.5 flex-1 rounded-full bg-primary/30"
                 ></div>
-                <div className="h-3.5 w-3.5 rounded-full bg-gradient-to-br from-primary/40 to-primary/20 shadow-md"></div>
+                <div className="h-3.5 w-3.5 rounded-full bg-primary/30 shadow-md"></div>
               </div>
 
               <div className="flex flex-1 flex-col gap-4">
@@ -282,7 +282,7 @@ function EventCreationForm() {
                     onChange={(e) =>
                       setStart(e.target.value + "T" + start.split("T")[1])
                     }
-                    className="flex-1 rounded-xl bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-white/15 transition-colors"
+                    className="flex-1 rounded-xl bg-card-background backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-white/15 transition-colors"
                   />
                   <input
                     type="time"
@@ -290,7 +290,7 @@ function EventCreationForm() {
                     onChange={(e) =>
                       setStart(start.split("T")[0] + "T" + e.target.value)
                     }
-                    className="w-32 rounded-xl bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-white/15 transition-colors"
+                    className="w-32 rounded-xl bg-card-background backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-white/15 transition-colors"
                   />
                 </div>
 
@@ -302,7 +302,7 @@ function EventCreationForm() {
                     onChange={(e) =>
                       setEnd(e.target.value + "T" + end.split("T")[1])
                     }
-                    className="flex-1 rounded-xl bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-white/15 transition-colors"
+                    className="flex-1 rounded-xl bg-card-background backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-white/15 transition-colors"
                   />
                   <input
                     type="time"
@@ -310,14 +310,14 @@ function EventCreationForm() {
                     onChange={(e) =>
                       setEnd(end.split("T")[0] + "T" + e.target.value)
                     }
-                    className="w-32 rounded-xl bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-white/15 transition-colors"
+                    className="w-32 rounded-xl bg-card-background backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-white/15 transition-colors"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="rounded-3xl bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl p-6 shadow-xl">
+          <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
             <label className="text-base text-foreground font-semibold">
               Event Location
             </label>
@@ -326,20 +326,20 @@ function EventCreationForm() {
               placeholder="Offline location or virtual link"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="mt-3 w-full rounded-xl bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner focus:bg-white/15 transition-colors"
+              className="mt-3 w-full rounded-xl bg-card-background backdrop-blur-md px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner focus:bg-white/15 transition-colors"
             />
           </div>
 
           <button
             type="button"
             onClick={handleDescriptionClick}
-            className="flex w-full items-center justify-center gap-3 rounded-3xl bg-gradient-to-r from-white/15 to-white/5 backdrop-blur-xl px-6 py-4 text-foreground text-base transition-all hover:from-white/20 hover:to-white/10 font-semibold shadow-xl hover:scale-[1.02]"
+            className="flex w-full items-center justify-center gap-3 rounded-3xl bg-card-background backdrop-blur-xl px-6 py-4 text-foreground text-base transition-all hover:bg-white/15 font-semibold shadow-xl hover:scale-[1.02]"
           >
             <Edit className="h-5 w-5" />
             <span>Edit Description</span>
           </button>
 
-          <div className="rounded-3xl bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl p-6 space-y-5 shadow-xl">
+          <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 space-y-5 shadow-xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-base font-semibold text-foreground">Tickets</p>
@@ -354,7 +354,7 @@ function EventCreationForm() {
                   className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all ${
                     tickets === "free"
                       ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105"
-                      : "bg-white/10 text-muted-foreground hover:bg-white/15"
+                      : "bg-card-background text-muted-foreground hover:bg-white/15"
                   }`}
                 >
                   Free
@@ -365,7 +365,7 @@ function EventCreationForm() {
                   className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all ${
                     tickets === "paid"
                       ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105"
-                      : "bg-white/10 text-muted-foreground hover:bg-white/15"
+                      : "bg-card-background text-muted-foreground hover:bg-white/15"
                   }`}
                 >
                   Paid
@@ -378,7 +378,7 @@ function EventCreationForm() {
                 min={1}
                 value={ticketPrice}
                 onChange={(e) => setTicketPrice(e.target.value)}
-                className="w-full rounded-xl bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner focus:bg-white/15 transition-colors"
+                className="w-full rounded-xl bg-card-background backdrop-blur-md px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner focus:bg-white/15 transition-colors"
                 placeholder="Enter ticket price"
               />
             )}
@@ -393,7 +393,7 @@ function EventCreationForm() {
                 type="button"
                 onClick={() => setRequireApproval((prev) => !prev)}
                 className={`h-7 w-14 rounded-full transition-all shadow-inner ${
-                  requireApproval ? "bg-primary shadow-lg shadow-primary/30" : "bg-white/10"
+                  requireApproval ? "bg-primary shadow-lg shadow-primary/30" : "bg-card-background"
                 }`}
               >
                 <span
@@ -411,7 +411,7 @@ function EventCreationForm() {
               <button
                 type="button"
                 onClick={() => setIsCapacityModalOpen(true)}
-                className="rounded-full p-2 transition-all hover:bg-white/10"
+                className="rounded-full p-2 transition-all hover:bg-card-background"
                 aria-label="Edit capacity settings"
               >
                 <Edit className="h-5 w-5 text-muted-foreground" />
@@ -430,7 +430,7 @@ function EventCreationForm() {
 
       {isCropModalOpen && imageToCrop && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-          <div className="w-full max-w-3xl rounded-3xl bg-white/15 backdrop-blur-2xl p-8 text-foreground shadow-2xl">
+          <div className="w-full max-w-3xl rounded-3xl bg-card-background backdrop-blur-2xl p-8 text-foreground shadow-2xl">
             <h2 className="mb-6 text-3xl font-bold">Crop Image</h2>
 
             <div className="relative h-[500px] w-full rounded-2xl bg-black">
@@ -463,14 +463,14 @@ function EventCreationForm() {
                 <button
                   type="button"
                   onClick={handleCropCancel}
-                  className="flex-1 rounded-full bg-white/10 backdrop-blur-md py-4 text-center font-semibold text-foreground transition-all hover:bg-white/15 shadow-lg hover:scale-105"
+                  className="flex-1 rounded-full bg-card-background backdrop-blur-md py-4 text-center font-semibold text-foreground transition-all hover:bg-white/15 shadow-lg hover:scale-105"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleCropSave}
-                  className="flex-1 rounded-full bg-gradient-to-r from-primary to-primary/90 py-4 text-center font-bold text-primary-foreground transition-all hover:shadow-2xl hover:shadow-primary/30 hover:scale-105 shadow-xl"
+                  className="flex-1 rounded-full bg-primary py-4 text-center font-bold text-primary-foreground transition-all hover:shadow-2xl hover:shadow-primary/30 hover:scale-105 shadow-xl"
                 >
                   Save
                 </button>
