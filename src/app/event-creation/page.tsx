@@ -403,17 +403,20 @@ function EventCreationForm() {
                 />
               </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsCapacityModalOpen(true)}
-              className="flex items-center justify-between pt-5 border-t border-foreground/10 w-full text-left transition-all hover:bg-black/5 dark:hover:bg-white/5 rounded-xl p-3 -m-3"
-            >
+            <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
               <div>
                 <p className="text-base font-semibold text-foreground">Capacity</p>
                 <p className="text-sm text-muted-foreground mt-1">{capacity}</p>
               </div>
-              <Edit className="h-5 w-5 text-muted-foreground" />
-            </button>
+              <button
+                type="button"
+                onClick={() => setIsCapacityModalOpen(true)}
+                className="rounded-full p-2 transition-all hover:bg-black/10 dark:hover:bg-white/10"
+                aria-label="Edit capacity settings"
+              >
+                <Edit className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
           </div>
 
           <button
