@@ -175,9 +175,9 @@ function EventCreationForm() {
 
   return (
     <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background px-6 py-12">
-      <div className="flex w-full max-w-5xl flex-col gap-8 rounded-3xl bg-[#2a2a2d] p-8 text-white shadow-2xl lg:flex-row">
-        <section className="flex flex-col gap-4 rounded-2xl bg-[#1f1f21] p-6 lg:w-80 lg:shrink-0">
-          <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/10 bg-[#111]">
+      <div className="flex w-full max-w-6xl flex-col gap-6 text-foreground lg:flex-row">
+        <section className="flex flex-col gap-5 rounded-3xl bg-black/10 dark:bg-white/10 backdrop-blur-2xl shadow-2xl shadow-black/10 dark:shadow-white/5 p-7 lg:w-96 lg:shrink-0">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-gradient-to-br from-black/20 to-black/5 dark:from-white/10 dark:to-black/20 backdrop-blur-sm shadow-lg">
             {coverPreview ? (
               <img
                 src={coverPreview}
@@ -185,17 +185,17 @@ function EventCreationForm() {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-[#f9f8f6] text-black">
-                <span className="text-3xl font-serif">You Are Invited</span>
-                <span className="text-sm text-black/60">
+              <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-muted">
+                <span className="text-3xl font-serif text-foreground">You Are Invited</span>
+                <span className="text-sm text-muted-foreground">
                   Upload a cover image
                 </span>
               </div>
             )}
-            <div className="absolute bottom-4 right-4 flex flex-wrap gap-3">
+            <div className="absolute bottom-4 right-4 flex flex-wrap gap-2">
               <label
                 htmlFor="cover-upload"
-                className="rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-black shadow-lg transition hover:bg-white"
+                className="rounded-full bg-primary/90 backdrop-blur-md px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-xl transition-all hover:bg-primary hover:scale-105 cursor-pointer"
               >
                 Change cover
               </label>
@@ -203,7 +203,7 @@ function EventCreationForm() {
                 <button
                   type="button"
                   onClick={handleImageRemove}
-                  className="rounded-full bg-black/70 px-4 py-2 text-sm font-medium text-white shadow-lg transition hover:bg-black"
+                  className="rounded-full bg-black/60 dark:bg-white/20 backdrop-blur-md px-5 py-2.5 text-sm font-medium text-white dark:text-foreground shadow-xl transition-all hover:bg-black/80 dark:hover:bg-white/30 hover:scale-105"
                 >
                   Remove
                 </button>
@@ -218,23 +218,23 @@ function EventCreationForm() {
               onChange={handleImageChange}
             />
           </div>
-          <div className="rounded-2xl border border-white/10 bg-[#131315] p-4 text-sm">
-            <div className="flex items-center justify-between text-white/70">
+          <div className="rounded-2xl bg-gradient-to-br from-black/15 to-black/5 dark:from-white/15 dark:to-white/5 backdrop-blur-xl p-5 text-sm shadow-lg">
+            <div className="flex items-center justify-between text-muted-foreground">
               <div>
-                <p className="text-xs uppercase tracking-wider text-white/40">
+                <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground/60">
                   Starts
                 </p>
-                <p className="text-base text-white">{formattedStart}</p>
+                <p className="text-base font-semibold text-foreground mt-1">{formattedStart}</p>
               </div>
-              <div>
-                <p className="text-xs uppercase tracking-wider text-white/40">
+              <div className="text-right">
+                <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground/60">
                   Ends
                 </p>
-                <p className="text-base text-white">{formattedEnd}</p>
+                <p className="text-base font-semibold text-foreground mt-1">{formattedEnd}</p>
               </div>
             </div>
-            <div className="mt-4 text-xs text-white/60">
-              Cover: <span className="text-white">{coverName}</span>
+            <div className="mt-5 pt-4 border-t border-foreground/10 text-xs text-muted-foreground">
+              <span className="font-medium">Cover:</span> <span className="text-foreground font-medium">{coverName}</span>
             </div>
           </div>
         </section>
@@ -247,44 +247,40 @@ function EventCreationForm() {
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
                 placeholder="Event Name"
-                className="w-full bg-transparent text-4xl font-semibold text-white outline-none placeholder:text-white/30"
+                className="w-full bg-transparent text-5xl font-bold text-foreground outline-none placeholder:text-muted-foreground/40"
               />
             </div>
             <button
               type="button"
               onClick={handleClearForm}
-              className="flex items-center gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-400 transition hover:bg-red-500/20 hover:border-red-500/50"
+              className="flex items-center gap-2 rounded-2xl bg-red-500/10 backdrop-blur-md px-5 py-3 text-red-500 dark:text-red-400 transition-all hover:bg-red-500/20 hover:scale-105 shadow-lg"
               title="Clear entire form"
             >
               <Trash2 className="h-5 w-5" />
-              <span className="hidden sm:inline">Clear Form</span>
+              <span className="hidden sm:inline font-medium">Clear Form</span>
             </button>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#1f1f21] p-4">
-            <div className="flex gap-4">
+          <div className="rounded-3xl bg-gradient-to-br from-black/15 to-black/5 dark:from-white/15 dark:to-white/5 backdrop-blur-xl p-6 shadow-xl">
+            <div className="flex gap-5">
               <div className="flex flex-col items-center py-3">
-                <div className="h-3 w-3 rounded-full bg-white"></div>
+                <div className="h-3.5 w-3.5 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
                 <div
-                  className="my-2 w-px flex-1"
-                  style={{
-                    backgroundImage:
-                      "repeating-linear-gradient(to bottom, rgba(255,255,255,0.5) 0, rgba(255,255,255,0.5) 2px, transparent 2px, transparent 6px)",
-                  }}
+                  className="my-2 w-0.5 flex-1 rounded-full bg-gradient-to-b from-primary/50 to-primary/10"
                 ></div>
-                <div className="h-3 w-3 rounded-full border-2 border-white/50"></div>
+                <div className="h-3.5 w-3.5 rounded-full bg-gradient-to-br from-primary/40 to-primary/20 shadow-md"></div>
               </div>
 
-              <div className="flex flex-1 flex-col gap-3">
+              <div className="flex flex-1 flex-col gap-4">
                 <div className="flex items-center gap-3">
-                  <label className="text-sm text-white/50 w-12">Start</label>
+                  <label className="text-sm font-medium text-muted-foreground w-14">Start</label>
                   <input
                     type="date"
                     value={start.split("T")[0]}
                     onChange={(e) =>
                       setStart(e.target.value + "T" + start.split("T")[1])
                     }
-                    className="flex-1 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
+                    className="flex-1 rounded-xl bg-black/20 dark:bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-black/25 dark:focus:bg-white/15 transition-colors"
                   />
                   <input
                     type="time"
@@ -292,19 +288,19 @@ function EventCreationForm() {
                     onChange={(e) =>
                       setStart(start.split("T")[0] + "T" + e.target.value)
                     }
-                    className="w-32 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
+                    className="w-32 rounded-xl bg-black/20 dark:bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-black/25 dark:focus:bg-white/15 transition-colors"
                   />
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <label className="text-sm text-white/50 w-12">End</label>
+                  <label className="text-sm font-medium text-muted-foreground w-14">End</label>
                   <input
                     type="date"
                     value={end.split("T")[0]}
                     onChange={(e) =>
                       setEnd(e.target.value + "T" + end.split("T")[1])
                     }
-                    className="flex-1 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
+                    className="flex-1 rounded-xl bg-black/20 dark:bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-black/25 dark:focus:bg-white/15 transition-colors"
                   />
                   <input
                     type="time"
@@ -312,40 +308,40 @@ function EventCreationForm() {
                     onChange={(e) =>
                       setEnd(end.split("T")[0] + "T" + e.target.value)
                     }
-                    className="w-32 rounded-xl bg-[#3a3a3d] px-4 py-3 text-white outline-none"
+                    className="w-32 rounded-xl bg-black/20 dark:bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-black/25 dark:focus:bg-white/15 transition-colors"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#1f1f21] p-4">
-            <label className="text-md text-white font-semibold">
-              Add Event Location
+          <div className="rounded-3xl bg-gradient-to-br from-black/15 to-black/5 dark:from-white/15 dark:to-white/5 backdrop-blur-xl p-6 shadow-xl">
+            <label className="text-base text-foreground font-semibold">
+              Event Location
             </label>
             <input
               type="text"
               placeholder="Offline location or virtual link"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="mt-2 w-full rounded-xl bg-white/5 px-3 py-2 text-white outline-none"
+              className="mt-3 w-full rounded-xl bg-black/20 dark:bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner focus:bg-black/25 dark:focus:bg-white/15 transition-colors"
             />
           </div>
 
           <button
             type="button"
             onClick={handleDescriptionClick}
-            className="flex w-full items-center gap-2 rounded-2xl border border-white/10 bg-[#1f1f21] px-4 py-3 text-white text-md transition hover:bg-[#25252a] font-semibold"
+            className="flex w-full items-center justify-center gap-3 rounded-3xl bg-gradient-to-r from-black/15 to-black/5 dark:from-white/15 dark:to-white/5 backdrop-blur-xl px-6 py-4 text-foreground text-base transition-all hover:from-black/20 hover:to-black/10 dark:hover:from-white/20 dark:hover:to-white/10 font-semibold shadow-xl hover:scale-[1.02]"
           >
             <Edit className="h-5 w-5" />
             <span>Edit Description</span>
           </button>
 
-          <div className="rounded-2xl border border-white/10 bg-[#1f1f21] p-4 space-y-4">
+          <div className="rounded-3xl bg-gradient-to-br from-black/15 to-black/5 dark:from-white/15 dark:to-white/5 backdrop-blur-xl p-6 space-y-5 shadow-xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Tickets</p>
-                <p className="text-xs text-white/50">
+                <p className="text-base font-semibold text-foreground">Tickets</p>
+                <p className="text-sm text-muted-foreground mt-1">
                   {tickets === "free" ? "Free" : `$${ticketPrice}`}
                 </p>
               </div>
@@ -353,10 +349,10 @@ function EventCreationForm() {
                 <button
                   type="button"
                   onClick={() => setTickets("free")}
-                  className={`rounded-full px-4 py-2 text-sm ${
+                  className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all ${
                     tickets === "free"
-                      ? "bg-white text-black"
-                      : "bg-white/10 text-white/70"
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105"
+                      : "bg-black/10 dark:bg-white/10 text-muted-foreground hover:bg-black/15 dark:hover:bg-white/15"
                   }`}
                 >
                   Free
@@ -364,10 +360,10 @@ function EventCreationForm() {
                 <button
                   type="button"
                   onClick={() => setTickets("paid")}
-                  className={`rounded-full px-4 py-2 text-sm ${
+                  className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all ${
                     tickets === "paid"
-                      ? "bg-white text-black"
-                      : "bg-white/10 text-white/70"
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105"
+                      : "bg-black/10 dark:bg-white/10 text-muted-foreground hover:bg-black/15 dark:hover:bg-white/15"
                   }`}
                 >
                   Paid
@@ -380,48 +376,48 @@ function EventCreationForm() {
                 min={1}
                 value={ticketPrice}
                 onChange={(e) => setTicketPrice(e.target.value)}
-                className="w-full rounded-xl bg-white/5 px-3 py-2 text-white outline-none"
-                placeholder="Ticket price"
+                className="w-full rounded-xl bg-black/20 dark:bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner focus:bg-black/25 dark:focus:bg-white/15 transition-colors"
+                placeholder="Enter ticket price"
               />
             )}
-            <div className="flex items-center justify-between border-t border-white/10 pt-4">
+            <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
               <div>
-                <p className="text-sm font-medium">Require approval</p>
-                <p className="text-xs text-white/50">
+                <p className="text-base font-semibold text-foreground">Require Approval</p>
+                <p className="text-sm text-muted-foreground mt-1">
                   Attendees must be approved
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setRequireApproval((prev) => !prev)}
-                className={`h-6 w-12 rounded-full border border-transparent transition ${
-                  requireApproval ? "bg-white" : "bg-white/10"
+                className={`h-7 w-14 rounded-full transition-all shadow-inner ${
+                  requireApproval ? "bg-primary shadow-lg shadow-primary/30" : "bg-black/20 dark:bg-white/10"
                 }`}
               >
                 <span
-                  className={`block h-5 w-5 rounded-full bg-black transition ${
-                    requireApproval ? "translate-x-6" : "translate-x-1"
+                  className={`block h-6 w-6 rounded-full transition-all shadow-lg ${
+                    requireApproval ? "translate-x-7 bg-primary-foreground" : "translate-x-0.5 bg-foreground"
                   }`}
                 />
               </button>
             </div>
-            <div className="flex items-center justify-between border-t border-white/10 pt-4">
+            <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
               <div>
-                <p className="text-sm font-medium">Capacity</p>
-                <p className="text-xs text-white/50">{capacity}</p>
+                <p className="text-base font-semibold text-foreground">Capacity</p>
+                <p className="text-sm text-muted-foreground mt-1">{capacity} attendees</p>
               </div>
               <input
                 type="text"
                 value={capacity}
                 onChange={(e) => setCapacity(e.target.value)}
-                className="w-40 rounded-xl bg-white/5 px-3 py-2 text-right text-white outline-none"
+                className="w-32 rounded-xl bg-black/20 dark:bg-white/10 backdrop-blur-md px-4 py-3 text-right text-foreground font-semibold outline-none shadow-inner focus:bg-black/25 dark:focus:bg-white/15 transition-colors"
               />
             </div>
           </div>
 
           <button
             type="button"
-            className="w-full rounded-full bg-white py-4 text-center text-base font-semibold text-black transition hover:bg-white/80"
+            className="w-full rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 py-5 text-center text-lg font-bold text-white transition-all hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-[1.02] shadow-xl shadow-blue-500/30 hover:from-blue-500 hover:to-purple-500"
           >
             Create Event
           </button>
@@ -429,9 +425,9 @@ function EventCreationForm() {
       </div>
 
       {isCropModalOpen && imageToCrop && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-          <div className="w-full max-w-3xl rounded-3xl bg-[#2a2a2d] p-6 text-white">
-            <h2 className="mb-4 text-2xl font-semibold">Crop Image</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="w-full max-w-3xl rounded-3xl bg-black/20 dark:bg-white/15 backdrop-blur-2xl p-8 text-foreground shadow-2xl">
+            <h2 className="mb-6 text-3xl font-bold">Crop Image</h2>
 
             <div className="relative h-[500px] w-full rounded-2xl bg-black">
               <Cropper
@@ -445,9 +441,9 @@ function EventCreationForm() {
               />
             </div>
 
-            <div className="mt-4 flex flex-col gap-4">
-              <div className="flex items-center gap-4">
-                <label className="text-sm text-white/70">Zoom</label>
+            <div className="mt-6 flex flex-col gap-5">
+              <div className="flex items-center gap-4 bg-black/10 dark:bg-white/5 backdrop-blur-md rounded-2xl p-4">
+                <label className="text-sm font-semibold text-foreground">Zoom</label>
                 <input
                   type="range"
                   min={1}
@@ -459,18 +455,18 @@ function EventCreationForm() {
                 />
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-4">
                 <button
                   type="button"
                   onClick={handleCropCancel}
-                  className="flex-1 rounded-full bg-white/10 py-3 text-center font-medium transition hover:bg-white/20"
+                  className="flex-1 rounded-full bg-black/20 dark:bg-white/10 backdrop-blur-md py-4 text-center font-semibold text-foreground transition-all hover:bg-black/30 dark:hover:bg-white/15 shadow-lg hover:scale-105"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleCropSave}
-                  className="flex-1 rounded-full bg-white py-3 text-center font-semibold text-black transition hover:bg-white/80"
+                  className="flex-1 rounded-full bg-gradient-to-r from-primary to-primary/90 py-4 text-center font-bold text-primary-foreground transition-all hover:shadow-2xl hover:shadow-primary/30 hover:scale-105 shadow-xl"
                 >
                   Save
                 </button>

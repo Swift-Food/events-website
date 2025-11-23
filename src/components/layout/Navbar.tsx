@@ -28,7 +28,7 @@ export default function Navbar() {
         </nav>
 
         <Link
-          href="/reserve"
+          href="/event-creation"
           className="rounded-full bg-foreground px-5 py-2 text-sm font-semibold text-background transition-colors hover:bg-zinc-900 dark:hover:bg-zinc-100 dark:hover:text-black"
         >
           Create Event
