@@ -67,7 +67,7 @@ export default function CapacityModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-      <div className="w-full max-w-lg rounded-3xl bg-white/95 dark:bg-black/90 backdrop-blur-2xl p-8 text-foreground shadow-2xl border border-black/10 dark:border-white/10">
+      <div className="w-full max-w-lg rounded-3xl bg-zinc-900/90 backdrop-blur-2xl p-8 text-foreground shadow-2xl border border-white/10">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-primary/20 p-3">
@@ -78,7 +78,7 @@ export default function CapacityModal({
           <button
             type="button"
             onClick={handleCancel}
-            className="rounded-full p-2 transition-all hover:bg-black/20 dark:hover:bg-white/10"
+            className="rounded-full p-2 transition-all hover:bg-white/10"
             aria-label="Close modal"
           >
             <X className="h-6 w-6" />
@@ -87,7 +87,7 @@ export default function CapacityModal({
 
         <div className="space-y-6">
           {/* Unlimited Capacity Toggle */}
-          <div className="rounded-2xl bg-gradient-to-br from-black/5 to-black/10 dark:from-white/15 dark:to-white/5 backdrop-blur-xl p-5 shadow-lg">
+          <div className="rounded-2xl bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl p-5 shadow-lg">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-base font-semibold text-foreground">
@@ -103,7 +103,7 @@ export default function CapacityModal({
                 className={`h-7 w-14 rounded-full transition-all shadow-inner ${
                   localIsUnlimited
                     ? "bg-primary shadow-lg shadow-primary/30"
-                    : "bg-black/20 dark:bg-white/10"
+                    : "bg-white/10"
                 }`}
               >
                 <span
@@ -119,7 +119,7 @@ export default function CapacityModal({
 
           {/* Capacity Number Input - only shown if not unlimited */}
           {!localIsUnlimited && (
-            <div className="rounded-2xl bg-gradient-to-br from-black/5 to-black/10 dark:from-white/15 dark:to-white/5 backdrop-blur-xl p-5 shadow-lg">
+            <div className="rounded-2xl bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl p-5 shadow-lg">
               <label className="text-base font-semibold text-foreground block mb-3">
                 Maximum Attendees
               </label>
@@ -128,7 +128,7 @@ export default function CapacityModal({
                 min="1"
                 value={localCapacityNumber}
                 onChange={(e) => setLocalCapacityNumber(e.target.value)}
-                className="w-full rounded-xl bg-white dark:bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground text-lg font-semibold outline-none shadow-inner focus:ring-2 focus:ring-primary/50 transition-all border border-black/10 dark:border-white/10"
+                className="w-full rounded-xl bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground text-lg font-semibold outline-none shadow-inner focus:ring-2 focus:ring-primary/50 transition-all border border-white/10"
                 placeholder="Enter capacity"
               />
             </div>
@@ -136,7 +136,7 @@ export default function CapacityModal({
 
           {/* Waiting List Toggle - only shown if not unlimited */}
           {!localIsUnlimited && (
-            <div className="rounded-2xl bg-gradient-to-br from-black/5 to-black/10 dark:from-white/15 dark:to-white/5 backdrop-blur-xl p-5 shadow-lg">
+            <div className="rounded-2xl bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl p-5 shadow-lg">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-base font-semibold text-foreground">
@@ -152,7 +152,7 @@ export default function CapacityModal({
                   className={`h-7 w-14 rounded-full transition-all shadow-inner ${
                     localHasWaitingList
                       ? "bg-primary shadow-lg shadow-primary/30"
-                      : "bg-black/20 dark:bg-white/10"
+                      : "bg-white/10"
                   }`}
                 >
                   <span
@@ -172,7 +172,7 @@ export default function CapacityModal({
           <button
             type="button"
             onClick={handleCancel}
-            className="flex-1 rounded-full bg-black/10 dark:bg-white/10 backdrop-blur-md py-4 text-center font-semibold text-foreground transition-all hover:bg-black/15 dark:hover:bg-white/15 shadow-lg hover:scale-105"
+            className="flex-1 rounded-full bg-white/10 backdrop-blur-md py-4 text-center font-semibold text-foreground transition-all hover:bg-white/15 shadow-lg hover:scale-105"
           >
             Cancel
           </button>

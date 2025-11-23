@@ -38,7 +38,7 @@ export default function EventDescriptionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-      <div className="flex h-[90vh] w-full max-w-4xl flex-col rounded-3xl bg-white/95 dark:bg-black/90 backdrop-blur-2xl p-8 text-foreground shadow-2xl border border-black/10 dark:border-white/10">
+      <div className="flex h-[90vh] w-full max-w-4xl flex-col rounded-3xl bg-zinc-900/90 backdrop-blur-2xl p-8 text-foreground shadow-2xl border border-white/10">
         <div className="mb-6 flex flex-shrink-0 items-center justify-between">
           <h2 className="text-3xl font-bold">
             {isEditMode
@@ -49,7 +49,7 @@ export default function EventDescriptionModal({
             <button
               type="button"
               onClick={() => setIsEditMode(!isEditMode)}
-              className="flex items-center gap-2 rounded-full bg-black/10 dark:bg-white/10 backdrop-blur-md px-5 py-2.5 text-sm font-medium transition-all hover:bg-black/15 dark:hover:bg-white/15 shadow-lg"
+              className="flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md px-5 py-2.5 text-sm font-medium transition-all hover:bg-white/15 shadow-lg"
               aria-label={
                 isEditMode ? "Switch to preview mode" : "Switch to edit mode"
               }
@@ -69,7 +69,7 @@ export default function EventDescriptionModal({
             <button
               type="button"
               onClick={handleCancel}
-              className="rounded-full p-2 transition-all hover:bg-black/10 dark:hover:bg-white/10"
+              className="rounded-full p-2 transition-all hover:bg-white/10"
               aria-label="Close modal"
             >
               <X className="h-6 w-6" />
@@ -77,7 +77,7 @@ export default function EventDescriptionModal({
           </div>
         </div>
 
-        <div className="flex-1 overflow-hidden rounded-2xl bg-gradient-to-br from-black/5 to-black/10 dark:from-white/15 dark:to-white/5 backdrop-blur-xl p-4 shadow-lg">
+        <div className="flex-1 overflow-hidden rounded-2xl bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl p-4 shadow-lg">
           <Tiptap
             content={localDescription}
             onChange={setLocalDescription}
@@ -89,7 +89,7 @@ export default function EventDescriptionModal({
           <button
             type="button"
             onClick={handleCancel}
-            className="rounded-full bg-black/10 dark:bg-white/10 backdrop-blur-md px-8 py-4 font-semibold transition-all hover:bg-black/15 dark:hover:bg-white/15 shadow-lg hover:scale-105"
+            className="rounded-full bg-white/10 backdrop-blur-md px-8 py-4 font-semibold transition-all hover:bg-white/15 shadow-lg hover:scale-105"
           >
             Cancel
           </button>
