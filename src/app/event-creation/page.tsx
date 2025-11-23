@@ -6,6 +6,7 @@ import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
 import { Edit, Trash2 } from "lucide-react";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
+import CapacityModal from "@/components/event-edit/CapacityModal";
 import {
   EventCreationProvider,
   useEventCreation,
@@ -38,6 +39,7 @@ function EventCreationForm() {
 
   // Local state for UI only
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
+  const [isCapacityModalOpen, setIsCapacityModalOpen] = useState(false);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -401,18 +403,17 @@ function EventCreationForm() {
                 />
               </button>
             </div>
-            <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
+            <button
+              type="button"
+              onClick={() => setIsCapacityModalOpen(true)}
+              className="flex items-center justify-between pt-5 border-t border-foreground/10 w-full text-left transition-all hover:bg-black/5 dark:hover:bg-white/5 rounded-xl p-3 -m-3"
+            >
               <div>
                 <p className="text-base font-semibold text-foreground">Capacity</p>
-                <p className="text-sm text-muted-foreground mt-1">{capacity} attendees</p>
+                <p className="text-sm text-muted-foreground mt-1">{capacity}</p>
               </div>
-              <input
-                type="text"
-                value={capacity}
-                onChange={(e) => setCapacity(e.target.value)}
-                className="w-32 rounded-xl bg-black/20 dark:bg-white/10 backdrop-blur-md px-4 py-3 text-right text-foreground font-semibold outline-none shadow-inner focus:bg-black/25 dark:focus:bg-white/15 transition-colors"
-              />
-            </div>
+              <Edit className="h-5 w-5 text-muted-foreground" />
+            </button>
           </div>
 
           <button
@@ -479,6 +480,11 @@ function EventCreationForm() {
       <EventDescriptionModal
         isOpen={isDescriptionModalOpen}
         onClose={() => setIsDescriptionModalOpen(false)}
+      />
+
+      <CapacityModal
+        isOpen={isCapacityModalOpen}
+        onClose={() => setIsCapacityModalOpen(false)}
       />
     </div>
   );

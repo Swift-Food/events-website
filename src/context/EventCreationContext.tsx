@@ -33,6 +33,12 @@ interface EventCreationContextType {
   setRequireApproval: Dispatch<SetStateAction<boolean>>;
   capacity: string;
   setCapacity: Dispatch<SetStateAction<string>>;
+  isUnlimitedCapacity: boolean;
+  setIsUnlimitedCapacity: Dispatch<SetStateAction<boolean>>;
+  hasWaitingList: boolean;
+  setHasWaitingList: Dispatch<SetStateAction<boolean>>;
+  capacityNumber: string;
+  setCapacityNumber: Dispatch<SetStateAction<string>>;
 
   // Cover image
   coverPreview: string | null;
@@ -61,6 +67,9 @@ type EventDraft = {
   ticketPrice: string;
   requireApproval: boolean;
   capacity: string;
+  isUnlimitedCapacity: boolean;
+  hasWaitingList: boolean;
+  capacityNumber: string;
   coverPreview: string | null;
   coverName: string;
 };
@@ -124,6 +133,15 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     storedDraft.requireApproval ?? false
   );
   const [capacity, setCapacity] = useState(storedDraft.capacity ?? "Unlimited");
+  const [isUnlimitedCapacity, setIsUnlimitedCapacity] = useState(
+    storedDraft.isUnlimitedCapacity ?? true
+  );
+  const [hasWaitingList, setHasWaitingList] = useState(
+    storedDraft.hasWaitingList ?? false
+  );
+  const [capacityNumber, setCapacityNumber] = useState(
+    storedDraft.capacityNumber ?? "100"
+  );
 
   // Cover image
   const [coverPreview, setCoverPreview] = useState<string | null>(
@@ -150,6 +168,9 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
       ticketPrice,
       requireApproval,
       capacity,
+      isUnlimitedCapacity,
+      hasWaitingList,
+      capacityNumber,
       coverPreview,
       coverName,
     };
@@ -161,11 +182,14 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     }
   }, [
     capacity,
+    capacityNumber,
     coverName,
     coverPreview,
     description,
     end,
     eventName,
+    hasWaitingList,
+    isUnlimitedCapacity,
     location,
     requireApproval,
     start,
@@ -188,6 +212,9 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     setTicketPrice("25");
     setRequireApproval(false);
     setCapacity("Unlimited");
+    setIsUnlimitedCapacity(true);
+    setHasWaitingList(false);
+    setCapacityNumber("100");
     setCoverPreview(null);
     setCoverName("invite-cover.png");
     if (typeof window !== "undefined") {
@@ -216,6 +243,12 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
         setRequireApproval,
         capacity,
         setCapacity,
+        isUnlimitedCapacity,
+        setIsUnlimitedCapacity,
+        hasWaitingList,
+        setHasWaitingList,
+        capacityNumber,
+        setCapacityNumber,
         coverPreview,
         setCoverPreview,
         coverName,
