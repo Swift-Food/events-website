@@ -96,7 +96,7 @@ export default function EventDescriptionModal({
           <button
             type="button"
             onClick={handleSave}
-            className="rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 px-8 py-4 font-bold text-white transition-all hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-105 shadow-xl shadow-blue-500/30 hover:from-blue-500 hover:to-purple-500"
+            className="rounded-full bg-primary px-8 py-4 font-bold text-primary-foreground transition-all hover:shadow-2xl hover:shadow-primary/50 hover:scale-105 shadow-xl shadow-primary/30 hover:bg-primary/90"
           >
             Save
           </button>

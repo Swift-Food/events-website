@@ -421,7 +421,7 @@ function EventCreationForm() {
 
           <button
             type="button"
-            className="w-full rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 py-5 text-center text-lg font-bold text-white transition-all hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-[1.02] shadow-xl shadow-blue-500/30 hover:from-blue-500 hover:to-purple-500"
+            className="w-full rounded-full bg-primary py-5 text-center text-lg font-bold text-primary-foreground transition-all hover:shadow-2xl hover:shadow-primary/50 hover:scale-[1.02] shadow-xl shadow-primary/30 hover:bg-primary/90"
           >
             Create Event
           </button>

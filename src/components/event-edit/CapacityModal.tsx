@@ -70,8 +70,8 @@ export default function CapacityModal({
       <div className="w-full max-w-lg rounded-3xl bg-white/95 dark:bg-black/90 backdrop-blur-2xl p-8 text-foreground shadow-2xl border border-black/10 dark:border-white/10">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-blue-500/20 p-3">
-              <Users className="h-6 w-6 text-blue-500" />
+            <div className="rounded-full bg-primary/20 p-3">
+              <Users className="h-6 w-6 text-primary" />
             </div>
             <h2 className="text-3xl font-bold">Capacity Settings</h2>
           </div>
@@ -102,7 +102,7 @@ export default function CapacityModal({
                 onClick={() => setLocalIsUnlimited(!localIsUnlimited)}
                 className={`h-7 w-14 rounded-full transition-all shadow-inner ${
                   localIsUnlimited
-                    ? "bg-blue-500 shadow-lg shadow-blue-500/30"
+                    ? "bg-primary shadow-lg shadow-primary/30"
                     : "bg-black/20 dark:bg-white/10"
                 }`}
               >
@@ -128,7 +128,7 @@ export default function CapacityModal({
                 min="1"
                 value={localCapacityNumber}
                 onChange={(e) => setLocalCapacityNumber(e.target.value)}
-                className="w-full rounded-xl bg-white dark:bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground text-lg font-semibold outline-none shadow-inner focus:ring-2 focus:ring-blue-500/50 transition-all border border-black/10 dark:border-white/10"
+                className="w-full rounded-xl bg-white dark:bg-white/10 backdrop-blur-md px-4 py-3.5 text-foreground text-lg font-semibold outline-none shadow-inner focus:ring-2 focus:ring-primary/50 transition-all border border-black/10 dark:border-white/10"
                 placeholder="Enter capacity"
               />
             </div>
@@ -151,7 +151,7 @@ export default function CapacityModal({
                   onClick={() => setLocalHasWaitingList(!localHasWaitingList)}
                   className={`h-7 w-14 rounded-full transition-all shadow-inner ${
                     localHasWaitingList
-                      ? "bg-blue-500 shadow-lg shadow-blue-500/30"
+                      ? "bg-primary shadow-lg shadow-primary/30"
                       : "bg-black/20 dark:bg-white/10"
                   }`}
                 >
@@ -179,7 +179,7 @@ export default function CapacityModal({
           <button
             type="button"
             onClick={handleSave}
-            className="flex-1 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 py-4 text-center font-bold text-white transition-all hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-105 shadow-xl shadow-blue-500/30 hover:from-blue-500 hover:to-purple-500"
+            className="flex-1 rounded-full bg-primary py-4 text-center font-bold text-primary-foreground transition-all hover:shadow-2xl hover:shadow-primary/50 hover:scale-105 shadow-xl shadow-primary/30 hover:bg-primary/90"
           >
             Save
           </button>
