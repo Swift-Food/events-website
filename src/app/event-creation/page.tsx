@@ -282,7 +282,7 @@ function EventCreationForm() {
                     onChange={(e) =>
                       setStart(e.target.value + "T" + start.split("T")[1])
                     }
-                    className="flex-1 rounded-xl bg-card-background backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-white/15 transition-colors"
+                    className="flex-1 rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner"
                   />
                   <input
                     type="time"
@@ -290,7 +290,7 @@ function EventCreationForm() {
                     onChange={(e) =>
                       setStart(start.split("T")[0] + "T" + e.target.value)
                     }
-                    className="w-32 rounded-xl bg-card-background backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-white/15 transition-colors"
+                    className="w-32 rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner"
                   />
                 </div>
 
@@ -302,7 +302,7 @@ function EventCreationForm() {
                     onChange={(e) =>
                       setEnd(e.target.value + "T" + end.split("T")[1])
                     }
-                    className="flex-1 rounded-xl bg-card-background backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-white/15 transition-colors"
+                    className="flex-1 rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner"
                   />
                   <input
                     type="time"
@@ -310,7 +310,7 @@ function EventCreationForm() {
                     onChange={(e) =>
                       setEnd(end.split("T")[0] + "T" + e.target.value)
                     }
-                    className="w-32 rounded-xl bg-card-background backdrop-blur-md px-4 py-3.5 text-foreground outline-none shadow-inner focus:bg-white/15 transition-colors"
+                    className="w-32 rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner"
                   />
                 </div>
               </div>
@@ -326,7 +326,7 @@ function EventCreationForm() {
               placeholder="Offline location or virtual link"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="mt-3 w-full rounded-xl bg-card-background backdrop-blur-md px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner focus:bg-white/15 transition-colors"
+              className="mt-3 w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
             />
           </div>
 
@@ -378,7 +378,7 @@ function EventCreationForm() {
                 min={1}
                 value={ticketPrice}
                 onChange={(e) => setTicketPrice(e.target.value)}
-                className="w-full rounded-xl bg-card-background backdrop-blur-md px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner focus:bg-white/15 transition-colors"
+                className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
                 placeholder="Enter ticket price"
               />
             )}
