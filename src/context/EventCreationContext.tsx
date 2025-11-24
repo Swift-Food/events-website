@@ -10,6 +10,7 @@ import {
   useEffect,
 } from "react";
 import type { Dispatch, SetStateAction } from "react";
+import { TicketType } from "@/types/event";
 
 interface EventCreationContextType {
   // Event details
@@ -25,10 +26,11 @@ interface EventCreationContextType {
   setDescription: Dispatch<SetStateAction<string>>;
 
   // Ticketing
-  tickets: "free" | "paid";
-  setTickets: Dispatch<SetStateAction<"free" | "paid">>;
-  ticketPrice: string;
-  setTicketPrice: Dispatch<SetStateAction<string>>;
+  ticketTypes: TicketType[];
+  setTicketTypes: Dispatch<SetStateAction<TicketType[]>>;
+  addTicketType: (ticket: TicketType) => void;
+  updateTicketType: (ticket: TicketType) => void;
+  deleteTicketType: (ticketId: string) => void;
   requireApproval: boolean;
   setRequireApproval: Dispatch<SetStateAction<boolean>>;
   capacity: string;
@@ -63,8 +65,7 @@ type EventDraft = {
   end: string;
   location: string;
   description: string;
-  tickets: "free" | "paid";
-  ticketPrice: string;
+  ticketTypes: TicketType[];
   requireApproval: boolean;
   capacity: string;
   isUnlimitedCapacity: boolean;
@@ -123,11 +124,8 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
   const [description, setDescription] = useState(storedDraft.description ?? "");
 
   // Ticketing
-  const [tickets, setTickets] = useState<"free" | "paid">(
-    storedDraft.tickets === "paid" ? "paid" : "free"
-  );
-  const [ticketPrice, setTicketPrice] = useState(
-    storedDraft.ticketPrice ?? "25"
+  const [ticketTypes, setTicketTypes] = useState<TicketType[]>(
+    storedDraft.ticketTypes ?? []
   );
   const [requireApproval, setRequireApproval] = useState(
     storedDraft.requireApproval ?? false
@@ -153,6 +151,21 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     storedDraft.coverName ?? "invite-cover.png"
   );
 
+  // Ticket management functions
+  const addTicketType = useCallback((ticket: TicketType) => {
+    setTicketTypes((prev) => [...prev, ticket]);
+  }, []);
+
+  const updateTicketType = useCallback((ticket: TicketType) => {
+    setTicketTypes((prev) =>
+      prev.map((t) => (t.id === ticket.id ? ticket : t))
+    );
+  }, []);
+
+  const deleteTicketType = useCallback((ticketId: string) => {
+    setTicketTypes((prev) => prev.filter((t) => t.id !== ticketId));
+  }, []);
+
   const persistEventDraft = useCallback(() => {
     if (typeof window === "undefined") {
       return;
@@ -164,8 +177,7 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
       end,
       location,
       description,
-      tickets,
-      ticketPrice,
+      ticketTypes,
       requireApproval,
       capacity,
       isUnlimitedCapacity,
@@ -193,8 +205,7 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     location,
     requireApproval,
     start,
-    ticketPrice,
-    tickets,
+    ticketTypes,
   ]);
 
   useEffect(() => {
@@ -208,8 +219,7 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     setEnd(newTimes.end);
     setLocation("");
     setDescription("");
-    setTickets("free");
-    setTicketPrice("25");
+    setTicketTypes([]);
     setRequireApproval(false);
     setCapacity("Unlimited");
     setIsUnlimitedCapacity(true);
@@ -235,10 +245,11 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
         setLocation,
         description,
         setDescription,
-        tickets,
-        setTickets,
-        ticketPrice,
-        setTicketPrice,
+        ticketTypes,
+        setTicketTypes,
+        addTicketType,
+        updateTicketType,
+        deleteTicketType,
         requireApproval,
         setRequireApproval,
         capacity,

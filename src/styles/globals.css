@@ -13,6 +13,8 @@
   --color-muted: #1e293b;
   --color-muted-foreground: #94a3b8;
   --color-border: #334155;
+  --color-toggle-inactive: #404040;
+  --color-button-inactive: #3a3a3a;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

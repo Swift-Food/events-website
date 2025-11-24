@@ -4,13 +4,15 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Plus } from "lucide-react";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
 import CapacityModal from "@/components/event-edit/CapacityModal";
+import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import {
   EventCreationProvider,
   useEventCreation,
 } from "@/context/EventCreationContext";
+import { TicketType } from "@/types/event";
 
 function EventCreationForm() {
   const {
@@ -22,10 +24,10 @@ function EventCreationForm() {
     setEnd,
     location,
     setLocation,
-    tickets,
-    setTickets,
-    ticketPrice,
-    setTicketPrice,
+    ticketTypes,
+    addTicketType,
+    updateTicketType,
+    deleteTicketType,
     requireApproval,
     setRequireApproval,
     capacity,
@@ -40,6 +42,8 @@ function EventCreationForm() {
   // Local state for UI only
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [isCapacityModalOpen, setIsCapacityModalOpen] = useState(false);
+  const [isTicketTypeModalOpen, setIsTicketTypeModalOpen] = useState(false);
+  const [ticketToEdit, setTicketToEdit] = useState<TicketType | null>(null);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -159,6 +163,30 @@ function EventCreationForm() {
 
   const handleDescriptionClick = () => {
     setIsDescriptionModalOpen(true);
+  };
+
+  const handleAddTicketClick = () => {
+    setTicketToEdit(null);
+    setIsTicketTypeModalOpen(true);
+  };
+
+  const handleEditTicketClick = (ticket: TicketType) => {
+    setTicketToEdit(ticket);
+    setIsTicketTypeModalOpen(true);
+  };
+
+  const handleSaveTicket = (ticket: TicketType) => {
+    if (ticketToEdit) {
+      updateTicketType(ticket);
+    } else {
+      addTicketType(ticket);
+    }
+  };
+
+  const handleDeleteTicket = (ticketId: string) => {
+    if (confirm("Are you sure you want to delete this ticket type?")) {
+      deleteTicketType(ticketId);
+    }
   };
 
   const handleClearForm = () => {
@@ -332,47 +360,81 @@ function EventCreationForm() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-base font-semibold text-foreground">
-                  Tickets
+                  Ticket Types
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {tickets === "free" ? "Free" : `$${ticketPrice}`}
+                  {ticketTypes.length === 0
+                    ? "No tickets added"
+                    : `${ticketTypes.length} ticket type${
+                        ticketTypes.length > 1 ? "s" : ""
+                      }`}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setTickets("free")}
-                  className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all ${
-                    tickets === "free"
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105"
-                      : "bg-card-background text-muted-foreground hover:bg-white/15"
-                  }`}
-                >
-                  Free
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTickets("paid")}
-                  className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all ${
-                    tickets === "paid"
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105"
-                      : "bg-card-background text-muted-foreground hover:bg-white/15"
-                  }`}
-                >
-                  Paid
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleAddTicketClick}
+                className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 hover:scale-105"
+              >
+                <Plus className="h-4 w-4" />
+                Add Ticket
+              </button>
             </div>
-            {tickets === "paid" && (
-              <input
-                type="number"
-                min={1}
-                value={ticketPrice}
-                onChange={(e) => setTicketPrice(e.target.value)}
-                className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
-                placeholder="Enter ticket price"
-              />
+
+            {/* List of Ticket Types */}
+            {ticketTypes.length > 0 && (
+              <div className="space-y-3">
+                {ticketTypes.map((ticket) => (
+                  <div
+                    key={ticket.id}
+                    className="rounded-2xl bg-card-secondary-background backdrop-blur-xl p-4 shadow-lg"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="text-base font-semibold text-foreground">
+                            {ticket.name}
+                          </p>
+                          {ticket.isSingleUse && (
+                            <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
+                              Single-use
+                            </span>
+                          )}
+                        </div>
+                        {ticket.description && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {ticket.description}
+                          </p>
+                        )}
+                        <p className="text-sm font-medium text-foreground mt-2">
+                          {ticket.isFree
+                            ? "Free"
+                            : `£${ticket.price.toFixed(2)}`}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleEditTicketClick(ticket)}
+                          className="rounded-full p-2 transition-all hover:bg-white/10"
+                          aria-label="Edit ticket"
+                        >
+                          <Edit className="h-4 w-4 text-muted-foreground" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTicket(ticket.id)}
+                          className="rounded-full p-2 transition-all hover:bg-red-500/20"
+                          aria-label="Delete ticket"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-400" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
+
             <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
               <div>
                 <p className="text-base font-semibold text-foreground">
@@ -489,6 +551,13 @@ function EventCreationForm() {
       <CapacityModal
         isOpen={isCapacityModalOpen}
         onClose={() => setIsCapacityModalOpen(false)}
+      />
+
+      <TicketTypeModal
+        isOpen={isTicketTypeModalOpen}
+        onClose={() => setIsTicketTypeModalOpen(false)}
+        onSave={handleSaveTicket}
+        ticketToEdit={ticketToEdit}
       />
     </div>
   );
