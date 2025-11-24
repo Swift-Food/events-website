@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -13,6 +13,7 @@ const navLinks = [
 
 export default function Navbar() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // TODO: Replace with actual auth state
 
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
   const closeDrawer = () => setIsDrawerOpen(false);
@@ -32,7 +33,7 @@ export default function Navbar() {
             </button>
 
             <Link href="/" className="text-lg font-semibold tracking-tight">
-              Swift Luma
+              Nodu
             </Link>
           </div>
 
@@ -49,12 +50,29 @@ export default function Navbar() {
             ))}
           </nav>
 
-          <Link
-            href="/event-creation"
-            className="rounded-full bg-foreground px-5 py-2 text-sm font-semibold text-background transition-colors hover:bg-zinc-100 hover:text-black"
-          >
-            Create Event
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/event-creation"
+              className="rounded-full bg-foreground px-5 py-2 text-sm font-semibold text-background transition-colors hover:bg-zinc-100 hover:text-black"
+            >
+              Create Event
+            </Link>
+            {isLoggedIn ? (
+              <button
+                className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-300 transition-colors hover:bg-white/10 hover:text-white cursor-pointer"
+                aria-label="User profile"
+              >
+                <User className="h-5 w-5" />
+              </button>
+            ) : (
+              <button
+                className="rounded-full border border-white/20 px-5 py-2 text-sm font-semibold text-zinc-300 transition-colors hover:border-white/40 hover:bg-white/5 hover:text-white"
+                aria-label="Sign in"
+              >
+                Sign In
+              </button>
+            )}
+          </div>
         </div>
       </header>
 

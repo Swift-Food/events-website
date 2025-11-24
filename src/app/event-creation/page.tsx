@@ -222,7 +222,7 @@ function EventCreationForm() {
               onChange={handleImageChange}
             />
           </div>
-          <div className="rounded-2xl bg-card-background backdrop-blur-xl p-5 text-sm shadow-lg">
+          <div className="rounded-2xl bg-card-secondary-background backdrop-blur-xl p-5 text-sm">
             <div className="flex items-center justify-between text-muted-foreground">
               <div>
                 <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground/60">
