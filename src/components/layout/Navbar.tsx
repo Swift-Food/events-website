@@ -33,7 +33,7 @@ export default function Navbar() {
             </button>
 
             <Link href="/" className="text-lg font-semibold tracking-tight">
-              Nodu
+              Prismo
             </Link>
           </div>
 
@@ -66,7 +66,7 @@ export default function Navbar() {
               </button>
             ) : (
               <button
-                className="rounded-full border border-white/20 px-5 py-2 text-sm font-semibold text-zinc-300 transition-colors hover:border-white/40 hover:bg-white/5 hover:text-white"
+                className="rounded-full border border-white/20 px-5 py-2 text-sm font-semibold text-zinc-300 transition-colors hover:border-white/40 hover:bg-white/5 hover:text-white cursor-pointer"
                 aria-label="Sign in"
               >
                 Sign In

@@ -262,7 +262,7 @@ function EventCreationForm() {
             <button
               type="button"
               onClick={handleClearForm}
-              className="flex items-center gap-2 rounded-2xl bg-red-500/10 backdrop-blur-md px-5 py-3 text-red-400 transition-all hover:bg-red-500/20 hover:scale-105 shadow-lg"
+              className="flex items-center gap-2 rounded-2xl bg-red-500/10 backdrop-blur-md px-5 py-3 text-red-400 transition-all hover:bg-red-500/20 hover:scale-105 shadow-lg cursor-pointer"
               title="Clear entire form"
             >
               <Trash2 className="h-5 w-5" />
