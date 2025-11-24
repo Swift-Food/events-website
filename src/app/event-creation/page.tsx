@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
 import { Edit, Trash2, Plus, ChevronDown, ChevronUp } from "lucide-react";
@@ -13,6 +13,23 @@ import {
   useEventCreation,
 } from "@/context/EventCreationContext";
 import { TicketType } from "@/types/event";
+import { GOOGLE_MAPS_CONFIG } from "@/constants/google-maps";
+import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
+
+// Load Google Maps script
+declare global {
+  interface Window {
+    initAutocomplete?: () => void;
+  }
+}
+
+// UK Postcode validation regex
+const UK_POSTCODE_REGEX = /^([A-Z]{1,2}\d{1,2}[A-Z]?)\s?(\d[A-Z]{2})$/i;
+
+const validateUKPostcode = (postcode: string): boolean => {
+  if (!postcode) return false;
+  return UK_POSTCODE_REGEX.test(postcode.trim());
+};
 
 function EventCreationForm() {
   const {
@@ -52,6 +69,20 @@ function EventCreationForm() {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Address-related state
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [city, setCity] = useState("");
+  const [postcode, setPostcode] = useState("");
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const [addressValidationError, setAddressValidationError] = useState<
+    string | null
+  >(null);
+
+  // Google Places Autocomplete refs
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const locationInputRef = useRef<HTMLInputElement | null>(null);
+
   const formatDate = (value: string) => {
     try {
       return new Intl.DateTimeFormat("en-GB", {
@@ -66,6 +97,144 @@ function EventCreationForm() {
 
   const formattedStart = useMemo(() => formatDate(start), [start]);
   const formattedEnd = useMemo(() => formatDate(end), [end]);
+
+  // Initialize Google Places Autocomplete
+  useEffect(() => {
+    const initializeAutocomplete = () => {
+      if (!locationInputRef.current || !window.google?.maps?.places) return;
+
+      autocompleteRef.current = new google.maps.places.Autocomplete(
+        locationInputRef.current,
+        {
+          // Remove types restriction to allow both addresses and establishments
+          componentRestrictions: {
+            country: GOOGLE_MAPS_CONFIG.COUNTRY_RESTRICTION,
+          },
+          fields: [
+            "address_components",
+            "formatted_address",
+            "geometry",
+            "name",
+            "place_id",
+          ],
+          // Bias results towards London (good for UCL and other UK universities)
+          bounds: {
+            north: 51.6723,
+            south: 51.3844,
+            east: 0.1485,
+            west: -0.3514,
+          },
+          strictBounds: false, // Allow results outside bounds but prioritize within
+        }
+      );
+
+      autocompleteRef.current.addListener("place_changed", handlePlaceSelect);
+    };
+
+    loadGoogleMapsScript().then(initializeAutocomplete);
+
+    return () => {
+      if (autocompleteRef.current) {
+        google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      }
+    };
+  }, []);
+
+  const handlePlaceSelect = () => {
+    const place = autocompleteRef.current?.getPlace();
+    if (!place) return;
+
+    // Store place_id for validation
+    if (place.place_id) {
+      setSelectedPlaceId(place.place_id);
+    }
+
+    let street = "";
+    let cityName = "";
+    let postcodeValue = "";
+    let country = "";
+    let buildingName = "";
+
+    // Get the place name (for establishments like "Roberts Building")
+    if (place.name) {
+      buildingName = place.name;
+    }
+
+    // Parse address components if available
+    if (place.address_components) {
+      place.address_components.forEach((component) => {
+        const types = component.types;
+
+        if (types.includes("street_number")) {
+          street = component.long_name + " ";
+        }
+        if (types.includes("route")) {
+          street += component.long_name;
+        }
+        if (types.includes("locality") || types.includes("postal_town")) {
+          cityName = component.long_name;
+        }
+        if (types.includes("postal_code")) {
+          postcodeValue = component.long_name;
+        }
+        if (types.includes("country")) {
+          country = component.short_name;
+        }
+        // Also check for premise (building name in address components)
+        if (types.includes("premise") && !buildingName) {
+          buildingName = component.long_name;
+        }
+      });
+    }
+
+    // Validate if address is in UK
+    if (country && country !== "GB") {
+      setAddressValidationError(
+        "Sorry, we only support addresses within the United Kingdom."
+      );
+    } else {
+      setAddressValidationError(null);
+    }
+
+    // Update address fields
+    // For establishments, use the building name if street is empty
+    if (buildingName && !street) {
+      setAddressLine1(buildingName);
+    } else if (street) {
+      setAddressLine1(street.trim());
+      // Put building name in address line 2 if it exists and is different from street
+      if (buildingName && !street.includes(buildingName)) {
+        setAddressLine2(buildingName);
+      }
+    }
+
+    setCity(cityName);
+    setPostcode(postcodeValue);
+
+    // Update location field with formatted address or name
+    if (place.formatted_address) {
+      setLocation(place.formatted_address);
+    } else if (buildingName) {
+      setLocation(buildingName);
+    }
+  };
+
+  // Update location when address fields change
+  useEffect(() => {
+    if (addressLine1 || city || postcode) {
+      const fullAddress = [
+        addressLine1,
+        addressLine2,
+        city,
+        postcode,
+      ]
+        .filter(Boolean)
+        .join(", ");
+      if (fullAddress) {
+        setLocation(fullAddress);
+      }
+    }
+  }, [addressLine1, addressLine2, city, postcode, setLocation]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -197,10 +366,19 @@ function EventCreationForm() {
       )
     ) {
       clearForm();
-      // Also clear local file input
+      // Also clear local file input and address fields
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+      if (locationInputRef.current) {
+        locationInputRef.current.value = "";
+      }
+      setAddressLine1("");
+      setAddressLine2("");
+      setCity("");
+      setPostcode("");
+      setSelectedPlaceId(null);
+      setAddressValidationError(null);
     }
   };
 
@@ -336,16 +514,115 @@ function EventCreationForm() {
           </div>
 
           <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
-            <label className="text-base text-foreground font-semibold">
+            <label className="text-base text-foreground font-semibold mb-3 block">
               Event Location
             </label>
-            <input
-              type="text"
-              placeholder="Offline location or virtual link"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="mt-3 w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
-            />
+            <p className="text-sm text-muted-foreground mb-4">
+              Search for a building, venue, or address - or enter details manually
+            </p>
+
+            {/* Google Places Autocomplete Search */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Search Location
+              </label>
+              <input
+                ref={locationInputRef}
+                type="text"
+                placeholder="Search for building, venue, or address..."
+                className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner border-2 border-transparent focus:border-primary transition-all"
+              />
+              {addressValidationError && (
+                <div className="mt-2 p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
+                  <p className="text-sm text-red-400">{addressValidationError}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Address Line 1 */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Address Line 1
+              </label>
+              <input
+                type="text"
+                value={addressLine1}
+                onChange={(e) => setAddressLine1(e.target.value)}
+                placeholder="Street address"
+                className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
+              />
+            </div>
+
+            {/* Address Line 2 */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Address Line 2 (Optional)
+              </label>
+              <input
+                type="text"
+                value={addressLine2}
+                onChange={(e) => setAddressLine2(e.target.value)}
+                placeholder="Apartment, suite, building, etc."
+                className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
+              />
+            </div>
+
+            {/* City and Postcode */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  City
+                </label>
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="City"
+                  className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Postcode
+                </label>
+                <input
+                  type="text"
+                  value={postcode}
+                  onChange={(e) => setPostcode(e.target.value.toUpperCase())}
+                  onBlur={(e) => {
+                    // Validate on blur
+                    const value = e.target.value.trim();
+                    if (value && !validateUKPostcode(value)) {
+                      // Could add error state here if needed
+                    }
+                  }}
+                  placeholder="e.g., SW1A 1AA"
+                  className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
+                />
+                {postcode && validateUKPostcode(postcode) && (
+                  <p className="mt-1 text-sm text-green-400">
+                    ✓ Valid UK postcode
+                  </p>
+                )}
+                {postcode && !validateUKPostcode(postcode) && (
+                  <p className="mt-1 text-sm text-red-400">
+                    Please enter a valid UK postcode
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Display full formatted address */}
+            {location && (
+              <div className="mt-4 p-3 bg-card-secondary-background rounded-xl">
+                <p className="text-xs text-muted-foreground mb-1">
+                  Full Address:
+                </p>
+                <p className="text-sm text-foreground font-medium">
+                  {location}
+                </p>
+              </div>
+            )}
           </div>
 
           <button
