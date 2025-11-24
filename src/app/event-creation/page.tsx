@@ -283,29 +283,11 @@ function EventCreationForm() {
                   <label className="text-sm font-medium text-muted-foreground sm:w-14">
                     Start
                   </label>
-                  {/* Mobile: Single datetime-local input */}
                   <input
                     type="datetime-local"
                     value={start}
                     onChange={(e) => setStart(e.target.value)}
-                    className="rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner sm:hidden"
-                  />
-                  {/* Desktop: Separate date and time inputs */}
-                  <input
-                    type="date"
-                    value={start.split("T")[0]}
-                    onChange={(e) =>
-                      setStart(e.target.value + "T" + start.split("T")[1])
-                    }
-                    className="hidden flex-1 rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner sm:block"
-                  />
-                  <input
-                    type="time"
-                    value={start.split("T")[1]}
-                    onChange={(e) =>
-                      setStart(start.split("T")[0] + "T" + e.target.value)
-                    }
-                    className="hidden w-32 rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner sm:block"
+                    className="flex-1 rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner"
                   />
                 </div>
 
@@ -313,29 +295,11 @@ function EventCreationForm() {
                   <label className="text-sm font-medium text-muted-foreground sm:w-14">
                     End
                   </label>
-                  {/* Mobile: Single datetime-local input */}
                   <input
                     type="datetime-local"
                     value={end}
                     onChange={(e) => setEnd(e.target.value)}
-                    className="rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner sm:hidden"
-                  />
-                  {/* Desktop: Separate date and time inputs */}
-                  <input
-                    type="date"
-                    value={end.split("T")[0]}
-                    onChange={(e) =>
-                      setEnd(e.target.value + "T" + end.split("T")[1])
-                    }
-                    className="hidden flex-1 rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner sm:block"
-                  />
-                  <input
-                    type="time"
-                    value={end.split("T")[1]}
-                    onChange={(e) =>
-                      setEnd(end.split("T")[0] + "T" + e.target.value)
-                    }
-                    className="hidden w-32 rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner sm:block"
+                    className="flex-1 rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner"
                   />
                 </div>
               </div>
