@@ -4,7 +4,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { Edit, Trash2, Plus } from "lucide-react";
+import { Edit, Trash2, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
 import CapacityModal from "@/components/event-edit/CapacityModal";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
@@ -44,6 +44,7 @@ function EventCreationForm() {
   const [isCapacityModalOpen, setIsCapacityModalOpen] = useState(false);
   const [isTicketTypeModalOpen, setIsTicketTypeModalOpen] = useState(false);
   const [ticketToEdit, setTicketToEdit] = useState<TicketType | null>(null);
+  const [isTicketListExpanded, setIsTicketListExpanded] = useState(true);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -381,7 +382,7 @@ function EventCreationForm() {
             </div>
 
             {/* List of Ticket Types */}
-            {ticketTypes.length > 0 && (
+            {ticketTypes.length > 0 && isTicketListExpanded && (
               <div className="space-y-3">
                 {ticketTypes.map((ticket) => (
                   <div
@@ -435,6 +436,22 @@ function EventCreationForm() {
               </div>
             )}
 
+            {/* Expand/Collapse Button */}
+            {ticketTypes.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsTicketListExpanded(!isTicketListExpanded)}
+                className="w-full flex justify-center pt-3 pb-1 transition-all hover:bg-white/5 rounded-xl cursor-pointer"
+                aria-label={isTicketListExpanded ? "Collapse ticket list" : "Expand ticket list"}
+              >
+                {isTicketListExpanded ? (
+                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                )}
+              </button>
+            )}
+
             <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
               <div>
                 <p className="text-base font-semibold text-foreground">
@@ -450,7 +467,7 @@ function EventCreationForm() {
                 className={`h-7 w-14 rounded-full transition-all shadow-inner ${
                   requireApproval
                     ? "bg-primary shadow-lg shadow-primary/30"
-                    : "bg-card-background"
+                    : "bg-card-secondary-background"
                 }`}
               >
                 <span
