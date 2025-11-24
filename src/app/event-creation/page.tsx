@@ -188,7 +188,9 @@ function EventCreationForm() {
               />
             ) : (
               <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-muted">
-                <span className="text-3xl font-serif text-foreground">You Are Invited</span>
+                <span className="text-3xl font-serif text-foreground">
+                  You Are Invited
+                </span>
                 <span className="text-sm text-muted-foreground">
                   Upload a cover image
                 </span>
@@ -226,17 +228,22 @@ function EventCreationForm() {
                 <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground/60">
                   Starts
                 </p>
-                <p className="text-base font-semibold text-foreground mt-1">{formattedStart}</p>
+                <p className="text-base font-semibold text-foreground mt-1">
+                  {formattedStart}
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground/60">
                   Ends
                 </p>
-                <p className="text-base font-semibold text-foreground mt-1">{formattedEnd}</p>
+                <p className="text-base font-semibold text-foreground mt-1">
+                  {formattedEnd}
+                </p>
               </div>
             </div>
             <div className="mt-5 pt-4 border-t border-foreground/10 text-xs text-muted-foreground">
-              <span className="font-medium">Cover:</span> <span className="text-foreground font-medium">{coverName}</span>
+              <span className="font-medium">Cover:</span>{" "}
+              <span className="text-foreground font-medium">{coverName}</span>
             </div>
           </div>
         </section>
@@ -249,7 +256,7 @@ function EventCreationForm() {
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
                 placeholder="Event Name"
-                className="w-full bg-transparent text-5xl font-bold text-foreground outline-none placeholder:text-muted-foreground/40"
+                className="w-full bg-transparent text-3xl md:text-5xl font-bold text-foreground outline-none placeholder:text-muted-foreground/40"
               />
             </div>
             <button
@@ -267,15 +274,15 @@ function EventCreationForm() {
             <div className="flex gap-5">
               <div className="flex flex-col items-center py-3">
                 <div className="h-3.5 w-3.5 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
-                <div
-                  className="my-2 w-0.5 flex-1 rounded-full bg-primary/30"
-                ></div>
+                <div className="my-2 w-0.5 flex-1 rounded-full bg-primary/30"></div>
                 <div className="h-3.5 w-3.5 rounded-full bg-primary/30 shadow-md"></div>
               </div>
 
               <div className="flex flex-1 flex-col gap-4">
                 <div className="flex items-center gap-3">
-                  <label className="text-sm font-medium text-muted-foreground w-14">Start</label>
+                  <label className="text-sm font-medium text-muted-foreground w-14">
+                    Start
+                  </label>
                   <input
                     type="date"
                     value={start.split("T")[0]}
@@ -295,7 +302,9 @@ function EventCreationForm() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <label className="text-sm font-medium text-muted-foreground w-14">End</label>
+                  <label className="text-sm font-medium text-muted-foreground w-14">
+                    End
+                  </label>
                   <input
                     type="date"
                     value={end.split("T")[0]}
@@ -333,7 +342,7 @@ function EventCreationForm() {
           <button
             type="button"
             onClick={handleDescriptionClick}
-            className="flex w-full items-center justify-center gap-3 rounded-3xl bg-card-background backdrop-blur-xl px-6 py-4 text-foreground text-base transition-all hover:bg-white/15 font-semibold shadow-xl hover:scale-[1.02]"
+            className="flex w-full items-center justify-center gap-3 rounded-3xl bg-card-background backdrop-blur-xl px-6 py-4 text-foreground text-base transition-all hover:bg-white/15 font-semibold shadow-xl cursor-pointer"
           >
             <Edit className="h-5 w-5" />
             <span>Edit Description</span>
@@ -342,7 +351,9 @@ function EventCreationForm() {
           <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 space-y-5 shadow-xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-base font-semibold text-foreground">Tickets</p>
+                <p className="text-base font-semibold text-foreground">
+                  Tickets
+                </p>
                 <p className="text-sm text-muted-foreground mt-1">
                   {tickets === "free" ? "Free" : `$${ticketPrice}`}
                 </p>
@@ -384,7 +395,9 @@ function EventCreationForm() {
             )}
             <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
               <div>
-                <p className="text-base font-semibold text-foreground">Require Approval</p>
+                <p className="text-base font-semibold text-foreground">
+                  Require Approval
+                </p>
                 <p className="text-sm text-muted-foreground mt-1">
                   Attendees must be approved
                 </p>
@@ -393,19 +406,25 @@ function EventCreationForm() {
                 type="button"
                 onClick={() => setRequireApproval((prev) => !prev)}
                 className={`h-7 w-14 rounded-full transition-all shadow-inner ${
-                  requireApproval ? "bg-primary shadow-lg shadow-primary/30" : "bg-card-background"
+                  requireApproval
+                    ? "bg-primary shadow-lg shadow-primary/30"
+                    : "bg-card-background"
                 }`}
               >
                 <span
                   className={`block h-6 w-6 rounded-full transition-all shadow-lg ${
-                    requireApproval ? "translate-x-7 bg-primary-foreground" : "translate-x-0.5 bg-foreground"
+                    requireApproval
+                      ? "translate-x-7 bg-primary-foreground"
+                      : "translate-x-0.5 bg-foreground"
                   }`}
                 />
               </button>
             </div>
             <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
               <div>
-                <p className="text-base font-semibold text-foreground">Capacity</p>
+                <p className="text-base font-semibold text-foreground">
+                  Capacity
+                </p>
                 <p className="text-sm text-muted-foreground mt-1">{capacity}</p>
               </div>
               <button
@@ -447,7 +466,9 @@ function EventCreationForm() {
 
             <div className="mt-6 flex flex-col gap-5">
               <div className="flex items-center gap-4 bg-white/5 backdrop-blur-md rounded-2xl p-4">
-                <label className="text-sm font-semibold text-foreground">Zoom</label>
+                <label className="text-sm font-semibold text-foreground">
+                  Zoom
+                </label>
                 <input
                   type="range"
                   min={1}
