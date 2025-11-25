@@ -65,12 +65,13 @@ export default function Navbar() {
                 <User className="h-5 w-5" />
               </button>
             ) : (
-              <button
+              <Link
                 className="rounded-full border border-white/20 px-5 py-2 text-sm font-semibold text-zinc-300 transition-colors hover:border-white/40 hover:bg-white/5 hover:text-white cursor-pointer"
                 aria-label="Sign in"
+                href={"/auth"}
               >
                 Sign In
-              </button>
+              </Link>
             )}
           </div>
         </div>

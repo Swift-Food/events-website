@@ -84,10 +84,9 @@ export const authApi = {
 
   /**
    * Refresh access token using refresh token
-   * TODO: Backend endpoint not implemented yet
    */
   refreshToken: async (refreshToken: string): Promise<TokenPair> => {
-    const response = await apiClient.post<TokenPair>("/auth/refresh-token", {
+    const response = await apiClient.post<TokenPair>("/auth/refresh-consumer", {
       refresh_token: refreshToken,
     });
     return response.data;
