@@ -16,8 +16,9 @@ export const authApi = {
       email,
       password,
     };
+    console.log("Login payload: ", payload);
     const response = await apiClient.post<LoginResponse>(
-      "/auth/corporate-login",
+      "/auth/login-event-user",
       payload
     );
     return response.data;
@@ -25,14 +26,15 @@ export const authApi = {
 
   register: async (data: RegisterDto): Promise<RegisterResponse> => {
     const response = await apiClient.post<RegisterResponse>(
-      "/auth/register-corporate",
+      "/auth/register-event-user",
       data
     );
+    console.log("Registration response: ", response);
     return response.data;
   },
 
   /**
-   * Verify corporate email with code
+   * Verify email with code
    */
   verifyEmail: async (
     email: string,
@@ -41,9 +43,10 @@ export const authApi = {
   ): Promise<VerifyEmailResponse> => {
     const payload: VerifyEmailDto = { email, code, organizationName };
     const response = await apiClient.post<VerifyEmailResponse>(
-      "/auth/verify-corporate-email",
+      "/auth/verify-event-user",
       payload
     );
+    console.log("Verification response: ", response);
     return response.data;
   },
 

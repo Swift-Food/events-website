@@ -131,7 +131,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           try {
             await refreshToken();
           } catch (error) {
-            console.error(error)
+            console.error(error);
             // If refresh fails, clear everything
             logout();
           }
@@ -151,6 +151,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     setState((prev) => ({ ...prev, isLoading: true }));
 
     try {
+      console.log("Credentials for login: ", credentials);
       const response = await authApi.login(
         credentials.email,
         credentials.password
@@ -202,13 +203,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
     try {
       const response = await authApi.verifyEmail(
-        data.code,
         data.email,
+        data.code,
         data.organizationName
       );
 
       // Decode the token to get user info
-      const payload = authApi.decodeJWT(response.tokenPair.access_token);
+      const payload = authApi.decodeJWT(response.access_token);
       if (payload) {
         const user: User = {
           id: payload.sub,
@@ -217,11 +218,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           createdAt: new Date(),
           updatedAt: new Date(),
         };
-        setAuthData(response.tokenPair, user);
+        setAuthData(response, user);
       }
 
       return response;
     } catch (error) {
+      console.error("Auth context verify email error: ", error);
       setState((prev) => ({ ...prev, isLoading: false }));
       throw error;
     }
