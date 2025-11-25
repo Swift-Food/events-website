@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { eventService, EventListResponse } from "@/services/event.service";
-import { guestTicketService, GuestTicket } from "@/services/guest-ticket.service";
+import { guestTicketService } from "@/services/guest-ticket.service";
+import { GuestTicketWithEventResponseDto } from "@/types/guest-ticket";
 import { eventUserService, EventUserStats } from "@/services/event-user.service";
 import { EventResponseDto } from "@/types/event";
 import EventCard from "@/components/EventCard";
@@ -40,7 +41,7 @@ export default function ProfilePage() {
   // Data states
   const [stats, setStats] = useState<ProfileStats | null>(null);
   const [hostedEvents, setHostedEvents] = useState<EventResponseDto[]>([]);
-  const [attendingTickets, setAttendingTickets] = useState<GuestTicket[]>([]);
+  const [attendingTickets, setAttendingTickets] = useState<GuestTicketWithEventResponseDto[]>([]);
 
   // UI states
   const [activeTab, setActiveTab] = useState<TabType>("upcoming");
@@ -128,12 +129,26 @@ export default function ProfilePage() {
   );
 
   const upcomingAttendingEvents = attendingTickets
-    .filter((ticket) => new Date(ticket.event.startDateTime) > now)
-    .map((ticket) => ticket.event);
+    .filter((ticket) => new Date(ticket.eventStartDateTime) > now)
+    .map((ticket) => ({
+      id: ticket.eventId,
+      name: ticket.eventName,
+      startDateTime: ticket.eventStartDateTime,
+      endDateTime: ticket.eventEndDateTime,
+      eventImage: ticket.eventImage,
+      status: ticket.eventStatus,
+    } as any));
 
   const pastAttendingEvents = attendingTickets
-    .filter((ticket) => new Date(ticket.event.startDateTime) <= now)
-    .map((ticket) => ticket.event);
+    .filter((ticket) => new Date(ticket.eventStartDateTime) <= now)
+    .map((ticket) => ({
+      id: ticket.eventId,
+      name: ticket.eventName,
+      startDateTime: ticket.eventStartDateTime,
+      endDateTime: ticket.eventEndDateTime,
+      eventImage: ticket.eventImage,
+      status: ticket.eventStatus,
+    } as any));
 
   // Get events for current tab
   const getEventsForTab = (): EventResponseDto[] => {
