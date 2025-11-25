@@ -547,22 +547,22 @@ function EventCreationForm() {
           </div>
 
           <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
-            <div className="flex items-center justify-between">
-              <label className="text-base text-foreground font-semibold">
+            <div
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => setIsLocationExpanded(!isLocationExpanded)}
+              role="button"
+              aria-label={isLocationExpanded ? "Collapse location" : "Expand location"}
+            >
+              <label className="text-base text-foreground font-semibold cursor-pointer">
                 Event Location
               </label>
-              <button
-                type="button"
-                onClick={() => setIsLocationExpanded(!isLocationExpanded)}
-                className="rounded-full p-2 transition-all hover:bg-white/10"
-                aria-label={isLocationExpanded ? "Collapse location" : "Expand location"}
-              >
+              <div className="rounded-full p-2">
                 {isLocationExpanded ? (
                   <ChevronUp className="h-5 w-5 text-muted-foreground" />
                 ) : (
                   <ChevronDown className="h-5 w-5 text-muted-foreground" />
                 )}
-              </button>
+              </div>
             </div>
 
             {/* Display full address when collapsed */}
