@@ -170,12 +170,12 @@ export default function LoginForm({
     <>
       {/* Verification Modal */}
       {needsVerification && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
-            <h2 className="text-2xl font-bold text-neutral mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="bg-card-background rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4">
+            <h2 className="text-2xl font-bold text-foreground mb-4">
               Verify Your Email
             </h2>
-            <p className="text-sm text-base-content/70 mb-6">
+            <p className="text-sm text-muted-foreground mb-6">
               We sent a 6-digit code to {loginData.email}
             </p>
             <form onSubmit={handleVerify} className="space-y-4">
@@ -185,19 +185,19 @@ export default function LoginForm({
                 required
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-base-300 rounded-lg focus:outline-none focus:border-primary bg-white text-center text-2xl tracking-widest"
+                className="w-full px-4 py-3 border-2 border-transparent rounded-xl focus:outline-none focus:border-primary bg-input-background text-foreground text-center text-2xl tracking-widest shadow-inner"
                 placeholder="000000"
                 disabled={isLoading}
               />
               {error && (
-                <div className="bg-error/10 border border-error/20 text-error text-sm p-3 rounded-lg">
+                <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm p-3 rounded-xl">
                   {error}
                 </div>
               )}
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-content font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-4 rounded-xl transition-all shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 disabled:opacity-50"
               >
                 {isLoading ? "Verifying..." : "Verify Email"}
               </button>
@@ -207,7 +207,7 @@ export default function LoginForm({
                   setNeedsVerification(false);
                   setError("");
                 }}
-                className="w-full text-sm text-base-content/70 hover:text-base-content"
+                className="w-full text-sm text-muted-foreground hover:text-foreground"
               >
                 Back to login
               </button>
@@ -218,14 +218,14 @@ export default function LoginForm({
 
       {/* Forgot Password Modal */}
       {showForgotPassword && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="bg-card-background rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4">
             {forgotPasswordStep === "email" ? (
               <>
-                <h2 className="text-2xl font-bold text-neutral mb-4">
+                <h2 className="text-2xl font-bold text-foreground mb-4">
                   Forgot Password
                 </h2>
-                <p className="text-sm text-base-content/70 mb-6">
+                <p className="text-sm text-muted-foreground mb-6">
                   Enter your email address and we&apos;ll send you a code to
                   reset your password.
                 </p>
@@ -234,7 +234,7 @@ export default function LoginForm({
                   className="space-y-4"
                 >
                   <div>
-                    <label className="block text-sm font-medium text-neutral mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Email Address
                     </label>
                     <input
@@ -242,20 +242,20 @@ export default function LoginForm({
                       required
                       value={forgotPasswordEmail}
                       onChange={(e) => setForgotPasswordEmail(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-base-300 rounded-lg focus:outline-none focus:border-primary bg-white"
+                      className="w-full px-4 py-3 border-2 border-transparent rounded-xl focus:outline-none focus:border-primary bg-input-background text-foreground placeholder:text-muted-foreground/40 shadow-inner"
                       placeholder="you@example.com"
                       disabled={isLoading}
                     />
                   </div>
                   {forgotPasswordError && (
-                    <div className="bg-error/10 border border-error/20 text-error text-sm p-3 rounded-lg">
+                    <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm p-3 rounded-xl">
                       {forgotPasswordError}
                     </div>
                   )}
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-primary hover:bg-primary/90 text-primary-content font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-4 rounded-xl transition-all shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 disabled:opacity-50"
                   >
                     {isLoading ? "Sending..." : "Send Reset Code"}
                   </button>
@@ -267,7 +267,7 @@ export default function LoginForm({
                       setForgotPasswordEmail("");
                       setForgotPasswordError("");
                     }}
-                    className="w-full text-sm text-base-content/70 hover:text-base-content"
+                    className="w-full text-sm text-muted-foreground hover:text-foreground"
                   >
                     Back to login
                   </button>
@@ -275,16 +275,16 @@ export default function LoginForm({
               </>
             ) : (
               <>
-                <h2 className="text-2xl font-bold text-neutral mb-4">
+                <h2 className="text-2xl font-bold text-foreground mb-4">
                   Reset Password
                 </h2>
-                <p className="text-sm text-base-content/70 mb-6">
+                <p className="text-sm text-muted-foreground mb-6">
                   Enter the code we sent to {forgotPasswordEmail} and your new
                   password.
                 </p>
                 <form onSubmit={handleResetPassword} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-neutral mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Reset Code
                     </label>
                     <input
@@ -293,13 +293,13 @@ export default function LoginForm({
                       required
                       value={resetCode}
                       onChange={(e) => setResetCode(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-base-300 rounded-lg focus:outline-none focus:border-primary bg-white text-center text-2xl tracking-widest"
+                      className="w-full px-4 py-3 border-2 border-transparent rounded-xl focus:outline-none focus:border-primary bg-input-background text-foreground text-center text-2xl tracking-widest shadow-inner"
                       placeholder="000000"
                       disabled={isLoading}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-neutral mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       New Password
                     </label>
                     <div className="relative">
@@ -308,14 +308,14 @@ export default function LoginForm({
                         required
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full px-4 py-3 pr-12 border-2 border-base-300 rounded-lg focus:outline-none focus:border-primary bg-white"
+                        className="w-full px-4 py-3 pr-12 border-2 border-transparent rounded-xl focus:outline-none focus:border-primary bg-input-background text-foreground placeholder:text-muted-foreground/40 shadow-inner"
                         placeholder="••••••••"
                         disabled={isLoading}
                       />
                       <button
                         type="button"
                         onClick={() => setShowNewPassword(!showNewPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       >
                         {showNewPassword ? (
                           <svg
@@ -357,14 +357,14 @@ export default function LoginForm({
                     </div>
                   </div>
                   {forgotPasswordError && (
-                    <div className="bg-error/10 border border-error/20 text-error text-sm p-3 rounded-lg">
+                    <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm p-3 rounded-xl">
                       {forgotPasswordError}
                     </div>
                   )}
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-primary hover:bg-primary/90 text-primary-content font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-4 rounded-xl transition-all shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 disabled:opacity-50"
                   >
                     {isLoading ? "Resetting..." : "Reset Password"}
                   </button>
@@ -376,7 +376,7 @@ export default function LoginForm({
                       setNewPassword("");
                       setForgotPasswordError("");
                     }}
-                    className="w-full text-sm text-base-content/70 hover:text-base-content"
+                    className="w-full text-sm text-muted-foreground hover:text-foreground"
                   >
                     Back
                   </button>
@@ -391,8 +391,8 @@ export default function LoginForm({
       <div className="w-full">
         {/* Title */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-neutral mb-1">Welcome Back</h1>
-          <p className="text-sm text-base-content/70">
+          <h1 className="text-2xl font-bold text-foreground mb-1">Welcome Back</h1>
+          <p className="text-sm text-muted-foreground">
             Sign in to your account
           </p>
         </div>
@@ -401,7 +401,7 @@ export default function LoginForm({
         <button
           type="button"
           onClick={handleGoogleLogin}
-          className="w-full mb-4 flex items-center justify-center gap-3 px-4 py-2.5 border-2 border-base-300 rounded-lg hover:bg-base-200 transition-colors"
+          className="w-full mb-4 flex items-center justify-center gap-3 px-4 py-2.5 border-2 border-border rounded-xl hover:bg-white/5 transition-colors bg-card-secondary-background"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -421,16 +421,16 @@ export default function LoginForm({
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          <span className="text-sm font-medium">Continue with Google</span>
+          <span className="text-sm font-medium text-foreground">Continue with Google</span>
         </button>
 
         {/* Divider */}
         <div className="relative mb-4">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-base-300"></div>
+            <div className="w-full border-t border-foreground/10"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-base-100 text-base-content/70">
+            <span className="px-2 bg-card-background text-muted-foreground">
               Or continue with email
             </span>
           </div>
@@ -441,7 +441,7 @@ export default function LoginForm({
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-neutral mb-2"
+              className="block text-sm font-medium text-foreground mb-2"
             >
               Email Address
             </label>
@@ -451,7 +451,7 @@ export default function LoginForm({
               name="email"
               value={loginData.email}
               onChange={handleLoginChange}
-              className="w-full px-4 py-2.5 border-2 border-base-300 rounded-lg focus:outline-none focus:border-primary bg-white transition-colors"
+              className="w-full px-4 py-2.5 border-2 border-transparent rounded-xl focus:outline-none focus:border-primary bg-input-background text-foreground placeholder:text-muted-foreground/40 shadow-inner transition-colors"
               placeholder="you@example.com"
               disabled={isLoading}
               required
@@ -461,7 +461,7 @@ export default function LoginForm({
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-neutral mb-2"
+              className="block text-sm font-medium text-foreground mb-2"
             >
               Password
             </label>
@@ -472,7 +472,7 @@ export default function LoginForm({
                 name="password"
                 value={loginData.password}
                 onChange={handleLoginChange}
-                className="w-full px-4 py-2.5 pr-12 border-2 border-base-300 rounded-lg focus:outline-none focus:border-primary bg-white transition-colors"
+                className="w-full px-4 py-2.5 pr-12 border-2 border-transparent rounded-xl focus:outline-none focus:border-primary bg-input-background text-foreground placeholder:text-muted-foreground/40 shadow-inner transition-colors"
                 placeholder="••••••••"
                 disabled={isLoading}
                 required
@@ -480,7 +480,7 @@ export default function LoginForm({
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 {showPassword ? (
                   <svg
@@ -533,7 +533,7 @@ export default function LoginForm({
           </div>
 
           {error && !needsVerification && (
-            <div className="bg-error/10 border border-error/20 text-error text-sm p-3 rounded-lg">
+            <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm p-3 rounded-xl">
               {error}
             </div>
           )}
@@ -541,7 +541,7 @@ export default function LoginForm({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-content font-semibold py-2.5 px-4 rounded-lg transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 px-4 rounded-xl transition-all shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <span className="flex items-center justify-center">
@@ -575,7 +575,7 @@ export default function LoginForm({
 
         {/* Sign up link */}
         {onSwitchToRegister && (
-          <p className="text-center mt-4 text-sm text-base-content/70">
+          <p className="text-center mt-4 text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
             <button
               type="button"

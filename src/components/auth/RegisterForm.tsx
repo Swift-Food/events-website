@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { RegisterDto } from "@/types/user";
@@ -47,6 +47,15 @@ export default function RegisterForm({
   };
 
   const passwordValidation = validatePassword(formData.password);
+
+  // Clear verification code when navigating to verify step
+  useEffect(() => {
+    if (step === "verify") {
+      setVerificationCode("");
+      setError("");
+      setSuccessMessage("");
+    }
+  }, [step]);
 
   // Step 1: Register
   const handleRegister = async (e: React.FormEvent) => {
@@ -115,6 +124,7 @@ export default function RegisterForm({
       }
     } catch (err: any) {
       setError(err.response?.data?.message || "Verification failed");
+      setVerificationCode(""); // Clear the code on error
     } finally {
       setIsLoading(false);
     }
@@ -160,7 +170,7 @@ export default function RegisterForm({
             <button
               type="button"
               onClick={() => setStep("register")}
-              className="text-base-content/70 hover:text-base-content transition-colors p-1 -ml-1"
+              className="text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
               disabled={isLoading}
             >
               <svg
@@ -179,20 +189,20 @@ export default function RegisterForm({
               </svg>
             </button>
           )}
-          <h2 className="text-2xl font-bold text-neutral">
+          <h2 className="text-2xl font-bold text-foreground">
             {step === "register" && "Create Account"}
             {step === "verify" && "Verify Your Email"}
           </h2>
         </div>
-        <p className="text-sm text-base-content/70">
+        <p className="text-sm text-muted-foreground">
           {step === "register" && "Enter your details to get started"}
           {step === "verify" && "Enter the code we sent to your email"}
         </p>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="mb-4 bg-error/10 border border-error/20 text-error text-sm p-3 rounded-lg">
+      {/* Error Message - Only show on register step */}
+      {error && step === "register" && (
+        <div className="mb-4 bg-red-500/10 border border-red-500/30 text-red-400 text-sm p-3 rounded-xl">
           {error}
         </div>
       )}
@@ -201,7 +211,7 @@ export default function RegisterForm({
       {step === "register" && (
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-neutral mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Email Address
             </label>
             <input
@@ -210,14 +220,14 @@ export default function RegisterForm({
               required
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 border-2 border-base-300 rounded-lg focus:outline-none focus:border-primary bg-white transition-colors"
+              className="w-full px-4 py-3 border-2 border-transparent rounded-xl focus:outline-none focus:border-primary bg-input-background text-foreground placeholder:text-muted-foreground/40 shadow-inner transition-colors"
               placeholder="you@example.com"
               disabled={isLoading}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Username
             </label>
             <input
@@ -226,14 +236,14 @@ export default function RegisterForm({
               required
               value={formData.username}
               onChange={handleChange}
-              className="w-full px-4 py-3 border-2 border-base-300 rounded-lg focus:outline-none focus:border-primary bg-white transition-colors"
+              className="w-full px-4 py-3 border-2 border-transparent rounded-xl focus:outline-none focus:border-primary bg-input-background text-foreground placeholder:text-muted-foreground/40 shadow-inner transition-colors"
               placeholder="johndoe"
               disabled={isLoading}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Organization Name (Optional)
             </label>
             <input
@@ -241,14 +251,14 @@ export default function RegisterForm({
               type="text"
               value={formData.organizationName}
               onChange={handleChange}
-              className="w-full px-4 py-3 border-2 border-base-300 rounded-lg focus:outline-none focus:border-primary bg-white transition-colors"
+              className="w-full px-4 py-3 border-2 border-transparent rounded-xl focus:outline-none focus:border-primary bg-input-background text-foreground placeholder:text-muted-foreground/40 shadow-inner transition-colors"
               placeholder="Your Organization"
               disabled={isLoading}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Password
             </label>
             <div className="relative">
@@ -259,14 +269,14 @@ export default function RegisterForm({
                 value={formData.password}
                 onChange={handleChange}
                 onFocus={() => setPasswordTouched(true)}
-                className="w-full px-4 py-3 pr-12 border-2 border-base-300 rounded-lg focus:outline-none focus:border-primary bg-white transition-colors"
+                className="w-full px-4 py-3 pr-12 border-2 border-transparent rounded-xl focus:outline-none focus:border-primary bg-input-background text-foreground placeholder:text-muted-foreground/40 shadow-inner transition-colors"
                 placeholder="••••••••"
                 disabled={isLoading}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 {showPassword ? (
                   <svg
@@ -310,7 +320,7 @@ export default function RegisterForm({
             {/* Password Requirements */}
             {passwordTouched && (
               <div className="mt-3 space-y-2">
-                <p className="text-xs font-medium text-base-content/70">
+                <p className="text-xs font-medium text-muted-foreground">
                   Password must contain:
                 </p>
                 <div className="grid grid-cols-1 gap-1.5">
@@ -347,8 +357,8 @@ export default function RegisterForm({
                     <span
                       className={`text-xs ${
                         passwordValidation.requirements.minLength
-                          ? "text-success"
-                          : "text-base-content/50"
+                          ? "text-green-400"
+                          : "text-muted-foreground"
                       }`}
                     >
                       At least 8 characters
@@ -387,8 +397,8 @@ export default function RegisterForm({
                     <span
                       className={`text-xs ${
                         passwordValidation.requirements.hasUpperCase
-                          ? "text-success"
-                          : "text-base-content/50"
+                          ? "text-green-400"
+                          : "text-muted-foreground"
                       }`}
                     >
                       One uppercase letter (A-Z)
@@ -427,8 +437,8 @@ export default function RegisterForm({
                     <span
                       className={`text-xs ${
                         passwordValidation.requirements.hasLowerCase
-                          ? "text-success"
-                          : "text-base-content/50"
+                          ? "text-green-400"
+                          : "text-muted-foreground"
                       }`}
                     >
                       One lowercase letter (a-z)
@@ -467,8 +477,8 @@ export default function RegisterForm({
                     <span
                       className={`text-xs ${
                         passwordValidation.requirements.hasNumber
-                          ? "text-success"
-                          : "text-base-content/50"
+                          ? "text-green-400"
+                          : "text-muted-foreground"
                       }`}
                     >
                       One number (0-9)
@@ -507,8 +517,8 @@ export default function RegisterForm({
                     <span
                       className={`text-xs ${
                         passwordValidation.requirements.hasSpecialChar
-                          ? "text-success"
-                          : "text-base-content/50"
+                          ? "text-green-400"
+                          : "text-muted-foreground"
                       }`}
                     >
                       One special character (!@#$%^&*...)
@@ -522,7 +532,7 @@ export default function RegisterForm({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full font-semibold py-3 px-4 rounded-lg transition-all shadow-md bg-primary hover:bg-primary/90 text-primary-content hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full font-semibold py-3 px-4 rounded-xl transition-all shadow-xl shadow-primary/30 bg-primary hover:bg-primary/90 text-primary-foreground hover:shadow-2xl hover:shadow-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <span className="flex items-center justify-center">
@@ -559,10 +569,10 @@ export default function RegisterForm({
       {step === "verify" && (
         <form onSubmit={handleVerify} className="space-y-6">
           <div>
-            <p className="text-sm text-base-content/70 mb-6 text-center">
-              We sent a 6-digit code to <strong>{formData.email}</strong>
+            <p className="text-sm text-muted-foreground mb-6 text-center">
+              We sent a 6-digit code to <strong className="text-foreground">{formData.email}</strong>
             </p>
-            <label className="block text-sm font-medium text-neutral mb-2 text-center">
+            <label className="block text-sm font-medium text-foreground mb-2 text-center">
               Verification Code
             </label>
             <input
@@ -571,25 +581,25 @@ export default function RegisterForm({
               required
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-base-300 rounded-lg focus:outline-none focus:border-primary bg-white text-center text-2xl tracking-widest"
+              className="w-full px-4 py-3 border-2 border-transparent rounded-xl focus:outline-none focus:border-primary bg-input-background text-foreground text-center text-2xl tracking-widest shadow-inner"
               placeholder="000000"
               disabled={isLoading}
             />
           </div>
           {successMessage && (
-            <div className="bg-success/10 border border-success/20 text-success text-sm p-3 rounded-lg">
+            <div className="bg-green-500/10 border border-green-500/30 text-green-400 text-sm p-3 rounded-xl">
               {successMessage}
             </div>
           )}
           {error && (
-            <div className="bg-error/10 border border-error/20 text-error text-sm p-3 rounded-lg">
+            <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm p-3 rounded-xl">
               {error}
             </div>
           )}
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full font-semibold py-3 px-4 rounded-lg transition-all shadow-md bg-primary hover:bg-primary/90 text-primary-content hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full font-semibold py-3 px-4 rounded-xl transition-all shadow-xl shadow-primary/30 bg-primary hover:bg-primary/90 text-primary-foreground hover:shadow-2xl hover:shadow-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <span className="flex items-center justify-center">
@@ -634,7 +644,7 @@ export default function RegisterForm({
 
       {/* Sign in link */}
       {onSwitchToLogin && (
-        <p className="text-center mt-6 text-sm text-base-content/70">
+        <p className="text-center mt-6 text-sm text-muted-foreground">
           Already have an account?{" "}
           <button
             type="button"

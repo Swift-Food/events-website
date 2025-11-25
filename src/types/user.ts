@@ -70,9 +70,7 @@ export interface VerifyEmailDto {
   organizationName?: string;
 }
 
-export interface VerifyEmailResponse {
-  tokenPair: TokenPair;
-}
+export type VerifyEmailResponse = TokenPair;
 
 // JWT Payload interface
 export interface JWTPayload {
