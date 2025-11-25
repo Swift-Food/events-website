@@ -86,7 +86,7 @@ export interface JWTPayload {
 // Auth Context State
 export interface AuthState {
   user: User | null;
-  corporateUser: EventUser | null;
+  eventUser: EventUser | null;
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;

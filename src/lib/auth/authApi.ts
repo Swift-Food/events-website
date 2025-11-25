@@ -6,8 +6,9 @@ import {
   RegisterResponse,
   VerifyEmailDto,
   VerifyEmailResponse,
+  TokenPair,
+  User,
 } from "@/types/user";
-import { User } from "@/types/user";
 
 export const authApi = {
   login: async (email: string, password: string): Promise<LoginResponse> => {
@@ -22,10 +23,7 @@ export const authApi = {
     return response.data;
   },
 
-
-  register: async (
-    data: RegisterDto
-  ): Promise<RegisterResponse> => {
+  register: async (data: RegisterDto): Promise<RegisterResponse> => {
     const response = await apiClient.post<RegisterResponse>(
       "/auth/register-corporate",
       data
@@ -36,11 +34,12 @@ export const authApi = {
   /**
    * Verify corporate email with code
    */
-  verifyCorporateEmail: async (
+  verifyEmail: async (
     email: string,
-    code: string
+    code: string,
+    organizationName?: string
   ): Promise<VerifyEmailResponse> => {
-    const payload: VerifyEmailDto = { email, code };
+    const payload: VerifyEmailDto = { email, code, organizationName };
     const response = await apiClient.post<VerifyEmailResponse>(
       "/auth/verify-corporate-email",
       payload
@@ -84,9 +83,20 @@ export const authApi = {
   },
 
   /**
+   * Refresh access token using refresh token
+   * TODO: Backend endpoint not implemented yet
+   */
+  refreshToken: async (refreshToken: string): Promise<TokenPair> => {
+    const response = await apiClient.post<TokenPair>("/auth/refresh-token", {
+      refresh_token: refreshToken,
+    });
+    return response.data;
+  },
+
+  /**
    * Decode JWT token (client-side only - for reading payload)
    */
-  decodeToken: (token: string) => {
+  decodeJWT: (token: string) => {
     try {
       const base64Url = token.split(".")[1];
       const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
