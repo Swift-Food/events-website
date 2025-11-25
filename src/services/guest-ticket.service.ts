@@ -10,6 +10,9 @@ import {
   UpdateTicketStatusDto,
   TicketActionResponseDto,
   BulkActionResponseDto,
+  RefundTicketRequestDto,
+  RefundResult,
+  RefundEligibilityResult,
 } from "@/types/guest-ticket";
 
 class GuestTicketService {
@@ -190,7 +193,33 @@ class GuestTicketService {
       checkedIn: number;
       pending: number;
       percentageCheckedIn: number;
-    }> = await apiClient.get(`${this.baseUrl}/event:${eventId}/check-in-stats`);
+    }> = await apiClient.get(`${this.baseUrl}/event/${eventId}/check-in-stats`);
+    return response.data;
+  }
+
+  /**
+   * Request a refund for a ticket
+   * Can be requested by ticket owner or event organizer
+   */
+  async refundTicket(
+    ticketId: string,
+    data: RefundTicketRequestDto
+  ): Promise<RefundResult> {
+    const response: AxiosResponse<RefundResult> = await apiClient.post(
+      `${this.baseUrl}/${ticketId}/refund`,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * Check if a ticket is eligible for refund
+   */
+  async checkRefundEligibility(
+    ticketId: string
+  ): Promise<RefundEligibilityResult> {
+    const response: AxiosResponse<RefundEligibilityResult> =
+      await apiClient.get(`${this.baseUrl}/${ticketId}/refund-eligibility`);
     return response.data;
   }
 }

@@ -136,6 +136,23 @@ export interface UpdateTicketStatusDto {
   reason?: string;
 }
 
+export interface BulkApproveTicketsDto {
+  ticketIds: string[];
+}
+
+export interface BulkRejectTicketsDto {
+  ticketIds: string[];
+  reason?: string;
+}
+
+export interface BulkCheckInDto {
+  qrCodes: string[];
+}
+
+export interface RefundTicketRequestDto {
+  reason: string;
+}
+
 // Other response types
 
 export interface TicketActionResponseDto {
@@ -152,4 +169,17 @@ export interface BulkActionResponseDto {
   checkedIn?: number;
   failed?: number;
   errors?: string[];
+}
+
+export interface RefundResult {
+  success: boolean;
+  message: string;
+  refundId?: string;
+  amountRefunded?: number;
+}
+
+export interface RefundEligibilityResult {
+  eligible: boolean;
+  reason?: string;
+  refundAmount?: number;
 }
