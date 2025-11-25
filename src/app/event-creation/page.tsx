@@ -16,9 +16,15 @@ import {
 import { TicketType, FormField } from "@/types/event";
 import { GOOGLE_MAPS_CONFIG } from "@/constants/google-maps";
 import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
-import { eventService, CreateEventDto, EventStatus, QuestionType, CreateEventTicketDto } from '@/services/event.service';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import {
+  eventService,
+  CreateEventDto,
+  EventStatus,
+  QuestionType,
+  CreateEventTicketDto,
+} from "@/services/event.service";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";
 
 // Load Google Maps script
@@ -90,12 +96,11 @@ function EventCreationForm() {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const { user, eventUser, isAuthenticated } = useAuth(); 
+  const { user, eventUser, isAuthenticated } = useAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [latitude, setLatitude] = useState<number>(0);
   const [longitude, setLongitude] = useState<number>(0);
-
 
   // Address-related state (local UI only)
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
@@ -251,13 +256,13 @@ function EventCreationForm() {
   // Helper to map frontend field types to backend QuestionType
   const mapFieldTypeToQuestionType = (fieldType: string): QuestionType => {
     switch (fieldType) {
-      case 'short-text':
+      case "short-text":
         return QuestionType.SHORT_TEXT;
-      case 'long-text':
+      case "long-text":
         return QuestionType.LONG_TEXT;
-      case 'single-select':
+      case "single-select":
         return QuestionType.SINGLE_SELECT;
-      case 'multi-select':
+      case "multi-select":
         return QuestionType.MULTI_SELECT;
       default:
         return QuestionType.SHORT_TEXT;
@@ -279,62 +284,64 @@ function EventCreationForm() {
   const handleCreateEvent = async () => {
     // Validation
     if (!eventName.trim()) {
-      toast.error('Please enter an event name');
+      toast.error("Please enter an event name");
       return;
     }
-  
+
     if (!start || !end) {
-      toast.error('Please select start and end times');
+      toast.error("Please select start and end times");
       return;
     }
-  
+
     if (new Date(start) >= new Date(end)) {
-      toast.error('End time must be after start time');
+      toast.error("End time must be after start time");
       return;
     }
-  
+
     if (!addressLine1 || !city || !postcode) {
-      toast.error('Please complete the event location');
+      toast.error("Please complete the event location");
       return;
     }
-  
+
     if (!validateUKPostcode(postcode)) {
-      toast.error('Please enter a valid UK postcode');
+      toast.error("Please enter a valid UK postcode");
       return;
     }
-  
+
     // Check authentication using auth context
     if (!isAuthenticated || !eventUser) {
-      toast.error('Please log in to create an event');
-      router.push('/login');
+      toast.error("Please log in to create an event");
+      router.push("/login");
       return;
     }
-  
+
     setIsSubmitting(true);
-  
+
     try {
       // Map frontend ticket types to API format
-      const ticketsPayload: CreateEventTicketDto[] = ticketTypes.map((ticket) => ({
-        name: ticket.name,
-        description: ticket.description || undefined,
-        price: ticket.isFree ? 0 : ticket.price,
-        isPaid: !ticket.isFree,
-        isSingleUse: ticket.isSingleUse ?? true,
-        quantityTotal: ticket.quantity || 100,
-        questionForm: formFields.map((field) => ({
-          question: field.question,
-          type: mapFieldTypeToQuestionType(field.type),
-          options: field.options,
-          required: field.required,
-        })),
-        isPrivate: false,
-      }));
-  
+      const ticketsPayload: CreateEventTicketDto[] = ticketTypes.map(
+        (ticket) => ({
+          name: ticket.name,
+          description: ticket.description,
+          price: ticket.isFree ? 0 : ticket.price,
+          isPaid: !ticket.isFree,
+          isSingleUse: ticket.isSingleUse ?? true,
+          quantityTotal: ticket.quantity || 100,
+          questionForm: formFields.map((field) => ({
+            question: field.question,
+            type: mapFieldTypeToQuestionType(field.type),
+            options: field.options,
+            required: field.required,
+          })),
+          isPrivate: false,
+        })
+      );
+
       const eventData: CreateEventDto = {
         name: eventName,
-        description: description || '',
+        description: description || "",
         eventImage: coverPreview || undefined,
-        eventColor: '#6366f1',
+        eventColor: "#6366f1",
         ownerEventUserId: eventUser.id,
         startDateTime: start,
         endDateTime: end,
@@ -355,30 +362,29 @@ function EventCreationForm() {
         eventUrl: undefined,
         tickets: ticketsPayload.length > 0 ? ticketsPayload : undefined,
       };
-  
+
       const response = await eventService.createEvent(eventData);
-  
+
       if (response.success) {
-        toast.success('Event created successfully!');
+        toast.success("Event created successfully!");
         clearForm();
         router.push(`/events/${response.event.id}`);
       }
     } catch (error: any) {
-      console.error('Error creating event:', error);
-  
+      console.error("Error creating event:", error);
+
       if (error.response?.status === 401) {
-        toast.error('Please log in to create an event');
-        router.push('/login');
+        toast.error("Please log in to create an event");
+        router.push("/login");
       } else if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else {
-        toast.error('Failed to create event. Please try again.');
+        toast.error("Failed to create event. Please try again.");
       }
     } finally {
       setIsSubmitting(false);
     }
   };
-
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -869,32 +875,34 @@ function EventCreationForm() {
                     className="rounded-2xl bg-card-secondary-background backdrop-blur-xl p-4 shadow-lg"
                   >
                     <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-base font-semibold text-foreground">
-                          {ticket.name}
-                        </p>
-                        {ticket.isSingleUse && (
-                          <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
-                            Single-use
-                          </span>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="text-base font-semibold text-foreground">
+                            {ticket.name}
+                          </p>
+                          {ticket.isSingleUse && (
+                            <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
+                              Single-use
+                            </span>
+                          )}
+                        </div>
+                        {ticket.description && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {ticket.description}
+                          </p>
                         )}
+                        <div className="flex items-center gap-3 mt-2">
+                          <p className="text-sm font-medium text-foreground">
+                            {ticket.isFree
+                              ? "Free"
+                              : `£${ticket.price.toFixed(2)}`}
+                          </p>
+                          <span className="text-muted-foreground">•</span>
+                          <p className="text-sm text-muted-foreground">
+                            {ticket.quantity.toLocaleString()} available
+                          </p>
+                        </div>
                       </div>
-                      {ticket.description && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {ticket.description}
-                        </p>
-                      )}
-                      <div className="flex items-center gap-3 mt-2">
-                        <p className="text-sm font-medium text-foreground">
-                          {ticket.isFree ? "Free" : `£${ticket.price.toFixed(2)}`}
-                        </p>
-                        <span className="text-muted-foreground">•</span>
-                        <p className="text-sm text-muted-foreground">
-                          {ticket.quantity.toLocaleString()} available
-                        </p>
-                      </div>
-                    </div>
                       <div className="flex gap-2">
                         <button
                           type="button"
@@ -1100,7 +1108,7 @@ function EventCreationForm() {
             disabled={isSubmitting}
             className="w-full rounded-full bg-primary py-5 text-center text-lg font-bold text-primary-foreground transition-all hover:shadow-2xl hover:shadow-primary/50 hover:scale-[1.02] shadow-xl shadow-primary/30 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? 'Creating Event...' : 'Create Event'}
+            {isSubmitting ? "Creating Event..." : "Create Event"}
           </button>
         </section>
       </div>
