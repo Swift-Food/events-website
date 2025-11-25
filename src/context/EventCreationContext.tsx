@@ -10,7 +10,7 @@ import {
   useEffect,
 } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { TicketType } from "@/types/event";
+import { TicketType, FormField } from "@/types/event";
 
 interface EventCreationContextType {
   // Event details
@@ -42,6 +42,13 @@ interface EventCreationContextType {
   capacityNumber: string;
   setCapacityNumber: Dispatch<SetStateAction<string>>;
 
+  // Form fields
+  formFields: FormField[];
+  setFormFields: Dispatch<SetStateAction<FormField[]>>;
+  addFormField: (field: FormField) => void;
+  updateFormField: (field: FormField) => void;
+  deleteFormField: (fieldId: string) => void;
+
   // Cover image
   coverPreview: string | null;
   setCoverPreview: Dispatch<SetStateAction<string | null>>;
@@ -71,6 +78,7 @@ type EventDraft = {
   isUnlimitedCapacity: boolean;
   hasWaitingList: boolean;
   capacityNumber: string;
+  formFields: FormField[];
   coverPreview: string | null;
   coverName: string;
 };
@@ -141,6 +149,11 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     storedDraft.capacityNumber ?? "100"
   );
 
+  // Form fields
+  const [formFields, setFormFields] = useState<FormField[]>(
+    storedDraft.formFields ?? []
+  );
+
   // Cover image
   const [coverPreview, setCoverPreview] = useState<string | null>(
     typeof storedDraft.coverPreview === "string"
@@ -166,6 +179,21 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     setTicketTypes((prev) => prev.filter((t) => t.id !== ticketId));
   }, []);
 
+  // Form field management functions
+  const addFormField = useCallback((field: FormField) => {
+    setFormFields((prev) => [...prev, field]);
+  }, []);
+
+  const updateFormField = useCallback((field: FormField) => {
+    setFormFields((prev) =>
+      prev.map((f) => (f.id === field.id ? field : f))
+    );
+  }, []);
+
+  const deleteFormField = useCallback((fieldId: string) => {
+    setFormFields((prev) => prev.filter((f) => f.id !== fieldId));
+  }, []);
+
   const persistEventDraft = useCallback(() => {
     if (typeof window === "undefined") {
       return;
@@ -183,6 +211,7 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
       isUnlimitedCapacity,
       hasWaitingList,
       capacityNumber,
+      formFields,
       coverPreview,
       coverName,
     };
@@ -206,6 +235,7 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     requireApproval,
     start,
     ticketTypes,
+    formFields,
   ]);
 
   useEffect(() => {
@@ -225,6 +255,7 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     setIsUnlimitedCapacity(true);
     setHasWaitingList(false);
     setCapacityNumber("100");
+    setFormFields([]);
     setCoverPreview(null);
     setCoverName("invite-cover.png");
     if (typeof window !== "undefined") {
@@ -260,6 +291,11 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
         setHasWaitingList,
         capacityNumber,
         setCapacityNumber,
+        formFields,
+        setFormFields,
+        addFormField,
+        updateFormField,
+        deleteFormField,
         coverPreview,
         setCoverPreview,
         coverName,

@@ -6,3 +6,13 @@ export interface TicketType {
   price: number;
   isSingleUse: boolean;
 }
+
+export type FormFieldType = "short-text" | "long-text" | "single-select" | "multi-select";
+
+export interface FormField {
+  id: string;
+  question: string;
+  type: FormFieldType;
+  options?: string[]; // For single-select and multi-select types
+  required: boolean;
+}

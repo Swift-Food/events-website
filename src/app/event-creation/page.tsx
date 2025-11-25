@@ -8,11 +8,12 @@ import { Edit, Trash2, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
 import CapacityModal from "@/components/event-edit/CapacityModal";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
+import FormFieldModal from "@/components/event-edit/FormFieldModal";
 import {
   EventCreationProvider,
   useEventCreation,
 } from "@/context/EventCreationContext";
-import { TicketType } from "@/types/event";
+import { TicketType, FormField } from "@/types/event";
 import { GOOGLE_MAPS_CONFIG } from "@/constants/google-maps";
 import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
 
@@ -49,6 +50,10 @@ function EventCreationForm() {
     setRequireApproval,
     capacity,
     setCapacity,
+    formFields,
+    addFormField,
+    updateFormField,
+    deleteFormField,
     coverPreview,
     setCoverPreview,
     coverName,
@@ -62,6 +67,9 @@ function EventCreationForm() {
   const [isTicketTypeModalOpen, setIsTicketTypeModalOpen] = useState(false);
   const [ticketToEdit, setTicketToEdit] = useState<TicketType | null>(null);
   const [isTicketListExpanded, setIsTicketListExpanded] = useState(true);
+  const [isFormFieldModalOpen, setIsFormFieldModalOpen] = useState(false);
+  const [fieldToEdit, setFieldToEdit] = useState<FormField | null>(null);
+  const [isFormFieldListExpanded, setIsFormFieldListExpanded] = useState(true);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -356,6 +364,30 @@ function EventCreationForm() {
   const handleDeleteTicket = (ticketId: string) => {
     if (confirm("Are you sure you want to delete this ticket type?")) {
       deleteTicketType(ticketId);
+    }
+  };
+
+  const handleAddFormFieldClick = () => {
+    setFieldToEdit(null);
+    setIsFormFieldModalOpen(true);
+  };
+
+  const handleEditFormFieldClick = (field: FormField) => {
+    setFieldToEdit(field);
+    setIsFormFieldModalOpen(true);
+  };
+
+  const handleSaveFormField = (field: FormField) => {
+    if (fieldToEdit) {
+      updateFormField(field);
+    } else {
+      addFormField(field);
+    }
+  };
+
+  const handleDeleteFormField = (fieldId: string) => {
+    if (confirm("Are you sure you want to delete this form field?")) {
+      deleteFormField(fieldId);
     }
   };
 
@@ -729,6 +761,116 @@ function EventCreationForm() {
               </button>
             )}
 
+            <div className="pt-5 border-t border-foreground/10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-base font-semibold text-foreground">
+                    Form Fields
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {formFields.length === 0
+                      ? "No form fields added"
+                      : `${formFields.length} field${
+                          formFields.length > 1 ? "s" : ""
+                        }`}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddFormFieldClick}
+                  className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 hover:scale-105"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Field
+                </button>
+              </div>
+
+              {/* List of Form Fields */}
+              {formFields.length > 0 && isFormFieldListExpanded && (
+                <div className="space-y-3 mt-5">
+                  {formFields.map((field) => (
+                    <div
+                      key={field.id}
+                      className="rounded-2xl bg-card-secondary-background backdrop-blur-xl p-4 shadow-lg"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="text-base font-semibold text-foreground">
+                              {field.question}
+                            </p>
+                            {field.required && (
+                              <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
+                                Required
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {field.type === "short-text" && "Short Text"}
+                            {field.type === "long-text" && "Long Text"}
+                            {field.type === "single-select" && "Single Select"}
+                            {field.type === "multi-select" && "Multi Select"}
+                          </p>
+                          {field.options && field.options.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {field.options.map((option, idx) => (
+                                <span
+                                  key={idx}
+                                  className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-foreground"
+                                >
+                                  {option}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEditFormFieldClick(field)}
+                            className="rounded-full p-2 transition-all hover:bg-white/10"
+                            aria-label="Edit field"
+                          >
+                            <Edit className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteFormField(field.id)}
+                            className="rounded-full p-2 transition-all hover:bg-red-500/20"
+                            aria-label="Delete field"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-400" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Expand/Collapse Button */}
+              {formFields.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setIsFormFieldListExpanded(!isFormFieldListExpanded)
+                  }
+                  className="w-full flex justify-center pt-3 pb-1 transition-all hover:bg-white/5 rounded-xl cursor-pointer"
+                  aria-label={
+                    isFormFieldListExpanded
+                      ? "Collapse form field list"
+                      : "Expand form field list"
+                  }
+                >
+                  {isFormFieldListExpanded ? (
+                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  )}
+                </button>
+              )}
+            </div>
+
             <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
               <div>
                 <p className="text-base font-semibold text-foreground">
@@ -852,6 +994,13 @@ function EventCreationForm() {
         onClose={() => setIsTicketTypeModalOpen(false)}
         onSave={handleSaveTicket}
         ticketToEdit={ticketToEdit}
+      />
+
+      <FormFieldModal
+        isOpen={isFormFieldModalOpen}
+        onClose={() => setIsFormFieldModalOpen(false)}
+        onSave={handleSaveFormField}
+        fieldToEdit={fieldToEdit}
       />
     </div>
   );
