@@ -368,7 +368,7 @@ function EventCreationForm() {
       if (response.success) {
         toast.success("Event created successfully!");
         clearForm();
-        router.push(`/events/${response.event.id}`);
+        // router.push(`/events/${response.event.id}`); // TODO: Uncomment this out
       }
     } catch (error: any) {
       console.error("Error creating event:", error);
