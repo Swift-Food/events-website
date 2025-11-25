@@ -10,7 +10,8 @@ import {
   useEffect,
 } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { TicketType, FormField } from "@/types/event";
+import { TicketType } from "@/types";
+import { FormField } from "@/types";
 
 interface EventCreationContextType {
   // Event details

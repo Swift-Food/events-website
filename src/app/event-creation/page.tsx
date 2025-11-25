@@ -13,15 +13,16 @@ import {
   EventCreationProvider,
   useEventCreation,
 } from "@/context/EventCreationContext";
-import { TicketType, FormField } from "@/types/event";
+import { TicketType } from "@/types";
+import { FormField } from "@/types";
 import { GOOGLE_MAPS_CONFIG } from "@/constants/google-maps";
 import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
+import { eventService } from "@/services/event.service";
 import {
-  eventService,
   CreateEventDto,
   QuestionType,
   CreateEventTicketDto,
-} from "@/services/event.service";
+} from "@/types";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";

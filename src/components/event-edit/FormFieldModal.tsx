@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X, FileText, Plus, Trash2 } from "lucide-react";
-import { FormField, FormFieldType } from "@/types/event";
+import { FormField, FormFieldType } from "@/types";
 
 interface FormFieldModalProps {
   isOpen: boolean;

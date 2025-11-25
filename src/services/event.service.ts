@@ -1,46 +1,48 @@
 // services/event.service.ts
 import apiClient from '@/lib/auth/apiClient';
 import { AxiosResponse } from 'axios';
-import { EventStatus, EventResponseDto } from '@/types/event';
+import {
+  EventResponseDto,
+  EventListResponseDto,
+  CreateEventResponse,
+  UpdateEventResponse,
+  EventStats,
+} from '@/types';
 import {
   CreateEventDto,
   UpdateEventDto,
   EventQueryDto,
-  EventListResponse,
-  CreateEventResponse,
-  UpdateEventResponse,
-  EventStats,
-} from '@/types/event-dto';
+} from '@/types';
 
 class EventService {
   private readonly baseUrl = '/events';
 
-  async getAllEvents(query?: EventQueryDto): Promise<EventListResponse> {
-    const response: AxiosResponse<EventListResponse> = await apiClient.get(
+  async getAllEvents(query?: EventQueryDto): Promise<EventListResponseDto> {
+    const response: AxiosResponse<EventListResponseDto> = await apiClient.get(
       this.baseUrl,
       { params: query }
     );
     return response.data;
   }
 
-  async getUpcomingEvents(take: number = 10): Promise<EventListResponse> {
-    const response: AxiosResponse<EventListResponse> = await apiClient.get(
+  async getUpcomingEvents(take: number = 10): Promise<EventListResponseDto> {
+    const response: AxiosResponse<EventListResponseDto> = await apiClient.get(
       `${this.baseUrl}/upcoming`,
       { params: { take } }
     );
     return response.data;
   }
 
-  async getTrendingEvents(take: number = 10): Promise<EventListResponse> {
-    const response: AxiosResponse<EventListResponse> = await apiClient.get(
+  async getTrendingEvents(take: number = 10): Promise<EventListResponseDto> {
+    const response: AxiosResponse<EventListResponseDto> = await apiClient.get(
       `${this.baseUrl}/trending`,
       { params: { take } }
     );
     return response.data;
   }
 
-  async getMyEvents(query?: EventQueryDto): Promise<EventListResponse> {
-    const response: AxiosResponse<EventListResponse> = await apiClient.get(
+  async getMyEvents(query?: EventQueryDto): Promise<EventListResponseDto> {
+    const response: AxiosResponse<EventListResponseDto> = await apiClient.get(
       `${this.baseUrl}/my-events`,
       { params: query }
     );

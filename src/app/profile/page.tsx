@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
-import { eventService, EventListResponse } from "@/services/event.service";
+import { eventService } from "@/services/event.service";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { GuestTicketWithEventResponseDto } from "@/types/guest-ticket";
 import { eventUserService, EventUserStats } from "@/services/event-user.service";

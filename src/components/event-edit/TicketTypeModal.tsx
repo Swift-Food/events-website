@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X, Ticket } from "lucide-react";
-import { TicketType } from "@/types/event";
+import { TicketType } from "@/types";
 
 interface TicketTypeModalProps {
   isOpen: boolean;
