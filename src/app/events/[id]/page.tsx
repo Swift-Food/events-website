@@ -64,6 +64,16 @@ export default function EventDetailsPage() {
     });
   };
 
+  const isSameDay = (date1: string | Date, date2: string | Date) => {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    return (
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate()
+    );
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -259,18 +269,49 @@ export default function EventDetailsPage() {
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Date & Time
                 </h3>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <Calendar className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-medium text-foreground">
-                        {formatDate(event.startDateTime)}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {formatTime(event.startDateTime)} -{" "}
-                        {formatTime(event.endDateTime)}
-                      </p>
-                    </div>
+                <div className="flex gap-4">
+                  <div className="flex flex-col items-center py-1">
+                    <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
+                    <div className="my-2 w-0.5 flex-1 rounded-full bg-primary/30"></div>
+                    <div className="h-3 w-3 rounded-full bg-primary/30 shadow-md"></div>
+                  </div>
+                  <div className="flex-1">
+                    {isSameDay(event.startDateTime, event.endDateTime) ? (
+                      <>
+                        <p className="font-medium text-foreground">
+                          {formatDate(event.startDateTime)}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatTime(event.startDateTime)} -{" "}
+                          {formatTime(event.endDateTime)}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="mb-3">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            Start
+                          </p>
+                          <p className="font-medium text-foreground">
+                            {formatDate(event.startDateTime)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {formatTime(event.startDateTime)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            End
+                          </p>
+                          <p className="font-medium text-foreground">
+                            {formatDate(event.endDateTime)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {formatTime(event.endDateTime)}
+                          </p>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
