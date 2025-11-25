@@ -121,11 +121,11 @@ export default function FormFieldModal({
             <label className="text-base font-semibold text-foreground block mb-3">
               Question <span className="text-red-400">*</span>
             </label>
-            <input
-              type="text"
+            <textarea
               value={localQuestion}
               onChange={(e) => setLocalQuestion(e.target.value)}
-              className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground text-lg font-semibold outline-none shadow-inner focus:ring-2 focus:ring-primary/50 transition-all"
+              rows={2}
+              className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground text-md font-semibold outline-none shadow-inner focus:ring-2 focus:ring-primary/50 transition-all resize-none"
               placeholder="e.g., What is your dietary preference?"
             />
           </div>
