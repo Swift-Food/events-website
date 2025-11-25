@@ -20,7 +20,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="border-b border-white/10 bg-background">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-background">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           {/* Mobile Drawer Button */}
           <div className="flex gap-4">
