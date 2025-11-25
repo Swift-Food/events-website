@@ -146,8 +146,10 @@ export interface TicketActionResponseDto {
 
 export interface BulkActionResponseDto {
   success: boolean;
-  message: string;
+  message?: string;
   approved?: number;
   rejected?: number;
+  checkedIn?: number;
   failed?: number;
+  errors?: string[];
 }

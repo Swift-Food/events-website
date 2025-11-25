@@ -153,6 +153,46 @@ class GuestTicketService {
     );
     return response.data;
   }
+
+  /**
+   * Check in a ticket using QR code
+   */
+  async checkInTicket(qrCode: string): Promise<GuestTicketResponseDto> {
+    const response: AxiosResponse<GuestTicketResponseDto> = await apiClient.post(
+      `${this.baseUrl}/check-in`,
+      { qrCode }
+    );
+    return response.data;
+  }
+
+  /**
+   * Bulk check in tickets by QR codes
+   */
+  async bulkCheckInTickets(qrCodes: string[]): Promise<BulkActionResponseDto> {
+    const response: AxiosResponse<BulkActionResponseDto> = await apiClient.post(
+      `${this.baseUrl}/bulk/check-in`,
+      { qrCodes }
+    );
+    return response.data;
+  }
+
+  /**
+   * Get check-in statistics for an event
+   */
+  async getCheckInStats(eventId: string): Promise<{
+    totalTickets: number;
+    checkedIn: number;
+    pending: number;
+    percentageCheckedIn: number;
+  }> {
+    const response: AxiosResponse<{
+      totalTickets: number;
+      checkedIn: number;
+      pending: number;
+      percentageCheckedIn: number;
+    }> = await apiClient.get(`${this.baseUrl}/event:${eventId}/check-in-stats`);
+    return response.data;
+  }
 }
 
 export const guestTicketService = new GuestTicketService();
