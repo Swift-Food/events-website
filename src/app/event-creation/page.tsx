@@ -235,12 +235,7 @@ function EventCreationForm() {
   // Update location when address fields change
   useEffect(() => {
     if (addressLine1 || city || postcode) {
-      const fullAddress = [
-        addressLine1,
-        addressLine2,
-        city,
-        postcode,
-      ]
+      const fullAddress = [addressLine1, addressLine2, city, postcode]
         .filter(Boolean)
         .join(", ");
       if (fullAddress) {
@@ -418,8 +413,8 @@ function EventCreationForm() {
   return (
     <div className="flex min-h-[calc(100vh-64px)] justify-center bg-background px-6 py-12">
       <div className="flex w-full max-w-6xl flex-col gap-6 text-foreground lg:flex-row">
-        <section className="sticky top-20 flex flex-col gap-5 rounded-3xl bg-card-background backdrop-blur-2xl shadow-2xl shadow-white/5 p-7 lg:w-96 lg:shrink-0 self-start">
-          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background backdrop-blur-sm shadow-lg">
+        <section className="flex flex-col gap-5 rounded-3xl bg-card-background backdrop-blur-2xl shadow-2xl shadow-white/5 p-7 lg:w-96 lg:shrink-0 lg:sticky lg:top-20 lg:self-start sm:flex-row lg:flex-col">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background backdrop-blur-sm shadow-lg  sm:flex-1 sm:basis-0 lg:w-full lg:flex-none">
             {coverPreview ? (
               <img
                 src={coverPreview}
@@ -462,28 +457,30 @@ function EventCreationForm() {
               onChange={handleImageChange}
             />
           </div>
-          <div className="rounded-2xl bg-card-secondary-background backdrop-blur-xl p-5 text-sm">
-            <div className="flex items-center justify-between text-muted-foreground">
-              <div>
-                <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground/60">
-                  Starts
-                </p>
-                <p className="text-base font-semibold text-foreground mt-1">
-                  {formattedStart}
-                </p>
+          <div className="rounded-2xl bg-card-secondary-background backdrop-blur-xl text-sm sm:flex-1 lg:flex-none lg:aspect-auto">
+            <div className="p-5">
+              <div className="flex items-center justify-between text-muted-foreground">
+                <div>
+                  <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground/60">
+                    Starts
+                  </p>
+                  <p className="text-base font-semibold text-foreground mt-1">
+                    {formattedStart}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground/60">
+                    Ends
+                  </p>
+                  <p className="text-base font-semibold text-foreground mt-1">
+                    {formattedEnd}
+                  </p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground/60">
-                  Ends
-                </p>
-                <p className="text-base font-semibold text-foreground mt-1">
-                  {formattedEnd}
-                </p>
+              <div className="mt-5 pt-4 border-t border-foreground/10 text-xs text-muted-foreground">
+                <span className="font-medium">Cover:</span>{" "}
+                <span className="text-foreground font-medium">{coverName}</span>
               </div>
-            </div>
-            <div className="mt-5 pt-4 border-t border-foreground/10 text-xs text-muted-foreground">
-              <span className="font-medium">Cover:</span>{" "}
-              <span className="text-foreground font-medium">{coverName}</span>
             </div>
           </div>
         </section>
@@ -551,7 +548,9 @@ function EventCreationForm() {
               className="flex items-center justify-between cursor-pointer"
               onClick={() => setIsLocationExpanded(!isLocationExpanded)}
               role="button"
-              aria-label={isLocationExpanded ? "Collapse location" : "Expand location"}
+              aria-label={
+                isLocationExpanded ? "Collapse location" : "Expand location"
+              }
             >
               <label className="text-base text-foreground font-semibold cursor-pointer">
                 Event Location
@@ -578,99 +577,104 @@ function EventCreationForm() {
             {isLocationExpanded && (
               <>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Search for a building, venue, or address - or enter details manually
+                  Search for a building, venue, or address - or enter details
+                  manually
                 </p>
 
                 {/* Google Places Autocomplete Search */}
                 <div className="mb-4">
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Search Location
-              </label>
-              <input
-                ref={locationInputRef}
-                type="text"
-                placeholder="Search for building, venue, or address..."
-                className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner border-2 border-transparent focus:border-primary transition-all"
-              />
-              {addressValidationError && (
-                <div className="mt-2 p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
-                  <p className="text-sm text-red-400">{addressValidationError}</p>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Search Location
+                  </label>
+                  <input
+                    ref={locationInputRef}
+                    type="text"
+                    placeholder="Search for building, venue, or address..."
+                    className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner border-2 border-transparent focus:border-primary transition-all"
+                  />
+                  {addressValidationError && (
+                    <div className="mt-2 p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
+                      <p className="text-sm text-red-400">
+                        {addressValidationError}
+                      </p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Address Line 1 */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Address Line 1
-              </label>
-              <input
-                type="text"
-                value={addressLine1}
-                onChange={(e) => setAddressLine1(e.target.value)}
-                placeholder="Street address"
-                className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
-              />
-            </div>
+                {/* Address Line 1 */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Address Line 1
+                  </label>
+                  <input
+                    type="text"
+                    value={addressLine1}
+                    onChange={(e) => setAddressLine1(e.target.value)}
+                    placeholder="Street address"
+                    className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
+                  />
+                </div>
 
-            {/* Address Line 2 */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Address Line 2 (Optional)
-              </label>
-              <input
-                type="text"
-                value={addressLine2}
-                onChange={(e) => setAddressLine2(e.target.value)}
-                placeholder="Apartment, suite, building, etc."
-                className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
-              />
-            </div>
+                {/* Address Line 2 */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Address Line 2 (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={addressLine2}
+                    onChange={(e) => setAddressLine2(e.target.value)}
+                    placeholder="Apartment, suite, building, etc."
+                    className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
+                  />
+                </div>
 
-            {/* City and Postcode */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  City
-                </label>
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="City"
-                  className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Postcode
-                </label>
-                <input
-                  type="text"
-                  value={postcode}
-                  onChange={(e) => setPostcode(e.target.value.toUpperCase())}
-                  onBlur={(e) => {
-                    // Validate on blur
-                    const value = e.target.value.trim();
-                    if (value && !validateUKPostcode(value)) {
-                      // Could add error state here if needed
-                    }
-                  }}
-                  placeholder="e.g., SW1A 1AA"
-                  className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
-                />
-                {postcode && validateUKPostcode(postcode) && (
-                  <p className="mt-1 text-sm text-green-400">
-                    ✓ Valid UK postcode
-                  </p>
-                )}
-                {postcode && !validateUKPostcode(postcode) && (
-                  <p className="mt-1 text-sm text-red-400">
-                    Please enter a valid UK postcode
-                  </p>
-                )}
-              </div>
-            </div>
+                {/* City and Postcode */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="City"
+                      className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Postcode
+                    </label>
+                    <input
+                      type="text"
+                      value={postcode}
+                      onChange={(e) =>
+                        setPostcode(e.target.value.toUpperCase())
+                      }
+                      onBlur={(e) => {
+                        // Validate on blur
+                        const value = e.target.value.trim();
+                        if (value && !validateUKPostcode(value)) {
+                          // Could add error state here if needed
+                        }
+                      }}
+                      placeholder="e.g., SW1A 1AA"
+                      className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
+                    />
+                    {postcode && validateUKPostcode(postcode) && (
+                      <p className="mt-1 text-sm text-green-400">
+                        ✓ Valid UK postcode
+                      </p>
+                    )}
+                    {postcode && !validateUKPostcode(postcode) && (
+                      <p className="mt-1 text-sm text-red-400">
+                        Please enter a valid UK postcode
+                      </p>
+                    )}
+                  </div>
+                </div>
 
                 {/* Display full formatted address */}
                 {location && (
@@ -781,7 +785,11 @@ function EventCreationForm() {
                 type="button"
                 onClick={() => setIsTicketListExpanded(!isTicketListExpanded)}
                 className="w-full flex justify-center pt-3 pb-1 transition-all hover:bg-white/5 rounded-xl cursor-pointer"
-                aria-label={isTicketListExpanded ? "Collapse ticket list" : "Expand ticket list"}
+                aria-label={
+                  isTicketListExpanded
+                    ? "Collapse ticket list"
+                    : "Expand ticket list"
+                }
               >
                 {isTicketListExpanded ? (
                   <ChevronUp className="h-5 w-5 text-muted-foreground" />
