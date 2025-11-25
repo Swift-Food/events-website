@@ -29,6 +29,9 @@ export interface EventUser {
 
 export interface User {
   id: string;
+  firstName?: string;
+  lastName?: string;
+  username?: string;
   email: string;
   createdAt: string;
   eventUser: EventUser | null;

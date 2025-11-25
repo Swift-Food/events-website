@@ -19,7 +19,6 @@ import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
 import {
   eventService,
   CreateEventDto,
-  EventStatus,
   QuestionType,
   CreateEventTicketDto,
 } from "@/services/event.service";
@@ -345,7 +344,6 @@ function EventCreationForm() {
         ownerEventUserId: eventUser.id,
         startDateTime: start,
         endDateTime: end,
-        status: EventStatus.DRAFT,
         isPrivate: false,
         addressData: {
           name: eventName,
