@@ -16,9 +16,10 @@ export default function Home() {
   //     }
   //   }
   // }, [isAuthenticated, isLoading, router]);
-  useEffect(() => {
-    router.replace("/");
-  }, [router]);
+
+  // useEffect(() => {
+  //   router.replace("/");
+  // }, [router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">
