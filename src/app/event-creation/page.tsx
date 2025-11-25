@@ -311,7 +311,7 @@ function EventCreationForm() {
     // Check authentication using auth context
     if (!isAuthenticated || !eventUser) {
       toast.error("Please log in to create an event");
-      router.push("/login");
+      router.push("/auth");
       return;
     }
 
@@ -375,7 +375,7 @@ function EventCreationForm() {
 
       if (error.response?.status === 401) {
         toast.error("Please log in to create an event");
-        router.push("/login");
+        router.push("/auth");
       } else if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else {

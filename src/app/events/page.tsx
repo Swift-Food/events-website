@@ -24,7 +24,7 @@ export default function EventCataloguePage() {
     setError(null);
     try {
       const result: EventListResponseDto = await eventsApi.findAll({
-        search: searchTerm || undefined,
+        // search: searchTerm || undefined,
         skip: (currentPage - 1) * eventsPerPage,
         take: eventsPerPage,
       });

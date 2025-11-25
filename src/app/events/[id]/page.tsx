@@ -190,7 +190,7 @@ export default function EventDetailsPage() {
                 About this event
               </h2>
               <div
-                className="prose prose-invert max-w-none text-muted-foreground prose-headings:text-foreground prose-a:text-primary prose-strong:text-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground"
+                className="tiptap-editor tiptap-view-mode"
                 dangerouslySetInnerHTML={{ __html: event.description }}
               />
             </div>
@@ -235,7 +235,9 @@ export default function EventDetailsPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-xl font-bold text-foreground">
-                          ${Number(ticket.price).toFixed(2)}
+                          {Number(ticket.price) === 0
+                            ? "Free"
+                            : `$${Number(ticket.price).toFixed(2)}`}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {ticket.status}
@@ -374,6 +376,119 @@ export default function EventDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* Tiptap Styling */}
+      <style jsx global>{`
+        .tiptap-editor {
+          color: white;
+        }
+
+        .tiptap-editor .ProseMirror {
+          outline: none;
+        }
+
+        .tiptap-editor h1 {
+          font-size: 2.25rem;
+          font-weight: 700;
+          line-height: 2.5rem;
+          margin-top: 1rem;
+          margin-bottom: 1rem;
+          color: white;
+        }
+
+        .tiptap-editor h2 {
+          font-size: 1.875rem;
+          font-weight: 600;
+          line-height: 2.25rem;
+          margin-top: 0.875rem;
+          margin-bottom: 0.875rem;
+          color: white;
+        }
+
+        .tiptap-editor h3 {
+          font-size: 1.5rem;
+          font-weight: 600;
+          line-height: 2rem;
+          margin-top: 0.75rem;
+          margin-bottom: 0.75rem;
+          color: white;
+        }
+
+        .tiptap-editor p {
+          font-size: 1rem;
+          line-height: 1.75rem;
+          margin-top: 0.5rem;
+          margin-bottom: 0.5rem;
+          color: rgba(255, 255, 255, 0.9);
+        }
+
+        .tiptap-editor ul {
+          list-style-type: disc;
+          padding-left: 1.5rem;
+          margin-top: 0.5rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .tiptap-editor ol {
+          list-style-type: decimal;
+          padding-left: 1.5rem;
+          margin-top: 0.5rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .tiptap-editor li {
+          margin-top: 0.25rem;
+          margin-bottom: 0.25rem;
+          color: rgba(255, 255, 255, 0.9);
+        }
+
+        .tiptap-editor hr {
+          border: none;
+          border-top: 2px solid rgba(255, 255, 255, 0.2);
+          margin-top: 1.5rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .tiptap-editor blockquote {
+          border-left: 4px solid rgba(255, 255, 255, 0.3);
+          padding-left: 1rem;
+          margin-left: 0;
+          margin-top: 1rem;
+          margin-bottom: 1rem;
+          font-style: italic;
+          color: rgba(255, 255, 255, 0.7);
+        }
+
+        .tiptap-editor strong {
+          font-weight: 700;
+        }
+
+        .tiptap-editor em {
+          font-style: italic;
+        }
+
+        .tiptap-editor code {
+          background-color: rgba(255, 255, 255, 0.1);
+          padding: 0.125rem 0.25rem;
+          border-radius: 0.25rem;
+          font-family: monospace;
+          font-size: 0.875rem;
+        }
+
+        .tiptap-editor a {
+          color: #60a5fa;
+          text-decoration: underline;
+          transition: color 150ms;
+        }
+
+        .tiptap-editor a:hover {
+          color: #93c5fd;
+        }
+
+        .tiptap-view-mode a {
+          cursor: pointer !important;
+        }
+      `}</style>
     </div>
   );
 }
