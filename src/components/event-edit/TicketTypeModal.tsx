@@ -22,6 +22,7 @@ export default function TicketTypeModal({
   const [localIsFree, setLocalIsFree] = useState(true);
   const [localPrice, setLocalPrice] = useState("0");
   const [localIsSingleUse, setLocalIsSingleUse] = useState(false);
+  const [localQuantity, setLocalQuantity] = useState("100");
 
   // Update local state when modal opens or when editing a ticket
   useEffect(() => {
@@ -32,6 +33,7 @@ export default function TicketTypeModal({
         setLocalIsFree(ticketToEdit.isFree);
         setLocalPrice(ticketToEdit.price.toString());
         setLocalIsSingleUse(ticketToEdit.isSingleUse);
+        setLocalQuantity(ticketToEdit.quantity?.toString() || "100");
       } else {
         // Reset for new ticket
         setLocalName("");
@@ -39,6 +41,7 @@ export default function TicketTypeModal({
         setLocalIsFree(true);
         setLocalPrice("0");
         setLocalIsSingleUse(false);
+        setLocalQuantity("100");
       }
     }
   }, [isOpen, ticketToEdit]);
@@ -52,12 +55,24 @@ export default function TicketTypeModal({
       return;
     }
 
+    const quantity = parseInt(localQuantity) || 100;
+    if (quantity < 1) {
+      alert("Quantity must be at least 1");
+      return;
+    }
+
+    if (quantity > 100000) {
+      alert("Quantity cannot exceed 100,000");
+      return;
+    }
+
     const ticket: TicketType = {
       id: ticketToEdit?.id || Date.now().toString(),
       name: localName.trim(),
       description: localDescription.trim(),
       isFree: localIsFree,
       price: localIsFree ? 0 : parseFloat(localPrice) || 0,
+      quantity: quantity,
       isSingleUse: localIsSingleUse,
     };
 
@@ -118,6 +133,25 @@ export default function TicketTypeModal({
               className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner focus:ring-2 focus:ring-primary/50 transition-all resize-none"
               placeholder="Optional description of this ticket type..."
             />
+          </div>
+
+          {/* Quantity */}
+          <div className="rounded-2xl bg-card-background backdrop-blur-xl p-5 shadow-lg">
+            <label className="text-base font-semibold text-foreground block mb-3">
+              Quantity Available <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="100000"
+              value={localQuantity}
+              onChange={(e) => setLocalQuantity(e.target.value)}
+              className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground text-lg font-semibold outline-none shadow-inner focus:ring-2 focus:ring-primary/50 transition-all"
+              placeholder="100"
+            />
+            <p className="text-sm text-muted-foreground mt-2">
+              Maximum number of tickets available for sale (1 - 100,000)
+            </p>
           </div>
 
           {/* Price Toggle */}
