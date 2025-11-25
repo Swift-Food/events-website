@@ -80,9 +80,11 @@ export const authApi = {
    * Get current user's profile (validates token)
    */
   getProfile: async (): Promise<User> => {
-    const response = await apiClient.get<User>("/auth/profile");
+    const response = await apiClient.get<{ success: boolean; user: User }>(
+      "/auth/profile"
+    );
     console.log("Getting profile: ", response);
-    return response.data;
+    return response.data.user;
   },
 
   /**

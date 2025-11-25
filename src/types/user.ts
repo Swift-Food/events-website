@@ -6,24 +6,34 @@ export interface TokenPair {
   adminMode: boolean;
 }
 
+export interface EventUser {
+  id: string;
+  userId: string;
+  allowEmailNotifications: boolean;
+  allowTicketReminders: boolean;
+  bio: string | null;
+  createdAt: string;
+  linkedinUrl: string | null;
+  organizationName: string | null;
+  stripeAccountId: string | null;
+  stripeOnboardingComplete: boolean;
+  totalEventsAttended: number;
+  totalEventsCreated: number;
+  totalRevenue: string;
+  twitterHandle: string | null;
+  updatedAt: string;
+  website: string | null;
+  googleId: string | null;
+  isGoogleUser: boolean;
+}
+
 export interface User {
   id: string;
   email: string;
-  phoneNumber?: string;
-  verified: boolean;
+  createdAt: string;
+  eventUser: EventUser | null;
+  googleId?: string | null;
   isGoogleUser?: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface EventUser {
-  id: string;
-  email: string;
-  phoneNumber?: string;
-  verified: boolean;
-  isGoogleUser?: boolean;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 // Auth DTOs

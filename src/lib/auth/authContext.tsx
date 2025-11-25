@@ -28,6 +28,7 @@ interface AuthContextType extends AuthState {
   logout: () => void;
   refreshToken: () => Promise<void>;
   updateUser: (user: User) => void;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -61,7 +62,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
     setState({
       user,
-      eventUser: null,
+      eventUser: user.eventUser, // Extract eventUser from user object
       token: tokenPair.access_token,
       isLoading: false,
       isAuthenticated: true,
@@ -92,18 +93,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     try {
       const response = await authApi.refreshToken(storedRefreshToken);
 
-      // Decode the token to get user info
-      const payload = authApi.decodeJWT(response.access_token);
-      if (payload) {
-        const user: User = {
-          id: payload.sub,
-          email: payload.email,
-          verified: payload.verified,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        setAuthData(response, user);
-      }
+      // Store token temporarily to make authenticated requests
+      localStorage.setItem(TOKEN_STORAGE_KEY, response.access_token);
+      localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, response.refresh_token);
+
+      // Fetch the user profile from the server
+      const userProfile = await authApi.getProfile();
+      setAuthData(response, userProfile);
     } catch (error) {
       logout();
       throw error;
@@ -121,7 +117,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           const user = JSON.parse(storedUser) as User;
           setState({
             user,
-            eventUser: null,
+            eventUser: user.eventUser, // Extract eventUser from user object
             token: storedToken,
             isLoading: false,
             isAuthenticated: true,
@@ -159,18 +155,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
       // Check if response is a TokenPair (successful login) or needs verification
       if ("access_token" in response) {
-        // Decode the token to get user info
-        const payload = authApi.decodeJWT(response.access_token);
-        if (payload) {
-          const user: User = {
-            id: payload.sub,
-            email: payload.email,
-            verified: payload.verified,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          };
-          setAuthData(response, user);
-        }
+        // Store token temporarily to make authenticated requests
+        localStorage.setItem(TOKEN_STORAGE_KEY, response.access_token);
+        localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, response.refresh_token);
+
+        // Fetch the user profile from the server
+        const userProfile = await authApi.getProfile();
+        setAuthData(response, userProfile);
       } else {
         // Needs verification
         setState((prev) => ({ ...prev, isLoading: false }));
@@ -208,18 +199,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         data.organizationName
       );
 
-      // Decode the token to get user info
-      const payload = authApi.decodeJWT(response.access_token);
-      if (payload) {
-        const user: User = {
-          id: payload.sub,
-          email: payload.email,
-          verified: payload.verified,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        setAuthData(response, user);
-      }
+      // Store token temporarily to make authenticated requests
+      localStorage.setItem(TOKEN_STORAGE_KEY, response.access_token);
+      localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, response.refresh_token);
+
+      // Fetch the user profile from the server
+      const userProfile = await authApi.getProfile();
+      setAuthData(response, userProfile);
 
       return response;
     } catch (error) {
@@ -234,7 +220,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     setState((prev) => ({
       ...prev,
       user,
+      eventUser: user.eventUser, // Extract eventUser from user object
     }));
+  };
+
+  const refreshProfile = async () => {
+    try {
+      const userProfile = await authApi.getProfile();
+      updateUser(userProfile);
+    } catch (error) {
+      console.error("Failed to refresh profile:", error);
+      throw error;
+    }
   };
 
   const value: AuthContextType = {
@@ -245,6 +242,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     logout,
     refreshToken,
     updateUser,
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

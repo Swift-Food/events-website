@@ -15,12 +15,11 @@ const navLinks = [
 export default function Navbar() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout, user, refreshProfile } = useAuth();
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
   const closeDrawer = () => setIsDrawerOpen(false);
-  const toggleUserMenu = () => setIsUserMenuOpen(!isUserMenuOpen);
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -45,6 +44,18 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     setIsUserMenuOpen(false);
+  };
+
+  const handleUserIconClick = async () => {
+    // Fetch profile when opening the menu
+    setIsUserMenuOpen(!isUserMenuOpen);
+    if (!isUserMenuOpen) {
+      try {
+        await refreshProfile();
+      } catch (error) {
+        console.error("Failed to refresh profile:", error);
+      }
+    }
   };
 
   return (
@@ -89,7 +100,7 @@ export default function Navbar() {
             {isAuthenticated ? (
               <div className="relative" ref={userMenuRef}>
                 <button
-                  onClick={toggleUserMenu}
+                  onClick={handleUserIconClick}
                   className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-300 transition-colors hover:bg-white/10 hover:text-white cursor-pointer"
                   aria-label="User profile"
                 >
