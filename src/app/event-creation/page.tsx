@@ -42,6 +42,14 @@ function EventCreationForm() {
     setEnd,
     location,
     setLocation,
+    addressLine1,
+    setAddressLine1,
+    addressLine2,
+    setAddressLine2,
+    city,
+    setCity,
+    postcode,
+    setPostcode,
     ticketTypes,
     addTicketType,
     updateTicketType,
@@ -70,6 +78,7 @@ function EventCreationForm() {
   const [isFormFieldModalOpen, setIsFormFieldModalOpen] = useState(false);
   const [fieldToEdit, setFieldToEdit] = useState<FormField | null>(null);
   const [isFormFieldListExpanded, setIsFormFieldListExpanded] = useState(true);
+  const [isLocationExpanded, setIsLocationExpanded] = useState(true);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -77,11 +86,7 @@ function EventCreationForm() {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Address-related state
-  const [addressLine1, setAddressLine1] = useState("");
-  const [addressLine2, setAddressLine2] = useState("");
-  const [city, setCity] = useState("");
-  const [postcode, setPostcode] = useState("");
+  // Address-related state (local UI only)
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [addressValidationError, setAddressValidationError] = useState<
     string | null
@@ -398,17 +403,13 @@ function EventCreationForm() {
       )
     ) {
       clearForm();
-      // Also clear local file input and address fields
+      // Also clear local file input and address-related state
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
       if (locationInputRef.current) {
         locationInputRef.current.value = "";
       }
-      setAddressLine1("");
-      setAddressLine2("");
-      setCity("");
-      setPostcode("");
       setSelectedPlaceId(null);
       setAddressValidationError(null);
     }
@@ -546,15 +547,42 @@ function EventCreationForm() {
           </div>
 
           <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
-            <label className="text-base text-foreground font-semibold mb-3 block">
-              Event Location
-            </label>
-            <p className="text-sm text-muted-foreground mb-4">
-              Search for a building, venue, or address - or enter details manually
-            </p>
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-base text-foreground font-semibold">
+                Event Location
+              </label>
+              <button
+                type="button"
+                onClick={() => setIsLocationExpanded(!isLocationExpanded)}
+                className="rounded-full p-2 transition-all hover:bg-white/10"
+                aria-label={isLocationExpanded ? "Collapse location" : "Expand location"}
+              >
+                {isLocationExpanded ? (
+                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                )}
+              </button>
+            </div>
 
-            {/* Google Places Autocomplete Search */}
-            <div className="mb-4">
+            {/* Display full address when collapsed */}
+            {!isLocationExpanded && location && (
+              <div className="mt-2 p-3 bg-card-secondary-background rounded-xl">
+                <p className="text-sm text-foreground font-medium">
+                  {location}
+                </p>
+              </div>
+            )}
+
+            {/* Show all fields when expanded */}
+            {isLocationExpanded && (
+              <>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Search for a building, venue, or address - or enter details manually
+                </p>
+
+                {/* Google Places Autocomplete Search */}
+                <div className="mb-4">
               <label className="block text-sm font-medium text-foreground mb-2">
                 Search Location
               </label>
@@ -644,16 +672,18 @@ function EventCreationForm() {
               </div>
             </div>
 
-            {/* Display full formatted address */}
-            {location && (
-              <div className="mt-4 p-3 bg-card-secondary-background rounded-xl">
-                <p className="text-xs text-muted-foreground mb-1">
-                  Full Address:
-                </p>
-                <p className="text-sm text-foreground font-medium">
-                  {location}
-                </p>
-              </div>
+                {/* Display full formatted address */}
+                {location && (
+                  <div className="mt-4 p-3 bg-card-secondary-background rounded-xl">
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Full Address:
+                    </p>
+                    <p className="text-sm text-foreground font-medium">
+                      {location}
+                    </p>
+                  </div>
+                )}
+              </>
             )}
           </div>
 

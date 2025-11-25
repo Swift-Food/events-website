@@ -25,6 +25,16 @@ interface EventCreationContextType {
   description: string;
   setDescription: Dispatch<SetStateAction<string>>;
 
+  // Address details
+  addressLine1: string;
+  setAddressLine1: Dispatch<SetStateAction<string>>;
+  addressLine2: string;
+  setAddressLine2: Dispatch<SetStateAction<string>>;
+  city: string;
+  setCity: Dispatch<SetStateAction<string>>;
+  postcode: string;
+  setPostcode: Dispatch<SetStateAction<string>>;
+
   // Ticketing
   ticketTypes: TicketType[];
   setTicketTypes: Dispatch<SetStateAction<TicketType[]>>;
@@ -72,6 +82,10 @@ type EventDraft = {
   end: string;
   location: string;
   description: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  postcode: string;
   ticketTypes: TicketType[];
   requireApproval: boolean;
   capacity: string;
@@ -130,6 +144,12 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
   const [end, setEnd] = useState(storedDraft.end ?? defaultTimes.end);
   const [location, setLocation] = useState(storedDraft.location ?? "");
   const [description, setDescription] = useState(storedDraft.description ?? "");
+
+  // Address details
+  const [addressLine1, setAddressLine1] = useState(storedDraft.addressLine1 ?? "");
+  const [addressLine2, setAddressLine2] = useState(storedDraft.addressLine2 ?? "");
+  const [city, setCity] = useState(storedDraft.city ?? "");
+  const [postcode, setPostcode] = useState(storedDraft.postcode ?? "");
 
   // Ticketing
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>(
@@ -205,6 +225,10 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
       end,
       location,
       description,
+      addressLine1,
+      addressLine2,
+      city,
+      postcode,
       ticketTypes,
       requireApproval,
       capacity,
@@ -236,6 +260,10 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     start,
     ticketTypes,
     formFields,
+    addressLine1,
+    addressLine2,
+    city,
+    postcode,
   ]);
 
   useEffect(() => {
@@ -249,6 +277,10 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     setEnd(newTimes.end);
     setLocation("");
     setDescription("");
+    setAddressLine1("");
+    setAddressLine2("");
+    setCity("");
+    setPostcode("");
     setTicketTypes([]);
     setRequireApproval(false);
     setCapacity("Unlimited");
@@ -276,6 +308,14 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
         setLocation,
         description,
         setDescription,
+        addressLine1,
+        setAddressLine1,
+        addressLine2,
+        setAddressLine2,
+        city,
+        setCity,
+        postcode,
+        setPostcode,
         ticketTypes,
         setTicketTypes,
         addTicketType,
