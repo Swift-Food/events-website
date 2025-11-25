@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import GoogleMap from "@/components/GoogleMap";
 
 export default function EventDetailsPage() {
   const params = useParams();
@@ -196,7 +197,7 @@ export default function EventDetailsPage() {
             </div>
 
             {/* Event URL */}
-            {event.eventUrl && (
+            {/* {event.eventUrl && (
               <div className="mb-8">
                 <h2 className="mb-4 text-2xl font-semibold text-foreground">
                   More Information
@@ -211,7 +212,7 @@ export default function EventDetailsPage() {
                   Visit Event Website
                 </a>
               </div>
-            )}
+            )} */}
 
             {/* Tickets */}
             {event.eventTickets && event.eventTickets.length > 0 && (
@@ -279,7 +280,7 @@ export default function EventDetailsPage() {
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Location
                 </h3>
-                <div className="flex items-start gap-3">
+                <div className="mb-4 flex items-start gap-3">
                   <MapPin className="h-5 w-5 text-primary" />
                   <div>
                     <p className="font-medium text-foreground">
@@ -298,6 +299,16 @@ export default function EventDetailsPage() {
                     </p>
                   </div>
                 </div>
+
+                {/* Google Map */}
+                {event.address.location && (
+                  <GoogleMap
+                    lat={event.address.location.lat}
+                    lng={event.address.location.lng}
+                    title={event.address.name}
+                    className="h-64 w-full"
+                  />
+                )}
               </div>
 
               {/* Organizer Card */}
