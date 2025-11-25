@@ -129,6 +129,27 @@ function EventCreationForm() {
   const formattedStart = useMemo(() => formatDate(start), [start]);
   const formattedEnd = useMemo(() => formatDate(end), [end]);
 
+  // Auto-update end date if start date is after end date
+  useEffect(() => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    if (startDate >= endDate) {
+      // Set end to 1 hour after start
+      const newEnd = new Date(startDate.getTime() + 60 * 60 * 1000);
+      const formatDateTime = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+      };
+      setEnd(formatDateTime(newEnd));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start]);
+
   // Initialize Google Places Autocomplete
   useEffect(() => {
     const initializeAutocomplete = () => {
