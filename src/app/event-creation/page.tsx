@@ -547,7 +547,7 @@ function EventCreationForm() {
           </div>
 
           <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between">
               <label className="text-base text-foreground font-semibold">
                 Event Location
               </label>
@@ -567,7 +567,7 @@ function EventCreationForm() {
 
             {/* Display full address when collapsed */}
             {!isLocationExpanded && location && (
-              <div className="mt-2 p-3 bg-card-secondary-background rounded-xl">
+              <div className="mt-3 p-3 bg-card-secondary-background rounded-xl">
                 <p className="text-sm text-foreground font-medium">
                   {location}
                 </p>
