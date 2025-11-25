@@ -12,7 +12,7 @@ export const eventsApi = {
   findAll: async (
     queryParams?: EventQueryDto
   ): Promise<EventListResponseDto> => {
-    const response = await apiClient.get<EventListResponseDto>("/api/events", {
+    const response = await apiClient.get<EventListResponseDto>("/events", {
       params: queryParams,
     });
     return response.data;
@@ -35,7 +35,7 @@ export const eventsApi = {
     ownerId: string,
     queryParams?: Omit<EventQueryDto, "ownerId">
   ): Promise<EventListResponseDto> => {
-    const response = await apiClient.get<EventListResponseDto>("/api/events", {
+    const response = await apiClient.get<EventListResponseDto>("/events", {
       params: {
         ...queryParams,
         ownerId,
