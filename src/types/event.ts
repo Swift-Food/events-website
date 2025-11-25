@@ -112,7 +112,8 @@ export interface EventTicketResponseDto {
   id: string;
   name: string;
   price: number;
-  quantity: number;
+  quantityTotal: number;
+  quantityLeft: number;
   quantitySold: number;
   status: string;
   startSale: string;

@@ -23,7 +23,7 @@ export const eventsApi = {
    */
   findById: async (eventId: string): Promise<EventResponseDto> => {
     const response = await apiClient.get<EventResponseDto>(
-      `/api/events/${eventId}`
+      `/events/${eventId}`
     );
     return response.data;
   },

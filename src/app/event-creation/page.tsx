@@ -322,7 +322,7 @@ function EventCreationForm() {
       const ticketsPayload: CreateEventTicketDto[] = ticketTypes.map(
         (ticket) => ({
           name: ticket.name,
-          description: ticket.description,
+          description: ticket.description || "",
           price: ticket.isFree ? 0 : ticket.price,
           isPaid: !ticket.isFree,
           isSingleUse: ticket.isSingleUse ?? true,
