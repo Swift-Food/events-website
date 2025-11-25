@@ -34,6 +34,10 @@ interface EventCreationContextType {
   setCity: Dispatch<SetStateAction<string>>;
   postcode: string;
   setPostcode: Dispatch<SetStateAction<string>>;
+  latitude: number | null;
+  setLatitude: Dispatch<SetStateAction<number | null>>;
+  longitude: number | null;
+  setLongitude: Dispatch<SetStateAction<number | null>>;
 
   // Ticketing
   ticketTypes: TicketType[];
@@ -86,6 +90,8 @@ type EventDraft = {
   addressLine2: string;
   city: string;
   postcode: string;
+  latitude: number | null;
+  longitude: number | null;
   ticketTypes: TicketType[];
   requireApproval: boolean;
   capacity: string;
@@ -150,6 +156,8 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
   const [addressLine2, setAddressLine2] = useState(storedDraft.addressLine2 ?? "");
   const [city, setCity] = useState(storedDraft.city ?? "");
   const [postcode, setPostcode] = useState(storedDraft.postcode ?? "");
+  const [latitude, setLatitude] = useState<number | null>(storedDraft.latitude ?? null);
+  const [longitude, setLongitude] = useState<number | null>(storedDraft.longitude ?? null);
 
   // Ticketing
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>(
@@ -229,6 +237,8 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
       addressLine2,
       city,
       postcode,
+      latitude,
+      longitude,
       ticketTypes,
       requireApproval,
       capacity,
@@ -264,6 +274,8 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     addressLine2,
     city,
     postcode,
+    latitude,
+    longitude,
   ]);
 
   useEffect(() => {
@@ -281,6 +293,8 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     setAddressLine2("");
     setCity("");
     setPostcode("");
+    setLatitude(null);
+    setLongitude(null);
     setTicketTypes([]);
     setRequireApproval(false);
     setCapacity("Unlimited");
@@ -316,6 +330,10 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
         setCity,
         postcode,
         setPostcode,
+        latitude,
+        setLatitude,
+        longitude,
+        setLongitude,
         ticketTypes,
         setTicketTypes,
         addTicketType,

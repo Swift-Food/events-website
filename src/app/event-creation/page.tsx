@@ -61,6 +61,10 @@ function EventCreationForm() {
     setCity,
     postcode,
     setPostcode,
+    latitude,
+    setLatitude,
+    longitude,
+    setLongitude,
     ticketTypes,
     addTicketType,
     updateTicketType,
@@ -99,8 +103,6 @@ function EventCreationForm() {
   const { user, eventUser, isAuthenticated } = useAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [latitude, setLatitude] = useState<number>(0);
-  const [longitude, setLongitude] = useState<number>(0);
 
   // Address-related state (local UI only)
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
@@ -369,7 +371,7 @@ function EventCreationForm() {
       if (response.success) {
         toast.success("Event created successfully!");
         clearForm();
-        // router.push(`/events/${response.event.id}`); // TODO: Uncomment this out
+        router.push(`/events/${response.event.id}`); 
       }
     } catch (error: any) {
       console.error("Error creating event:", error);
