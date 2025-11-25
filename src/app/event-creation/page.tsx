@@ -543,6 +543,15 @@ function EventCreationForm() {
             </div>
           </div>
 
+          <button
+            type="button"
+            onClick={handleDescriptionClick}
+            className="flex w-full items-center justify-center gap-3 rounded-3xl bg-card-background backdrop-blur-xl px-6 py-4 text-foreground text-base transition-all hover:bg-white/15 font-semibold shadow-xl cursor-pointer"
+          >
+            <Edit className="h-5 w-5" />
+            <span>Edit Description</span>
+          </button>
+
           <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
             <div
               className="flex items-center justify-between cursor-pointer"
@@ -690,15 +699,6 @@ function EventCreationForm() {
               </>
             )}
           </div>
-
-          <button
-            type="button"
-            onClick={handleDescriptionClick}
-            className="flex w-full items-center justify-center gap-3 rounded-3xl bg-card-background backdrop-blur-xl px-6 py-4 text-foreground text-base transition-all hover:bg-white/15 font-semibold shadow-xl cursor-pointer"
-          >
-            <Edit className="h-5 w-5" />
-            <span>Edit Description</span>
-          </button>
 
           <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 space-y-5 shadow-xl">
             <div className="flex items-center justify-between">
