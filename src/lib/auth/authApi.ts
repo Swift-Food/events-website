@@ -16,7 +16,6 @@ export const authApi = {
       email,
       password,
     };
-    console.log("Login payload: ", payload);
     const response = await apiClient.post<LoginResponse>(
       "/auth/login-event-user",
       payload
@@ -29,7 +28,6 @@ export const authApi = {
       "/auth/register-event-user",
       data
     );
-    console.log("Registration response: ", response);
     return response.data;
   },
 
@@ -46,7 +44,6 @@ export const authApi = {
       "/auth/verify-event-user",
       payload
     );
-    console.log("Verification response: ", response);
     return response.data;
   },
 
@@ -83,7 +80,6 @@ export const authApi = {
     const response = await apiClient.get<{ success: boolean; user: User }>(
       "/auth/profile"
     );
-    console.log("Getting profile: ", response);
     return response.data.user;
   },
 
