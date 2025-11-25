@@ -374,10 +374,9 @@ function EventCreationForm() {
           addressLine2: addressLine2 || undefined,
           city: city,
           zipcode: postcode,
-          location: {
-            latitude: latitude,
-            longitude: longitude,
-          },
+          location: latitude !== null && longitude !== null
+            ? { latitude, longitude }
+            : undefined,
         },
         categoryIds: [],
         eventUrl: undefined,

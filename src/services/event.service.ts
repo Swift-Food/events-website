@@ -4,21 +4,25 @@ import { AxiosResponse } from 'axios';
 import {
   EventStatus,
   EventResponseDto,
-  EventOwnerResponseDto,
-  EventAddressResponseDto,
-  EventCategoryResponseDto,
-  EventTicketResponseDto,
 } from '@/types/event';
 
 // Re-export for convenience
 export { EventStatus };
 export type { EventResponseDto };
 
+/**
+ * Location coordinates (matches backend LocationDto)
+ * Backend: src/features/user-management/driver-user/dto/location.dto.ts
+ */
 export interface LocationDto {
   latitude: number;
   longitude: number;
 }
 
+/**
+ * Address data for creating events (matches backend CreateEventAddressDto)
+ * Backend: src/features/event-management/events/dto/create-event.dto.ts
+ */
 export interface CreateEventAddressDto {
   name?: string;
   addressLine1: string;
@@ -26,7 +30,7 @@ export interface CreateEventAddressDto {
   flat?: string;
   city: string;
   zipcode: string;
-  location: LocationDto;
+  location?: LocationDto;
 }
 
 export interface CreateEventDto {
