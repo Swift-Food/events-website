@@ -283,9 +283,9 @@ export default function EventDetailsPage() {
                 <div className="mb-4 flex items-start gap-3">
                   <MapPin className="h-5 w-5 text-primary" />
                   <div>
-                    <p className="font-medium text-foreground">
+                    {/* <p className="font-medium text-foreground">
                       {event.address.name}
-                    </p>
+                    </p> */}
                     <p className="text-sm text-muted-foreground">
                       {event.address.addressLine1}
                     </p>
@@ -301,14 +301,12 @@ export default function EventDetailsPage() {
                 </div>
 
                 {/* Google Map */}
-                {event.address.location && (
-                  <GoogleMap
-                    lat={event.address.location.lat}
-                    lng={event.address.location.lng}
-                    title={event.address.name}
-                    className="h-64 w-full"
-                  />
-                )}
+                <GoogleMap
+                  latitude={event.address.location?.latitude}
+                  longitude={event.address.location?.longitude}
+                  title={event.address.name}
+                  className="h-64 w-full"
+                />
               </div>
 
               {/* Organizer Card */}

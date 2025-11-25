@@ -96,8 +96,8 @@ export interface EventAddressResponseDto {
   city: string;
   zipcode: string;
   location?: {
-    lat: number;
-    lng: number;
+    latitude: number;
+    longitude: number;
   };
 }
 

@@ -362,6 +362,7 @@ function EventCreationForm() {
         eventUrl: undefined,
         tickets: ticketsPayload.length > 0 ? ticketsPayload : undefined,
       };
+      console.log("Event Data payload: ", eventData)
 
       const response = await eventService.createEvent(eventData);
 
