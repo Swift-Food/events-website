@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { Menu, X, User, LogOut, UserCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth/authContext";
@@ -10,7 +11,7 @@ const navLinks = [
   { href: "/events", label: "Events" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
-  { href: "/profile", label: "Profile" },
+  // { href: "/profile", label: "Profile" },
 ];
 
 export default function Navbar() {
@@ -18,6 +19,7 @@ export default function Navbar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { isAuthenticated, logout, user, refreshProfile } = useAuth();
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
   const closeDrawer = () => setIsDrawerOpen(false);
@@ -125,7 +127,10 @@ export default function Navbar() {
                     <div className="py-2">
                       <button
                         className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/5 hover:text-white"
-                        onClick={() => setIsUserMenuOpen(false)}
+                        onClick={() => {
+                          router.push("/profile");
+                          setIsUserMenuOpen(false);
+                        }}
                       >
                         <UserCircle className="h-4 w-4" />
                         Profile
