@@ -1,8 +1,9 @@
 export enum EventStatus {
-  DRAFT = 'DRAFT',
-  PUBLISHED = 'PUBLISHED',
-  CANCELLED = 'CANCELLED',
-  COMPLETED = 'COMPLETED',
+  DRAFT = 'draft',
+  PUBLISHED = 'published',
+  ONGOING = 'ongoing',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
 }
 
 export enum EventCategoryType {
@@ -112,8 +113,7 @@ export interface EventTicketResponseDto {
   id: string;
   name: string;
   price: number;
-  quantityTotal: number;
-  quantityLeft: number;
+  quantity: number;
   quantitySold: number;
   status: string;
   startSale: string;
