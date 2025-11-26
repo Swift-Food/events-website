@@ -123,7 +123,7 @@ export default function EventDetailsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-5xl px-6 py-8">
+      <div className="mx-auto max-w-6xl px-6 py-8">
         {/* Back Button */}
         <button
           onClick={() => router.push("/events")}
@@ -133,137 +133,43 @@ export default function EventDetailsPage() {
           Back to Events
         </button>
 
-        {/* Hero Image */}
-        <div className="relative mb-8 aspect-[21/9] w-full overflow-hidden rounded-2xl border border-white/10 bg-card-secondary-background">
-          {event.eventImage ? (
-            <Image
-              src={event.eventImage}
-              alt={event.name}
-              fill
-              className="object-cover"
-              priority
-            />
-          ) : (
-            <div
-              className="flex h-full items-center justify-center"
-              style={{ backgroundColor: event.eventColor }}
-            >
-              <Calendar className="h-24 w-24 text-white/30" />
-            </div>
-          )}
-
-          {/* Status Badge */}
-          <div className="absolute right-6 top-6">
-            <span
-              className={`rounded-full border px-4 py-2 text-sm font-semibold backdrop-blur-md ${
-                statusColors[event.status]
-              }`}
-            >
-              {event.status}
-            </span>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="grid gap-8 lg:grid-cols-3">
-          {/* Left Column - Main Info */}
-          <div className="lg:col-span-2">
-            {/* Event Title */}
-            <h1 className="mb-4 text-4xl font-bold tracking-tight text-foreground">
-              {event.name}
-            </h1>
-
-            {/* Categories */}
-            {event.categories && event.categories.length > 0 && (
-              <div className="mb-6 flex flex-wrap gap-2">
-                {event.categories.map((category) => (
-                  <span
-                    key={category.id}
-                    className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-foreground"
-                    style={
-                      category.color
-                        ? {
-                            borderColor: category.color + "40",
-                            color: category.color,
-                          }
-                        : undefined
-                    }
-                  >
-                    {category.name}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Description */}
-            <div className="mb-8">
-              <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                About this event
-              </h2>
-              <div
-                className="tiptap-editor tiptap-view-mode"
-                dangerouslySetInnerHTML={{ __html: event.description }}
-              />
-            </div>
-
-            {/* Event URL */}
-            {/* {event.eventUrl && (
-              <div className="mb-8">
-                <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                  More Information
-                </h2>
-                <a
-                  href={event.eventUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-primary transition-colors hover:text-primary/80"
+        {/* Main Content - Two Column Layout */}
+        <div className="flex flex-col gap-6 lg:flex-row">
+          {/* Left Column - Image and Event Details Sidebar */}
+          <section className="flex flex-col gap-6 lg:w-96 lg:shrink-0">
+            {/* Square Image with Status Badge */}
+            <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/10 bg-card-secondary-background">
+              {event.eventImage ? (
+                <Image
+                  src={event.eventImage}
+                  alt={event.name}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              ) : (
+                <div
+                  className="flex h-full items-center justify-center"
+                  style={{ backgroundColor: event.eventColor }}
                 >
-                  <ExternalLink className="h-5 w-5" />
-                  Visit Event Website
-                </a>
-              </div>
-            )} */}
-
-            {/* Tickets */}
-            {event.eventTickets && event.eventTickets.length > 0 && (
-              <div className="mb-8">
-                <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                  Tickets
-                </h2>
-                <div className="space-y-3">
-                  {event.eventTickets.map((ticket) => (
-                    <div
-                      key={ticket.id}
-                      className="flex items-center justify-between rounded-xl border border-white/10 bg-card-background p-4"
-                    >
-                      <div>
-                        <h3 className="font-semibold text-foreground">
-                          {ticket.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {ticket.quantityLeft ?? 0} left
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xl font-bold text-foreground">
-                          {Number(ticket.price) === 0
-                            ? "Free"
-                            : `$${Number(ticket.price).toFixed(2)}`}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {ticket.status}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                  <Calendar className="h-24 w-24 text-white/30" />
                 </div>
-              </div>
-            )}
-          </div>
+              )}
 
-          {/* Right Column - Event Details Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8 space-y-6">
+              {/* Status Badge */}
+              <div className="absolute right-4 top-4">
+                <span
+                  className={`rounded-full border px-4 py-2 text-sm font-semibold backdrop-blur-md ${
+                    statusColors[event.status]
+                  }`}
+                >
+                  {event.status}
+                </span>
+              </div>
+            </div>
+
+            {/* Sticky Sidebar Content */}
+            <div className="lg:sticky lg:top-8 space-y-6">
               {/* Date & Time Card */}
               <div className="rounded-xl border border-white/10 bg-card-background p-6">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
@@ -324,9 +230,6 @@ export default function EventDetailsPage() {
                 <div className="mb-4 flex items-start gap-3">
                   <MapPin className="h-5 w-5 text-primary" />
                   <div>
-                    {/* <p className="font-medium text-foreground">
-                      {event.address.name}
-                    </p> */}
                     <p className="text-sm text-muted-foreground">
                       {event.address.addressLine1}
                     </p>
@@ -346,7 +249,7 @@ export default function EventDetailsPage() {
                   latitude={event.address.location?.latitude}
                   longitude={event.address.location?.longitude}
                   title={event.address.name}
-                  className="h-64 w-full"
+                  className="h-48 w-full"
                 />
               </div>
 
@@ -415,15 +318,95 @@ export default function EventDetailsPage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </section>
 
-              {/* Register Button */}
-              {event.status === EventStatus.PUBLISHED && (
-                <button className="w-full rounded-full bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-primary/80">
-                  Register for Event
-                </button>
+          {/* Right Column - Event Information */}
+          <section className="flex-1 space-y-6">
+            {/* Event Title */}
+            <div>
+              <h1 className="mb-4 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+                {event.name}
+              </h1>
+
+              {/* Categories */}
+              {event.categories && event.categories.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {event.categories.map((category) => (
+                    <span
+                      key={category.id}
+                      className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-foreground"
+                      style={
+                        category.color
+                          ? {
+                              borderColor: category.color + "40",
+                              color: category.color,
+                            }
+                          : undefined
+                      }
+                    >
+                      {category.name}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
-          </div>
+
+            {/* Description */}
+            <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
+              <h2 className="mb-4 text-2xl font-semibold text-foreground">
+                About this event
+              </h2>
+              <div
+                className="tiptap-editor tiptap-view-mode"
+                dangerouslySetInnerHTML={{ __html: event.description }}
+              />
+            </div>
+
+            {/* Tickets */}
+            {event.eventTickets && event.eventTickets.length > 0 && (
+              <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
+                <h2 className="mb-4 text-2xl font-semibold text-foreground">
+                  Tickets
+                </h2>
+                <div className="space-y-3">
+                  {event.eventTickets.map((ticket) => (
+                    <div
+                      key={ticket.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-white/10 bg-card-secondary-background p-4"
+                    >
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-foreground">
+                          {ticket.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {ticket.quantityLeft ?? 0} left
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className="text-xl font-bold text-foreground">
+                            {Number(ticket.price) === 0
+                              ? "Free"
+                              : `£${Number(ticket.price).toFixed(2)}`}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {ticket.status}
+                          </p>
+                        </div>
+                        {event.status === EventStatus.PUBLISHED &&
+                          (ticket.quantityLeft ?? 0) > 0 && (
+                            <button className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary/80 hover:scale-105 shadow-lg shadow-primary/30">
+                              Register
+                            </button>
+                          )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
         </div>
       </div>
 
