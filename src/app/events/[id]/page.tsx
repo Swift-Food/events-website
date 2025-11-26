@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { eventsApi } from "@/services/events";
+import { guestTicketService } from "@/services/guest-ticket.service";
+import { useAuth } from "@/lib/auth/authContext";
 import { EventResponseDto, EventStatus } from "@/types/event";
 import {
   Calendar,
@@ -13,19 +15,29 @@ import {
   User,
   Ticket,
   ExternalLink,
+  Loader2,
+  Check,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import GoogleMap from "@/components/GoogleMap";
+import { toast } from "sonner";
 
 export default function EventDetailsPage() {
   const params = useParams();
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const eventId = params.id as string;
 
   const [event, setEvent] = useState<EventResponseDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [showTicketSelector, setShowTicketSelector] = useState(false);
+  const [showQuestionForm, setShowQuestionForm] = useState(false);
+  const [questionAnswers, setQuestionAnswers] = useState<Record<string, any>>({});
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -47,6 +59,61 @@ export default function EventDetailsPage() {
       fetchEventDetails();
     }
   }, [eventId]);
+
+  const selectedTicket = event?.eventTickets?.find(t => t.id === selectedTicketId);
+
+  const handleRegister = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please log in to register for this event");
+      router.push("/auth");
+      return;
+    }
+
+    if (!selectedTicketId) {
+      toast.error("Please select a ticket type");
+      return;
+    }
+
+    // Check if ticket has questions that need answering
+    if (selectedTicket?.questionForm && selectedTicket.questionForm.length > 0 && !showQuestionForm) {
+      setShowQuestionForm(true);
+      return;
+    }
+
+    try {
+      setIsRegistering(true);
+      const result = await guestTicketService.registerForTicket({
+        eventTicketId: selectedTicketId,
+        questionAnswers: Object.keys(questionAnswers).length > 0 ? questionAnswers : undefined,
+      });
+
+      if (result.success) {
+        toast.success(result.message || "Successfully registered for event!");
+        setShowTicketSelector(false);
+        setSelectedTicketId(null);
+        setShowQuestionForm(false);
+        setQuestionAnswers({});
+
+        if (result.requiresPayment && result.paymentUrl) {
+          window.location.href = result.paymentUrl;
+        } else {
+          router.push("/my-tickets");
+        }
+      }
+    } catch (error: any) {
+      console.error("Registration failed:", error);
+      toast.error(error.response?.data?.message || "Failed to register for event");
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+
+  const handleQuestionChange = (question: string, value: any) => {
+    setQuestionAnswers(prev => ({
+      ...prev,
+      [question]: value,
+    }));
+  };
 
   const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -170,8 +237,122 @@ export default function EventDetailsPage() {
               </div>
             </div>
 
-            {/* Sticky Sidebar Content */}
-            <div className="lg:sticky lg:top-8 space-y-6">
+        {/* Main Content */}
+        <div className="grid gap-8 lg:grid-cols-3">
+          {/* Left Column - Main Info */}
+          <div className="lg:col-span-2">
+            {/* Event Title */}
+            <h1 className="mb-4 text-4xl font-bold tracking-tight text-foreground">
+              {event.name}
+            </h1>
+
+            {/* Categories */}
+            {event.categories && event.categories.length > 0 && (
+              <div className="mb-6 flex flex-wrap gap-2">
+                {event.categories.map((category) => (
+                  <span
+                    key={category.id}
+                    className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-foreground"
+                    style={
+                      category.color
+                        ? {
+                            borderColor: category.color + "40",
+                            color: category.color,
+                          }
+                        : undefined
+                    }
+                  >
+                    {category.name}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Description */}
+            <div className="mb-8">
+              <h2 className="mb-4 text-2xl font-semibold text-foreground">
+                About this event
+              </h2>
+              <div
+                className="tiptap-editor tiptap-view-mode"
+                dangerouslySetInnerHTML={{ __html: event.description }}
+              />
+            </div>
+
+            {/* Event URL */}
+            {/* {event.eventUrl && (
+              <div className="mb-8">
+                <h2 className="mb-4 text-2xl font-semibold text-foreground">
+                  More Information
+                </h2>
+                <a
+                  href={event.eventUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-primary transition-colors hover:text-primary/80"
+                >
+                  <ExternalLink className="h-5 w-5" />
+                  Visit Event Website
+                </a>
+              </div>
+            )} */}
+
+            {/* Tickets */}
+            {event.eventTickets && event.eventTickets.length > 0 && (
+              <div className="mb-8">
+                <h2 className="mb-4 text-2xl font-semibold text-foreground">
+                  Tickets
+                </h2>
+                <div className="space-y-3">
+                  {event.eventTickets.map((ticket) => {
+                    const remaining = ticket.quantityLeft ?? 0;
+                    const isSelected = selectedTicketId === ticket.id;
+                    const isSoldOut = remaining <= 0 || !ticket.isAvailable;
+
+                    return (
+                      <button
+                        key={ticket.id}
+                        onClick={() => !isSoldOut && setSelectedTicketId(ticket.id)}
+                        disabled={isSoldOut}
+                        className={`w-full flex items-center justify-between rounded-xl border p-4 transition-all ${
+                          isSelected
+                            ? "border-primary bg-primary/10"
+                            : isSoldOut
+                            ? "border-white/5 bg-card-background opacity-50 cursor-not-allowed"
+                            : "border-white/10 bg-card-background hover:border-white/20"
+                        }`}
+                      >
+                        <div className="text-left">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-foreground">
+                              {ticket.name}
+                            </h3>
+                            {isSelected && (
+                              <Check className="h-4 w-4 text-primary" />
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {isSoldOut ? "Sold out" : `${remaining} left`}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xl font-bold text-foreground">
+                            {Number(ticket.price) === 0
+                              ? "Free"
+                              : `$${Number(ticket.price).toFixed(2)}`}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Event Details Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-8 space-y-6">
               {/* Date & Time Card */}
               <div className="rounded-xl border border-white/10 bg-card-background p-6">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
@@ -325,97 +506,179 @@ export default function EventDetailsPage() {
                   </div>
                 </div>
               </div>
-            </div>
-          </section>
 
-          {/* Right Column - Event Information */}
-          <section className="flex-1 space-y-6">
-            {/* Event Title */}
-            <div>
-              <h1 className="mb-4 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
-                {event.name}
-              </h1>
-
-              {/* Categories */}
-              {event.categories && event.categories.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {event.categories.map((category) => (
-                    <span
-                      key={category.id}
-                      className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-foreground"
-                      style={
-                        category.color
-                          ? {
-                              borderColor: category.color + "40",
-                              color: category.color,
-                            }
-                          : undefined
-                      }
-                    >
-                      {category.name}
-                    </span>
-                  ))}
-                </div>
+              {/* Register Button */}
+              {event.status === EventStatus.PUBLISHED && (
+                <button className="w-full rounded-full bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-primary/80">
+                  Register for Event
+                </button>
               )}
             </div>
-
-            {/* Description */}
-            <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
-              <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                About this event
-              </h2>
-              <div
-                className="tiptap-editor tiptap-view-mode"
-                dangerouslySetInnerHTML={{ __html: event.description }}
-              />
-            </div>
-
-            {/* Tickets */}
-            {event.eventTickets && event.eventTickets.length > 0 && (
-              <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
-                <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                  Tickets
-                </h2>
-                <div className="space-y-3">
-                  {event.eventTickets.map((ticket) => (
-                    <div
-                      key={ticket.id}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-white/10 bg-card-secondary-background p-4"
-                    >
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-foreground">
-                          {ticket.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {ticket.quantityLeft} left
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="text-xl font-bold text-foreground">
-                            {Number(ticket.price) === 0
-                              ? "Free"
-                              : `£${Number(ticket.price).toFixed(2)}`}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {ticket.status}
-                          </p>
-                        </div>
-                        {event.status === EventStatus.PUBLISHED &&
-                          ticket.quantityLeft > 0 && (
-                            <button className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary/80 hover:scale-105 shadow-lg shadow-primary/30">
-                              Register
-                            </button>
-                          )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </section>
+          </div>
         </div>
       </div>
+
+      {/* Question Form Modal */}
+      {showQuestionForm && selectedTicket?.questionForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div
+            className="bg-gradient-to-b from-card-background to-card-secondary-background rounded-3xl border border-white/10 w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl shadow-black/50"
+          >
+            {/* Header */}
+            <div className="relative p-6 pb-4">
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent" />
+              <div className="relative flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground">
+                    Almost there!
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Please answer a few questions to complete your registration
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowQuestionForm(false);
+                    setQuestionAnswers({});
+                  }}
+                  className="p-2 rounded-full bg-white/5 text-muted-foreground hover:text-foreground hover:bg-white/10 transition-all"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Form Content */}
+            <div className="px-6 pb-6 space-y-5 max-h-[50vh] overflow-y-auto">
+              {selectedTicket.questionForm.map((q, index) => (
+                <div key={index} className="space-y-2">
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    {q.question}
+                    {q.required && <span className="text-red-400 ml-0.5">*</span>}
+                  </label>
+
+                  {q.type === 'shortText' && (
+                    <input
+                      type="text"
+                      value={questionAnswers[q.question] || ''}
+                      onChange={(e) => handleQuestionChange(q.question, e.target.value)}
+                      placeholder="Your answer..."
+                      className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+                    />
+                  )}
+
+                  {q.type === 'longText' && (
+                    <textarea
+                      value={questionAnswers[q.question] || ''}
+                      onChange={(e) => handleQuestionChange(q.question, e.target.value)}
+                      rows={4}
+                      placeholder="Your answer..."
+                      className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none"
+                    />
+                  )}
+
+                  {q.type === 'singleSelect' && q.options && (
+                    <div className="space-y-2">
+                      {q.options.map((option, optIndex) => (
+                        <label
+                          key={optIndex}
+                          onClick={() => handleQuestionChange(q.question, option)}
+                          className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                            questionAnswers[q.question] === option
+                              ? 'border-primary bg-primary/10'
+                              : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
+                          }`}
+                        >
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                            questionAnswers[q.question] === option
+                              ? 'border-primary'
+                              : 'border-white/30'
+                          }`}>
+                            {questionAnswers[q.question] === option && (
+                              <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+                            )}
+                          </div>
+                          <span className="text-foreground">{option}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+
+                  {q.type === 'multiSelect' && q.options && (
+                    <div className="space-y-2">
+                      {q.options.map((option, optIndex) => {
+                        const isChecked = (questionAnswers[q.question] || []).includes(option);
+                        return (
+                          <label
+                            key={optIndex}
+                            className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                              isChecked
+                                ? 'border-primary bg-primary/10'
+                                : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
+                            }`}
+                          >
+                            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                              isChecked
+                                ? 'border-primary bg-primary'
+                                : 'border-white/30'
+                            }`}>
+                              {isChecked && (
+                                <Check className="w-3 h-3 text-white" />
+                              )}
+                            </div>
+                            <span className="text-foreground">{option}</span>
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                const current = questionAnswers[q.question] || [];
+                                const updated = e.target.checked
+                                  ? [...current, option]
+                                  : current.filter((o: string) => o !== option);
+                                handleQuestionChange(q.question, updated);
+                              }}
+                              className="sr-only"
+                            />
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 pt-4 border-t border-white/10 bg-card-secondary-background/50">
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowQuestionForm(false);
+                    setQuestionAnswers({});
+                  }}
+                  className="flex-1 px-6 py-3 rounded-full border border-white/10 text-foreground font-medium hover:bg-white/5 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleRegister}
+                  disabled={isRegistering}
+                  className="flex-1 px-6 py-3 rounded-full bg-primary text-white font-semibold shadow-lg shadow-primary/25 hover:bg-primary/90 hover:shadow-primary/40 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                >
+                  {isRegistering ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Complete Registration"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tiptap Styling */}
       <style jsx global>{`

@@ -25,21 +25,66 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor - Handle errors
+// Flag to prevent multiple refresh attempts
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (token: string) => void;
+  reject: (error: Error) => void;
+}> = [];
+
+const processQueue = (error: Error | null, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token!);
+    }
+  });
+  failedQueue = [];
+};
+
+// Response interceptor - Handle errors and token refresh
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
-    // Only auto-logout on 401 if it's an authentication endpoint
-    // This prevents premature logout on temporary network issues
-    if (error.response?.status === 401) {
-      const url = error.config?.url || "";
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
-      // Only clear auth and show login modal for auth-related endpoints
-      if (url.includes("/auth/") || url.includes("/corporate-users/email/")) {
+    // Handle 401 errors - attempt token refresh
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      const url = originalRequest?.url || "";
+
+      // Don't try to refresh for auth endpoints (login, register, etc.)
+      if (url.includes("/auth/")) {
+        return Promise.reject(error);
+      }
+
+      if (isRefreshing) {
+        // If already refreshing, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({
+            resolve: (token: string) => {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+              resolve(apiClient(originalRequest));
+            },
+            reject: (err: Error) => {
+              reject(err);
+            },
+          });
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = localStorage.getItem("refresh_token");
+
+      if (!refreshToken) {
+        isRefreshing = false;
+        // No refresh token - clear auth and show login modal
         localStorage.removeItem("auth_token");
         localStorage.removeItem("user_data");
-
-        // Dispatch a custom event to open LoginModal and show relogin message
         if (typeof window !== "undefined") {
           window.dispatchEvent(
             new CustomEvent("open-login-modal", {
@@ -49,6 +94,50 @@ apiClient.interceptors.response.use(
             })
           );
         }
+        return Promise.reject(error);
+      }
+
+      try {
+        // Call refresh endpoint
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+          { refresh_token: refreshToken }
+        );
+
+        const { access_token, refresh_token: newRefreshToken } = response.data;
+
+        // Store new tokens
+        localStorage.setItem("auth_token", access_token);
+        localStorage.setItem("refresh_token", newRefreshToken);
+
+        // Update the failed request with new token
+        originalRequest.headers.Authorization = `Bearer ${access_token}`;
+
+        // Process queued requests
+        processQueue(null, access_token);
+
+        isRefreshing = false;
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed - clear auth and show login modal
+        processQueue(refreshError as Error, null);
+        isRefreshing = false;
+
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user_data");
+
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("open-login-modal", {
+              detail: {
+                message: "Your session has expired. Please log in again.",
+              },
+            })
+          );
+        }
+
+        return Promise.reject(refreshError);
       }
     }
 
