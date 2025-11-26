@@ -1,4 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import type { authApi as AuthApiType } from "./authApi";
 
 // Create axios instance
 export const apiClient = axios.create({
@@ -8,6 +9,16 @@ export const apiClient = axios.create({
   },
   timeout: 30000,
 });
+
+// Lazy import authApi to avoid circular dependency issues
+let authApiInstance: typeof AuthApiType | null = null;
+const getAuthApi = async () => {
+  if (!authApiInstance) {
+    const { authApi } = await import("./authApi");
+    authApiInstance = authApi;
+  }
+  return authApiInstance;
+};
 
 // Request interceptor - Add auth token
 apiClient.interceptors.request.use(
@@ -98,13 +109,11 @@ apiClient.interceptors.response.use(
       }
 
       try {
-        // Call refresh endpoint
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-          { refresh_token: refreshToken }
-        );
+        // Use centralized authApi.refreshToken method
+        const authApi = await getAuthApi();
+        const tokenData = await authApi.refreshToken(refreshToken);
 
-        const { access_token, refresh_token: newRefreshToken } = response.data;
+        const { access_token, refresh_token: newRefreshToken } = tokenData;
 
         // Store new tokens
         localStorage.setItem("auth_token", access_token);
