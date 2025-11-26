@@ -201,45 +201,45 @@ export default function EventDetailsPage() {
           Back to Events
         </button>
 
-        {/* Main Content - Two Column Layout */}
+        {/* Main Content - Responsive Layout */}
         <div className="flex flex-col gap-6 lg:flex-row">
-          {/* Left Column - Image and Event Details Sidebar */}
+          {/* Left Column - Image and Sidebar */}
           <section className="flex flex-col gap-6 lg:w-96 lg:shrink-0">
-            {/* Square Image with Status Badge */}
-            <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/10 bg-card-secondary-background">
-              {event.eventImage ? (
-                <Image
-                  src={event.eventImage}
-                  alt={event.name}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              ) : (
-                <div
-                  className="flex h-full items-center justify-center"
-                  style={{ backgroundColor: event.eventColor }}
-                >
-                  <Calendar className="h-24 w-24 text-white/30" />
+            {/* Top Section: Grid on sm-md, Flex column on lg+ */}
+            <div className="flex flex-col gap-6 sm:grid sm:grid-cols-3 lg:flex lg:flex-col">
+              {/* Square Image with Status Badge */}
+              <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/10 bg-card-secondary-background sm:col-span-2 sm:row-span-2 lg:col-span-1 lg:row-span-1">
+                {event.eventImage ? (
+                  <Image
+                    src={event.eventImage}
+                    alt={event.name}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                ) : (
+                  <div
+                    className="flex h-full items-center justify-center"
+                    style={{ backgroundColor: event.eventColor }}
+                  >
+                    <Calendar className="h-24 w-24 text-white/30" />
+                  </div>
+                )}
+
+                {/* Status Badge */}
+                <div className="absolute right-4 top-4">
+                  <span
+                    className={`rounded-full border px-4 py-2 text-sm font-semibold backdrop-blur-md ${
+                      statusColors[event.status]
+                    }`}
+                  >
+                    {event.status}
+                  </span>
                 </div>
-              )}
-
-              {/* Status Badge */}
-              <div className="absolute right-4 top-4">
-                <span
-                  className={`rounded-full border px-4 py-2 text-sm font-semibold backdrop-blur-md ${
-                    statusColors[event.status]
-                  }`}
-                >
-                  {event.status}
-                </span>
               </div>
-            </div>
 
-            {/* Sticky Sidebar Content */}
-            <div className="lg:sticky lg:top-8 space-y-6">
               {/* Date & Time Card */}
-              <div className="rounded-xl border border-white/10 bg-card-background p-6">
+              <div className="rounded-xl border border-white/10 bg-card-background p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Date & Time
                 </h3>
@@ -296,7 +296,7 @@ export default function EventDetailsPage() {
               </div>
 
               {/* Location Card */}
-              <div className="rounded-xl border border-white/10 bg-card-background p-6">
+              <div className="rounded-xl border border-white/10 bg-card-background p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Location
                 </h3>
@@ -322,10 +322,13 @@ export default function EventDetailsPage() {
                   latitude={event.address.location?.latitude}
                   longitude={event.address.location?.longitude}
                   title={event.address.name}
-                  className="h-48 w-full"
+                  className="h-32 sm:h-32 lg:h-48 w-full"
                 />
               </div>
+            </div>
 
+            {/* Additional Cards - 2 columns on sm-md, 1 column on lg+ */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
               {/* Organizer Card */}
               <div className="rounded-xl border border-white/10 bg-card-background p-6">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
@@ -394,7 +397,7 @@ export default function EventDetailsPage() {
             </div>
           </section>
 
-          {/* Right Column - Event Information */}
+          {/* Right Column - Main Content */}
           <section className="flex-1 space-y-6">
             {/* Event Title and Categories */}
             <div>
