@@ -176,14 +176,12 @@ export default function EventDetailsPage() {
                   Date & Time
                 </h3>
                 <div className="flex gap-4">
-                  <div className="flex flex-col items-center py-1">
-                    <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
-                    <div className="my-2 w-0.5 flex-1 rounded-full bg-primary/30"></div>
-                    <div className="h-3 w-3 rounded-full bg-primary/30 shadow-md"></div>
-                  </div>
-                  <div className="flex-1">
-                    {isSameDay(event.startDateTime, event.endDateTime) ? (
-                      <>
+                  {isSameDay(event.startDateTime, event.endDateTime) ? (
+                    <>
+                      <div className="flex flex-col items-center py-1">
+                        <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
+                      </div>
+                      <div className="flex-1">
                         <p className="font-medium text-foreground">
                           {formatDate(event.startDateTime)}
                         </p>
@@ -191,9 +189,16 @@ export default function EventDetailsPage() {
                           {formatTime(event.startDateTime)} -{" "}
                           {formatTime(event.endDateTime)}
                         </p>
-                      </>
-                    ) : (
-                      <>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex flex-col items-center py-1">
+                        <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
+                        <div className="my-2 w-0.5 flex-1 rounded-full bg-primary/30"></div>
+                        <div className="h-3 w-3 rounded-full bg-primary/30 shadow-md"></div>
+                      </div>
+                      <div className="flex-1">
                         <div className="mb-3">
                           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                             Start
@@ -216,9 +221,9 @@ export default function EventDetailsPage() {
                             {formatTime(event.endDateTime)}
                           </p>
                         </div>
-                      </>
-                    )}
-                  </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
