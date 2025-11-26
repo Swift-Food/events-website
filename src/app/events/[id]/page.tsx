@@ -226,8 +226,8 @@ export default function EventDetailsPage() {
                   </div>
                 )}
 
-                {/* Status Badge */}
-                <div className="absolute right-4 top-4">
+                {/* Status Badge - Only on lg+ */}
+                <div className="absolute right-4 top-4 hidden lg:block">
                   <span
                     className={`rounded-full border px-4 py-2 text-sm font-semibold backdrop-blur-md ${
                       statusColors[event.status]
@@ -238,7 +238,36 @@ export default function EventDetailsPage() {
                 </div>
               </div>
 
-              {/* Top Right: Date & Time Card */}
+              {/* Event Title & Categories - Show on mobile & tablet, hide on desktop */}
+              <div className="block lg:hidden sm:col-span-1 sm:row-span-1 sm:flex sm:flex-col sm:items-center sm:justify-center">
+                <h1 className="mb-4 text-2xl sm:text-3xl font-bold tracking-tight text-foreground sm:text-center">
+                  {event.name}
+                </h1>
+
+                {/* Categories */}
+                {event.categories && event.categories.length > 0 && (
+                  <div className="flex flex-wrap gap-2 sm:justify-center">
+                    {event.categories.map((category) => (
+                      <span
+                        key={category.id}
+                        className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-foreground"
+                        style={
+                          category.color
+                            ? {
+                                borderColor: category.color + "40",
+                                color: category.color,
+                              }
+                            : undefined
+                        }
+                      >
+                        {category.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Date & Time Card - Bottom left on tablet, normal on mobile/desktop */}
               <div className="rounded-xl border border-white/10 bg-card-background p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Date & Time
@@ -295,8 +324,82 @@ export default function EventDetailsPage() {
                 </div>
               </div>
 
-              {/* Bottom Left: Event Stats Card */}
+              {/* Location Card - Bottom right */}
               <div className="rounded-xl border border-white/10 bg-card-background p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+                <h3 className="mb-4 text-lg font-semibold text-foreground">
+                  Location
+                </h3>
+                <div className="mb-4 flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      {event.address.addressLine1}
+                    </p>
+                    {event.address.addressLine2 && (
+                      <p className="text-sm text-muted-foreground">
+                        {event.address.addressLine2}
+                      </p>
+                    )}
+                    <p className="text-sm text-muted-foreground">
+                      {event.address.city}, {event.address.zipcode}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Google Map */}
+                <GoogleMap
+                  latitude={event.address.location?.latitude}
+                  longitude={event.address.location?.longitude}
+                  title={event.address.name}
+                  className="h-32 sm:h-32 lg:h-48 w-full"
+                />
+              </div>
+            </div>
+
+            {/* Organizer & Stats - Side by side on sm-md, separate on lg+ */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+              {/* Organizer Card */}
+              <div className="rounded-xl border border-white/10 bg-card-background p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    Organized by
+                  </h3>
+                  {/* Status Badge - Show on mobile/tablet, hide on desktop */}
+                  <div className="block lg:hidden">
+                    <span
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                        statusColors[event.status]
+                      }`}
+                    >
+                      {event.status}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {event.owner.profilePicture ? (
+                    <Image
+                      src={event.owner.profilePicture}
+                      alt={event.owner.username}
+                      width={48}
+                      height={48}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                      <User className="h-6 w-6 text-primary" />
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-medium text-foreground">
+                      {event.owner.username}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Organizer</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Event Stats Card */}
+              <div className="rounded-xl border border-white/10 bg-card-background p-6">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Event Stats
                 </h3>
@@ -332,72 +435,13 @@ export default function EventDetailsPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Bottom Right: Location Card */}
-              <div className="rounded-xl border border-white/10 bg-card-background p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
-                <h3 className="mb-4 text-lg font-semibold text-foreground">
-                  Location
-                </h3>
-                <div className="mb-4 flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      {event.address.addressLine1}
-                    </p>
-                    {event.address.addressLine2 && (
-                      <p className="text-sm text-muted-foreground">
-                        {event.address.addressLine2}
-                      </p>
-                    )}
-                    <p className="text-sm text-muted-foreground">
-                      {event.address.city}, {event.address.zipcode}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Google Map */}
-                <GoogleMap
-                  latitude={event.address.location?.latitude}
-                  longitude={event.address.location?.longitude}
-                  title={event.address.name}
-                  className="h-32 sm:h-32 lg:h-48 w-full"
-                />
-              </div>
-            </div>
-
-            {/* Organizer Card - Full width below grid on sm-md, part of sidebar on lg+ */}
-            <div className="rounded-xl border border-white/10 bg-card-background p-6">
-              <h3 className="mb-4 text-lg font-semibold text-foreground">
-                Organized by
-              </h3>
-              <div className="flex items-center gap-3">
-                {event.owner.profilePicture ? (
-                  <Image
-                    src={event.owner.profilePicture}
-                    alt={event.owner.username}
-                    width={48}
-                    height={48}
-                    className="rounded-full"
-                  />
-                ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                    <User className="h-6 w-6 text-primary" />
-                  </div>
-                )}
-                <div>
-                  <p className="font-medium text-foreground">
-                    {event.owner.username}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Organizer</p>
-                </div>
-              </div>
             </div>
           </section>
 
           {/* Right Column - Main Content */}
           <section className="flex-1 space-y-6">
-            {/* Event Title and Categories */}
-            <div>
+            {/* Event Title and Categories - Only show on desktop */}
+            <div className="hidden lg:block">
               <h1 className="mb-4 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
                 {event.name}
               </h1>
