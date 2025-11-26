@@ -392,10 +392,10 @@ export default function EventDetailsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  {event.owner.profilePicture ? (
+                  {event.owner.user.profilePicture ? (
                     <Image
-                      src={event.owner.profilePicture}
-                      alt={event.owner.username}
+                      src={event.owner.user.profilePicture}
+                      alt={event.owner.user.username || ""}
                       width={48}
                       height={48}
                       className="rounded-full"
@@ -407,7 +407,7 @@ export default function EventDetailsPage() {
                   )}
                   <div>
                     <p className="font-medium text-foreground">
-                      {event.owner.username}
+                      {event.owner.user.username}
                     </p>
                     <p className="text-sm text-muted-foreground">Organizer</p>
                   </div>
@@ -713,7 +713,9 @@ export default function EventDetailsPage() {
                   Cancel
                 </button>
                 <button
-                  onClick={() => selectedTicketId && handleRegister(selectedTicketId)}
+                  onClick={() =>
+                    selectedTicketId && handleRegister(selectedTicketId)
+                  }
                   disabled={isRegistering}
                   className="flex-1 px-6 py-3 rounded-full bg-primary text-white font-semibold shadow-lg shadow-primary/25 hover:bg-primary/90 hover:shadow-primary/40 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
                 >

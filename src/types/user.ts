@@ -37,6 +37,7 @@ export interface User {
   eventUser: EventUser | null;
   googleId?: string | null;
   isGoogleUser?: boolean;
+  profilePicture?: string;
 }
 
 // Auth DTOs
