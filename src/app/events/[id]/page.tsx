@@ -191,7 +191,7 @@ export default function EventDetailsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-5xl px-6 py-8">
+      <div className="mx-auto max-w-6xl px-6 py-8">
         {/* Back Button */}
         <button
           onClick={() => router.push("/events")}
@@ -201,167 +201,55 @@ export default function EventDetailsPage() {
           Back to Events
         </button>
 
-        {/* Hero Image */}
-        <div className="relative mb-8 aspect-[21/9] w-full overflow-hidden rounded-2xl border border-white/10 bg-card-secondary-background">
-          {event.eventImage ? (
-            <Image
-              src={event.eventImage}
-              alt={event.name}
-              fill
-              className="object-cover"
-              priority
-            />
-          ) : (
-            <div
-              className="flex h-full items-center justify-center"
-              style={{ backgroundColor: event.eventColor }}
-            >
-              <Calendar className="h-24 w-24 text-white/30" />
-            </div>
-          )}
-
-          {/* Status Badge */}
-          <div className="absolute right-6 top-6">
-            <span
-              className={`rounded-full border px-4 py-2 text-sm font-semibold backdrop-blur-md ${
-                statusColors[event.status]
-              }`}
-            >
-              {event.status}
-            </span>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="grid gap-8 lg:grid-cols-3">
-          {/* Left Column - Main Info */}
-          <div className="lg:col-span-2">
-            {/* Event Title */}
-            <h1 className="mb-4 text-4xl font-bold tracking-tight text-foreground">
-              {event.name}
-            </h1>
-
-            {/* Categories */}
-            {event.categories && event.categories.length > 0 && (
-              <div className="mb-6 flex flex-wrap gap-2">
-                {event.categories.map((category) => (
-                  <span
-                    key={category.id}
-                    className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-foreground"
-                    style={
-                      category.color
-                        ? {
-                            borderColor: category.color + "40",
-                            color: category.color,
-                          }
-                        : undefined
-                    }
-                  >
-                    {category.name}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Description */}
-            <div className="mb-8">
-              <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                About this event
-              </h2>
-              <div
-                className="tiptap-editor tiptap-view-mode"
-                dangerouslySetInnerHTML={{ __html: event.description }}
-              />
-            </div>
-
-            {/* Event URL */}
-            {/* {event.eventUrl && (
-              <div className="mb-8">
-                <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                  More Information
-                </h2>
-                <a
-                  href={event.eventUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-primary transition-colors hover:text-primary/80"
+        {/* Main Content - Two Column Layout */}
+        <div className="flex flex-col gap-6 lg:flex-row">
+          {/* Left Column - Image and Event Details Sidebar */}
+          <section className="flex flex-col gap-6 lg:w-96 lg:shrink-0">
+            {/* Square Image with Status Badge */}
+            <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/10 bg-card-secondary-background">
+              {event.eventImage ? (
+                <Image
+                  src={event.eventImage}
+                  alt={event.name}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              ) : (
+                <div
+                  className="flex h-full items-center justify-center"
+                  style={{ backgroundColor: event.eventColor }}
                 >
-                  <ExternalLink className="h-5 w-5" />
-                  Visit Event Website
-                </a>
-              </div>
-            )} */}
-
-            {/* Tickets */}
-            {event.eventTickets && event.eventTickets.length > 0 && (
-              <div className="mb-8">
-                <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                  Tickets
-                </h2>
-                <div className="space-y-3">
-                  {event.eventTickets.map((ticket) => {
-                    const remaining = ticket.quantityLeft ?? 0;
-                    const isSelected = selectedTicketId === ticket.id;
-                    const isSoldOut = remaining <= 0 || !ticket.isAvailable;
-
-                    return (
-                      <button
-                        key={ticket.id}
-                        onClick={() => !isSoldOut && setSelectedTicketId(ticket.id)}
-                        disabled={isSoldOut}
-                        className={`w-full flex items-center justify-between rounded-xl border p-4 transition-all ${
-                          isSelected
-                            ? "border-primary bg-primary/10"
-                            : isSoldOut
-                            ? "border-white/5 bg-card-background opacity-50 cursor-not-allowed"
-                            : "border-white/10 bg-card-background hover:border-white/20"
-                        }`}
-                      >
-                        <div className="text-left">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-foreground">
-                              {ticket.name}
-                            </h3>
-                            {isSelected && (
-                              <Check className="h-4 w-4 text-primary" />
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {isSoldOut ? "Sold out" : `${remaining} left`}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xl font-bold text-foreground">
-                            {Number(ticket.price) === 0
-                              ? "Free"
-                              : `$${Number(ticket.price).toFixed(2)}`}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
+                  <Calendar className="h-24 w-24 text-white/30" />
                 </div>
-              </div>
-            )}
-          </div>
+              )}
 
-          {/* Right Column - Event Details Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8 space-y-6">
+              {/* Status Badge */}
+              <div className="absolute right-4 top-4">
+                <span
+                  className={`rounded-full border px-4 py-2 text-sm font-semibold backdrop-blur-md ${
+                    statusColors[event.status]
+                  }`}
+                >
+                  {event.status}
+                </span>
+              </div>
+            </div>
+
+            {/* Sticky Sidebar Content */}
+            <div className="lg:sticky lg:top-8 space-y-6">
               {/* Date & Time Card */}
               <div className="rounded-xl border border-white/10 bg-card-background p-6">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Date & Time
                 </h3>
                 <div className="flex gap-4">
-                  <div className="flex flex-col items-center py-1">
-                    <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
-                    <div className="my-2 w-0.5 flex-1 rounded-full bg-primary/30"></div>
-                    <div className="h-3 w-3 rounded-full bg-primary/30 shadow-md"></div>
-                  </div>
-                  <div className="flex-1">
-                    {isSameDay(event.startDateTime, event.endDateTime) ? (
-                      <>
+                  {isSameDay(event.startDateTime, event.endDateTime) ? (
+                    <>
+                      <div className="flex flex-col items-center py-1">
+                        <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
+                      </div>
+                      <div className="flex-1">
                         <p className="font-medium text-foreground">
                           {formatDate(event.startDateTime)}
                         </p>
@@ -369,9 +257,16 @@ export default function EventDetailsPage() {
                           {formatTime(event.startDateTime)} -{" "}
                           {formatTime(event.endDateTime)}
                         </p>
-                      </>
-                    ) : (
-                      <>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex flex-col items-center py-1">
+                        <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
+                        <div className="my-2 w-0.5 flex-1 rounded-full bg-primary/30"></div>
+                        <div className="h-3 w-3 rounded-full bg-primary/30 shadow-md"></div>
+                      </div>
+                      <div className="flex-1">
                         <div className="mb-3">
                           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                             Start
@@ -394,9 +289,9 @@ export default function EventDetailsPage() {
                             {formatTime(event.endDateTime)}
                           </p>
                         </div>
-                      </>
-                    )}
-                  </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -408,9 +303,6 @@ export default function EventDetailsPage() {
                 <div className="mb-4 flex items-start gap-3">
                   <MapPin className="h-5 w-5 text-primary" />
                   <div>
-                    {/* <p className="font-medium text-foreground">
-                      {event.address.name}
-                    </p> */}
                     <p className="text-sm text-muted-foreground">
                       {event.address.addressLine1}
                     </p>
@@ -430,7 +322,7 @@ export default function EventDetailsPage() {
                   latitude={event.address.location?.latitude}
                   longitude={event.address.location?.longitude}
                   title={event.address.name}
-                  className="h-64 w-full"
+                  className="h-48 w-full"
                 />
               </div>
 
@@ -499,28 +391,116 @@ export default function EventDetailsPage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </section>
 
-              {/* Register Button */}
-              {event.status === EventStatus.PUBLISHED && (
-                <button
-                  onClick={handleRegister}
-                  disabled={isRegistering || !selectedTicketId}
-                  className="w-full rounded-full bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isRegistering ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      Registering...
-                    </>
-                  ) : selectedTicketId ? (
-                    "Register for Event"
-                  ) : (
-                    "Select a Ticket Above"
-                  )}
-                </button>
+          {/* Right Column - Event Information */}
+          <section className="flex-1 space-y-6">
+            {/* Event Title and Categories */}
+            <div>
+              <h1 className="mb-4 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+                {event.name}
+              </h1>
+
+              {/* Categories */}
+              {event.categories && event.categories.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {event.categories.map((category) => (
+                    <span
+                      key={category.id}
+                      className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-foreground"
+                      style={
+                        category.color
+                          ? {
+                              borderColor: category.color + "40",
+                              color: category.color,
+                            }
+                          : undefined
+                      }
+                    >
+                      {category.name}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
-          </div>
+
+            {/* Description */}
+            <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
+              <h2 className="mb-4 text-2xl font-semibold text-foreground">
+                About this event
+              </h2>
+              <div
+                className="tiptap-editor tiptap-view-mode"
+                dangerouslySetInnerHTML={{ __html: event.description }}
+              />
+            </div>
+
+            {/* Tickets */}
+            {event.eventTickets && event.eventTickets.length > 0 && (
+              <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
+                <h2 className="mb-4 text-2xl font-semibold text-foreground">
+                  Tickets
+                </h2>
+                <div className="space-y-3">
+                  {event.eventTickets.map((ticket) => {
+                    const remaining = ticket.quantityLeft ?? 0;
+                    const isSelected = selectedTicketId === ticket.id;
+                    const isSoldOut = remaining <= 0 || !ticket.isAvailable;
+
+                    return (
+                      <div
+                        key={ticket.id}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-white/10 bg-card-secondary-background p-4"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-foreground">
+                              {ticket.name}
+                            </h3>
+                            {isSelected && (
+                              <Check className="h-4 w-4 text-primary" />
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {isSoldOut ? "Sold out" : `${remaining} left`}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="text-xl font-bold text-foreground">
+                              {Number(ticket.price) === 0
+                                ? "Free"
+                                : `£${Number(ticket.price).toFixed(2)}`}
+                            </p>
+                          </div>
+                          {event.status === EventStatus.PUBLISHED && !isSoldOut && (
+                            <button
+                              onClick={() => {
+                                setSelectedTicketId(ticket.id);
+                                handleRegister();
+                              }}
+                              disabled={isRegistering && isSelected}
+                              className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary/80 hover:scale-105 shadow-lg shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                              {isRegistering && isSelected ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                  Registering...
+                                </>
+                              ) : (
+                                "Register"
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </section>
         </div>
       </div>
 
