@@ -137,7 +137,30 @@ export default function ProfilePage() {
       endDateTime: ticket.eventEndDateTime,
       eventImage: ticket.eventImage,
       status: ticket.eventStatus,
-    } as any));
+      description: "",
+      eventColor: "#000000",
+      isPrivate: false,
+      eventUrl: null,
+      viewCount: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      owner: {
+        id: "",
+        username: "",
+        email: "",
+        organizationName: null,
+      },
+      address: {
+        id: "",
+        street: "",
+        city: "TBD",
+        state: "",
+        zipcode: "",
+        country: "",
+      },
+      categories: [],
+      attendeesCount: 0,
+    } as EventResponseDto));
 
   const pastAttendingEvents = attendingTickets
     .filter((ticket) => new Date(ticket.eventStartDateTime) <= now)
@@ -148,7 +171,30 @@ export default function ProfilePage() {
       endDateTime: ticket.eventEndDateTime,
       eventImage: ticket.eventImage,
       status: ticket.eventStatus,
-    } as any));
+      description: "",
+      eventColor: "#000000",
+      isPrivate: false,
+      eventUrl: null,
+      viewCount: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      owner: {
+        id: "",
+        username: "",
+        email: "",
+        organizationName: null,
+      },
+      address: {
+        id: "",
+        street: "",
+        city: "TBD",
+        state: "",
+        zipcode: "",
+        country: "",
+      },
+      categories: [],
+      attendeesCount: 0,
+    } as EventResponseDto));
 
   // Get events for current tab
   const getEventsForTab = (): EventResponseDto[] => {

@@ -71,12 +71,14 @@ export default function EventCard({ event }: EventCardProps) {
         </div>
 
         {/* Location */}
-        <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
-          <MapPin className="h-4 w-4" />
-          <span className="line-clamp-1">
-            {event.address.city}, {event.address.zipcode}
-          </span>
-        </div>
+        {event.address && event.address.city && event.address.city !== "TBD" && (
+          <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
+            <MapPin className="h-4 w-4" />
+            <span className="line-clamp-1">
+              {event.address.city}, {event.address.zipcode}
+            </span>
+          </div>
+        )}
 
         {/* Categories */}
         {event.categories && event.categories.length > 0 && (
