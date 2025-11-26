@@ -1,111 +1,39 @@
 // services/guest-ticket.service.ts
-import apiClient from '@/lib/auth/apiClient';
-import { AxiosResponse } from 'axios';
-import { EventResponseDto } from '@/types/event';
-
-export enum GuestTicketStatus {
-  PENDING = 'pending',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-  CANCELLED = 'cancelled',
-  WAITLISTED = 'waitlisted',
-  CHECKED_IN = 'checked_in',
-}
-
-export interface GuestTicketEventUser {
-  id: string;
-  organizationName: string | null;
-  user: {
-    id: string;
-    email: string;
-    username: string;
-    profilePicture: string;
-  };
-}
-
-export interface GuestTicketInfo {
-  id: string;
-  name: string;
-  description: string;
-  price: string;
-}
-
-export interface GuestTicket {
-  id: string;
-  status: GuestTicketStatus;
-  qrCode: string | null;
-  formResponses: Record<string, any>[];
-  approvedAt: Date | null;
-  rejectedAt: Date | null;
-  rejectionReason: string | null;
-  checkedInAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-  event: EventResponseDto;
-  eventTicket: GuestTicketInfo;
-  eventUser: GuestTicketEventUser;
-}
-
-export interface RegisterForTicketDto {
-  eventTicketId: string;
-  formResponses?: Record<string, any>[];
-}
-
-export interface RegisterTicketResponse {
-  success: boolean;
-  message: string;
-  ticket: GuestTicket;
-}
-
-export interface MyTicketsResponse {
-  success: boolean;
-  tickets: GuestTicket[];
-  total: number;
-}
-
-export interface EventAttendeesResponse {
-  success: boolean;
-  attendees: GuestTicket[];
-  total: number;
-}
-
-export interface UpdateTicketStatusDto {
-  status: GuestTicketStatus;
-  reason?: string;
-}
-
-export interface TicketActionResponse {
-  success: boolean;
-  message: string;
-  ticket: GuestTicket;
-}
-
-export interface BulkActionResponse {
-  success: boolean;
-  message: string;
-  processed: number;
-  failed: number;
-}
+import apiClient from "@/lib/auth/apiClient";
+import { AxiosResponse } from "axios";
+import {
+  GuestTicketResponseDto,
+  RegisterForTicketDto,
+  RegisterTicketResponseDto,
+  MyTicketsResponseDto,
+  PendingTicketsResponseDto,
+  UpdateTicketStatusDto,
+  TicketActionResponseDto,
+  BulkActionResponseDto,
+  RefundTicketRequestDto,
+  RefundResult,
+  RefundEligibilityResult,
+} from "@/types/guest-ticket";
 
 class GuestTicketService {
-  private readonly baseUrl = '/guest-tickets';
+  private readonly baseUrl = "/guest-tickets";
 
   /**
    * Register for a ticket (join an event)
    */
-  async registerForTicket(data: RegisterForTicketDto): Promise<RegisterTicketResponse> {
-    const response: AxiosResponse<RegisterTicketResponse> = await apiClient.post(
-      `${this.baseUrl}/register`,
-      data
-    );
+  async registerForTicket(
+    data: RegisterForTicketDto
+  ): Promise<RegisterTicketResponseDto> {
+    const response: AxiosResponse<RegisterTicketResponseDto> =
+      await apiClient.post(`${this.baseUrl}/register`, data);
     return response.data;
   }
 
   /**
    * Get all my tickets (events I've joined)
    */
-  async getMyTickets(): Promise<MyTicketsResponse> {
-    const response: AxiosResponse<MyTicketsResponse> = await apiClient.get(
+  async getMyTickets(): Promise<MyTicketsResponseDto> {
+    const response: AxiosResponse<MyTicketsResponseDto> = await apiClient.get(
       `${this.baseUrl}/my-tickets`
     );
     return response.data;
@@ -114,18 +42,17 @@ class GuestTicketService {
   /**
    * Get my tickets for a specific event
    */
-  async getMyEventTickets(eventId: string): Promise<MyTicketsResponse> {
-    const response: AxiosResponse<MyTicketsResponse> = await apiClient.get(
-      `${this.baseUrl}/my-tickets/event/${eventId}`
-    );
+  async getMyEventTickets(eventId: string): Promise<GuestTicketResponseDto[]> {
+    const response: AxiosResponse<GuestTicketResponseDto[]> =
+      await apiClient.get(`${this.baseUrl}/my-tickets/event/${eventId}`);
     return response.data;
   }
 
   /**
    * Get a single guest ticket by ID
    */
-  async getTicketById(id: string): Promise<GuestTicket> {
-    const response: AxiosResponse<GuestTicket> = await apiClient.get(
+  async getTicketById(id: string): Promise<GuestTicketResponseDto> {
+    const response: AxiosResponse<GuestTicketResponseDto> = await apiClient.get(
       `${this.baseUrl}/${id}`
     );
     return response.data;
@@ -134,52 +61,51 @@ class GuestTicketService {
   /**
    * Cancel a ticket
    */
-  async cancelTicket(id: string): Promise<TicketActionResponse> {
-    const response: AxiosResponse<TicketActionResponse> = await apiClient.delete(
-      `${this.baseUrl}/${id}`
-    );
+  async cancelTicket(id: string): Promise<TicketActionResponseDto> {
+    const response: AxiosResponse<TicketActionResponseDto> =
+      await apiClient.delete(`${this.baseUrl}/${id}`);
     return response.data;
   }
 
   /**
    * Get event attendees (for organizers)
    */
-  async getEventAttendees(eventId: string): Promise<EventAttendeesResponse> {
-    const response: AxiosResponse<EventAttendeesResponse> = await apiClient.get(
-      `${this.baseUrl}/event/${eventId}/attendees`
-    );
+  async getEventAttendees(eventId: string): Promise<GuestTicketResponseDto[]> {
+    const response: AxiosResponse<GuestTicketResponseDto[]> =
+      await apiClient.get(`${this.baseUrl}/event/${eventId}/attendees`);
     return response.data;
   }
 
   /**
    * Get pending tickets for an event (for organizers)
    */
-  async getPendingTickets(eventId: string): Promise<EventAttendeesResponse> {
-    const response: AxiosResponse<EventAttendeesResponse> = await apiClient.get(
-      `${this.baseUrl}/event/${eventId}/pending`
-    );
+  async getPendingTickets(eventId: string): Promise<PendingTicketsResponseDto> {
+    const response: AxiosResponse<PendingTicketsResponseDto> =
+      await apiClient.get(`${this.baseUrl}/event/${eventId}/pending`);
     return response.data;
   }
 
   /**
    * Approve a ticket
    */
-  async approveTicket(id: string, reason?: string): Promise<TicketActionResponse> {
-    const response: AxiosResponse<TicketActionResponse> = await apiClient.post(
-      `${this.baseUrl}/${id}/approve`,
-      { reason }
-    );
+  async approveTicket(
+    id: string,
+    reason?: string
+  ): Promise<GuestTicketResponseDto> {
+    const response: AxiosResponse<GuestTicketResponseDto> =
+      await apiClient.post(`${this.baseUrl}/${id}/approve`, { reason });
     return response.data;
   }
 
   /**
    * Reject a ticket
    */
-  async rejectTicket(id: string, reason?: string): Promise<TicketActionResponse> {
-    const response: AxiosResponse<TicketActionResponse> = await apiClient.post(
-      `${this.baseUrl}/${id}/reject`,
-      { reason }
-    );
+  async rejectTicket(
+    id: string,
+    reason?: string
+  ): Promise<TicketActionResponseDto> {
+    const response: AxiosResponse<TicketActionResponseDto> =
+      await apiClient.post(`${this.baseUrl}/${id}/reject`, { reason });
     return response.data;
   }
 
@@ -189,29 +115,28 @@ class GuestTicketService {
   async updateTicketStatus(
     id: string,
     data: UpdateTicketStatusDto
-  ): Promise<TicketActionResponse> {
-    const response: AxiosResponse<TicketActionResponse> = await apiClient.patch(
-      `${this.baseUrl}/${id}/status`,
-      data
-    );
+  ): Promise<GuestTicketResponseDto> {
+    const response: AxiosResponse<GuestTicketResponseDto> =
+      await apiClient.patch(`${this.baseUrl}/${id}/status`, data);
     return response.data;
   }
 
   /**
    * Promote from waitlist
    */
-  async promoteFromWaitlist(id: string): Promise<TicketActionResponse> {
-    const response: AxiosResponse<TicketActionResponse> = await apiClient.post(
-      `${this.baseUrl}/${id}/promote`
-    );
+  async promoteFromWaitlist(id: string): Promise<GuestTicketResponseDto> {
+    const response: AxiosResponse<GuestTicketResponseDto> =
+      await apiClient.post(`${this.baseUrl}/${id}/promote`);
     return response.data;
   }
 
   /**
    * Bulk approve tickets
    */
-  async bulkApproveTickets(ticketIds: string[]): Promise<BulkActionResponse> {
-    const response: AxiosResponse<BulkActionResponse> = await apiClient.post(
+  async bulkApproveTickets(
+    ticketIds: string[]
+  ): Promise<BulkActionResponseDto> {
+    const response: AxiosResponse<BulkActionResponseDto> = await apiClient.post(
       `${this.baseUrl}/bulk/approve`,
       { ticketIds }
     );
@@ -224,11 +149,77 @@ class GuestTicketService {
   async bulkRejectTickets(
     ticketIds: string[],
     reason?: string
-  ): Promise<BulkActionResponse> {
-    const response: AxiosResponse<BulkActionResponse> = await apiClient.post(
+  ): Promise<BulkActionResponseDto> {
+    const response: AxiosResponse<BulkActionResponseDto> = await apiClient.post(
       `${this.baseUrl}/bulk/reject`,
       { ticketIds, reason }
     );
+    return response.data;
+  }
+
+  /**
+   * Check in a ticket using QR code
+   */
+  async checkInTicket(qrCode: string): Promise<GuestTicketResponseDto> {
+    const response: AxiosResponse<GuestTicketResponseDto> = await apiClient.post(
+      `${this.baseUrl}/check-in`,
+      { qrCode }
+    );
+    return response.data;
+  }
+
+  /**
+   * Bulk check in tickets by QR codes
+   */
+  async bulkCheckInTickets(qrCodes: string[]): Promise<BulkActionResponseDto> {
+    const response: AxiosResponse<BulkActionResponseDto> = await apiClient.post(
+      `${this.baseUrl}/bulk/check-in`,
+      { qrCodes }
+    );
+    return response.data;
+  }
+
+  /**
+   * Get check-in statistics for an event
+   */
+  async getCheckInStats(eventId: string): Promise<{
+    totalTickets: number;
+    checkedIn: number;
+    pending: number;
+    percentageCheckedIn: number;
+  }> {
+    const response: AxiosResponse<{
+      totalTickets: number;
+      checkedIn: number;
+      pending: number;
+      percentageCheckedIn: number;
+    }> = await apiClient.get(`${this.baseUrl}/event/${eventId}/check-in-stats`);
+    return response.data;
+  }
+
+  /**
+   * Request a refund for a ticket
+   * Can be requested by ticket owner or event organizer
+   */
+  async refundTicket(
+    ticketId: string,
+    data: RefundTicketRequestDto
+  ): Promise<RefundResult> {
+    const response: AxiosResponse<RefundResult> = await apiClient.post(
+      `${this.baseUrl}/${ticketId}/refund`,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * Check if a ticket is eligible for refund
+   */
+  async checkRefundEligibility(
+    ticketId: string
+  ): Promise<RefundEligibilityResult> {
+    const response: AxiosResponse<RefundEligibilityResult> =
+      await apiClient.get(`${this.baseUrl}/${ticketId}/refund-eligibility`);
     return response.data;
   }
 }

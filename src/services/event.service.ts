@@ -2,166 +2,47 @@
 import apiClient from '@/lib/auth/apiClient';
 import { AxiosResponse } from 'axios';
 import {
-  EventStatus,
   EventResponseDto,
-  EventOwnerResponseDto,
-  EventAddressResponseDto,
-  EventCategoryResponseDto,
-  EventTicketResponseDto,
-} from '@/types/event';
-
-// Re-export for convenience
-export { EventStatus };
-export type { EventResponseDto };
-
-export interface LocationDto {
-  latitude: number;
-  longitude: number;
-}
-
-export interface CreateEventAddressDto {
-  name?: string;
-  addressLine1: string;
-  addressLine2?: string;
-  flat?: string;
-  city: string;
-  zipcode: string;
-  location: LocationDto;
-}
-
-export interface CreateEventDto {
-  name: string;
-  description: string;
-  eventImage?: string;
-  eventColor?: string;
-  ownerEventUserId: string;
-  startDateTime: Date | string;
-  endDateTime: Date | string;
-  status?: EventStatus;
-  isPrivate?: boolean;
-  addressId?: string;
-  addressData?: CreateEventAddressDto;
-  cateringOrderId?: string;
-  categoryIds?: string[];
-  eventUrl?: string;
-  tickets?: CreateEventTicketDto[];
-}
-
-export interface UpdateEventDto {
-  name?: string;
-  description?: string;
-  eventImage?: string;
-  eventColor?: string;
-  startDateTime?: Date | string;
-  endDateTime?: Date | string;
-  status?: EventStatus;
-  isPrivate?: boolean;
-  addressId?: string;
-  cateringOrderId?: string;
-  categoryIds?: string[];
-  eventUrl?: string;
-}
-
-export interface EventQueryDto {
-  search?: string;
-  status?: EventStatus;
-  categoryId?: string;
-  startDate?: string;
-  endDate?: string;
-  isPrivate?: boolean;
-  skip?: number;
-  take?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface EventListResponse {
-  events: EventResponseDto[];
-  total: number;
-  skip: number;
-  take: number;
-}
-
-export interface CreateEventResponse {
-  success: boolean;
-  message: string;
-  event: EventResponseDto;
-}
-
-export interface UpdateEventResponse {
-  success: boolean;
-  message: string;
-  event: EventResponseDto;
-}
-
-export interface EventStats {
-  totalTickets: number;
-  ticketsSold: number;
-  ticketsAvailable: number;
-  totalRevenue: number;
-  attendeesCount: number;
-  checkInsCount: number;
-  pendingApprovals: number;
-}
-
-// Ticket types
-export enum QuestionType {
-  SHORT_TEXT = 'shortText',
-  LONG_TEXT = 'longText',
-  MULTI_SELECT = 'multiSelect',
-  SINGLE_SELECT = 'singleSelect',
-}
-
-export interface QuestionBlockDto {
-  question: string;
-  type: QuestionType;
-  options?: string[];
-  required: boolean;
-}
-
-export interface CreateEventTicketDto {
-  name: string;
-  description?: string;
-  price?: number;
-  isPaid: boolean;
-  isSingleUse?: boolean;
-  quantityTotal: number;
-  questionForm?: QuestionBlockDto[];
-  isPrivate?: boolean;
-  autoApprovalGuestEmails?: string[];
-  salesStartDate?: string;
-  salesEndDate?: string;
-}
+  EventListResponseDto,
+  CreateEventResponse,
+  UpdateEventResponse,
+  EventStats,
+} from '@/types';
+import {
+  CreateEventDto,
+  UpdateEventDto,
+  EventQueryDto,
+} from '@/types';
 
 class EventService {
   private readonly baseUrl = '/events';
 
-  async getAllEvents(query?: EventQueryDto): Promise<EventListResponse> {
-    const response: AxiosResponse<EventListResponse> = await apiClient.get(
+  async getAllEvents(query?: EventQueryDto): Promise<EventListResponseDto> {
+    const response: AxiosResponse<EventListResponseDto> = await apiClient.get(
       this.baseUrl,
       { params: query }
     );
     return response.data;
   }
 
-  async getUpcomingEvents(take: number = 10): Promise<EventListResponse> {
-    const response: AxiosResponse<EventListResponse> = await apiClient.get(
+  async getUpcomingEvents(take: number = 10): Promise<EventListResponseDto> {
+    const response: AxiosResponse<EventListResponseDto> = await apiClient.get(
       `${this.baseUrl}/upcoming`,
       { params: { take } }
     );
     return response.data;
   }
 
-  async getTrendingEvents(take: number = 10): Promise<EventListResponse> {
-    const response: AxiosResponse<EventListResponse> = await apiClient.get(
+  async getTrendingEvents(take: number = 10): Promise<EventListResponseDto> {
+    const response: AxiosResponse<EventListResponseDto> = await apiClient.get(
       `${this.baseUrl}/trending`,
       { params: { take } }
     );
     return response.data;
   }
 
-  async getMyEvents(query?: EventQueryDto): Promise<EventListResponse> {
-    const response: AxiosResponse<EventListResponse> = await apiClient.get(
+  async getMyEvents(query?: EventQueryDto): Promise<EventListResponseDto> {
+    const response: AxiosResponse<EventListResponseDto> = await apiClient.get(
       `${this.baseUrl}/my-events`,
       { params: query }
     );

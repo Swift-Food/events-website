@@ -91,9 +91,9 @@ export default function GoogleMap({
     const createMap = async (lat: number, lng: number) => {
       if (!mapRef.current) return;
 
-      // Create map
+      // Create map (default to 0,0 if coordinates not provided)
       const mapOptions: google.maps.MapOptions = {
-        center: { lat: latitude, lng: longitude },
+        center: { lat: latitude ?? 0, lng: longitude ?? 0 },
         zoom: 15,
         mapTypeControl: false,
         streetViewControl: false,
@@ -158,7 +158,7 @@ export default function GoogleMap({
 
       // Create marker
       const marker = new google.maps.Marker({
-        position: { lat: latitude, lng: longitude },
+        position: { lat: latitude ?? 0, lng: longitude ?? 0 },
         map,
         title,
         animation: google.maps.Animation.DROP,
