@@ -184,15 +184,14 @@ export default function EventDetailsPage() {
     [EventStatus.PUBLISHED]:
       "bg-green-500/20 text-green-400 border-green-500/30",
     [EventStatus.DRAFT]: "bg-gray-500/20 text-gray-400 border-gray-500/30",
-    [EventStatus.ONGOING]:
-      "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    [EventStatus.ONGOING]: "bg-purple-500/20 text-purple-400 border-purple-500/30",
     [EventStatus.CANCELLED]: "bg-red-500/20 text-red-400 border-red-500/30",
     [EventStatus.COMPLETED]: "bg-blue-500/20 text-blue-400 border-blue-500/30",
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="mx-auto max-w-5xl px-6 py-8">
         {/* Back Button */}
         <button
           onClick={() => router.push("/events")}
@@ -202,40 +201,36 @@ export default function EventDetailsPage() {
           Back to Events
         </button>
 
-        {/* Main Content - Two Column Layout */}
-        <div className="flex flex-col gap-6 lg:flex-row">
-          {/* Left Column - Image and Event Details Sidebar */}
-          <section className="flex flex-col gap-6 lg:w-96 lg:shrink-0">
-            {/* Square Image with Status Badge */}
-            <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/10 bg-card-secondary-background">
-              {event.eventImage ? (
-                <Image
-                  src={event.eventImage}
-                  alt={event.name}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              ) : (
-                <div
-                  className="flex h-full items-center justify-center"
-                  style={{ backgroundColor: event.eventColor }}
-                >
-                  <Calendar className="h-24 w-24 text-white/30" />
-                </div>
-              )}
-
-              {/* Status Badge */}
-              <div className="absolute right-4 top-4">
-                <span
-                  className={`rounded-full border px-4 py-2 text-sm font-semibold backdrop-blur-md ${
-                    statusColors[event.status]
-                  }`}
-                >
-                  {event.status}
-                </span>
-              </div>
+        {/* Hero Image */}
+        <div className="relative mb-8 aspect-[21/9] w-full overflow-hidden rounded-2xl border border-white/10 bg-card-secondary-background">
+          {event.eventImage ? (
+            <Image
+              src={event.eventImage}
+              alt={event.name}
+              fill
+              className="object-cover"
+              priority
+            />
+          ) : (
+            <div
+              className="flex h-full items-center justify-center"
+              style={{ backgroundColor: event.eventColor }}
+            >
+              <Calendar className="h-24 w-24 text-white/30" />
             </div>
+          )}
+
+          {/* Status Badge */}
+          <div className="absolute right-6 top-6">
+            <span
+              className={`rounded-full border px-4 py-2 text-sm font-semibold backdrop-blur-md ${
+                statusColors[event.status]
+              }`}
+            >
+              {event.status}
+            </span>
+          </div>
+        </div>
 
         {/* Main Content */}
         <div className="grid gap-8 lg:grid-cols-3">
@@ -359,12 +354,14 @@ export default function EventDetailsPage() {
                   Date & Time
                 </h3>
                 <div className="flex gap-4">
-                  {isSameDay(event.startDateTime, event.endDateTime) ? (
-                    <>
-                      <div className="flex flex-col items-center py-1">
-                        <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
-                      </div>
-                      <div className="flex-1">
+                  <div className="flex flex-col items-center py-1">
+                    <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
+                    <div className="my-2 w-0.5 flex-1 rounded-full bg-primary/30"></div>
+                    <div className="h-3 w-3 rounded-full bg-primary/30 shadow-md"></div>
+                  </div>
+                  <div className="flex-1">
+                    {isSameDay(event.startDateTime, event.endDateTime) ? (
+                      <>
                         <p className="font-medium text-foreground">
                           {formatDate(event.startDateTime)}
                         </p>
@@ -372,16 +369,9 @@ export default function EventDetailsPage() {
                           {formatTime(event.startDateTime)} -{" "}
                           {formatTime(event.endDateTime)}
                         </p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex flex-col items-center py-1">
-                        <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
-                        <div className="my-2 w-0.5 flex-1 rounded-full bg-primary/30"></div>
-                        <div className="h-3 w-3 rounded-full bg-primary/30 shadow-md"></div>
-                      </div>
-                      <div className="flex-1">
+                      </>
+                    ) : (
+                      <>
                         <div className="mb-3">
                           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                             Start
@@ -404,9 +394,9 @@ export default function EventDetailsPage() {
                             {formatTime(event.endDateTime)}
                           </p>
                         </div>
-                      </div>
-                    </>
-                  )}
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -418,6 +408,9 @@ export default function EventDetailsPage() {
                 <div className="mb-4 flex items-start gap-3">
                   <MapPin className="h-5 w-5 text-primary" />
                   <div>
+                    {/* <p className="font-medium text-foreground">
+                      {event.address.name}
+                    </p> */}
                     <p className="text-sm text-muted-foreground">
                       {event.address.addressLine1}
                     </p>
@@ -437,7 +430,7 @@ export default function EventDetailsPage() {
                   latitude={event.address.location?.latitude}
                   longitude={event.address.location?.longitude}
                   title={event.address.name}
-                  className="h-48 w-full"
+                  className="h-64 w-full"
                 />
               </div>
 
@@ -509,8 +502,21 @@ export default function EventDetailsPage() {
 
               {/* Register Button */}
               {event.status === EventStatus.PUBLISHED && (
-                <button className="w-full rounded-full bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-primary/80">
-                  Register for Event
+                <button
+                  onClick={handleRegister}
+                  disabled={isRegistering || !selectedTicketId}
+                  className="w-full rounded-full bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isRegistering ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Registering...
+                    </>
+                  ) : selectedTicketId ? (
+                    "Register for Event"
+                  ) : (
+                    "Select a Ticket Above"
+                  )}
                 </button>
               )}
             </div>
