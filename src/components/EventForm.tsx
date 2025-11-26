@@ -18,6 +18,7 @@ import { FormField } from "@/types";
 import { GOOGLE_MAPS_CONFIG } from "@/constants/google-maps";
 import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
 import { eventService } from "@/services/event.service";
+import { imageService } from "@/services/image.service";
 import { CreateEventDto, QuestionType, CreateEventTicketDto } from "@/types";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -108,6 +109,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
   const { user, eventUser, isAuthenticated } = useAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   console.log("Ticket Types: ", ticketTypes);
   // Address-related state (local UI only)
@@ -607,14 +609,30 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     if (!imageToCrop || !croppedAreaPixels) return;
 
     try {
-      const croppedImage = await getCroppedImg(imageToCrop, croppedAreaPixels);
-      setCoverPreview(croppedImage);
+      setIsUploadingImage(true);
+
+      // First, crop the image locally
+      const croppedImageBlob = await getCroppedImg(imageToCrop, croppedAreaPixels);
+
+      // Upload the cropped image to the server
+      const uploadedImageUrl = await imageService.uploadImageFromBlob(
+        croppedImageBlob,
+        coverName
+      );
+
+      // Store the server URL instead of the blob URL
+      setCoverPreview(uploadedImageUrl);
+      toast.success("Image uploaded successfully!");
+
       setIsCropModalOpen(false);
       setImageToCrop(null);
       setCrop({ x: 0, y: 0 });
       setZoom(1);
     } catch (e) {
-      console.error("Error cropping image:", e);
+      console.error("Error uploading image:", e);
+      toast.error("Failed to upload image. Please try again.");
+    } finally {
+      setIsUploadingImage(false);
     }
   };
 
@@ -1309,16 +1327,18 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                 <button
                   type="button"
                   onClick={handleCropCancel}
-                  className="flex-1 rounded-full bg-card-background backdrop-blur-md py-4 text-center font-semibold text-foreground transition-all hover:bg-white/15 shadow-lg hover:scale-105"
+                  disabled={isUploadingImage}
+                  className="flex-1 rounded-full bg-card-background backdrop-blur-md py-4 text-center font-semibold text-foreground transition-all hover:bg-white/15 shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleCropSave}
-                  className="flex-1 rounded-full bg-primary py-4 text-center font-bold text-primary-foreground transition-all hover:shadow-2xl hover:shadow-primary/30 hover:scale-105 shadow-xl"
+                  disabled={isUploadingImage}
+                  className="flex-1 rounded-full bg-primary py-4 text-center font-bold text-primary-foreground transition-all hover:shadow-2xl hover:shadow-primary/30 hover:scale-105 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Save
+                  {isUploadingImage ? "Uploading..." : "Save"}
                 </button>
               </div>
             </div>
