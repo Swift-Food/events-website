@@ -577,7 +577,7 @@ function EventCreationForm() {
   return (
     <div className="flex min-h-[calc(100vh-64px)] justify-center bg-background px-6 py-12">
       <div className="flex w-full max-w-6xl flex-col gap-6 text-foreground lg:flex-row">
-        <section className="flex flex-col gap-5 rounded-3xl bg-card-background backdrop-blur-2xl shadow-2xl shadow-white/5 p-7 lg:w-96 lg:shrink-0 lg:sticky lg:top-20 lg:self-start sm:flex-row lg:flex-col">
+        <section className="flex flex-col gap-5 rounded-3xl bg-card-background  p-7 lg:w-96 lg:shrink-0 lg:sticky lg:top-20 lg:self-start sm:flex-row lg:flex-col">
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background backdrop-blur-sm shadow-lg  sm:flex-1 sm:basis-0 lg:w-full lg:flex-none">
             {coverPreview ? (
               <img
