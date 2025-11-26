@@ -126,11 +126,17 @@ const getDefaultTimes = () => {
   };
 };
 
-export function EventCreationProvider({ children }: { children: ReactNode }) {
+export function EventCreationProvider({
+  children,
+  disablePersistence = false
+}: {
+  children: ReactNode;
+  disablePersistence?: boolean;
+}) {
   const defaultTimes = getDefaultTimes();
 
   const loadDraft = () => {
-    if (typeof window === "undefined") {
+    if (typeof window === "undefined" || disablePersistence) {
       return {};
     }
 
@@ -143,7 +149,7 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const storedDraft = useMemo<Partial<EventDraft>>(() => loadDraft(), []);
+  const storedDraft = useMemo<Partial<EventDraft>>(() => loadDraft(), [disablePersistence]);
 
   // Event details
   const [eventName, setEventName] = useState(storedDraft.eventName ?? "");
@@ -224,7 +230,7 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const persistEventDraft = useCallback(() => {
-    if (typeof window === "undefined") {
+    if (typeof window === "undefined" || disablePersistence) {
       return;
     }
 
@@ -257,6 +263,7 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
       console.warn("Failed to save event draft to storage", error);
     }
   }, [
+    disablePersistence,
     capacity,
     capacityNumber,
     coverName,
@@ -280,8 +287,10 @@ export function EventCreationProvider({ children }: { children: ReactNode }) {
   ]);
 
   useEffect(() => {
-    persistEventDraft();
-  }, [persistEventDraft]);
+    if (!disablePersistence) {
+      persistEventDraft();
+    }
+  }, [persistEventDraft, disablePersistence]);
 
   const clearForm = () => {
     const newTimes = getDefaultTimes();
