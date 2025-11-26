@@ -43,7 +43,7 @@ export default function EventCard({ event }: EventCardProps) {
         )}
 
         {/* Status Badge */}
-        <div className="absolute right-3 top-3">
+        {/* <div className="absolute right-3 top-3">
           <span
             className={`rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-sm ${
               event.status === EventStatus.PUBLISHED
@@ -55,7 +55,7 @@ export default function EventCard({ event }: EventCardProps) {
           >
             {event.status}
           </span>
-        </div>
+        </div> */}
       </div>
 
       {/* Event Details */}
@@ -71,14 +71,16 @@ export default function EventCard({ event }: EventCardProps) {
         </div>
 
         {/* Location */}
-        {event.address && event.address.city && event.address.city !== "TBD" && (
-          <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4" />
-            <span className="line-clamp-1">
-              {event.address.city}, {event.address.zipcode}
-            </span>
-          </div>
-        )}
+        {event.address &&
+          event.address.city &&
+          event.address.city !== "TBD" && (
+            <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
+              <MapPin className="h-4 w-4" />
+              <span className="line-clamp-1">
+                {event.address.city}, {event.address.zipcode}
+              </span>
+            </div>
+          )}
 
         {/* Categories */}
         {event.categories && event.categories.length > 0 && (
