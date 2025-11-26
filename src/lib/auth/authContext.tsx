@@ -147,7 +147,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     setState((prev) => ({ ...prev, isLoading: true }));
 
     try {
-      console.log("Credentials for login: ", credentials);
       const response = await authApi.login(
         credentials.email,
         credentials.password
