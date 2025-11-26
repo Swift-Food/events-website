@@ -66,22 +66,26 @@ export default function EventDetailsPage() {
     (t) => t.id === selectedTicketId
   );
 
-  const handleRegister = async () => {
+  const handleRegister = async (ticketId: string) => {
     if (!isAuthenticated) {
       toast.error("Please log in to register for this event");
       router.push("/auth");
       return;
     }
 
-    if (!selectedTicketId) {
-      toast.error("Please select a ticket type");
+    const ticket = event?.eventTickets?.find((t) => t.id === ticketId);
+    if (!ticket) {
+      toast.error("Ticket not found");
       return;
     }
 
+    // Set the selected ticket for the question form
+    setSelectedTicketId(ticketId);
+
     // Check if ticket has questions that need answering
     if (
-      selectedTicket?.questionForm &&
-      selectedTicket.questionForm.length > 0 &&
+      ticket.questionForm &&
+      ticket.questionForm.length > 0 &&
       !showQuestionForm
     ) {
       setShowQuestionForm(true);
@@ -91,7 +95,7 @@ export default function EventDetailsPage() {
     try {
       setIsRegistering(true);
       const result = await guestTicketService.registerForTicket({
-        eventTicketId: selectedTicketId,
+        eventTicketId: ticketId,
         questionAnswers:
           Object.keys(questionAnswers).length > 0 ? questionAnswers : undefined,
       });
@@ -481,17 +485,6 @@ export default function EventDetailsPage() {
               )}
             </div>
 
-            {/* Description */}
-            <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
-              <h2 className="mb-4 text-lg font-semibold text-muted-foreground ">
-                About this event
-              </h2>
-              <div
-                className="tiptap-editor tiptap-view-mode"
-                dangerouslySetInnerHTML={{ __html: event.description }}
-              />
-            </div>
-
             {/* Tickets */}
             {event.eventTickets && event.eventTickets.length > 0 && (
               <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
@@ -510,14 +503,9 @@ export default function EventDetailsPage() {
                         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-white/10 bg-card-secondary-background p-4"
                       >
                         <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-foreground">
-                              {ticket.name}
-                            </h3>
-                            {isSelected && (
-                              <Check className="h-4 w-4 text-primary" />
-                            )}
-                          </div>
+                          <h3 className="font-semibold text-foreground">
+                            {ticket.name}
+                          </h3>
                           <p className="text-sm text-muted-foreground">
                             {isSoldOut ? "Sold out" : `${remaining} left`}
                           </p>
@@ -533,10 +521,7 @@ export default function EventDetailsPage() {
                           {event.status === EventStatus.PUBLISHED &&
                             !isSoldOut && (
                               <button
-                                onClick={() => {
-                                  setSelectedTicketId(ticket.id);
-                                  handleRegister();
-                                }}
+                                onClick={() => handleRegister(ticket.id)}
                                 disabled={isRegistering && isSelected}
                                 className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary/80 hover:scale-105 shadow-lg shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                               >
@@ -557,6 +542,17 @@ export default function EventDetailsPage() {
                 </div>
               </div>
             )}
+
+            {/* Description */}
+            <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
+              <h2 className="mb-4 text-lg font-semibold text-muted-foreground ">
+                About this event
+              </h2>
+              <div
+                className="tiptap-editor tiptap-view-mode"
+                dangerouslySetInnerHTML={{ __html: event.description }}
+              />
+            </div>
           </section>
         </div>
       </div>
@@ -717,7 +713,7 @@ export default function EventDetailsPage() {
                   Cancel
                 </button>
                 <button
-                  onClick={handleRegister}
+                  onClick={() => selectedTicketId && handleRegister(selectedTicketId)}
                   disabled={isRegistering}
                   className="flex-1 px-6 py-3 rounded-full bg-primary text-white font-semibold shadow-lg shadow-primary/25 hover:bg-primary/90 hover:shadow-primary/40 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
                 >
