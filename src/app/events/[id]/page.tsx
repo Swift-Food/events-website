@@ -37,7 +37,9 @@ export default function EventDetailsPage() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [showTicketSelector, setShowTicketSelector] = useState(false);
   const [showQuestionForm, setShowQuestionForm] = useState(false);
-  const [questionAnswers, setQuestionAnswers] = useState<Record<string, any>>({});
+  const [questionAnswers, setQuestionAnswers] = useState<Record<string, any>>(
+    {}
+  );
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -60,7 +62,9 @@ export default function EventDetailsPage() {
     }
   }, [eventId]);
 
-  const selectedTicket = event?.eventTickets?.find(t => t.id === selectedTicketId);
+  const selectedTicket = event?.eventTickets?.find(
+    (t) => t.id === selectedTicketId
+  );
 
   const handleRegister = async () => {
     if (!isAuthenticated) {
@@ -75,7 +79,11 @@ export default function EventDetailsPage() {
     }
 
     // Check if ticket has questions that need answering
-    if (selectedTicket?.questionForm && selectedTicket.questionForm.length > 0 && !showQuestionForm) {
+    if (
+      selectedTicket?.questionForm &&
+      selectedTicket.questionForm.length > 0 &&
+      !showQuestionForm
+    ) {
       setShowQuestionForm(true);
       return;
     }
@@ -84,7 +92,8 @@ export default function EventDetailsPage() {
       setIsRegistering(true);
       const result = await guestTicketService.registerForTicket({
         eventTicketId: selectedTicketId,
-        questionAnswers: Object.keys(questionAnswers).length > 0 ? questionAnswers : undefined,
+        questionAnswers:
+          Object.keys(questionAnswers).length > 0 ? questionAnswers : undefined,
       });
 
       if (result.success) {
@@ -102,14 +111,16 @@ export default function EventDetailsPage() {
       }
     } catch (error: any) {
       console.error("Registration failed:", error);
-      toast.error(error.response?.data?.message || "Failed to register for event");
+      toast.error(
+        error.response?.data?.message || "Failed to register for event"
+      );
     } finally {
       setIsRegistering(false);
     }
   };
 
   const handleQuestionChange = (question: string, value: any) => {
-    setQuestionAnswers(prev => ({
+    setQuestionAnswers((prev) => ({
       ...prev,
       [question]: value,
     }));
@@ -184,7 +195,8 @@ export default function EventDetailsPage() {
     [EventStatus.PUBLISHED]:
       "bg-green-500/20 text-green-400 border-green-500/30",
     [EventStatus.DRAFT]: "bg-gray-500/20 text-gray-400 border-gray-500/30",
-    [EventStatus.ONGOING]: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    [EventStatus.ONGOING]:
+      "bg-purple-500/20 text-purple-400 border-purple-500/30",
     [EventStatus.CANCELLED]: "bg-red-500/20 text-red-400 border-red-500/30",
     [EventStatus.COMPLETED]: "bg-blue-500/20 text-blue-400 border-blue-500/30",
   };
@@ -471,7 +483,7 @@ export default function EventDetailsPage() {
 
             {/* Description */}
             <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
-              <h2 className="mb-4 text-2xl font-semibold text-foreground">
+              <h2 className="mb-4 text-lg font-semibold text-muted-foreground ">
                 About this event
               </h2>
               <div
@@ -518,25 +530,26 @@ export default function EventDetailsPage() {
                                 : `£${Number(ticket.price).toFixed(2)}`}
                             </p>
                           </div>
-                          {event.status === EventStatus.PUBLISHED && !isSoldOut && (
-                            <button
-                              onClick={() => {
-                                setSelectedTicketId(ticket.id);
-                                handleRegister();
-                              }}
-                              disabled={isRegistering && isSelected}
-                              className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary/80 hover:scale-105 shadow-lg shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                            >
-                              {isRegistering && isSelected ? (
-                                <>
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                  Registering...
-                                </>
-                              ) : (
-                                "Register"
-                              )}
-                            </button>
-                          )}
+                          {event.status === EventStatus.PUBLISHED &&
+                            !isSoldOut && (
+                              <button
+                                onClick={() => {
+                                  setSelectedTicketId(ticket.id);
+                                  handleRegister();
+                                }}
+                                disabled={isRegistering && isSelected}
+                                className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary/80 hover:scale-105 shadow-lg shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                              >
+                                {isRegistering && isSelected ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    Registering...
+                                  </>
+                                ) : (
+                                  "Register"
+                                )}
+                              </button>
+                            )}
                         </div>
                       </div>
                     );
@@ -551,9 +564,7 @@ export default function EventDetailsPage() {
       {/* Question Form Modal */}
       {showQuestionForm && selectedTicket?.questionForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-          <div
-            className="bg-gradient-to-b from-card-background to-card-secondary-background rounded-3xl border border-white/10 w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl shadow-black/50"
-          >
+          <div className="bg-gradient-to-b from-card-background to-card-secondary-background rounded-3xl border border-white/10 w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl shadow-black/50">
             {/* Header */}
             <div className="relative p-6 pb-4">
               <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent" />
@@ -584,46 +595,56 @@ export default function EventDetailsPage() {
                 <div key={index} className="space-y-2">
                   <label className="block text-sm font-medium text-foreground mb-2">
                     {q.question}
-                    {q.required && <span className="text-red-400 ml-0.5">*</span>}
+                    {q.required && (
+                      <span className="text-red-400 ml-0.5">*</span>
+                    )}
                   </label>
 
-                  {q.type === 'shortText' && (
+                  {q.type === "shortText" && (
                     <input
                       type="text"
-                      value={questionAnswers[q.question] || ''}
-                      onChange={(e) => handleQuestionChange(q.question, e.target.value)}
+                      value={questionAnswers[q.question] || ""}
+                      onChange={(e) =>
+                        handleQuestionChange(q.question, e.target.value)
+                      }
                       placeholder="Your answer..."
                       className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
                     />
                   )}
 
-                  {q.type === 'longText' && (
+                  {q.type === "longText" && (
                     <textarea
-                      value={questionAnswers[q.question] || ''}
-                      onChange={(e) => handleQuestionChange(q.question, e.target.value)}
+                      value={questionAnswers[q.question] || ""}
+                      onChange={(e) =>
+                        handleQuestionChange(q.question, e.target.value)
+                      }
                       rows={4}
                       placeholder="Your answer..."
                       className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none"
                     />
                   )}
 
-                  {q.type === 'singleSelect' && q.options && (
+                  {q.type === "singleSelect" && q.options && (
                     <div className="space-y-2">
                       {q.options.map((option, optIndex) => (
                         <label
                           key={optIndex}
-                          onClick={() => handleQuestionChange(q.question, option)}
+                          onClick={() =>
+                            handleQuestionChange(q.question, option)
+                          }
                           className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
                             questionAnswers[q.question] === option
-                              ? 'border-primary bg-primary/10'
-                              : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
+                              ? "border-primary bg-primary/10"
+                              : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
                           }`}
                         >
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                            questionAnswers[q.question] === option
-                              ? 'border-primary'
-                              : 'border-white/30'
-                          }`}>
+                          <div
+                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                              questionAnswers[q.question] === option
+                                ? "border-primary"
+                                : "border-white/30"
+                            }`}
+                          >
                             {questionAnswers[q.question] === option && (
                               <div className="w-2.5 h-2.5 rounded-full bg-primary" />
                             )}
@@ -634,24 +655,28 @@ export default function EventDetailsPage() {
                     </div>
                   )}
 
-                  {q.type === 'multiSelect' && q.options && (
+                  {q.type === "multiSelect" && q.options && (
                     <div className="space-y-2">
                       {q.options.map((option, optIndex) => {
-                        const isChecked = (questionAnswers[q.question] || []).includes(option);
+                        const isChecked = (
+                          questionAnswers[q.question] || []
+                        ).includes(option);
                         return (
                           <label
                             key={optIndex}
                             className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
                               isChecked
-                                ? 'border-primary bg-primary/10'
-                                : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
+                                ? "border-primary bg-primary/10"
+                                : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
                             }`}
                           >
-                            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
-                              isChecked
-                                ? 'border-primary bg-primary'
-                                : 'border-white/30'
-                            }`}>
+                            <div
+                              className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                                isChecked
+                                  ? "border-primary bg-primary"
+                                  : "border-white/30"
+                              }`}
+                            >
                               {isChecked && (
                                 <Check className="w-3 h-3 text-white" />
                               )}
@@ -661,7 +686,8 @@ export default function EventDetailsPage() {
                               type="checkbox"
                               checked={isChecked}
                               onChange={(e) => {
-                                const current = questionAnswers[q.question] || [];
+                                const current =
+                                  questionAnswers[q.question] || [];
                                 const updated = e.target.checked
                                   ? [...current, option]
                                   : current.filter((o: string) => o !== option);
