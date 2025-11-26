@@ -69,6 +69,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     longitude,
     setLongitude,
     ticketTypes,
+    setTicketTypes,
     addTicketType,
     updateTicketType,
     deleteTicketType,
@@ -77,6 +78,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     capacity,
     setCapacity,
     formFields,
+    setFormFields,
     addFormField,
     updateFormField,
     deleteFormField,
@@ -175,8 +177,8 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
           };
         });
 
-        // Add tickets one by one
-        ticketsToLoad.forEach((ticket) => addTicketType(ticket));
+        // Set tickets directly (replaces existing tickets)
+        setTicketTypes(ticketsToLoad);
 
         // Load form fields from the first ticket's question form
         const firstTicket = initialData.eventTickets[0];
@@ -206,8 +208,8 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
             }
           );
 
-          // Add form fields one by one
-          fieldsToLoad.forEach((field) => addFormField(field));
+          // Set form fields directly (replaces existing fields)
+          setFormFields(fieldsToLoad);
         }
       }
 
