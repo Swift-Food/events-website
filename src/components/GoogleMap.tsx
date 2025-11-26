@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
 
 interface GoogleMapProps {
@@ -22,8 +22,8 @@ export default function GoogleMap({
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
 
-  // Check if coordinates are valid
-  const hasValidCoordinates = () => {
+  // Check if coordinates are valid - memoized to avoid recalculating on every render
+  const hasValidCoordinates = useMemo(() => {
     if (latitude === undefined || longitude === undefined) {
       console.log("[GoogleMap] No coordinates provided");
       return false;
@@ -44,14 +44,13 @@ export default function GoogleMap({
     }
 
     return true;
-  };
+  }, [latitude, longitude]);
 
   useEffect(() => {
     const initMap = async () => {
       try {
         // Validate coordinates first
-        if (!hasValidCoordinates()) {
-          console.log("[GoogleMap] Map will not render - invalid coordinates");
+        if (!hasValidCoordinates) {
           setIsLoading(false);
           return;
         }
@@ -186,7 +185,7 @@ export default function GoogleMap({
   }, [latitude, longitude, title]);
 
   // Don't render if no valid coordinates
-  if (!hasValidCoordinates()) {
+  if (!hasValidCoordinates) {
     return null;
   }
 
