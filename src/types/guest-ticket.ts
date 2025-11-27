@@ -1,4 +1,7 @@
 // types/guest-ticket.ts
+
+import { EventUser } from "./user";
+
 /**
  * Guest Ticket Status Flow (matches backend exactly):
  *
@@ -54,6 +57,7 @@ export interface GuestTicketResponseDto {
   guestEventUserId: string;
   eventTicketId: string;
   ticketName: string;
+  guest: EventUser;
   status: GuestTicketStatus;
   questionAnswers: Record<string, any> | null;
   qrCode: string | null;

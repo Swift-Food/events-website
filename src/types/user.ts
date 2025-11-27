@@ -9,6 +9,8 @@ export interface TokenPair {
 export interface EventUser {
   id: string;
   userId: string;
+  firstName: string;
+  lastName: string;
   allowEmailNotifications: boolean;
   allowTicketReminders: boolean;
   bio: string | null;
@@ -20,6 +22,7 @@ export interface EventUser {
   totalEventsAttended: number;
   totalEventsCreated: number;
   totalRevenue: string;
+  user: User;
   twitterHandle: string | null;
   updatedAt: string;
   website: string | null;

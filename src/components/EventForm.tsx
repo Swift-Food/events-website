@@ -840,6 +840,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                   <input
                     type="datetime-local"
                     value={start}
+                    min={new Date().toISOString().slice(0, 16)}
                     onChange={(e) => setStart(e.target.value)}
                     className="flex-1 rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner"
                   />

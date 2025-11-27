@@ -36,7 +36,9 @@ export default function EventManagementPage() {
 
         // Authorization check
         if (user && data.owner?.user?.id) {
+          console.log("user and data", JSON.stringify(user),JSON.stringify(data.owner?.user) )
           const authorized = user.id === data.owner.user.id;
+          console.log("authorized", authorized)
           setIsAuthorized(authorized);
 
           if (!authorized) {
