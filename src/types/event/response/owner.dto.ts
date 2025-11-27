@@ -3,9 +3,10 @@
  * Backend source: src/features/user-management/event-user/dto/response.dto.ts
  */
 
+import { User } from "@/types/user";
+
 export interface EventOwnerResponseDto {
   id: string;
-  userId: string;
-  username: string;
-  profilePicture?: string;
+  organizationName: string;
+  user: User;
 }

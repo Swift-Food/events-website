@@ -287,7 +287,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
           font-size: 2.25rem;
           font-weight: 700;
           line-height: 2.5rem;
-          margin-top: 1rem;
+          margin-top: 2.5rem;
           margin-bottom: 1rem;
           color: white;
         }
@@ -296,7 +296,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
           font-size: 1.875rem;
           font-weight: 600;
           line-height: 2.25rem;
-          margin-top: 0.875rem;
+          margin-top: 2rem;
           margin-bottom: 0.875rem;
           color: white;
         }
@@ -305,7 +305,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
           font-size: 1.5rem;
           font-weight: 600;
           line-height: 2rem;
-          margin-top: 0.75rem;
+          margin-top: 1.5rem;
           margin-bottom: 0.75rem;
           color: white;
         }

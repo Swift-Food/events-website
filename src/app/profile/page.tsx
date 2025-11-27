@@ -7,7 +7,10 @@ import { useAuth } from "@/lib/auth/authContext";
 import { eventService } from "@/services/event.service";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { GuestTicketWithEventResponseDto } from "@/types/guest-ticket";
-import { eventUserService, EventUserStats } from "@/services/event-user.service";
+import {
+  eventUserService,
+  EventUserStats,
+} from "@/services/event-user.service";
 import { EventResponseDto } from "@/types/event";
 import EventCard from "@/components/EventCard";
 import {
@@ -35,13 +38,21 @@ interface ProfileStats {
 }
 
 export default function ProfilePage() {
-  const { user, eventUser, isAuthenticated, isLoading: authLoading, logout } = useAuth();
+  const {
+    user,
+    eventUser,
+    isAuthenticated,
+    isLoading: authLoading,
+    logout,
+  } = useAuth();
   const router = useRouter();
 
   // Data states
   const [stats, setStats] = useState<ProfileStats | null>(null);
   const [hostedEvents, setHostedEvents] = useState<EventResponseDto[]>([]);
-  const [attendingTickets, setAttendingTickets] = useState<GuestTicketWithEventResponseDto[]>([]);
+  const [attendingTickets, setAttendingTickets] = useState<
+    GuestTicketWithEventResponseDto[]
+  >([]);
 
   // UI states
   const [activeTab, setActiveTab] = useState<TabType>("upcoming");
@@ -53,7 +64,7 @@ export default function ProfilePage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      router.push("/login");
+      router.push("/auth");
     }
   }, [authLoading, isAuthenticated, router]);
 
@@ -130,71 +141,77 @@ export default function ProfilePage() {
 
   const upcomingAttendingEvents = attendingTickets
     .filter((ticket) => new Date(ticket.eventStartDateTime) > now)
-    .map((ticket) => ({
-      id: ticket.eventId,
-      name: ticket.eventName,
-      startDateTime: ticket.eventStartDateTime,
-      endDateTime: ticket.eventEndDateTime,
-      eventImage: ticket.eventImage,
-      status: ticket.eventStatus,
-      description: "",
-      eventColor: "#000000",
-      isPrivate: false,
-      eventUrl: null,
-      viewCount: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      owner: {
-        id: "",
-        username: "",
-        email: "",
-        organizationName: null,
-      },
-      address: {
-        id: "",
-        street: "",
-        city: "TBD",
-        state: "",
-        zipcode: "",
-        country: "",
-      },
-      categories: [],
-      attendeesCount: 0,
-    } as EventResponseDto));
+    .map(
+      (ticket) =>
+        ({
+          id: ticket.eventId,
+          name: ticket.eventName,
+          startDateTime: ticket.eventStartDateTime,
+          endDateTime: ticket.eventEndDateTime,
+          eventImage: ticket.eventImage,
+          status: ticket.eventStatus,
+          description: "",
+          eventColor: "#000000",
+          isPrivate: false,
+          eventUrl: null,
+          viewCount: 0,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          owner: {
+            id: "",
+            username: "",
+            email: "",
+            organizationName: null,
+          },
+          address: {
+            id: "",
+            street: "",
+            city: "TBD",
+            state: "",
+            zipcode: "",
+            country: "",
+          },
+          categories: [],
+          attendeesCount: 0,
+        } as EventResponseDto)
+    );
 
   const pastAttendingEvents = attendingTickets
     .filter((ticket) => new Date(ticket.eventStartDateTime) <= now)
-    .map((ticket) => ({
-      id: ticket.eventId,
-      name: ticket.eventName,
-      startDateTime: ticket.eventStartDateTime,
-      endDateTime: ticket.eventEndDateTime,
-      eventImage: ticket.eventImage,
-      status: ticket.eventStatus,
-      description: "",
-      eventColor: "#000000",
-      isPrivate: false,
-      eventUrl: null,
-      viewCount: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      owner: {
-        id: "",
-        username: "",
-        email: "",
-        organizationName: null,
-      },
-      address: {
-        id: "",
-        street: "",
-        city: "TBD",
-        state: "",
-        zipcode: "",
-        country: "",
-      },
-      categories: [],
-      attendeesCount: 0,
-    } as EventResponseDto));
+    .map(
+      (ticket) =>
+        ({
+          id: ticket.eventId,
+          name: ticket.eventName,
+          startDateTime: ticket.eventStartDateTime,
+          endDateTime: ticket.eventEndDateTime,
+          eventImage: ticket.eventImage,
+          status: ticket.eventStatus,
+          description: "",
+          eventColor: "#000000",
+          isPrivate: false,
+          eventUrl: null,
+          viewCount: 0,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          owner: {
+            id: "",
+            username: "",
+            email: "",
+            organizationName: null,
+          },
+          address: {
+            id: "",
+            street: "",
+            city: "TBD",
+            state: "",
+            zipcode: "",
+            country: "",
+          },
+          categories: [],
+          attendeesCount: 0,
+        } as EventResponseDto)
+    );
 
   // Get events for current tab
   const getEventsForTab = (): EventResponseDto[] => {
@@ -240,7 +257,12 @@ export default function ProfilePage() {
     return null;
   }
 
-  const tabs: { id: TabType; label: string; icon: React.ReactNode; count: number }[] = [
+  const tabs: {
+    id: TabType;
+    label: string;
+    icon: React.ReactNode;
+    count: number;
+  }[] = [
     {
       id: "upcoming",
       label: "Upcoming",
@@ -269,7 +291,9 @@ export default function ProfilePage() {
 
   const currentEvents = getEventsForTab();
   const isLoadingCurrentTab =
-    (activeTab === "hosting" || activeTab === "past") ? isLoadingEvents : isLoadingTickets;
+    activeTab === "hosting" || activeTab === "past"
+      ? isLoadingEvents
+      : isLoadingTickets;
 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-background">
@@ -303,7 +327,7 @@ export default function ProfilePage() {
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <Link
-                href="/events/create"
+                href="/event-creation"
                 className="flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 hover:scale-105"
               >
                 <Plus className="h-4 w-4" />
@@ -402,7 +426,13 @@ export default function ProfilePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {currentEvents.map((event) => (
-                  <EventCard key={event.id} event={event} />
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    isHostedEvent={
+                      activeTab === "hosting" || activeTab === "past"
+                    }
+                  />
                 ))}
               </div>
             )}

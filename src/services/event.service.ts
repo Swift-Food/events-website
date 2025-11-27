@@ -106,6 +106,13 @@ class EventService {
   async deleteEvent(id: string): Promise<void> {
     await apiClient.delete(`${this.baseUrl}/${id}`);
   }
+
+  async getEventCategories(): Promise<string[]> {
+    const response: AxiosResponse<string[]> = await apiClient.get(
+      `${this.baseUrl}/categories`
+    );
+    return response.data;
+  }
 }
 
 export const eventService = new EventService();

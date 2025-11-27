@@ -1,11 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import LoginForm from "@/components/auth/LoginForm";
 import RegisterForm from "@/components/auth/RegisterForm";
+import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
+import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
+import VerifyEmailForm from "@/components/auth/VerifyEmailForm";
+import { toast } from "sonner";
+
+type AuthView =
+  | "login"
+  | "register"
+  | "forgot-password"
+  | "reset-password"
+  | "verify-email";
 
 export default function AuthPage() {
-  const [activeTab, setActiveTab] = useState<"login" | "register">("login");
+  const router = useRouter();
+  const [authView, setAuthView] = useState<AuthView>("login");
+  const [resetEmail, setResetEmail] = useState("");
+  const [verifyEmail, setVerifyEmail] = useState("");
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -13,7 +28,7 @@ export default function AuthPage() {
         {/* Card Container */}
         <div className="bg-card-background rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl">
           {/* Tabs */}
-          <div className="flex border-b border-foreground/10">
+          {/* <div className="flex border-b border-foreground/10">
             <button
               onClick={() => setActiveTab("login")}
               className={`flex-1 py-4 px-6 text-center font-semibold transition-all ${
@@ -34,14 +49,57 @@ export default function AuthPage() {
             >
               Sign Up
             </button>
-          </div>
+          </div> */}
 
           {/* Form Content */}
           <div className="p-8">
-            {activeTab === "login" ? (
-              <LoginForm onSwitchToRegister={() => setActiveTab("register")} />
-            ) : (
-              <RegisterForm onSwitchToLogin={() => setActiveTab("login")} />
+            {authView === "login" && (
+              <LoginForm
+                onSwitchToRegister={() => setAuthView("register")}
+                onForgotPassword={() => setAuthView("forgot-password")}
+                onNeedsVerification={(email) => {
+                  setVerifyEmail(email);
+                  setAuthView("verify-email");
+                }}
+              />
+            )}
+
+            {authView === "register" && (
+              <RegisterForm onSwitchToLogin={() => setAuthView("login")} />
+            )}
+
+            {authView === "forgot-password" && (
+              <ForgotPasswordForm
+                onSuccess={(email) => {
+                  setResetEmail(email);
+                  setAuthView("reset-password");
+                }}
+                onBack={() => setAuthView("login")}
+              />
+            )}
+
+            {authView === "reset-password" && (
+              <ResetPasswordForm
+                email={resetEmail}
+                onSuccess={() => {
+                  toast.success(
+                    "Password reset successfully! You can now log in."
+                  );
+                  setAuthView("login");
+                }}
+                onBack={() => setAuthView("forgot-password")}
+              />
+            )}
+
+            {authView === "verify-email" && (
+              <VerifyEmailForm
+                email={verifyEmail}
+                onSuccess={() => {
+                  toast.success("Email verified! Please log in.");
+                  setAuthView("login");
+                }}
+                onBack={() => setAuthView("login")}
+              />
             )}
           </div>
         </div>
