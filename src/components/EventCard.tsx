@@ -5,9 +5,10 @@ import { EventResponseDto, EventStatus } from "@/types/event";
 
 interface EventCardProps {
   event: EventResponseDto;
+  isHostedEvent?: boolean;
 }
 
-export default function EventCard({ event }: EventCardProps) {
+export default function EventCard({ event, isHostedEvent = false }: EventCardProps) {
   const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleDateString("en-US", {
       month: "short",
@@ -25,7 +26,7 @@ export default function EventCard({ event }: EventCardProps) {
 
   return (
     <Link
-      href={`/events/${event.id}`}
+      href={isHostedEvent ? `/event-management/${event.id}` : `/events/${event.id}`}
       className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-card-background transition-all hover:border-white/20 hover:shadow-2xl"
     >
       {/* Event Image */}
