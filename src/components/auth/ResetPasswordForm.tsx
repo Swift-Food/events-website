@@ -24,6 +24,7 @@ export default function ResetPasswordForm({
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   const passwordValidation = validatePassword(newPassword);
 
@@ -52,6 +53,24 @@ export default function ResetPasswordForm({
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    setError("");
+    setIsResending(true);
+
+    try {
+      await authApi.forgotPassword(email);
+      toast.success("Reset code resent! Check your email.");
+    } catch (err: any) {
+      console.error("Resend code error:", err);
+      const errorMessage =
+        err.response?.data?.message || "Failed to resend code";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -135,10 +154,19 @@ export default function ResetPasswordForm({
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || isResending}
           className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-4 rounded-xl transition-all shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 disabled:opacity-50"
         >
           {isLoading ? "Resetting..." : "Reset Password"}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleResendCode}
+          disabled={isResending || isLoading}
+          className="w-full text-sm text-primary hover:text-primary/80 font-medium disabled:opacity-50"
+        >
+          {isResending ? "Resending..." : "Resend Code"}
         </button>
 
         <button
