@@ -84,7 +84,7 @@ export default function EventManagementPage() {
             You must be logged in to manage events.
           </p>
           <button
-            onClick={() => router.push("/login")}
+            onClick={() => router.push("/auth")}
             className="rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground transition-all hover:bg-primary/90"
           >
             Go to Login

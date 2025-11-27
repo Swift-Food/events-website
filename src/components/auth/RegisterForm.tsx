@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { RegisterDto } from "@/types/user";
+import { validatePassword } from "@/lib/utils/passwordValidation";
+import PasswordRequirements from "./PasswordRequirements";
 
 interface RegisterFormProps {
   onSuccess?: () => void;
@@ -31,20 +33,6 @@ export default function RegisterForm({
   const [showPassword, setShowPassword] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [userId, setUserId] = useState("");
-
-  // Password validation helper
-  const validatePassword = (password: string) => {
-    const requirements = {
-      minLength: password.length >= 8,
-      hasUpperCase: /[A-Z]/.test(password),
-      hasLowerCase: /[a-z]/.test(password),
-      hasNumber: /\d/.test(password),
-      hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-    };
-
-    const allMet = Object.values(requirements).every((req) => req);
-    return { requirements, allMet };
-  };
 
   const passwordValidation = validatePassword(formData.password);
 
@@ -318,215 +306,10 @@ export default function RegisterForm({
             </div>
 
             {/* Password Requirements */}
-            {passwordTouched && (
-              <div className="mt-3 space-y-2">
-                <p className="text-xs font-medium text-muted-foreground">
-                  Password must contain:
-                </p>
-                <div className="grid grid-cols-1 gap-1.5">
-                  <div className="flex items-center gap-2">
-                    {passwordValidation.requirements.minLength ? (
-                      <svg
-                        className="w-4 h-4 text-success flex-shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        className="w-4 h-4 text-base-content/30 flex-shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    )}
-                    <span
-                      className={`text-xs ${
-                        passwordValidation.requirements.minLength
-                          ? "text-green-400"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      At least 8 characters
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {passwordValidation.requirements.hasUpperCase ? (
-                      <svg
-                        className="w-4 h-4 text-success flex-shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        className="w-4 h-4 text-base-content/30 flex-shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    )}
-                    <span
-                      className={`text-xs ${
-                        passwordValidation.requirements.hasUpperCase
-                          ? "text-green-400"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      One uppercase letter (A-Z)
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {passwordValidation.requirements.hasLowerCase ? (
-                      <svg
-                        className="w-4 h-4 text-success flex-shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        className="w-4 h-4 text-base-content/30 flex-shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    )}
-                    <span
-                      className={`text-xs ${
-                        passwordValidation.requirements.hasLowerCase
-                          ? "text-green-400"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      One lowercase letter (a-z)
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {passwordValidation.requirements.hasNumber ? (
-                      <svg
-                        className="w-4 h-4 text-success flex-shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        className="w-4 h-4 text-base-content/30 flex-shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    )}
-                    <span
-                      className={`text-xs ${
-                        passwordValidation.requirements.hasNumber
-                          ? "text-green-400"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      One number (0-9)
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {passwordValidation.requirements.hasSpecialChar ? (
-                      <svg
-                        className="w-4 h-4 text-success flex-shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        className="w-4 h-4 text-base-content/30 flex-shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    )}
-                    <span
-                      className={`text-xs ${
-                        passwordValidation.requirements.hasSpecialChar
-                          ? "text-green-400"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      One special character (!@#$%^&*...)
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
+            <PasswordRequirements
+              validation={passwordValidation}
+              touched={passwordTouched}
+            />
           </div>
 
           <button
