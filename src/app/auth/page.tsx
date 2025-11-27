@@ -13,7 +13,7 @@ export default function AuthPage() {
         {/* Card Container */}
         <div className="bg-card-background rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl">
           {/* Tabs */}
-          <div className="flex border-b border-foreground/10">
+          {/* <div className="flex border-b border-foreground/10">
             <button
               onClick={() => setActiveTab("login")}
               className={`flex-1 py-4 px-6 text-center font-semibold transition-all ${
@@ -34,7 +34,7 @@ export default function AuthPage() {
             >
               Sign Up
             </button>
-          </div>
+          </div> */}
 
           {/* Form Content */}
           <div className="p-8">
