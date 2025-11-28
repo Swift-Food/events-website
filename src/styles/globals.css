@@ -1,5 +1,41 @@
 @import "tailwindcss";
 
+/* Inter - for body text */
+@font-face {
+  font-family: 'Inter';
+  src: url('./Inter Font/Inter-VariableFont_opsz,wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('./Inter Font/Inter-Italic-VariableFont_opsz,wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Satoshi - for headers */
+@font-face {
+  font-family: 'Satoshi';
+  src: url('./Satoshi_Complete/Fonts/WEB/fonts/Satoshi-Bold.woff2') format('woff2'),
+       url('./Satoshi_Complete/Fonts/WEB/fonts/Satoshi-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('./Satoshi_Complete/Fonts/WEB/fonts/Satoshi-Regular.woff2') format('woff2'),
+       url('./Satoshi_Complete/Fonts/WEB/fonts/Satoshi-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-background: #222222;
   --color-foreground: #ededed;
@@ -15,18 +51,18 @@
   --color-border: #334155;
   --color-toggle-inactive: #404040;
   --color-button-inactive: #3a3a3a;
-  --font-sans: var(--font-geist-sans);
+  --font-sans: 'Inter', sans-serif;
+  --font-heading: 'Satoshi', sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--color-background);
   color: var(--color-foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
 
-
-/*
-Headers - Satoshi bold  
-Everything else - Inter 
-*/
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
