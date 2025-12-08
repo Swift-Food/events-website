@@ -21,20 +21,13 @@ export const GuestStatsCards = ({
   rejectedCount,
 }: GuestStatsCardsProps) => {
   const cards = [
-    {
-      label: "Total Guests",
-      value: totalGuests,
-      icon: Users,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
-    },
-    {
-      label: "Approved",
-      value: approvedCount,
-      icon: CheckCircle2,
-      color: "text-green-600",
-      bgColor: "bg-green-100",
-    },
+    // {
+    //   label: "Total Guests",
+    //   value: totalGuests,
+    //   icon: Users,
+    //   color: "text-blue-600",
+    //   bgColor: "bg-blue-100",
+    // },
     {
       label: "Checked In",
       value: stats.checkedIn,
@@ -42,6 +35,13 @@ export const GuestStatsCards = ({
       icon: UserCheck,
       color: "text-purple-600",
       bgColor: "bg-purple-100",
+    },
+    {
+      label: "Approved",
+      value: approvedCount,
+      icon: CheckCircle2,
+      color: "text-green-600",
+      bgColor: "bg-green-100",
     },
     {
       label: "Waitlisted",

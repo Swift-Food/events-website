@@ -7,6 +7,7 @@ import { eventService } from "@/services/event.service";
 import { EventResponseDto } from "@/types";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";
+import { CollaboratorManagement } from "@/components/event-collaborators/CollaboratorManagement";
 
 export default function EventManagementPage() {
   const params = useParams();
@@ -149,5 +150,44 @@ export default function EventManagementPage() {
     );
   }
 
-  return <EventForm mode="edit" eventId={eventId} initialData={eventData} />;
+
+  return (
+    <div className="relative min-h-screen bg-background">
+      {/* Floating Manage Guests Button */}
+      <div className="fixed right-8 top-24 z-50">
+        <button
+          onClick={() => router.push(`/event-management/${eventId}/guest-management`)}
+          className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+            />
+          </svg>
+          Manage Guests
+        </button>
+      </div>
+
+      {/* Event Form */}
+      <EventForm mode="edit" eventId={eventId} initialData={eventData} />
+
+      {/* Collaborator Management Section */}
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <CollaboratorManagement
+          eventId={eventId}
+          ownerId={eventData.owner?.user?.id}
+          isCompact={true}
+        />
+      </div>
+    </div>
+  );
 }

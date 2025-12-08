@@ -187,3 +187,110 @@ export interface RefundEligibilityResult {
   reason?: string;
   refundAmount?: number;
 }
+
+// Ticket Invite Link Types
+
+/**
+ * Reservation mode for invite links
+ */
+export enum ReservationMode {
+  /** First come first serve - tickets given on registration */
+  FCFS = "fcfs",
+
+  /** Reserve tickets for specific people */
+  RESERVED = "reserved",
+}
+
+/**
+ * Generate a ticket invite link
+ */
+export interface GenerateTicketInviteLinkDto {
+  eventTicketId: string;
+  bypassPayment?: boolean;
+  bypassApproval?: boolean;
+  reservationMode: ReservationMode;
+  maxUses?: number; // Default: 100
+}
+
+/**
+ * Response when generating a ticket invite link
+ */
+export interface GenerateTicketInviteLinkResponseDto {
+  success: boolean;
+  message: string;
+  inviteLink: string;
+  token: string;
+  inviteLinkId: string;
+}
+
+/**
+ * Accept a ticket invitation
+ */
+export interface AcceptTicketInviteDto {
+  token?: string; // Token from URL params, optional in body
+}
+
+/**
+ * Response when accepting a ticket invitation
+ */
+export interface AcceptTicketInviteResponseDto {
+  success: boolean;
+  message: string;
+  guestTicket?: GuestTicketResponseDto;
+  requiresPayment?: boolean;
+  paymentUrl?: string;
+  requiresLogin?: boolean;
+}
+
+/**
+ * Preview ticket invitation details
+ */
+export interface TicketInvitationPreviewDto {
+  success: boolean;
+  message?: string;
+  event?: {
+    id: string;
+    name: string;
+    description: string;
+    startDateTime: Date;
+    endDateTime: Date;
+    eventImage: string | null;
+  };
+  ticket?: {
+    id: string;
+    name: string;
+    isPaid: boolean;
+    bypassPayment: boolean;
+  };
+  bypassApproval?: boolean;
+  reservationMode?: ReservationMode;
+  maxUses?: number;
+  usedCount?: number;
+}
+
+/**
+ * Ticket invite link details
+ */
+export interface TicketInviteLinkDto {
+  id: string;
+  eventId: string;
+  eventTicketId: string;
+  ticketName: string;
+  token: string;
+  bypassPayment: boolean;
+  bypassApproval: boolean;
+  reservationMode: ReservationMode;
+  maxUses: number;
+  usedCount: number;
+  createdAt: Date;
+  createdBy: string;
+}
+
+/**
+ * Response for getting all invite links for an event
+ */
+export interface InviteLinksListResponseDto {
+  success: boolean;
+  inviteLinks: TicketInviteLinkDto[];
+  total: number;
+}

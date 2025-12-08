@@ -35,7 +35,12 @@ export const GuestTableRow = ({
   console.log("guest is", JSON.stringify(guest))
   const getStatusBadge = () => {
     const statusConfig = {
-      approved: {
+      checked_in: {  // ← Add this
+        label: "Active",  // Show as "Active" since they're checked in
+        icon: CheckCircle2,
+        className: "bg-green-100 text-green-700",
+      },
+      active: {
         label: "Approved",
         icon: CheckCircle2,
         className: "bg-green-100 text-green-700",
@@ -56,7 +61,7 @@ export const GuestTableRow = ({
         className: "bg-red-100 text-red-700",
       },
     };
-
+    console.log("guest status", guest.status)
     const config = statusConfig[guest.status as keyof typeof statusConfig];
     if (!config) return null;
 
@@ -72,18 +77,7 @@ export const GuestTableRow = ({
     );
   };
 
-  const getCheckInBadge = () => {
-    if (guest.status === GuestTicketStatus.CHECKED_IN) {
-      return (
-        <span className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-700">
-          <UserCheck className="h-3.5 w-3.5" />
-          Checked In
-        </span>
-      );
-    }
-    return null;
-  };
-
+ 
   return (
     <tr className="border-b border-border transition-colors hover:bg-white/5">
       <td className="p-4">
@@ -108,7 +102,7 @@ export const GuestTableRow = ({
       <td className="p-4">
         <div className="flex items-center">
           {getStatusBadge()}
-          {getCheckInBadge()}
+    
         </div>
       </td>
       <td className="p-4">
@@ -151,7 +145,6 @@ export const GuestTableRow = ({
               onClick={() => onCheckIn(guest.qrCode || "")}
               className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-purple-700"
             >
-              <UserCheck className="h-3.5 w-3.5" />
               Check In
             </button>
           )}

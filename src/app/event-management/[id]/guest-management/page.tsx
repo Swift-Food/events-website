@@ -133,13 +133,13 @@ export default function GuestManagementPage() {
     const matchesStatus =
       filterStatus === "all" ||
       guest.status === filterStatus ||
-      (filterStatus === GuestTicketStatus.CHECKED_IN);
-
+      (filterStatus === "checked_in" && guest.status === "checked_in"); // ← Fixed
+  
     const matchesSearch =
       searchQuery === "" ||
-      (guest.guest.firstName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (guest.guest.lastName || "").toLowerCase().includes(searchQuery.toLowerCase());
-
+      `${guest.guest.firstName} ${guest.guest.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      guest.guest.user.email.toLowerCase().includes(searchQuery.toLowerCase());
+  
     return matchesStatus && matchesSearch;
   });
 
@@ -195,10 +195,10 @@ export default function GuestManagementPage() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           pendingCount={pendingGuests.length}
-          approvedCount={guests.filter((g) => GuestTicketStatus.ACTIVE).length}
+          approvedCount={guests.filter((g) => g.status === GuestTicketStatus.ACTIVE).length}
           waitlistedCount={guests.filter((g) => g.status === GuestTicketStatus.WAITLISTED).length}
           rejectedCount={guests.filter((g) => g.status === GuestTicketStatus.CANCELLED).length}
-          checkedInCount={checkInStats.checkedIn}
+          checkedInCount={guests.filter((g) => g.status === GuestTicketStatus.CHECKED_IN).length} // ← Fixed
         />
 
         {selectedGuests.size > 0 && (

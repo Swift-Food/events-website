@@ -13,6 +13,11 @@ import {
   RefundTicketRequestDto,
   RefundResult,
   RefundEligibilityResult,
+  GenerateTicketInviteLinkDto,
+  GenerateTicketInviteLinkResponseDto,
+  AcceptTicketInviteResponseDto,
+  TicketInvitationPreviewDto,
+  InviteLinksListResponseDto,
 } from "@/types/guest-ticket";
 
 class GuestTicketService {
@@ -220,6 +225,59 @@ class GuestTicketService {
   ): Promise<RefundEligibilityResult> {
     const response: AxiosResponse<RefundEligibilityResult> =
       await apiClient.get(`${this.baseUrl}/${ticketId}/refund-eligibility`);
+    return response.data;
+  }
+
+  /**
+   * Generate a shareable ticket invite link
+   * POST /guest-tickets/events/:eventId/invite-link
+   */
+  async generateTicketInviteLink(
+    eventId: string,
+    data: GenerateTicketInviteLinkDto
+  ): Promise<GenerateTicketInviteLinkResponseDto> {
+    const response: AxiosResponse<GenerateTicketInviteLinkResponseDto> =
+      await apiClient.post(`${this.baseUrl}/events/${eventId}/invite-link`, data);
+    return response.data;
+  }
+
+  /**
+   * Accept a ticket invitation (public endpoint - can be called during registration or after login)
+   * POST /guest-tickets/accept/:token
+   */
+  async acceptTicketInvite(token: string): Promise<AcceptTicketInviteResponseDto> {
+    const response: AxiosResponse<AcceptTicketInviteResponseDto> =
+      await apiClient.post(`${this.baseUrl}/accept/${token}`);
+    return response.data;
+  }
+
+  /**
+   * Preview ticket invitation details (public endpoint for frontend to show invitation preview)
+   * GET /guest-tickets/preview/:token
+   */
+  async previewTicketInvitation(token: string): Promise<TicketInvitationPreviewDto> {
+    const response: AxiosResponse<TicketInvitationPreviewDto> =
+      await apiClient.get(`${this.baseUrl}/preview/${token}`);
+    return response.data;
+  }
+
+  /**
+   * Get all invite links for an event
+   * GET /guest-tickets/events/:eventId/invite-links
+   */
+  async getInviteLinksForEvent(eventId: string): Promise<InviteLinksListResponseDto> {
+    const response: AxiosResponse<InviteLinksListResponseDto> =
+      await apiClient.get(`${this.baseUrl}/events/${eventId}/invite-links`);
+    return response.data;
+  }
+
+  /**
+   * Revoke an invite link
+   * DELETE /guest-tickets/invite-link/:id
+   */
+  async revokeInviteLink(id: string): Promise<TicketActionResponseDto> {
+    const response: AxiosResponse<TicketActionResponseDto> =
+      await apiClient.delete(`${this.baseUrl}/invite-link/${id}`);
     return response.data;
   }
 }

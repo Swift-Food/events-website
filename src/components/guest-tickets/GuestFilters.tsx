@@ -28,7 +28,7 @@ export const GuestFilters = ({
   const filters = [
     { value: "all" as FilterStatus, label: "All" },
     { value: "pending" as FilterStatus, label: "Pending", count: pendingCount },
-    { value: "approved" as FilterStatus, label: "Approved", count: approvedCount },
+    { value: "active" as FilterStatus, label: "Approved", count: approvedCount },
     { value: "checked_in" as FilterStatus, label: "Checked In", count: checkedInCount },
     { value: "waitlisted" as FilterStatus, label: "Waitlisted", count: waitlistedCount },
     { value: "rejected" as FilterStatus, label: "Rejected", count: rejectedCount },
@@ -62,17 +62,7 @@ export const GuestFilters = ({
               }`}
             >
               {filter.label}
-              {filter.count !== undefined && filter.count > 0 && (
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs ${
-                    filterStatus === filter.value
-                      ? "bg-primary-foreground/20 text-primary-foreground"
-                      : "bg-primary/10 text-primary"
-                  }`}
-                >
-                  {filter.count}
-                </span>
-              )}
+             
             </button>
           ))}
         </div>

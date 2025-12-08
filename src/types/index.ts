@@ -9,6 +9,9 @@ export * from './event';
 // Event Ticket types
 export * from './event-ticket';
 
+// Event Collaborator types
+export * from './event-collaborator';
+
 // Address types
 export * from './address';
 
