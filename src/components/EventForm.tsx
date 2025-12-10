@@ -20,6 +20,7 @@ import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
 import { eventService } from "@/services/event.service";
 import { imageService } from "@/services/image.service";
 import { CreateEventDto, QuestionType, CreateEventTicketDto } from "@/types";
+import type { EventTicketResponseDto, QuestionBlock } from "@/types/event-ticket/response/ticket.dto";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";
@@ -166,7 +167,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
 
       // Load tickets
       if (initialData.eventTickets && initialData.eventTickets.length > 0) {
-        const ticketsToLoad = initialData.eventTickets.map((ticket, index) => {
+        const ticketsToLoad = initialData.eventTickets.map((ticket: EventTicketResponseDto, index: number) => {
           const price = parseFloat(ticket.price) || 0;
           return {
             id: ticket.id || `ticket-${index}`,
@@ -186,7 +187,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
         const firstTicket = initialData.eventTickets[0];
         if (firstTicket.questionForm && firstTicket.questionForm.length > 0) {
           const fieldsToLoad = firstTicket.questionForm.map(
-            (question, index) => {
+            (question: QuestionBlock, index: number) => {
               // Map backend question type to frontend field type
               let fieldType:
                 | "short-text"
@@ -218,7 +219,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
       // Set capacity (sum of all ticket quantities)
       if (initialData.eventTickets && initialData.eventTickets.length > 0) {
         const totalCapacity = initialData.eventTickets.reduce(
-          (sum, ticket) => sum + (ticket.quantityTotal || 0),
+          (sum: number, ticket: EventTicketResponseDto) => sum + (ticket.quantityTotal || 0),
           0
         );
         setCapacity(totalCapacity.toString());

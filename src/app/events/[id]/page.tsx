@@ -4,8 +4,11 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
+import { paymentService } from "@/services/payment.service";
 import { useAuth } from "@/lib/auth/authContext";
 import { EventResponseDto, EventStatus } from "@/types/event";
+import { GuestTicketStatus } from "@/types/guest-ticket";
+import type { PaymentFlowState } from "@/types/payment";
 import {
   Calendar,
   MapPin,
@@ -23,6 +26,7 @@ import Image from "next/image";
 import Link from "next/link";
 import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
+import PaymentModal, { PaymentSuccessModal } from "@/components/payments/PaymentModal";
 
 export default function EventDetailsPage() {
   const params = useParams();
@@ -40,6 +44,12 @@ export default function EventDetailsPage() {
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, any>>(
     {}
   );
+
+  // Payment modal state
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [paymentData, setPaymentData] = useState<PaymentFlowState | null>(null);
+  const [successTicketDetails, setSuccessTicketDetails] = useState<Pick<PaymentFlowState['ticketDetails'], 'ticketName' | 'eventName'> | null>(null);
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -101,15 +111,44 @@ export default function EventDetailsPage() {
       });
 
       if (result.success) {
-        toast.success(result.message || "Successfully registered for event!");
-        setShowTicketSelector(false);
-        setSelectedTicketId(null);
         setShowQuestionForm(false);
         setQuestionAnswers({});
 
-        if (result.requiresPayment && result.paymentUrl) {
-          window.location.href = result.paymentUrl;
+        // Check if payment is required
+        if (result.requiresPayment && result.guestTicket.status === GuestTicketStatus.PENDING_PAYMENT) {
+          // Get payment intent for this guest ticket
+          try {
+            const paymentResponse = await paymentService.createTicketPaymentIntent(result.guestTicket.id);
+
+            if (paymentResponse.success && paymentResponse.clientSecret) {
+              setPaymentData({
+                clientSecret: paymentResponse.clientSecret,
+                amount: paymentResponse.amount || 0,
+                currency: paymentResponse.currency || 'gbp',
+                ticketDetails: paymentResponse.ticketDetails || {
+                  ticketName: ticket?.name || 'Ticket',
+                  eventName: event?.name || 'Event',
+                  price: Number(ticket?.price) || 0,
+                },
+                guestTicketId: result.guestTicket.id,
+              });
+              setShowPaymentModal(true);
+              setShowTicketSelector(false);
+              setSelectedTicketId(null);
+            } else {
+              throw new Error(paymentResponse.error || 'Failed to create payment');
+            }
+          } catch (paymentError: any) {
+            console.error("Payment setup failed:", paymentError);
+            toast.error(
+              paymentError.response?.data?.message || "Failed to setup payment. Please try again from My Tickets."
+            );
+            router.push("/my-tickets");
+          }
         } else {
+          toast.success(result.message || "Successfully registered for event!");
+          setShowTicketSelector(false);
+          setSelectedTicketId(null);
           router.push("/my-tickets");
         }
       }
@@ -121,6 +160,30 @@ export default function EventDetailsPage() {
     } finally {
       setIsRegistering(false);
     }
+  };
+
+  const handlePaymentSuccess = () => {
+    setShowPaymentModal(false);
+    if (paymentData) {
+      setSuccessTicketDetails({
+        ticketName: paymentData.ticketDetails.ticketName,
+        eventName: paymentData.ticketDetails.eventName,
+      });
+    }
+    setShowSuccessModal(true);
+    setPaymentData(null);
+  };
+
+  const handlePaymentClose = () => {
+    setShowPaymentModal(false);
+    setPaymentData(null);
+    toast.info("Payment cancelled. You can complete payment from My Tickets.");
+  };
+
+  const handleSuccessClose = () => {
+    setShowSuccessModal(false);
+    setSuccessTicketDetails(null);
+    router.push("/my-tickets");
   };
 
   const handleQuestionChange = (question: string, value: any) => {
@@ -556,6 +619,28 @@ export default function EventDetailsPage() {
           </section>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      {showPaymentModal && paymentData && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={handlePaymentClose}
+          onSuccess={handlePaymentSuccess}
+          clientSecret={paymentData.clientSecret}
+          ticketDetails={paymentData.ticketDetails}
+          amount={paymentData.amount}
+          currency={paymentData.currency}
+        />
+      )}
+
+      {/* Payment Success Modal */}
+      {showSuccessModal && successTicketDetails && (
+        <PaymentSuccessModal
+          isOpen={showSuccessModal}
+          onClose={handleSuccessClose}
+          ticketDetails={successTicketDetails}
+        />
+      )}
 
       {/* Question Form Modal */}
       {showQuestionForm && selectedTicket?.questionForm && (

@@ -89,6 +89,16 @@ export interface RegisterTicketResponseDto {
   guestTicket: GuestTicketResponseDto;
   requiresPayment: boolean;
   paymentUrl?: string;
+  /** For Stripe.js payment flow - client secret for PaymentIntent */
+  clientSecret?: string;
+  paymentIntentId?: string;
+  amount?: number;
+  currency?: string;
+  ticketDetails?: {
+    ticketName: string;
+    eventName: string;
+    price: number;
+  };
 }
 
 /**
