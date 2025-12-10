@@ -28,7 +28,7 @@ export default function VerifyEmailForm({
     setIsLoading(true);
 
     try {
-      await authApi.verifyEmail({ email, code });
+      await authApi.verifyEmail(email, code);
       toast.success("Email verified successfully!");
       onSuccess();
     } catch (err: any) {

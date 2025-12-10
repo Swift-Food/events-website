@@ -47,6 +47,8 @@ export interface User {
 export interface LoginDto {
   email: string;
   password: string;
+  inviteToken?: string;
+  inviteType?: 'collaborator' | 'ticket';
 }
 
 export type LoginResponse =
@@ -70,6 +72,8 @@ export interface RegisterDto {
   username: string;
   password: string;
   organizationName?: string;
+  inviteToken?: string;
+  inviteType?: 'collaborator' | 'ticket';
   //   firstName?: string;
   //   lastName?: string;
   //   phoneNumber?: string;
@@ -85,9 +89,23 @@ export interface VerifyEmailDto {
   email: string;
   code: string;
   organizationName?: string;
+  inviteToken?: string;
+  inviteType?: 'collaborator' | 'ticket';
 }
 
 export type VerifyEmailResponse = TokenPair;
+
+export interface GoogleLoginDto {
+  idToken: string;
+  inviteToken?: string;
+  inviteType?: 'collaborator' | 'ticket';
+}
+
+export interface GoogleRegisterDto {
+  idToken: string;
+  inviteToken?: string;
+  inviteType?: 'collaborator' | 'ticket';
+}
 
 // JWT Payload interface
 export interface JWTPayload {

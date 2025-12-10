@@ -149,7 +149,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     try {
       const response = await authApi.login(
         credentials.email,
-        credentials.password
+        credentials.password,
+        credentials.inviteToken,
+        credentials.inviteType
       );
 
       // Check if response is a TokenPair (successful login) or needs verification
@@ -177,7 +179,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     setState((prev) => ({ ...prev, isLoading: true }));
 
     try {
-      const response = await authApi.register(data);
+      const response = await authApi.register(
+        data,
+        data.inviteToken,
+        data.inviteType
+      );
       setState((prev) => ({ ...prev, isLoading: false }));
       return response;
     } catch (error) {
@@ -195,7 +201,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       const response = await authApi.verifyEmail(
         data.email,
         data.code,
-        data.organizationName
+        data.organizationName,
+        data.inviteToken,
+        data.inviteType
       );
 
       // Store token temporarily to make authenticated requests

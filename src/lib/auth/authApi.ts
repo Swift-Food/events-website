@@ -8,13 +8,22 @@ import {
   VerifyEmailResponse,
   TokenPair,
   User,
+  GoogleLoginDto,
+  GoogleRegisterDto,
 } from "@/types/user";
 
 export const authApi = {
-  login: async (email: string, password: string): Promise<LoginResponse> => {
+  login: async (
+    email: string,
+    password: string,
+    inviteToken?: string,
+    inviteType?: 'collaborator' | 'ticket'
+  ): Promise<LoginResponse> => {
     const payload: LoginDto = {
       email,
       password,
+      inviteToken,
+      inviteType,
     };
     const response = await apiClient.post<LoginResponse>(
       "/auth/login-event-user",
@@ -23,10 +32,19 @@ export const authApi = {
     return response.data;
   },
 
-  register: async (data: RegisterDto): Promise<RegisterResponse> => {
+  register: async (
+    data: RegisterDto,
+    inviteToken?: string,
+    inviteType?: 'collaborator' | 'ticket'
+  ): Promise<RegisterResponse> => {
+    const payload = {
+      ...data,
+      inviteToken,
+      inviteType,
+    };
     const response = await apiClient.post<RegisterResponse>(
       "/auth/register-event-user",
-      data
+      payload
     );
     return response.data;
   },
@@ -37,9 +55,17 @@ export const authApi = {
   verifyEmail: async (
     email: string,
     code: string,
-    organizationName?: string
+    organizationName?: string,
+    inviteToken?: string,
+    inviteType?: 'collaborator' | 'ticket'
   ): Promise<VerifyEmailResponse> => {
-    const payload: VerifyEmailDto = { email, code, organizationName };
+    const payload: VerifyEmailDto = {
+      email,
+      code,
+      organizationName,
+      inviteToken,
+      inviteType,
+    };
     const response = await apiClient.post<VerifyEmailResponse>(
       "/auth/verify-event-user",
       payload
@@ -90,6 +116,46 @@ export const authApi = {
     const response = await apiClient.post<TokenPair>("/auth/refresh", {
       refresh_token: refreshToken,
     });
+    return response.data;
+  },
+
+  /**
+   * Google Sign-In for Event Users
+   */
+  googleLogin: async (
+    idToken: string,
+    inviteToken?: string,
+    inviteType?: 'collaborator' | 'ticket'
+  ): Promise<{ access_token: string; refresh_token: string }> => {
+    const payload = {
+      idToken,
+      inviteToken,
+      inviteType,
+    };
+    const response = await apiClient.post<{
+      access_token: string;
+      refresh_token: string;
+    }>("/auth/google-login-event-user", payload);
+    return response.data;
+  },
+
+  /**
+   * Google Register for Event Users
+   */
+  googleRegister: async (
+    idToken: string,
+    inviteToken?: string,
+    inviteType?: 'collaborator' | 'ticket'
+  ): Promise<{ access_token: string; refresh_token: string }> => {
+    const payload = {
+      idToken,
+      inviteToken,
+      inviteType,
+    };
+    const response = await apiClient.post<{
+      access_token: string;
+      refresh_token: string;
+    }>("/auth/google-register-event-user", payload);
     return response.data;
   },
 
