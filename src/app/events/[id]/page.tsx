@@ -18,13 +18,11 @@ import {
   ArrowLeft,
   User,
   Ticket,
-  ExternalLink,
   Loader2,
   Check,
   X,
 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
 import PaymentModal, { PaymentSuccessModal } from "@/components/payments/PaymentModal";
@@ -334,7 +332,7 @@ export default function EventDetailsPage() {
                 ) : (
                   <div
                     className="flex h-full items-center justify-center"
-                    style={{ backgroundColor: event.eventColor }}
+                    style={{ backgroundColor: event.eventColor || "#3b82f6" }}
                   >
                     <Calendar className="h-24 w-24 text-white/30" />
                   </div>
@@ -344,10 +342,10 @@ export default function EventDetailsPage() {
                 <div className="absolute right-4 top-4 hidden lg:block">
                   <span
                     className={`rounded-full border px-4 py-2 text-sm font-semibold backdrop-blur-md ${
-                      statusColors[event.status]
+                      statusColors[event.status] || "bg-gray-500/20 text-gray-400 border-gray-500/30"
                     }`}
                   >
-                    {event.status}
+                    {event.status || "Unknown"}
                   </span>
                 </div>
               </div>
@@ -443,30 +441,36 @@ export default function EventDetailsPage() {
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Location
                 </h3>
-                <div className="mb-4 flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      {event.address.addressLine1}
-                    </p>
-                    {event.address.addressLine2 && (
-                      <p className="text-sm text-muted-foreground">
-                        {event.address.addressLine2}
-                      </p>
-                    )}
-                    <p className="text-sm text-muted-foreground">
-                      {event.address.city}, {event.address.zipcode}
-                    </p>
-                  </div>
-                </div>
+                {event.address ? (
+                  <>
+                    <div className="mb-4 flex items-start gap-3">
+                      <MapPin className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          {event.address.addressLine1}
+                        </p>
+                        {event.address.addressLine2 && (
+                          <p className="text-sm text-muted-foreground">
+                            {event.address.addressLine2}
+                          </p>
+                        )}
+                        <p className="text-sm text-muted-foreground">
+                          {event.address.city}, {event.address.zipcode}
+                        </p>
+                      </div>
+                    </div>
 
-                {/* Google Map */}
-                <GoogleMap
-                  latitude={event.address.location?.latitude}
-                  longitude={event.address.location?.longitude}
-                  title={event.address.name}
-                  className="h-32 sm:h-32 lg:h-48 w-full"
-                />
+                    {/* Google Map */}
+                    <GoogleMap
+                      latitude={event.address.location?.latitude}
+                      longitude={event.address.location?.longitude}
+                      title={event.address.name}
+                      className="h-32 sm:h-32 lg:h-48 w-full"
+                    />
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Location TBD</p>
+                )}
               </div>
             </div>
 
@@ -482,34 +486,46 @@ export default function EventDetailsPage() {
                   <div className="block lg:hidden">
                     <span
                       className={`rounded-full border px-3 py-1 text-xs font-semibold ${
-                        statusColors[event.status]
+                        statusColors[event.status] || "bg-gray-500/20 text-gray-400 border-gray-500/30"
                       }`}
                     >
                       {event.status}
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  {event.owner.user.profilePicture ? (
-                    <Image
-                      src={event.owner.user.profilePicture}
-                      alt={event.owner.user.username || ""}
-                      width={48}
-                      height={48}
-                      className="rounded-full"
-                    />
-                  ) : (
+                {event.owner?.user ? (
+                  <div className="flex items-center gap-3">
+                    {event.owner.user.profilePicture ? (
+                      <Image
+                        src={event.owner.user.profilePicture}
+                        alt={event.owner.user.username || "Organizer"}
+                        width={48}
+                        height={48}
+                        className="rounded-full"
+                      />
+                    ) : (
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                        <User className="h-6 w-6 text-primary" />
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {event.owner.user.username || "Anonymous"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">Organizer</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                       <User className="h-6 w-6 text-primary" />
                     </div>
-                  )}
-                  <div>
-                    <p className="font-medium text-foreground">
-                      {event.owner.user.username}
-                    </p>
-                    <p className="text-sm text-muted-foreground">Organizer</p>
+                    <div>
+                      <p className="font-medium text-foreground">Event Organizer</p>
+                      <p className="text-sm text-muted-foreground">Organizer</p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Event Stats Card */}
@@ -544,7 +560,7 @@ export default function EventDetailsPage() {
                       <span>Views</span>
                     </div>
                     <span className="font-semibold text-foreground">
-                      {event.viewCount}
+                      {event.viewCount ?? 0}
                     </span>
                   </div>
                 </div>
@@ -646,10 +662,14 @@ export default function EventDetailsPage() {
               <h2 className="mb-4 text-lg font-semibold text-muted-foreground ">
                 About this event
               </h2>
-              <div
-                className="tiptap-editor tiptap-view-mode"
-                dangerouslySetInnerHTML={{ __html: event.description }}
-              />
+              {event.description ? (
+                <div
+                  className="tiptap-editor tiptap-view-mode"
+                  dangerouslySetInnerHTML={{ __html: event.description }}
+                />
+              ) : (
+                <p className="text-muted-foreground">No description provided.</p>
+              )}
             </div>
           </section>
         </div>
