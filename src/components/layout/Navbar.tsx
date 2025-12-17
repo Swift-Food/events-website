@@ -7,7 +7,7 @@ import { Menu, X, User, LogOut, UserCircle, Ticket } from "lucide-react";
 import { useAuth } from "@/lib/auth/authContext";
 
 const navLinks = [
-  { href: "/", label: "Home" },
+  // { href: "/", label: "Home" },
   { href: "/events", label: "Events" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },

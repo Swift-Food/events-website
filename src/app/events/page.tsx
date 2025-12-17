@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { eventsApi } from "@/services/events";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
 import { Search, Calendar, ChevronLeft, ChevronRight, X } from "lucide-react";
-import EventCard from "@/components/EventCard";
+import HorizontalEventCard from "@/components/HorizontalEventCard";
 
 export default function EventCataloguePage() {
   const [events, setEvents] = useState<EventResponseDto[]>([]);
@@ -15,6 +15,10 @@ export default function EventCataloguePage() {
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Track which date headers are stuck
+  const [stuckHeaders, setStuckHeaders] = useState<Set<string>>(new Set());
+  const sentinelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   const eventsPerPage = 12;
 
@@ -29,6 +33,7 @@ export default function EventCataloguePage() {
         take: eventsPerPage,
       });
 
+      console.log("Received events: ", result.events)
       setEvents(result.events);
       setTotal(result.total);
     } catch (err) {
@@ -51,6 +56,32 @@ export default function EventCataloguePage() {
 
   const totalPages = Math.ceil(total / eventsPerPage);
 
+  // Calculate range for display
+  const startIndex = (currentPage - 1) * eventsPerPage + 1;
+  const endIndex = Math.min(currentPage * eventsPerPage, total);
+
+  // Group events by date (preserving order received from API)
+  const groupedEvents = useMemo(() => {
+    const groups = new Map<string, EventResponseDto[]>();
+
+    events.forEach((event) => {
+      const date = new Date(event.startDateTime);
+      const dateKey = date.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+
+      if (!groups.has(dateKey)) {
+        groups.set(dateKey, []);
+      }
+      groups.get(dateKey)!.push(event);
+    });
+
+    return Array.from(groups.entries());
+  }, [events]);
+
   const clearSearch = () => {
     setSearchTerm("");
     setCurrentPage(1);
@@ -58,15 +89,47 @@ export default function EventCataloguePage() {
 
   const hasActiveSearch = !!searchTerm;
 
+  // Intersection observer to detect when headers become stuck
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const dateKey = entry.target.getAttribute("data-date-key");
+          if (dateKey) {
+            setStuckHeaders((prev) => {
+              const next = new Set(prev);
+              if (entry.isIntersecting) {
+                next.delete(dateKey);
+              } else {
+                next.add(dateKey);
+              }
+              return next;
+            });
+          }
+        });
+      },
+      {
+        rootMargin: "-80px 0px 0px 0px",
+        threshold: 0,
+      }
+    );
+
+    sentinelRefs.current.forEach((element) => {
+      observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, [groupedEvents]);
+
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-7xl px-6 py-8">
+      <div className="mx-auto max-w-2xl px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
             Discover Events
           </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
+          <p className="mt-2 text-md text-muted-foreground">
             Find and join exciting events happening around you
           </p>
         </div>
@@ -95,15 +158,17 @@ export default function EventCataloguePage() {
         </div>
 
         {/* Results Count */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6">
           <p className="text-sm text-muted-foreground">
             {loading ? (
               "Loading events..."
-            ) : (
+            ) : total > 0 ? (
               <>
-                Showing {events.length} of {total} event
+                Showing {startIndex}-{endIndex} of {total} event
                 {total !== 1 ? "s" : ""}
               </>
+            ) : (
+              "No events found"
             )}
           </p>
         </div>
@@ -151,12 +216,87 @@ export default function EventCataloguePage() {
           </div>
         )}
 
-        {/* Events Grid */}
+        {/* Events Grouped by Date */}
         {!loading && !error && events.length > 0 && (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
+          <div>
+            {groupedEvents.map(([dateKey, dateEvents], index) => {
+              const firstEventDate = new Date(dateEvents[0].startDateTime);
+              const monthAbbrev = firstEventDate.toLocaleDateString("en-US", {
+                month: "short",
+              });
+              const dayNum = firstEventDate.getDate();
+              const dayName = firstEventDate.toLocaleDateString("en-US", {
+                weekday: "long",
+              });
+              const isLast = index === groupedEvents.length - 1;
+
+              return (
+                <div key={dateKey} className="relative flex">
+                  {/* Timeline column - continuous line */}
+                  <div className="hidden sm:block sm:w-8 relative">
+                    {/* Continuous line */}
+                    {!isLast && (
+                      <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-white/20" />
+                    )}
+                    {/* Dot positioned at header level */}
+                    <div className="sticky top-20 z-40 flex h-8 items-center justify-center">
+                      <div
+                        className={`h-2 w-2 rounded-full transition-colors ${
+                          stuckHeaders.has(dateKey)
+                            ? "bg-primary"
+                            : "bg-muted-foreground"
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="min-w-0 flex-1 pb-8">
+                    {/* Sentinel for detecting stuck state */}
+                    <div
+                      ref={(el) => {
+                        if (el) sentinelRefs.current.set(dateKey, el);
+                      }}
+                      data-date-key={dateKey}
+                      className="h-0"
+                    />
+
+                    {/* Sticky Date Header */}
+                    <div className="sticky top-20 z-30 pb-3">
+                      <div
+                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors ${
+                          stuckHeaders.has(dateKey)
+                            ? "border border-white/10 bg-card-background"
+                            : ""
+                        }`}
+                      >
+                        {/* Mobile dot - only show on mobile */}
+                        <div
+                          className={`h-2 w-2 flex-shrink-0 rounded-full transition-colors sm:hidden ${
+                            stuckHeaders.has(dateKey)
+                              ? "bg-primary"
+                              : "bg-muted-foreground"
+                          }`}
+                        />
+                        <span className="text-sm font-semibold text-foreground">
+                          {monthAbbrev} {dayNum}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          {dayName}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Events for this date */}
+                    <div className="min-w-0 space-y-3">
+                      {dateEvents.map((event) => (
+                        <HorizontalEventCard key={event.id} event={event} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
 

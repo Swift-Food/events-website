@@ -7,12 +7,12 @@ export interface EventAddressResponseDto {
   id: string;
   name: string;
   addressLine1: string;
-  addressLine2?: string;
-  flat?: string;
+  addressLine2: string | null;
+  flat: string | null;
   city: string;
   zipcode: string;
-  location?: {
+  location: {
     latitude: number;
     longitude: number;
-  };
+  } | null;
 }
