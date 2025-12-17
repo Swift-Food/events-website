@@ -5,8 +5,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { guestTicketService } from "@/services/guest-ticket.service";
+import { paymentService } from "@/services/payment.service";
 import { GuestTicketWithEventResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
+import type { PaymentFlowState } from "@/types/payment";
 import { TicketCard } from "@/components/tickets";
+import PaymentModal, { PaymentSuccessModal } from "@/components/payments/PaymentModal";
 import { Ticket, Calendar, CheckCircle2, Clock, Loader2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -21,6 +24,13 @@ export default function MyTicketsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>("upcoming");
   const [refundingTicketId, setRefundingTicketId] = useState<string | null>(null);
+
+  // Payment state
+  const [processingPaymentTicketId, setProcessingPaymentTicketId] = useState<string | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [paymentData, setPaymentData] = useState<PaymentFlowState | null>(null);
+  const [successTicketDetails, setSuccessTicketDetails] = useState<{ ticketName: string; eventName: string } | null>(null);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -86,6 +96,73 @@ export default function MyTicketsPage() {
     } finally {
       setRefundingTicketId(null);
     }
+  };
+
+  const handleCompletePayment = async (ticketId: string) => {
+    const ticket = tickets.find((t) => t.id === ticketId);
+    if (!ticket) {
+      toast.error("Ticket not found");
+      return;
+    }
+
+    try {
+      setProcessingPaymentTicketId(ticketId);
+      const paymentResponse = await paymentService.createTicketPaymentIntent(ticketId);
+
+      if (paymentResponse.success && paymentResponse.clientSecret) {
+        setPaymentData({
+          clientSecret: paymentResponse.clientSecret,
+          amount: paymentResponse.amount || 0,
+          currency: paymentResponse.currency || "gbp",
+          ticketDetails: paymentResponse.ticketDetails || {
+            ticketName: ticket.ticketName,
+            eventName: ticket.eventName,
+            price: 0,
+          },
+          guestTicketId: ticketId,
+        });
+        setShowPaymentModal(true);
+      } else {
+        throw new Error(paymentResponse.error || "Failed to create payment");
+      }
+    } catch (error: any) {
+      console.error("Payment setup failed:", error);
+      toast.error(error.response?.data?.message || "Failed to setup payment. Please try again.");
+    } finally {
+      setProcessingPaymentTicketId(null);
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    setShowPaymentModal(false);
+    if (paymentData) {
+      setSuccessTicketDetails({
+        ticketName: paymentData.ticketDetails.ticketName,
+        eventName: paymentData.ticketDetails.eventName,
+      });
+    }
+    setShowSuccessModal(true);
+    setPaymentData(null);
+
+    // Update ticket status locally
+    if (paymentData?.guestTicketId) {
+      setTickets((prev) =>
+        prev.map((t) =>
+          t.id === paymentData.guestTicketId ? { ...t, status: GuestTicketStatus.ACTIVE } : t
+        )
+      );
+    }
+  };
+
+  const handlePaymentClose = () => {
+    setShowPaymentModal(false);
+    setPaymentData(null);
+    toast.info("Payment cancelled. You can try again later.");
+  };
+
+  const handleSuccessClose = () => {
+    setShowSuccessModal(false);
+    setSuccessTicketDetails(null);
   };
 
   const now = new Date();
@@ -197,11 +274,35 @@ export default function MyTicketsPage() {
                 ticket={ticket}
                 onRefund={handleRefund}
                 isRefunding={refundingTicketId === ticket.id}
+                onCompletePayment={handleCompletePayment}
+                isProcessingPayment={processingPaymentTicketId === ticket.id}
               />
             ))}
           </div>
         )}
       </div>
+
+      {/* Payment Modal */}
+      {showPaymentModal && paymentData && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={handlePaymentClose}
+          onSuccess={handlePaymentSuccess}
+          clientSecret={paymentData.clientSecret}
+          ticketDetails={paymentData.ticketDetails}
+          amount={paymentData.amount}
+          currency={paymentData.currency}
+        />
+      )}
+
+      {/* Payment Success Modal */}
+      {showSuccessModal && successTicketDetails && (
+        <PaymentSuccessModal
+          isOpen={showSuccessModal}
+          onClose={handleSuccessClose}
+          ticketDetails={successTicketDetails}
+        />
+      )}
     </div>
   );
 }

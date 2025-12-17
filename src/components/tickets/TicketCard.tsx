@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { GuestTicketWithEventResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
-import { Calendar, MapPin, Ticket, QrCode, X, Clock, CheckCircle2, XCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Calendar, Ticket, QrCode, X, Clock, CheckCircle2, XCircle, AlertCircle, Loader2 } from "lucide-react";
 import TicketQRCode from "./TicketQRCode";
 import { format } from "date-fns";
 
@@ -11,6 +11,8 @@ interface TicketCardProps {
   ticket: GuestTicketWithEventResponseDto;
   onRefund?: (ticketId: string) => void;
   isRefunding?: boolean;
+  onCompletePayment?: (ticketId: string) => void;
+  isProcessingPayment?: boolean;
 }
 
 const statusConfig: Record<GuestTicketStatus, { label: string; color: string; icon: React.ReactNode }> = {
@@ -56,7 +58,7 @@ const statusConfig: Record<GuestTicketStatus, { label: string; color: string; ic
   },
 };
 
-export default function TicketCard({ ticket, onRefund, isRefunding }: TicketCardProps) {
+export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePayment, isProcessingPayment }: TicketCardProps) {
   const [showQRModal, setShowQRModal] = useState(false);
 
   const status = statusConfig[ticket.status] || statusConfig[GuestTicketStatus.ACTIVE];
@@ -128,9 +130,20 @@ export default function TicketCard({ ticket, onRefund, isRefunding }: TicketCard
               </button>
             )}
 
-            {ticket.status === GuestTicketStatus.PENDING_PAYMENT && (
-              <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-medium hover:bg-orange-600 transition-colors">
-                Complete Payment
+            {ticket.status === GuestTicketStatus.PENDING_PAYMENT && onCompletePayment && (
+              <button
+                onClick={() => onCompletePayment(ticket.id)}
+                disabled={isProcessingPayment}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isProcessingPayment ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Complete Payment"
+                )}
               </button>
             )}
           </div>
