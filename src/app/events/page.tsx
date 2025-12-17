@@ -183,7 +183,7 @@ export default function EventCataloguePage() {
         {/* Events Grouped by Date */}
         {!loading && !error && events.length > 0 && (
           <div>
-            {groupedEvents.map(([dateKey, dateEvents]) => {
+            {groupedEvents.map(([dateKey, dateEvents], index) => {
               const firstEventDate = new Date(dateEvents[0].startDateTime);
               const monthAbbrev = firstEventDate.toLocaleDateString("en-US", {
                 month: "short",
@@ -192,27 +192,39 @@ export default function EventCataloguePage() {
               const dayName = firstEventDate.toLocaleDateString("en-US", {
                 weekday: "long",
               });
+              const isLast = index === groupedEvents.length - 1;
 
               return (
-                <div key={dateKey} className="relative">
-                  {/* Sticky Date Header */}
-                  <div className="sticky top-20 z-30 mb-3">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-card-background px-3 py-1.5">
-                      <div className="h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
-                      <span className="text-sm font-semibold text-foreground">
-                        {monthAbbrev} {dayNum}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        {dayName}
-                      </span>
-                    </div>
+                <div key={dateKey} className="relative flex gap-4">
+                  {/* Timeline column */}
+                  <div className="hidden sm:flex sm:w-4 sm:flex-col sm:items-center">
+                    {/* Dot */}
+                    <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-muted-foreground" />
+                    {/* Line */}
+                    {!isLast && <div className="w-0.5 flex-1 bg-white/20" />}
                   </div>
 
-                  {/* Events for this date */}
-                  <div className="space-y-3 pb-6">
-                    {dateEvents.map((event) => (
-                      <HorizontalEventCard key={event.id} event={event} />
-                    ))}
+                  {/* Content */}
+                  <div className="flex-1 pb-8">
+                    {/* Sticky Date Header */}
+                    <div className="sticky top-20 z-30 mb-3">
+                      <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-card-background px-3 py-1.5">
+                        <div className="h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
+                        <span className="text-sm font-semibold text-foreground">
+                          {monthAbbrev} {dayNum}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          {dayName}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Events for this date */}
+                    <div className="space-y-3">
+                      {dateEvents.map((event) => (
+                        <HorizontalEventCard key={event.id} event={event} />
+                      ))}
+                    </div>
                   </div>
                 </div>
               );
