@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckCircle, XCircle, Loader2, ArrowRight, Sparkles, PartyPopper } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, ArrowRight, Sparkles, PartyPopper, CloudRain, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
 // Confetti piece component
@@ -41,11 +41,28 @@ function Confetti() {
   );
 }
 
+// Floating sad clouds for error state
+function SadClouds() {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <div className="absolute top-10 left-10 animate-float-slow opacity-20">
+        <CloudRain className="w-16 h-16 text-gray-400" />
+      </div>
+      <div className="absolute top-20 right-16 animate-float-medium opacity-15">
+        <CloudRain className="w-12 h-12 text-gray-400" />
+      </div>
+      <div className="absolute bottom-20 left-20 animate-float-fast opacity-10">
+        <CloudRain className="w-10 h-10 text-gray-400" />
+      </div>
+    </div>
+  );
+}
+
 function StripeCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const success = searchParams.get("success") === "true";
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(10);
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
@@ -158,10 +175,21 @@ function StripeCallbackContent() {
 
   // Error or cancelled state
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-        <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <XCircle className="w-12 h-12 text-red-600" />
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
+      <SadClouds />
+
+      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center relative z-10">
+        {/* Decorative elements */}
+        <div className="absolute -top-3 -left-3">
+          <RefreshCw className="w-7 h-7 text-orange-400 animate-spin-slow" />
+        </div>
+        <div className="absolute -top-3 -right-3 text-2xl animate-wiggle">
+          😅
+        </div>
+
+        {/* Animated X icon */}
+        <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-error-shake">
+          <XCircle className="w-14 h-14 text-white" />
         </div>
 
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -169,16 +197,22 @@ function StripeCallbackContent() {
         </h1>
 
         <p className="text-gray-600 mb-6">
-          Your Stripe account setup was not completed. You can try again whenever you&apos;re ready.
+          No worries! Your Stripe account setup was not completed. You can try again whenever you&apos;re ready.
         </p>
+
+        <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-4 mb-6">
+          <p className="text-orange-700 text-sm font-medium">
+            💡 Tip: Make sure to complete all steps in the Stripe form
+          </p>
+        </div>
 
         <div className="flex flex-col gap-3">
           <Link
             href="/event-creation"
-            className="inline-flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-primary/90 transition-all hover:scale-105 shadow-md"
           >
+            <RefreshCw className="w-4 h-4" />
             Try Again
-            <ArrowRight className="w-4 h-4" />
           </Link>
 
           <Link
@@ -189,6 +223,54 @@ function StripeCallbackContent() {
           </Link>
         </div>
       </div>
+
+      {/* CSS for error animations */}
+      <style jsx>{`
+        @keyframes error-shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+          20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        @keyframes wiggle {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(-10deg); }
+          75% { transform: rotate(10deg); }
+        }
+        @keyframes float-slow {
+          0%, 100% { transform: translateY(0) translateX(0); }
+          50% { transform: translateY(-20px) translateX(10px); }
+        }
+        @keyframes float-medium {
+          0%, 100% { transform: translateY(0) translateX(0); }
+          50% { transform: translateY(-15px) translateX(-8px); }
+        }
+        @keyframes float-fast {
+          0%, 100% { transform: translateY(0) translateX(0); }
+          50% { transform: translateY(-10px) translateX(5px); }
+        }
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        :global(.animate-error-shake) {
+          animation: error-shake 0.6s ease-out;
+        }
+        :global(.animate-wiggle) {
+          animation: wiggle 1s ease-in-out infinite;
+        }
+        :global(.animate-float-slow) {
+          animation: float-slow 6s ease-in-out infinite;
+        }
+        :global(.animate-float-medium) {
+          animation: float-medium 4s ease-in-out infinite;
+        }
+        :global(.animate-float-fast) {
+          animation: float-fast 3s ease-in-out infinite;
+        }
+        :global(.animate-spin-slow) {
+          animation: spin-slow 3s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }
