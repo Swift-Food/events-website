@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { eventsApi } from "@/services/events";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
 import { Search, Calendar, ChevronLeft, ChevronRight, X } from "lucide-react";
@@ -15,6 +15,10 @@ export default function EventCataloguePage() {
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Track which date headers are stuck
+  const [stuckHeaders, setStuckHeaders] = useState<Set<string>>(new Set());
+  const sentinelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   const eventsPerPage = 12;
 
@@ -84,6 +88,38 @@ export default function EventCataloguePage() {
   };
 
   const hasActiveSearch = !!searchTerm;
+
+  // Intersection observer to detect when headers become stuck
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const dateKey = entry.target.getAttribute("data-date-key");
+          if (dateKey) {
+            setStuckHeaders((prev) => {
+              const next = new Set(prev);
+              if (entry.isIntersecting) {
+                next.delete(dateKey);
+              } else {
+                next.add(dateKey);
+              }
+              return next;
+            });
+          }
+        });
+      },
+      {
+        rootMargin: "-80px 0px 0px 0px",
+        threshold: 0,
+      }
+    );
+
+    sentinelRefs.current.forEach((element) => {
+      observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, [groupedEvents]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -206,9 +242,23 @@ export default function EventCataloguePage() {
 
                   {/* Content */}
                   <div className="flex-1 pb-8">
+                    {/* Sentinel for detecting stuck state */}
+                    <div
+                      ref={(el) => {
+                        if (el) sentinelRefs.current.set(dateKey, el);
+                      }}
+                      data-date-key={dateKey}
+                      className="h-0"
+                    />
                     {/* Sticky Date Header */}
-                    <div className="sticky top-20 z-30 mb-3">
-                      <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-card-background px-3 py-1.5">
+                    <div className="sticky top-20 z-30 -mt-1 pb-3">
+                      <div
+                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors ${
+                          stuckHeaders.has(dateKey)
+                            ? "border border-white/10 bg-card-background"
+                            : ""
+                        }`}
+                      >
                         <div className="h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
                         <span className="text-sm font-semibold text-foreground">
                           {monthAbbrev} {dayNum}
