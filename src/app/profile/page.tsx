@@ -161,6 +161,7 @@ export default function ProfilePage() {
           updatedAt: new Date(),
           owner: {
             id: "",
+            userId: "",
             organizationName: "",
             user: {
               id: "",
@@ -174,8 +175,11 @@ export default function ProfilePage() {
             id: "",
             name: "",
             addressLine1: "",
+            addressLine2: null,
+            flat: null,
             city: "TBD",
             zipcode: "",
+            location: null,
           },
           categories: [],
           attendeesCount: 0,
@@ -202,6 +206,7 @@ export default function ProfilePage() {
           updatedAt: new Date(),
           owner: {
             id: "",
+            userId: "",
             organizationName: "",
             user: {
               id: "",
@@ -215,8 +220,11 @@ export default function ProfilePage() {
             id: "",
             name: "",
             addressLine1: "",
+            addressLine2: null,
+            flat: null,
             city: "TBD",
             zipcode: "",
+            location: null,
           },
           categories: [],
           attendeesCount: 0,
