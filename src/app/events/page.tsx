@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { eventsApi } from "@/services/events";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
 import { Search, Calendar, ChevronLeft, ChevronRight, X } from "lucide-react";
-import EventCard from "@/components/EventCard";
+import HorizontalEventCard from "@/components/HorizontalEventCard";
 
 export default function EventCataloguePage() {
   const [events, setEvents] = useState<EventResponseDto[]>([]);
@@ -29,6 +29,7 @@ export default function EventCataloguePage() {
         take: eventsPerPage,
       });
 
+      console.log("Received events: ", result.events)
       setEvents(result.events);
       setTotal(result.total);
     } catch (err) {
@@ -51,6 +52,32 @@ export default function EventCataloguePage() {
 
   const totalPages = Math.ceil(total / eventsPerPage);
 
+  // Calculate range for display
+  const startIndex = (currentPage - 1) * eventsPerPage + 1;
+  const endIndex = Math.min(currentPage * eventsPerPage, total);
+
+  // Group events by date (preserving order received from API)
+  const groupedEvents = useMemo(() => {
+    const groups = new Map<string, EventResponseDto[]>();
+
+    events.forEach((event) => {
+      const date = new Date(event.startDateTime);
+      const dateKey = date.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+
+      if (!groups.has(dateKey)) {
+        groups.set(dateKey, []);
+      }
+      groups.get(dateKey)!.push(event);
+    });
+
+    return Array.from(groups.entries());
+  }, [events]);
+
   const clearSearch = () => {
     setSearchTerm("");
     setCurrentPage(1);
@@ -58,15 +85,33 @@ export default function EventCataloguePage() {
 
   const hasActiveSearch = !!searchTerm;
 
+  // Get current date for floating indicator
+  const today = new Date();
+  const currentMonth = today.toLocaleDateString("en-US", { month: "short" });
+  const currentDay = today.getDate();
+  const currentYear = today.getFullYear();
+
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-7xl px-6 py-8">
+      {/* Floating Current Date Indicator */}
+      <div className="sticky top-0 z-20 hidden bg-background/80 backdrop-blur-sm sm:block">
+        <div className="mx-auto max-w-2xl px-6 py-3">
+          <div className="flex items-center gap-2 text-sm">
+            <div className="h-2 w-2 rounded-full bg-primary" />
+            <span className="font-medium text-foreground">
+              {currentMonth} {currentDay}, {currentYear}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-2xl px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
             Discover Events
           </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
+          <p className="mt-2 text-md text-muted-foreground">
             Find and join exciting events happening around you
           </p>
         </div>
@@ -95,15 +140,17 @@ export default function EventCataloguePage() {
         </div>
 
         {/* Results Count */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6">
           <p className="text-sm text-muted-foreground">
             {loading ? (
               "Loading events..."
-            ) : (
+            ) : total > 0 ? (
               <>
-                Showing {events.length} of {total} event
+                Showing {startIndex}-{endIndex} of {total} event
                 {total !== 1 ? "s" : ""}
               </>
+            ) : (
+              "No events found"
             )}
           </p>
         </div>
@@ -151,12 +198,54 @@ export default function EventCataloguePage() {
           </div>
         )}
 
-        {/* Events Grid */}
+        {/* Events Grouped by Date */}
         {!loading && !error && events.length > 0 && (
-          <div className="grid gap-6 sm:grid-cols-2 omd:grid-cols-3 lg:grid-cols-4">
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
+          <div>
+            {groupedEvents.map(([dateKey, dateEvents], index) => {
+              const firstEventDate = new Date(dateEvents[0].startDateTime);
+              const monthAbbrev = firstEventDate.toLocaleDateString("en-US", {
+                month: "short",
+              });
+              const dayNum = firstEventDate.getDate();
+              const dayName = firstEventDate.toLocaleDateString("en-US", {
+                weekday: "long",
+              });
+              const isLast = index === groupedEvents.length - 1;
+
+              return (
+                <div key={dateKey} className="relative flex gap-4">
+                  {/* Timeline column */}
+                  <div className="hidden sm:flex sm:w-4 sm:flex-col sm:items-center">
+                    {/* Dot */}
+                    <div className="h-2 w-2 flex-shrink-0 rounded-full bg-muted-foreground" />
+                    {/* Line */}
+                    {!isLast && (
+                      <div className="w-0.5 flex-1 bg-white/20" />
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 pb-8">
+                    {/* Date Header */}
+                    <div className="mb-3 flex items-center gap-2">
+                      <span className="text-base font-semibold text-foreground">
+                        {monthAbbrev} {dayNum}
+                      </span>
+                      <span className="text-base text-muted-foreground">
+                        {dayName}
+                      </span>
+                    </div>
+
+                    {/* Events for this date */}
+                    <div className="space-y-3">
+                      {dateEvents.map((event) => (
+                        <HorizontalEventCard key={event.id} event={event} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
 
