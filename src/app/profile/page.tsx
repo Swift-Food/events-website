@@ -25,7 +25,9 @@ import {
   History,
   Users,
   Loader2,
+  Banknote,
 } from "lucide-react";
+import StripeConnectCard from "@/components/payments/StripeConnectCard";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -159,17 +161,21 @@ export default function ProfilePage() {
           updatedAt: new Date(),
           owner: {
             id: "",
-            username: "",
-            email: "",
-            organizationName: null,
+            organizationName: "",
+            user: {
+              id: "",
+              username: "",
+              email: "",
+              createdAt: "",
+              eventUser: null,
+            },
           },
           address: {
             id: "",
-            street: "",
+            name: "",
+            addressLine1: "",
             city: "TBD",
-            state: "",
             zipcode: "",
-            country: "",
           },
           categories: [],
           attendeesCount: 0,
@@ -196,17 +202,21 @@ export default function ProfilePage() {
           updatedAt: new Date(),
           owner: {
             id: "",
-            username: "",
-            email: "",
-            organizationName: null,
+            organizationName: "",
+            user: {
+              id: "",
+              username: "",
+              email: "",
+              createdAt: "",
+              eventUser: null,
+            },
           },
           address: {
             id: "",
-            street: "",
+            name: "",
+            addressLine1: "",
             city: "TBD",
-            state: "",
             zipcode: "",
-            country: "",
           },
           categories: [],
           attendeesCount: 0,
@@ -377,11 +387,17 @@ export default function ProfilePage() {
             isLoading={isLoadingEvents || isLoadingTickets}
           />
           <StatsCard
-            label="Total Events"
-            value={hostedEvents.length + attendingTickets.length}
-            icon={<Users className="h-5 w-5" />}
-            isLoading={isLoadingEvents || isLoadingTickets}
+            label="Tickets"
+            value={eventUser?.totalRevenue ? `£${parseFloat(eventUser.totalRevenue).toFixed(2)}` : '£0.00'}
+            icon={<Banknote className="h-5 w-5" />}
+            isLoading={isLoadingStats}
+            isText
           />
+        </div>
+
+        {/* Stripe Connect Payment Setup */}
+        <div className="mb-6">
+          <StripeConnectCard />
         </div>
 
         {/* Tabs */}
@@ -446,12 +462,13 @@ export default function ProfilePage() {
 // Stats Card Component
 interface StatsCardProps {
   label: string;
-  value: number;
+  value: number | string;
   icon: React.ReactNode;
   isLoading?: boolean;
+  isText?: boolean;
 }
 
-function StatsCard({ label, value, icon, isLoading }: StatsCardProps) {
+function StatsCard({ label, value, icon, isLoading, isText }: StatsCardProps) {
   return (
     <div className="rounded-2xl bg-card-background backdrop-blur-xl p-5 shadow-lg">
       <div className="flex items-center gap-3">
@@ -462,7 +479,7 @@ function StatsCard({ label, value, icon, isLoading }: StatsCardProps) {
           {isLoading ? (
             <div className="h-7 w-12 bg-card-secondary-background rounded animate-pulse" />
           ) : (
-            <p className="text-2xl font-bold text-foreground">{value}</p>
+            <p className={`font-bold text-foreground ${isText ? 'text-lg' : 'text-2xl'}`}>{value}</p>
           )}
           <p className="text-xs text-muted-foreground">{label}</p>
         </div>
