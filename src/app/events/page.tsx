@@ -251,7 +251,7 @@ export default function EventCataloguePage() {
                   </div>
 
                   {/* Content */}
-                  <div className="flex-1 pb-8">
+                  <div className="min-w-0 flex-1 pb-8">
                     {/* Sentinel for detecting stuck state */}
                     <div
                       ref={(el) => {
@@ -288,7 +288,7 @@ export default function EventCataloguePage() {
                     </div>
 
                     {/* Events for this date */}
-                    <div className="space-y-3">
+                    <div className="min-w-0 space-y-3">
                       {dateEvents.map((event) => (
                         <HorizontalEventCard key={event.id} event={event} />
                       ))}

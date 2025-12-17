@@ -51,7 +51,7 @@ export default function HorizontalEventCard({
   return (
     <Link
       href={isHostedEvent ? `/event-management/${event.id}` : `/events/${event.id}`}
-      className="group flex gap-4 rounded-2xl border border-white/10 bg-card-background p-4 transition-all hover:border-white/20 hover:shadow-2xl"
+      className="group flex gap-4 overflow-hidden rounded-2xl border border-white/10 bg-card-background p-4 transition-all hover:border-white/20 hover:shadow-2xl"
     >
       {/* Event Image */}
       <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-card-secondary-background">
