@@ -41,14 +41,17 @@ export interface UpdateEventDto {
   description?: string;
   eventImage?: string;
   eventColor?: string;
+  ownerEventUserId?: string;
   startDateTime?: Date | string;
   endDateTime?: Date | string;
   status?: EventStatus;
   isPrivate?: boolean;
   addressId?: string;
+  addressData?: CreateEventAddressDto;
   cateringOrderId?: string;
   categoryIds?: string[];
   eventUrl?: string;
+  tickets?: CreateEventTicketDto[];
 }
 
 export interface EventQueryDto {

@@ -18,6 +18,8 @@ export interface QuestionBlockDto {
 }
 
 export interface CreateEventTicketDto {
+  id?: string;
+  eventId?: string;
   name: string;
   description?: string;
   price?: number;

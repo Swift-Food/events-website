@@ -13,11 +13,12 @@ import {
   EventCreationProvider,
   useEventCreation,
 } from "@/context/EventCreationContext";
-import { TicketType } from "@/types";
+import { TicketType, UpdateEventDto } from "@/types";
 import { FormField } from "@/types";
 import { GOOGLE_MAPS_CONFIG } from "@/constants/google-maps";
 import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
 import { eventService } from "@/services/event.service";
+import { eventTicketService } from "@/services/event-ticket.service";
 import { imageService } from "@/services/image.service";
 import { CreateEventDto, QuestionType, CreateEventTicketDto } from "@/types";
 import { useRouter } from "next/navigation";
@@ -110,6 +111,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [originalTickets, setOriginalTickets] = useState<TicketType[]>([]);
 
   console.log("Ticket Types: ", ticketTypes);
   // Address-related state (local UI only)
@@ -181,6 +183,8 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
 
         // Set tickets directly (replaces existing tickets)
         setTicketTypes(ticketsToLoad);
+        // Store original tickets for comparison in edit mode
+        setOriginalTickets(ticketsToLoad);
 
         // Load form fields from the first ticket's question form
         const firstTicket = initialData.eventTickets[0];
@@ -420,6 +424,46 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     }
   }, [addressLine1, addressLine2, city, postcode, setLocation]);
 
+  // Handle ticket operations (only for CREATE mode, since EDIT mode handles tickets immediately)
+  const handleTicketOperations = async (eventId: string) => {
+    const errors: string[] = [];
+
+    // Only handle ticket creation for CREATE mode
+    // In EDIT mode, tickets are created/updated/deleted immediately via handleSaveTicket/handleDeleteTicket
+    if (mode === "create") {
+      // Map frontend ticket types to API format
+      const mapTicketToPayload = (ticket: TicketType): CreateEventTicketDto => ({
+        id: ticket.id,
+        eventId: eventId,
+        name: ticket.name,
+        description: ticket.description || "",
+        price: ticket.isFree ? 0 : ticket.price,
+        isPaid: !ticket.isFree,
+        isSingleUse: ticket.isSingleUse ?? true,
+        quantityTotal: ticket.quantity || 100,
+        questionForm: formFields.map((field) => ({
+          question: field.question,
+          type: mapFieldTypeToQuestionType(field.type),
+          options: field.options,
+          required: field.required,
+        })),
+        isPrivate: false,
+      });
+
+      // Create all tickets for new event
+      for (const ticket of ticketTypes) {
+        try {
+          await eventTicketService.createTicket(mapTicketToPayload(ticket));
+        } catch (error: any) {
+          console.error(`Failed to create ticket ${ticket.name}:`, error);
+          errors.push(`Failed to create ticket "${ticket.name}"`);
+        }
+      }
+    }
+
+    return errors;
+  };
+
   const handleSubmit = async () => {
     // Validation
     if (!eventName.trim()) {
@@ -457,26 +501,8 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     setIsSubmitting(true);
 
     try {
-      // Map frontend ticket types to API format
-      const ticketsPayload: CreateEventTicketDto[] = ticketTypes.map(
-        (ticket) => ({
-          name: ticket.name,
-          description: ticket.description || "",
-          price: ticket.isFree ? 0 : ticket.price,
-          isPaid: !ticket.isFree,
-          isSingleUse: ticket.isSingleUse ?? true,
-          quantityTotal: ticket.quantity || 100,
-          questionForm: formFields.map((field) => ({
-            question: field.question,
-            type: mapFieldTypeToQuestionType(field.type),
-            options: field.options,
-            required: field.required,
-          })),
-          isPrivate: false,
-        })
-      );
-
-      const eventData: CreateEventDto = {
+      // Prepare event data WITHOUT tickets (tickets will be managed separately)
+      const eventData: CreateEventDto | UpdateEventDto = {
         name: eventName,
         description: description || "",
         eventImage: coverPreview || undefined,
@@ -498,15 +524,28 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
         },
         categoryIds: [],
         eventUrl: undefined,
-        tickets: ticketsPayload.length > 0 ? ticketsPayload : undefined,
+        // DO NOT include tickets in event payload
       };
 
+      let createdOrUpdatedEventId: string;
+
       if (mode === "create") {
-        const response = await eventService.createEvent(eventData);
+        // Create event first
+        const response = await eventService.createEvent(eventData as CreateEventDto);
         if (response.success) {
-          toast.success("Event created successfully!");
+          createdOrUpdatedEventId = response.event.id;
+
+          // Then create tickets
+          const ticketErrors = await handleTicketOperations(createdOrUpdatedEventId);
+
+          if (ticketErrors.length > 0) {
+            toast.warning(`Event created, but some tickets failed: ${ticketErrors.join(", ")}`);
+          } else {
+            toast.success("Event and tickets created successfully!");
+          }
+
           clearForm();
-          router.push(`/events/${response.event.id}`);
+          router.push(`/events/${createdOrUpdatedEventId}`);
         }
       } else {
         // Edit mode - use update API
@@ -514,8 +553,10 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
           toast.error("Event ID is missing");
           return;
         }
+        console.log("event data", JSON.stringify(eventData));
         const response = await eventService.updateEvent(eventId, eventData);
         if (response.success) {
+          // In edit mode, tickets are already handled immediately via handleSaveTicket/handleDeleteTicket
           toast.success("Event updated successfully!");
           router.push(`/events/${eventId}`);
         }
@@ -668,17 +709,93 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     setIsTicketTypeModalOpen(true);
   };
 
-  const handleSaveTicket = (ticket: TicketType) => {
-    if (ticketToEdit) {
-      updateTicketType(ticket);
+  const handleSaveTicket = async (ticket: TicketType) => {
+    const isExistingTicket = ticketToEdit && originalTickets.some(t => t.id === ticket.id);
+
+    // Map ticket to API format
+    const mapTicketToPayload = (t: TicketType): CreateEventTicketDto => ({
+      id: t.id,
+      eventId: eventId,
+      name: t.name,
+      description: t.description || "",
+      price: t.isFree ? 0 : t.price,
+      isPaid: !t.isFree,
+      isSingleUse: t.isSingleUse ?? true,
+      quantityTotal: t.quantity || 100,
+      questionForm: formFields.map((field) => ({
+        question: field.question,
+        type: mapFieldTypeToQuestionType(field.type),
+        options: field.options,
+        required: field.required,
+      })),
+      isPrivate: false,
+    });
+
+    if (mode === "edit" && eventId) {
+      // In edit mode, make immediate backend calls
+      try {
+        if (ticketToEdit && isExistingTicket) {
+          // Update existing ticket
+          await eventTicketService.updateTicket(ticket.id, mapTicketToPayload(ticket));
+          updateTicketType(ticket);
+          // Update in originalTickets too
+          setOriginalTickets(prev => prev.map(t => t.id === ticket.id ? ticket : t));
+          toast.success(`"${ticket.name}" updated successfully`);
+        } else {
+          // Create new ticket
+          const response = await eventTicketService.createTicket(mapTicketToPayload(ticket));
+          // Update the ticket with the backend-generated ID if needed
+          const ticketWithId = { ...ticket, id: response.id };
+          addTicketType(ticketWithId);
+          // Also add to originalTickets since it now exists in backend
+          setOriginalTickets(prev => [...prev, ticketWithId]);
+          toast.success(`"${ticket.name}" created successfully`);
+        }
+      } catch (error: any) {
+        console.error("Failed to save ticket:", error);
+        toast.error(error.response?.data?.message || `Failed to save "${ticket.name}"`);
+        return; // Don't update state if backend call failed
+      }
     } else {
-      addTicketType(ticket);
+      // In create mode, just update state (tickets will be created when event is created)
+      if (ticketToEdit) {
+        updateTicketType(ticket);
+      } else {
+        addTicketType(ticket);
+      }
     }
   };
 
-  const handleDeleteTicket = (ticketId: string) => {
-    if (confirm("Are you sure you want to delete this ticket type?")) {
-      deleteTicketType(ticketId);
+  const handleDeleteTicket = async (ticketId: string) => {
+    const ticketToDelete = ticketTypes.find(t => t.id === ticketId);
+    if (!ticketToDelete) return;
+
+    const ticketName = ticketToDelete.name;
+    const isExistingTicket = originalTickets.some(t => t.id === ticketId);
+
+    const message = mode === "edit" && isExistingTicket
+      ? `Are you sure you want to delete "${ticketName}"? This action cannot be undone.`
+      : `Are you sure you want to remove "${ticketName}"?`;
+
+    if (confirm(message)) {
+      // If in edit mode and this is an existing ticket (not newly added), delete it from backend
+      if (mode === "edit" && isExistingTicket) {
+        try {
+          await eventTicketService.deleteTicket(ticketId);
+          // Remove from frontend state after successful backend deletion
+          deleteTicketType(ticketId);
+          // Also remove from originalTickets so it won't be processed again on save
+          setOriginalTickets(prev => prev.filter(t => t.id !== ticketId));
+          toast.success(`"${ticketName}" deleted successfully`);
+        } catch (error: any) {
+          console.error(`Failed to delete ticket ${ticketId}:`, error);
+          toast.error(error.response?.data?.message || `Failed to delete "${ticketName}"`);
+        }
+      } else {
+        // In create mode, just remove from state
+        deleteTicketType(ticketId);
+        toast.success(`"${ticketName}" removed`);
+      }
     }
   };
 

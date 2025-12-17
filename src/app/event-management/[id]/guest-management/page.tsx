@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { guestTicketService } from "@/services/guest-ticket.service";
-import { AdminTicketResponseDto, GuestTicketResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
+import { eventTicketService } from "@/services/event-ticket.service";
+import { AdminTicketResponseDto, GuestTicketResponseDto, GuestTicketStatus, ReservationMode } from "@/types/guest-ticket";
+import { EventTicketResponseDto } from "@/types/event-ticket/response/ticket.dto";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";
 import { GuestManagementHeader } from "@/components/guest-tickets/GuestManagementHeader";
@@ -11,7 +13,7 @@ import { GuestStatsCards } from "@/components/guest-tickets/GuestTicketStatsCard
 import { GuestFilters } from "@/components/guest-tickets";
 import { GuestTable } from "@/components/guest-tickets";
 import { BulkActionBar } from "@/components/guest-tickets";
-import { Loader } from "lucide-react";
+import { Loader, Link as LinkIcon, Copy, Check } from "lucide-react";
 
 type FilterStatus = "all" | "approved" | "pending" | "waitlisted" | "rejected" | "checked_in";
 
@@ -33,6 +35,13 @@ export default function GuestManagementPage() {
     pending: 0,
     percentageCheckedIn: 0,
   });
+
+  // Invite modal state
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [availableTickets, setAvailableTickets] = useState<EventTicketResponseDto[]>([]);
+  const [generatedLink, setGeneratedLink] = useState<string>("");
+  const [isCopied, setIsCopied] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated && !authLoading) {
@@ -129,6 +138,49 @@ export default function GuestManagementPage() {
     }
   };
 
+  const handleOpenInviteModal = async () => {
+    try {
+      const tickets = await eventTicketService.getEventTickets(eventId);
+      console.log("tickets are", tickets)
+      setAvailableTickets(tickets);
+      setShowInviteModal(true);
+      setGeneratedLink("");
+      setIsCopied(false);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to load ticket types");
+    }
+  };
+
+  const handleGenerateLink = async (ticketId: string) => {
+    try {
+      setIsGenerating(true);
+      const response = await guestTicketService.generateTicketInviteLink(eventId, {
+        eventTicketId: ticketId,
+        bypassPayment: false,
+        bypassApproval: true,
+        reservationMode: ReservationMode.FCFS,
+        maxUses: 100,
+      });
+      setGeneratedLink(response.inviteLink);
+      toast.success("Invite link generated!");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to generate invite link");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedLink);
+      setIsCopied(true);
+      toast.success("Link copied to clipboard!");
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (error) {
+      toast.error("Failed to copy link");
+    }
+  };
+
   const filteredGuests = guests.filter((guest) => {
     const matchesStatus =
       filterStatus === "all" ||
@@ -175,11 +227,20 @@ export default function GuestManagementPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <GuestManagementHeader
-          eventId={eventId}
-          totalGuests={guests.length}
-          pendingCount={pendingGuests.length}
-        />
+        <div className="mb-6 flex items-center justify-between">
+          <GuestManagementHeader
+            eventId={eventId}
+            totalGuests={guests.length}
+            pendingCount={pendingGuests.length}
+          />
+          <button
+            onClick={handleOpenInviteModal}
+            className="group flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-gray-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-gray-600"
+          >
+            <LinkIcon className="h-4 w-4 transition-transform group-hover:scale-110" />
+            Invite Guests
+          </button>
+        </div>
 
         <GuestStatsCards
           stats={checkInStats}
@@ -220,6 +281,98 @@ export default function GuestManagementPage() {
           onCheckIn={handleCheckIn}
           onPromote={handlePromoteFromWaitlist}
         />
+
+        {/* Invite Modal */}
+        {showInviteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  Generate Invite Link
+                </h3>
+                <button
+                  onClick={() => setShowInviteModal(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {!generatedLink ? (
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Select a ticket type to generate an invite link
+                  </p>
+                  <div className="space-y-2">
+                    {availableTickets.map((ticket) => (
+                      <button
+                        key={ticket.id}
+                        onClick={() => handleGenerateLink(ticket.id)}
+                        disabled={isGenerating}
+                        className="w-full rounded-lg border border-gray-200 bg-white p-4 text-left transition-all hover:border-gray-300 hover:shadow-md disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:hover:border-gray-600"
+                      >
+                        <div className="font-medium text-gray-900 dark:text-gray-100">
+                          {ticket.name}
+                        </div>
+                        <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                          {parseFloat(ticket.price) > 0 ? `$${ticket.price}` : "Free"} • {ticket.quantityLeft} of {ticket.quantityTotal} available
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  {isGenerating && (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-900">
+                    <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+                      Share this link with guests
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={generatedLink}
+                        readOnly
+                        className="flex-1 rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                      />
+                      <button
+                        onClick={handleCopyLink}
+                        className="flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+                      >
+                        {isCopied ? (
+                          <>
+                            <Check className="h-4 w-4" />
+                            Copied
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-4 w-4" />
+                            Copy
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setGeneratedLink("");
+                      setIsCopied(false);
+                    }}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Generate another link
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

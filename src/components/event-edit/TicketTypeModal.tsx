@@ -7,7 +7,7 @@ import { TicketType } from "@/types";
 interface TicketTypeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (ticket: TicketType) => void;
+  onSave: (ticket: TicketType) => void | Promise<void>;
   ticketToEdit?: TicketType | null;
 }
 
@@ -23,6 +23,7 @@ export default function TicketTypeModal({
   const [localPrice, setLocalPrice] = useState("0");
   const [localIsSingleUse, setLocalIsSingleUse] = useState(false);
   const [localQuantity, setLocalQuantity] = useState("100");
+  const [isSaving, setIsSaving] = useState(false);
 
   // Update local state when modal opens or when editing a ticket
   useEffect(() => {
@@ -48,7 +49,7 @@ export default function TicketTypeModal({
 
   if (!isOpen) return null;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validate
     if (!localName.trim()) {
       alert("Please enter a ticket name");
@@ -76,8 +77,16 @@ export default function TicketTypeModal({
       isSingleUse: localIsSingleUse,
     };
 
-    onSave(ticket);
-    onClose();
+    setIsSaving(true);
+    try {
+      await onSave(ticket);
+      onClose();
+    } catch (error) {
+      // Error is already handled in the parent component
+      console.error("Error saving ticket:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -243,16 +252,18 @@ export default function TicketTypeModal({
           <button
             type="button"
             onClick={handleCancel}
-            className="flex-1 rounded-full bg-white/10 backdrop-blur-md py-4 text-center font-semibold text-foreground transition-all hover:bg-white/15 shadow-lg hover:scale-105"
+            disabled={isSaving}
+            className="flex-1 rounded-full bg-white/10 backdrop-blur-md py-4 text-center font-semibold text-foreground transition-all hover:bg-white/15 shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="flex-1 rounded-full bg-primary py-4 text-center font-bold text-primary-foreground transition-all hover:shadow-2xl hover:shadow-primary/50 hover:scale-105 shadow-xl shadow-primary/30 hover:bg-primary/90"
+            disabled={isSaving}
+            className="flex-1 rounded-full bg-primary py-4 text-center font-bold text-primary-foreground transition-all hover:shadow-2xl hover:shadow-primary/50 hover:scale-105 shadow-xl shadow-primary/30 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
-            {ticketToEdit ? "Update" : "Add"} Ticket
+            {isSaving ? "Saving..." : ticketToEdit ? "Update Ticket" : "Add Ticket"}
           </button>
         </div>
       </div>

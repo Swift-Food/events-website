@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
+import { eventCollaboratorService } from "@/services/event-collaborator.service";
 import { useAuth } from "@/lib/auth/authContext";
 import { EventResponseDto, EventStatus } from "@/types/event";
 import {
@@ -27,7 +28,7 @@ import { toast } from "sonner";
 export default function EventDetailsPage() {
   const params = useParams();
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const eventId = params.id as string;
 
   const [event, setEvent] = useState<EventResponseDto | null>(null);
@@ -61,6 +62,40 @@ export default function EventDetailsPage() {
       fetchEventDetails();
     }
   }, [eventId]);
+
+  // Check if user is host or collaborator and redirect to management page
+  useEffect(() => {
+    const checkUserRoleAndRedirect = async () => {
+      if (!event || !isAuthenticated || !user) return;
+
+      try {
+        // Check if user is the event owner (host)
+        const isOwner = event.owner?.user?.id === user.id;
+
+        if (isOwner) {
+          router.push(`/event-management/${eventId}`);
+          return;
+        }
+
+        // Check if user is a collaborator
+        const collaboratorsData = await eventCollaboratorService.getCollaborators(eventId);
+        const isCollaborator = collaboratorsData.collaborators.some(
+          (collab) =>
+            collab.inviteAccepted &&
+            collab.eventUser?.id === user.eventUser?.id
+        );
+
+        if (isCollaborator) {
+          router.push(`/event-management/${eventId}`);
+        }
+      } catch (err) {
+        // Silently fail - user might not have permission to view collaborators
+        console.log("Could not check collaborator status:", err);
+      }
+    };
+
+    checkUserRoleAndRedirect();
+  }, [event, isAuthenticated, user, eventId, router]);
 
   const selectedTicket = event?.eventTickets?.find(
     (t) => t.id === selectedTicketId

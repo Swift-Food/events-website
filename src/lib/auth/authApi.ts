@@ -8,8 +8,6 @@ import {
   VerifyEmailResponse,
   TokenPair,
   User,
-  GoogleLoginDto,
-  GoogleRegisterDto,
 } from "@/types/user";
 
 export const authApi = {
