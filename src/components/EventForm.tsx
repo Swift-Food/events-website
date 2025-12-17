@@ -19,11 +19,14 @@ import { GOOGLE_MAPS_CONFIG } from "@/constants/google-maps";
 import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
 import { eventService } from "@/services/event.service";
 import { imageService } from "@/services/image.service";
+import { paymentService } from "@/services/payment.service";
 import { CreateEventDto, QuestionType, CreateEventTicketDto } from "@/types";
 import type { EventTicketResponseDto, QuestionBlock } from "@/types/event-ticket/response/ticket.dto";
+import type { StripeConnectStatus } from "@/types/payment";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";
+import { AlertTriangle, ExternalLink } from "lucide-react";
 
 // Load Google Maps script
 declare global {
@@ -111,6 +114,9 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [stripeConnectStatus, setStripeConnectStatus] = useState<StripeConnectStatus | null>(null);
+  const [isLoadingStripeStatus, setIsLoadingStripeStatus] = useState(false);
+  const [isStartingOnboarding, setIsStartingOnboarding] = useState(false);
 
   console.log("Ticket Types: ", ticketTypes);
   // Address-related state (local UI only)
@@ -266,6 +272,63 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [start]);
+
+  // Check if user has any paid tickets
+  const hasPaidTickets = useMemo(() => {
+    return ticketTypes.some((ticket) => !ticket.isFree && ticket.price > 0);
+  }, [ticketTypes]);
+
+  // Fetch Stripe Connect status when user is authenticated
+  useEffect(() => {
+    const fetchStripeStatus = async () => {
+      if (!isAuthenticated || !eventUser) return;
+
+      setIsLoadingStripeStatus(true);
+      try {
+        const status = await paymentService.getStripeConnectStatus();
+        setStripeConnectStatus(status);
+      } catch (error) {
+        console.error("Error fetching Stripe Connect status:", error);
+      } finally {
+        setIsLoadingStripeStatus(false);
+      }
+    };
+
+    fetchStripeStatus();
+  }, [isAuthenticated, eventUser]);
+
+  // Handle starting Stripe Connect onboarding
+  const handleStartStripeOnboarding = async () => {
+    setIsStartingOnboarding(true);
+    try {
+      const response = await paymentService.startStripeConnectOnboarding();
+      if (response.onboardingUrl) {
+        window.open(response.onboardingUrl, "_blank");
+        toast.success("Complete the setup in the new tab, then return here");
+      }
+    } catch (error: any) {
+      console.error("Error starting Stripe onboarding:", error);
+      toast.error(error.response?.data?.message || "Failed to start payment setup");
+    } finally {
+      setIsStartingOnboarding(false);
+    }
+  };
+
+  // Refresh Stripe Connect status (after user returns from onboarding)
+  const handleRefreshStripeStatus = async () => {
+    setIsLoadingStripeStatus(true);
+    try {
+      const status = await paymentService.getStripeConnectStatus();
+      setStripeConnectStatus(status);
+      if (status.onboardingComplete) {
+        toast.success("Payment setup complete! You can now create paid tickets.");
+      }
+    } catch (error) {
+      console.error("Error refreshing Stripe status:", error);
+    } finally {
+      setIsLoadingStripeStatus(false);
+    }
+  };
 
   // Initialize Google Places Autocomplete
   useEffect(() => {
@@ -452,6 +515,12 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     if (!isAuthenticated || !eventUser) {
       toast.error("Please log in to create an event");
       router.push("/auth");
+      return;
+    }
+
+    // Check Stripe Connect for paid tickets
+    if (hasPaidTickets && (!stripeConnectStatus || !stripeConnectStatus.onboardingComplete)) {
+      toast.error("Please complete payment setup before creating events with paid tickets");
       return;
     }
 
@@ -1042,6 +1111,48 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                 Add Ticket
               </button>
             </div>
+
+            {/* Stripe Connect Warning for Paid Tickets */}
+            {hasPaidTickets && stripeConnectStatus && !stripeConnectStatus.onboardingComplete && (
+              <div className="rounded-2xl bg-amber-500/10 border border-amber-500/30 p-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-amber-400">
+                      Payment Setup Required
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      To create events with paid tickets, you need to complete Stripe payment setup first.
+                    </p>
+                    <div className="flex items-center gap-3 mt-3">
+                      <button
+                        type="button"
+                        onClick={handleStartStripeOnboarding}
+                        disabled={isStartingOnboarding}
+                        className="flex items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-sm font-medium text-black transition-all hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isStartingOnboarding ? (
+                          "Opening..."
+                        ) : (
+                          <>
+                            Set Up Payments
+                            <ExternalLink className="h-4 w-4" />
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleRefreshStripeStatus}
+                        disabled={isLoadingStripeStatus}
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {isLoadingStripeStatus ? "Checking..." : "I've completed setup"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* List of Ticket Types */}
             {ticketTypes.length > 0 && isTicketListExpanded && (
