@@ -197,7 +197,7 @@ function StripeCallbackContent() {
         </h1>
 
         <p className="text-gray-600 mb-6">
-          No worries! Your Stripe account setup was not completed. You can try again whenever you&apos;re ready.
+          Looks like you didn&apos;t finish setting up your Stripe account. No worries - you can try again whenever you&apos;re ready!
         </p>
 
         <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-4 mb-6">
