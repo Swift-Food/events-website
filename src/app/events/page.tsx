@@ -231,13 +231,23 @@ export default function EventCataloguePage() {
               const isLast = index === groupedEvents.length - 1;
 
               return (
-                <div key={dateKey} className="relative flex gap-4">
-                  {/* Timeline column */}
-                  <div className="hidden sm:flex sm:w-4 sm:flex-col sm:items-center">
-                    {/* Dot */}
-                    <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-muted-foreground" />
-                    {/* Line */}
-                    {!isLast && <div className="w-0.5 flex-1 bg-white/20" />}
+                <div key={dateKey} className="relative flex">
+                  {/* Timeline column - continuous line */}
+                  <div className="hidden sm:block sm:w-8 relative">
+                    {/* Continuous line */}
+                    {!isLast && (
+                      <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-white/20" />
+                    )}
+                    {/* Dot positioned at header level */}
+                    <div className="sticky top-20 z-40 flex h-8 items-center justify-center">
+                      <div
+                        className={`h-2 w-2 rounded-full transition-colors ${
+                          stuckHeaders.has(dateKey)
+                            ? "bg-primary"
+                            : "bg-muted-foreground"
+                        }`}
+                      />
+                    </div>
                   </div>
 
                   {/* Content */}
@@ -250,8 +260,9 @@ export default function EventCataloguePage() {
                       data-date-key={dateKey}
                       className="h-0"
                     />
+
                     {/* Sticky Date Header */}
-                    <div className="sticky top-20 z-30 -mt-1 pb-3">
+                    <div className="sticky top-20 z-30 pb-3">
                       <div
                         className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors ${
                           stuckHeaders.has(dateKey)
@@ -259,7 +270,14 @@ export default function EventCataloguePage() {
                             : ""
                         }`}
                       >
-                        <div className="h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
+                        {/* Mobile dot - only show on mobile */}
+                        <div
+                          className={`h-2 w-2 flex-shrink-0 rounded-full transition-colors sm:hidden ${
+                            stuckHeaders.has(dateKey)
+                              ? "bg-primary"
+                              : "bg-muted-foreground"
+                          }`}
+                        />
                         <span className="text-sm font-semibold text-foreground">
                           {monthAbbrev} {dayNum}
                         </span>
