@@ -20,10 +20,21 @@ export default function HorizontalEventCard({
     });
   };
 
+  // Get public tickets
+  const publicTickets = event.eventTickets?.filter(
+    (ticket) => !ticket.isPrivate
+  );
+
+  // Check if sold out (all public tickets have no quantity left)
+  const isSoldOut =
+    publicTickets &&
+    publicTickets.length > 0 &&
+    publicTickets.every((ticket) => ticket.quantityLeft === 0);
+
   // Get minimum price from available public tickets
   const getMinPrice = () => {
-    const availableTickets = event.eventTickets?.filter(
-      (ticket) => ticket.isAvailable && !ticket.isPrivate
+    const availableTickets = publicTickets?.filter(
+      (ticket) => ticket.isAvailable && ticket.quantityLeft > 0
     );
     if (!availableTickets || availableTickets.length === 0) return null;
 
@@ -34,6 +45,7 @@ export default function HorizontalEventCard({
   const minPrice = getMinPrice();
 
   const formatPrice = () => {
+    if (isSoldOut) return "Sold Out";
     if (minPrice === null) return null;
     if (minPrice === 0) return "Free";
     return `From £${minPrice.toFixed(2)}`;
@@ -98,9 +110,9 @@ export default function HorizontalEventCard({
 
         {/* Price */}
         {formatPrice() && (
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <div className={`flex items-center gap-1.5 text-sm ${isSoldOut ? "text-red-400" : "text-muted-foreground"}`}>
             <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
-            <span>{formatPrice()}</span>
+            <span className={isSoldOut ? "font-medium" : ""}>{formatPrice()}</span>
           </div>
         )}
       </div>
