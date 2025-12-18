@@ -153,8 +153,43 @@ export default function EventManagementPage() {
 
   return (
     <div className="relative min-h-screen bg-background">
-      {/* Floating Manage Guests Button */}
-      <div className="fixed right-8 top-24 z-50">
+      {/* Preview Event Banner */}
+      <div className="flex justify-center px-6 pt-8">
+        <div className="flex w-full max-w-6xl items-center justify-between rounded-xl border border-purple-500/30 bg-purple-500/10 px-4 py-3">
+          <span className="text-sm font-medium text-purple-400">
+            You are editing this event
+          </span>
+          <button
+            onClick={() => router.push(`/events/${eventId}`)}
+            className="flex items-center gap-2 rounded-full bg-purple-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-purple-500/80"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+              />
+            </svg>
+            Preview Event
+          </button>
+        </div>
+      </div>
+
+      {/* Floating Manage Guests Button - Bottom Right */}
+      <div className="fixed right-8 bottom-8 z-50">
         <button
           onClick={() => router.push(`/event-management/${eventId}/guest-management`)}
           className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl"
