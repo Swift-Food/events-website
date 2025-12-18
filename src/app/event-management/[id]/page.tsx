@@ -16,7 +16,9 @@ import {
   X,
   Users,
   Eye,
+  ImageIcon,
 } from "lucide-react";
+import Image from "next/image";
 
 // Import guest management components
 import { guestTicketService } from "@/services/guest-ticket.service";
@@ -446,7 +448,28 @@ export default function EventManagementPage() {
                 </button>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2">
+              <div className="flex flex-col gap-6 lg:flex-row">
+                {/* Event Image */}
+                <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-card-secondary-background lg:aspect-square lg:w-48 lg:shrink-0">
+                  {eventData.eventImage ? (
+                    <Image
+                      src={eventData.eventImage}
+                      alt={eventData.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div
+                      className="flex h-full w-full items-center justify-center"
+                      style={{ backgroundColor: eventData.eventColor || "#3b82f6" }}
+                    >
+                      <ImageIcon className="h-12 w-12 text-white/30" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Event Info Grid */}
+                <div className="grid flex-1 gap-6 sm:grid-cols-2">
                 {/* When */}
                 <div className="flex items-start gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -501,6 +524,7 @@ export default function EventManagementPage() {
                     <p className="text-sm font-medium text-muted-foreground">Status</p>
                     <p className="text-foreground capitalize">{eventData.status}</p>
                   </div>
+                </div>
                 </div>
               </div>
             </div>
