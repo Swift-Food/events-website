@@ -50,7 +50,7 @@ export const GuestFilters = ({
 
       {/* Filter Tabs */}
       <div className="overflow-x-auto">
-        <div className="flex gap-2 border-b border-border pb-2">
+        <div className="flex gap-2">
           {filters.map((filter) => (
             <button
               key={filter.value}
