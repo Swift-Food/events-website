@@ -1,5 +1,4 @@
-import { ArrowLeft, Download, Users } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Users } from "lucide-react";
 
 interface GuestManagementHeaderProps {
   eventId: string;
@@ -12,23 +11,8 @@ export const GuestManagementHeader = ({
   totalGuests,
   pendingCount,
 }: GuestManagementHeaderProps) => {
-  const router = useRouter();
-
-  const handleExport = () => {
-    // TODO: Implement CSV export
-    console.log("Export guests to CSV");
-  };
-
   return (
-    <div className="mb-8">
-      <button
-        onClick={() => router.push(`/events/${eventId}`)}
-        className="mb-4 flex items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Event
-      </button>
-
+    <div>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-3">
