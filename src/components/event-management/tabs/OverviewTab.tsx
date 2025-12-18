@@ -29,18 +29,8 @@ export function OverviewTab({ eventData, onEditClick }: OverviewTabProps) {
   return (
     <div className="space-y-6">
       {/* Event Details Card */}
-      <div className="rounded-2xl border border-white/10 bg-card-background p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-foreground">Event Details</h2>
-          <button
-            onClick={onEditClick}
-            className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            <Edit className="h-4 w-4" />
-            Edit Event
-          </button>
-        </div>
-
+          {/* <h2 className="text-xl font-bold text-foreground">Event Details</h2> */}
+      <div className="">
         <div className="flex flex-col gap-6 lg:flex-row">
           {/* Event Image */}
           <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-card-secondary-background lg:aspect-square lg:w-48 lg:shrink-0">
@@ -119,6 +109,15 @@ export function OverviewTab({ eventData, onEditClick }: OverviewTabProps) {
               </div>
             </div>
           </div>
+        </div>
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={onEditClick}
+            className="flex items-center gap-2 rounded-md bg-card-secondary-background px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            <Edit className="h-4 w-4" />
+            Edit Event Details
+          </button>
         </div>
       </div>
     </div>
