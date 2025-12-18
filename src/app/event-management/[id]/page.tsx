@@ -181,7 +181,7 @@ export default function EventManagementPage() {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-6 border-b border-white/10 -mb-px">
+          <div className="flex gap-6 border-b border-neutral-700   -mb-px">
             {tabs.map((tab) => {
               const isActive = currentTab === tab.id;
               return (

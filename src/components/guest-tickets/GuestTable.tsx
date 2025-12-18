@@ -44,13 +44,13 @@ export const GuestTable = ({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-700">
+            <tr className="border-b border-neutral-700">
               <th className="p-4 text-left">
                 <input
                   type="checkbox"
                   checked={selectedGuests.size === guests.length && guests.length > 0}
                   onChange={onToggleSelectAll}
-                  className="h-4 w-4 rounded border-border bg-input-background text-primary focus:ring-2 focus:ring-primary"
+                  className="h-4 w-4 rounded border-neutral-700 bg-input-background text-primary focus:ring-2 focus:ring-primary"
                 />
               </th>
               <th className="p-4 text-left text-sm font-semibold text-muted-foreground">
