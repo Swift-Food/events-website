@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
+import { eventCollaboratorService } from "@/services/event-collaborator.service";
 import { paymentService } from "@/services/payment.service";
 import { useAuth } from "@/lib/auth/authContext";
 import { EventResponseDto, EventStatus } from "@/types/event";
@@ -20,7 +21,9 @@ import {
   Loader2,
   Check,
   X,
+  Settings,
 } from "lucide-react";
+import Link from "next/link";
 import Image from "next/image";
 import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
@@ -49,6 +52,9 @@ export default function EventDetailsPage() {
   const [paymentData, setPaymentData] = useState<PaymentFlowState | null>(null);
   const [successTicketDetails, setSuccessTicketDetails] = useState<Pick<PaymentFlowState['ticketDetails'], 'ticketName' | 'eventName'> | null>(null);
 
+  // Check if user can manage this event
+  const [canManageEvent, setCanManageEvent] = useState(false);
+
   useEffect(() => {
     const fetchEventDetails = async () => {
       try {
@@ -70,6 +76,38 @@ export default function EventDetailsPage() {
     }
   }, [eventId]);
 
+  // Check if user is owner or collaborator
+  useEffect(() => {
+    const checkCanManageEvent = async () => {
+      if (!event || !isAuthenticated || !user) {
+        setCanManageEvent(false);
+        return;
+      }
+
+      // Check if user is the event owner
+      const isOwner = event.owner?.user?.id === user.id;
+      if (isOwner) {
+        setCanManageEvent(true);
+        return;
+      }
+
+      // Check if user is a collaborator
+      try {
+        const collaboratorsData = await eventCollaboratorService.getCollaborators(eventId);
+        const isCollaborator = collaboratorsData.collaborators.some(
+          (collab) =>
+            collab.inviteAccepted &&
+            collab.eventUser?.id === user.eventUser?.id
+        );
+        setCanManageEvent(isCollaborator);
+      } catch (err) {
+        // User might not have permission to view collaborators
+        setCanManageEvent(false);
+      }
+    };
+
+    checkCanManageEvent();
+  }, [event, isAuthenticated, user, eventId]);
 
   const selectedTicket = event?.eventTickets?.find(
     (t) => t.id === selectedTicketId
@@ -270,6 +308,22 @@ export default function EventDetailsPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-6xl px-6 py-8">
+        {/* Management Banner */}
+        {canManageEvent && (
+          <div className="mb-6 flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-4 py-3">
+            <span className="text-sm font-medium text-primary">
+              You are managing this event
+            </span>
+            <Link
+              href={`/event-management/${eventId}`}
+              className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/80"
+            >
+              <Settings className="h-4 w-4" />
+              Manage Event
+            </Link>
+          </div>
+        )}
+
         {/* Back Button */}
         <button
           onClick={() => router.push("/events")}
