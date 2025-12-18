@@ -40,7 +40,7 @@ export const GuestTable = ({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-card-secondary-background">
+    <div className="overflow-hidden rounded-2xl bg-card-background">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
