@@ -79,7 +79,7 @@ export const GuestTableRow = ({
 
  
   return (
-    <tr className="border-b border-border transition-colors hover:bg-white/5">
+    <tr className="border-b border-gray-700 last:border-b-0 transition-colors hover:bg-white/5">
       <td className="p-4">
         <input
           type="checkbox"

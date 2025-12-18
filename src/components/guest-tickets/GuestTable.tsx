@@ -44,7 +44,7 @@ export const GuestTable = ({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-border">
+            <tr className="border-b border-gray-700">
               <th className="p-4 text-left">
                 <input
                   type="checkbox"
