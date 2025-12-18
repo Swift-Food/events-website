@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import LoginForm from "@/components/auth/LoginForm";
 import RegisterForm from "@/components/auth/RegisterForm";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
@@ -18,6 +18,8 @@ type AuthView =
 
 export default function AuthPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || undefined;
   const [authView, setAuthView] = useState<AuthView>("login");
   const [resetEmail, setResetEmail] = useState("");
   const [verifyEmail, setVerifyEmail] = useState("");
@@ -61,6 +63,7 @@ export default function AuthPage() {
                   setVerifyEmail(email);
                   setAuthView("verify-email");
                 }}
+                redirectTo={redirectTo}
               />
             )}
 

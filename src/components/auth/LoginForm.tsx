@@ -10,6 +10,7 @@ interface LoginFormProps {
   onSwitchToRegister?: () => void;
   onForgotPassword?: () => void;
   onNeedsVerification?: (email: string) => void;
+  redirectTo?: string;
 }
 
 export default function LoginForm({
@@ -17,6 +18,7 @@ export default function LoginForm({
   onSwitchToRegister,
   onForgotPassword,
   onNeedsVerification,
+  redirectTo,
 }: LoginFormProps) {
   const router = useRouter();
   const { login } = useAuth();
@@ -44,7 +46,7 @@ export default function LoginForm({
       if ("access_token" in response) {
         // Successful login
         if (onClose) onClose();
-        router.push("/");
+        router.push(redirectTo || "/");
       } else if ("needsVerification" in response && response.needsVerification) {
         // Needs verification - call parent callback
         if (onNeedsVerification) {

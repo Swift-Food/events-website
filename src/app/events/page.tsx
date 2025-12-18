@@ -24,18 +24,21 @@ export default function EventCataloguePage() {
 
   // Fetch events
   const fetchEvents = async () => {
+    console.log("fetchEvents called");
     setLoading(true);
     setError(null);
     try {
+      console.log("Calling eventsApi.findAll...");
       const result: EventListResponseDto = await eventsApi.findAll({
         // search: searchTerm || undefined,
         skip: (currentPage - 1) * eventsPerPage,
         take: eventsPerPage,
       });
 
-      console.log("Received events: ", result.events)
-      setEvents(result.events);
-      setTotal(result.total);
+      console.log("Received result:", result);
+      console.log("Received events:", result.events);
+      setEvents(result.events ?? []);
+      setTotal(result.total ?? 0);
     } catch (err) {
       console.error("Failed to fetch events:", err);
       setError("Failed to load events. Please try again later.");
@@ -44,15 +47,20 @@ export default function EventCataloguePage() {
     }
   };
 
+  // Reset to page 1 when search changes (skip initial render)
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   // Fetch on mount and when filters change
   useEffect(() => {
     fetchEvents();
   }, [searchTerm, currentPage]);
-
-  // Reset to page 1 when search changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
 
   const totalPages = Math.ceil(total / eventsPerPage);
 
@@ -64,7 +72,7 @@ export default function EventCataloguePage() {
   const groupedEvents = useMemo(() => {
     const groups = new Map<string, EventResponseDto[]>();
 
-    events.forEach((event) => {
+    (events ?? []).forEach((event) => {
       const date = new Date(event.startDateTime);
       const dateKey = date.toLocaleDateString("en-US", {
         weekday: "long",
