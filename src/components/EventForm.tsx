@@ -913,8 +913,8 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] justify-center bg-background px-6 py-12">
-      <div className="flex w-full max-w-6xl flex-col gap-6 text-foreground lg:flex-row">
+    <div className="flex min-h-[calc(100vh-64px)] justify-center bg-background px-6">
+      <div className="flex w-full max-w-5xl flex-col gap-6 text-foreground lg:flex-row">
         <section className="flex flex-col gap-5 rounded-3xl  p-7 lg:w-96 lg:shrink-0 lg:sticky lg:top-20 lg:self-start sm:flex-row lg:flex-col">
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background backdrop-blur-sm  sm:flex-1 sm:basis-0 lg:w-full lg:flex-none">
             {coverPreview ? (
@@ -1011,7 +1011,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
             )}
           </div>
 
-          <div className="rounded-xl backdrop-blur-xl px-4 py-4">
+          <div className="rounded-xl backdrop-blur-xl pl-4 py-4">
             <div className="flex gap-5">
               <div className="flex flex-col items-center py-3">
                 <div className="h-3.5 w-3.5 rounded-full bg-primary"></div>
@@ -1029,7 +1029,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                     value={start}
                     min={new Date().toISOString().slice(0, 16)}
                     onChange={(e) => setStart(e.target.value)}
-                    className="flex-1 rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none"
+                    className="flex-1 rounded-xl bg-card-background px-4 py-3.5 text-foreground outline-none"
                   />
                 </div>
 
@@ -1041,7 +1041,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                     type="datetime-local"
                     value={end}
                     onChange={(e) => setEnd(e.target.value)}
-                    className="flex-1 rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none"
+                    className="flex-1 rounded-xl bg-card-background px-4 py-3.5 text-foreground outline-none"
                   />
                 </div>
               </div>
@@ -1051,13 +1051,13 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
           <button
             type="button"
             onClick={handleDescriptionClick}
-            className="flex w-full items-center justify-center gap-3 rounded-3xl bg-card-background backdrop-blur-xl px-6 py-4 text-foreground text-base transition-all hover:bg-white/15 font-semibold cursor-pointer"
+            className="flex w-full items-center justify-center gap-3 rounded-lg bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-6 py-4 text-foreground text-base transition-all font-semibold cursor-pointer"
           >
             <Edit className="h-5 w-5" />
             <span>Edit Description</span>
           </button>
 
-          <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6">
+          <div className="rounded-lg bg-card-background backdrop-blur-xl p-6">
             <div
               className="flex items-center justify-between cursor-pointer"
               onClick={() => setIsLocationExpanded(!isLocationExpanded)}
@@ -1205,7 +1205,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
             )}
           </div>
 
-          <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 space-y-5">
+          <div className="rounded-lg bg-card-background backdrop-blur-xl p-6 space-y-5">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-base font-semibold text-foreground">
@@ -1511,7 +1511,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="w-full rounded-full bg-primary py-5 text-center text-lg font-bold text-primary-foreground transition-all hover:scale-[1.02] hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-foreground py-2 text-center text-lg font-semibold text-black transition-all hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting
               ? `${mode === "create" ? "Creating" : "Updating"} Event...`

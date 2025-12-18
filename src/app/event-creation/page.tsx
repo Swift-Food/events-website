@@ -26,6 +26,6 @@ export default function EventCreationPage() {
   if (!isAuthenticated) {
     return null;
   }
-
-  return <EventForm mode="create" />;
+ 
+  return  <div className="py-6"><EventForm mode="create" /></div>;
 }

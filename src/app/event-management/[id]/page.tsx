@@ -232,8 +232,8 @@ export default function EventManagementPage() {
           {/* Slide-out Panel */}
           <div className="fixed right-0 top-0 z-50 h-full w-full max-w-4xl overflow-y-auto bg-background shadow-2xl animate-in slide-in-from-right duration-300">
             {/* Modal Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-background px-6 py-4">
-              <h2 className="text-lg font-semibold text-foreground">Edit Event</h2>
+            <div className="sticky top-0 z-10 flex items-center justify-end  bg-background px-6 py-4">
+              {/* <h2 className="text-lg font-semibold text-foreground">Edit Event</h2> */}
               <button
                 onClick={() => setShowEditModal(false)}
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
@@ -243,6 +243,7 @@ export default function EventManagementPage() {
             </div>
 
             {/* Event Form */}
+
             <EventForm mode="edit" eventId={eventId} initialData={eventData} />
           </div>
         </>
