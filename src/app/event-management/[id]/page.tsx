@@ -188,14 +188,14 @@ export default function EventManagementPage() {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-6 border-b border-neutral-700   -mb-px">
+          <div className="flex gap-6 border-b border-neutral-700 -mb-px overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => {
               const isActive = currentTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setTab(tab.id)}
-                  className={`relative pb-3 text-sm font-medium transition-colors ${
+                  className={`relative shrink-0 whitespace-nowrap pb-3 text-sm font-medium transition-colors ${
                     isActive
                       ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
