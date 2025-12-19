@@ -124,7 +124,7 @@ export default function TicketTypeModal({
           ${isAnimating ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"}
         `}
       >
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-primary/20 p-3">
               <Ticket className="h-6 w-6 text-primary" />
@@ -143,7 +143,7 @@ export default function TicketTypeModal({
           </button>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Ticket Name */}
           <div className="rounded-xl bg-card-background backdrop-blur-xl p-5">
             <label className="text-base font-semibold text-foreground block mb-3">

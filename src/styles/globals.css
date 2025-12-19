@@ -74,6 +74,15 @@ h1, h2, h3, h4, h5, h6 {
 
 .tiptap-editor .ProseMirror {
   outline: none;
+  min-height: 100%;
+}
+
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: "Start typing...";
+  color: #71717a;
+  float: left;
+  pointer-events: none;
+  height: 0;
 }
 
 .tiptap-editor h1 {
