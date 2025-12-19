@@ -17,12 +17,23 @@ export default function EventDescriptionModal({
   const { description, setDescription } = useEventCreation();
   const [localDescription, setLocalDescription] = useState(description);
   const [isEditMode, setIsEditMode] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Update localDescription whenever the modal opens or description changes
   useEffect(() => {
     setLocalDescription(description);
     setIsEditMode(true); // Reset to edit mode when modal opens
   }, [isOpen, description]);
+
+  // Handle animation on open/close
+  useEffect(() => {
+    if (isOpen) {
+      // Small delay to trigger animation
+      requestAnimationFrame(() => setIsVisible(true));
+    } else {
+      setIsVisible(false);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -37,8 +48,12 @@ export default function EventDescriptionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-      <div className="flex h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-zinc-900 p-6 text-foreground border border-zinc-800">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center bg-black/80 sm:p-4">
+      <div
+        className={`flex h-[90vh] w-full sm:max-w-4xl flex-col rounded-t-2xl sm:rounded-2xl bg-zinc-900 p-4 sm:p-6 text-foreground border border-zinc-800 transition-transform duration-300 ease-out ${
+          isVisible ? "translate-y-0" : "translate-y-full sm:translate-y-0"
+        }`}
+      >
         <div className="mb-4 flex flex-shrink-0 items-center justify-between">
           <h2 className="text-md sm:text-xl font-semibold">
             Edit Event Description
