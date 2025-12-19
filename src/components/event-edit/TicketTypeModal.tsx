@@ -117,7 +117,7 @@ export default function TicketTypeModal({
 
         <div className="space-y-6">
           {/* Ticket Name */}
-          <div className="rounded-2xl bg-card-background backdrop-blur-xl p-5">
+          <div className="rounded-xl bg-card-background backdrop-blur-xl p-5">
             <label className="text-base font-semibold text-foreground block mb-3">
               Ticket Name <span className="text-red-400">*</span>
             </label>
@@ -131,7 +131,7 @@ export default function TicketTypeModal({
           </div>
 
           {/* Ticket Description */}
-          <div className="rounded-2xl bg-card-background backdrop-blur-xl p-5">
+          <div className="rounded-xl bg-card-background backdrop-blur-xl p-5">
             <label className="text-base font-semibold text-foreground block mb-3">
               Description
             </label>
@@ -145,7 +145,7 @@ export default function TicketTypeModal({
           </div>
 
           {/* Quantity */}
-          <div className="rounded-2xl bg-card-background backdrop-blur-xl p-5">
+          <div className="rounded-xl bg-card-background backdrop-blur-xl p-5">
             <label className="text-base font-semibold text-foreground block mb-3">
               Quantity Available <span className="text-red-400">*</span>
             </label>
@@ -164,18 +164,35 @@ export default function TicketTypeModal({
           </div>
 
           {/* Price Toggle */}
-          <div className="rounded-2xl bg-card-background backdrop-blur-xl p-5">
-            <div className={`flex items-center justify-between ${!localIsFree ? "mb-4" : ""}`}>
+          <div className="rounded-xl bg-card-background backdrop-blur-xl px-4 py-3">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-base font-semibold text-foreground">
-                  {localIsFree ? "Free Ticket" : `£${localPrice || "0"}`}
-                </p>
+                {localIsFree ? (
+                  <p className="text-base font-semibold text-foreground">
+                    Free Ticket
+                  </p>
+                ) : (
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground text-lg font-semibold">
+                      £
+                    </span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={localPrice}
+                      onChange={(e) => setLocalPrice(e.target.value)}
+                      className="w-40 rounded-xl bg-input-background pl-9 pr-4 py-2.5 text-foreground text-lg font-semibold outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                      placeholder="0.00"
+                    />
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setLocalIsFree(true)}
-                  className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all ${
+                  className={`rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${
                     localIsFree
                       ? "bg-primary text-primary-foreground scale-105"
                       : "bg-card-secondary-background text-muted-foreground hover:bg-white/15"
@@ -186,7 +203,7 @@ export default function TicketTypeModal({
                 <button
                   type="button"
                   onClick={() => setLocalIsFree(false)}
-                  className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all ${
+                  className={`rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${
                     !localIsFree
                       ? "bg-primary text-primary-foreground scale-105"
                       : "bg-card-secondary-background text-muted-foreground hover:bg-white/15"
@@ -196,28 +213,10 @@ export default function TicketTypeModal({
                 </button>
               </div>
             </div>
-
-            {/* Price Input - only shown if paid */}
-            {!localIsFree && (
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground text-lg font-semibold">
-                  £
-                </span>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={localPrice}
-                  onChange={(e) => setLocalPrice(e.target.value)}
-                  className="w-full rounded-xl bg-input-background pl-9 pr-4 py-3.5 text-foreground text-lg font-semibold outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                  placeholder="0.00"
-                />
-              </div>
-            )}
           </div>
 
           {/* Single Use Toggle */}
-          <div className="rounded-2xl bg-card-background backdrop-blur-xl p-5">
+          <div className="rounded-xl bg-card-background backdrop-blur-xl p-5">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-base font-semibold text-foreground">
