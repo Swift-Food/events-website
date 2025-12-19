@@ -1057,7 +1057,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
             <span>Edit Description</span>
           </button>
 
-          <div className="rounded-xl bg-card-background backdrop-blur-xl p-6">
+          <div className="rounded-xl bg-card-background backdrop-blur-xl px-4 py-3">
             <div
               className="flex items-center justify-between cursor-pointer"
               onClick={() => setIsLocationExpanded(!isLocationExpanded)}

@@ -24,6 +24,19 @@ export default function TicketTypeModal({
   const [localIsSingleUse, setLocalIsSingleUse] = useState(false);
   const [localQuantity, setLocalQuantity] = useState("100");
   const [isSaving, setIsSaving] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // Handle open/close animations
+  useEffect(() => {
+    if (isOpen) {
+      // Small delay to trigger animation
+      requestAnimationFrame(() => {
+        setIsAnimating(true);
+      });
+    } else {
+      setIsAnimating(false);
+    }
+  }, [isOpen]);
 
   // Update local state when modal opens or when editing a ticket
   useEffect(() => {
@@ -94,14 +107,31 @@ export default function TicketTypeModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-      <div className="w-full max-w-lg rounded-2xl bg-background backdrop-blur-2xl p-8 text-foreground border border-white/10 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50">
+      {/* Backdrop */}
+      <div
+        className={`absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300 ${
+          isAnimating ? "opacity-100" : "opacity-0"
+        }`}
+        onClick={handleCancel}
+      />
+
+      {/* Panel - slides from right on desktop, from bottom on mobile */}
+      <div
+        className={`absolute bg-background text-foreground border-white/10 overflow-y-auto transition-transform duration-300 ease-out
+          /* Mobile: bottom sheet */
+          inset-x-0 bottom-0 max-h-[90vh] rounded-t-2xl border-t p-6
+          /* Desktop: right side panel */
+          md:inset-y-0 md:right-0 md:left-auto md:w-full md:max-w-lg md:max-h-none md:rounded-t-none md:rounded-l-2xl md:border-t-0 md:border-l md:p-8
+          ${isAnimating ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"}
+        `}
+      >
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-primary/20 p-3">
               <Ticket className="h-6 w-6 text-primary" />
             </div>
-            <h2 className="text-3xl font-bold">
+            <h2 className="text-2xl md:text-3xl font-bold">
               {ticketToEdit ? "Edit Ticket" : "Add Ticket Type"}
             </h2>
           </div>
