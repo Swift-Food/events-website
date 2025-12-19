@@ -15,9 +15,10 @@ import {
   GuestsTab,
   RegistrationTab,
   TeamTab,
+  CateringTab,
 } from "@/components/event-management/tabs";
 
-type TabType = "overview" | "guests" | "registration" | "team";
+type TabType = "overview" | "guests" | "registration" | "team" | "catering";
 
 export default function EventManagementPage() {
   const params = useParams();
@@ -158,6 +159,7 @@ export default function EventManagementPage() {
     { id: "guests", label: "Guests" },
     { id: "registration", label: "Registration" },
     { id: "team", label: "Team" },
+    { id: "catering", label: "Catering" },
   ];
 
   return (
@@ -218,6 +220,7 @@ export default function EventManagementPage() {
         {currentTab === "team" && (
           <TeamTab eventId={eventId} ownerId={eventData.owner?.user?.id} />
         )}
+        {currentTab === "catering" && <CateringTab/>}
       </div>
 
       {/* Edit Event Slide-out Modal */}
