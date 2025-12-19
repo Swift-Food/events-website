@@ -1051,7 +1051,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
           <button
             type="button"
             onClick={handleDescriptionClick}
-            className="flex w-full items-center justify-center gap-3 rounded-lg bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-6 py-4 text-foreground text-base transition-all font-semibold cursor-pointer"
+            className="flex w-full items-center justify-center gap-3 rounded-lg bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-6 py-3 text-foreground text-base transition-all font-semibold cursor-pointer"
           >
             <Edit className="h-5 w-5" />
             <span>Edit Description</span>
