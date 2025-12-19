@@ -119,10 +119,8 @@ export default function TicketTypeModal({
       {/* Panel - slides from right on desktop, from bottom on mobile */}
       <div
         className={`absolute bg-background text-foreground border-white/10 overflow-y-auto transition-transform duration-300 ease-out
-          /* Mobile: bottom sheet */
-          inset-x-0 bottom-0 max-h-[90vh] rounded-t-2xl border-t p-6
-          /* Desktop: right side panel */
-          md:inset-y-0 md:right-0 md:left-auto md:w-full md:max-w-lg md:max-h-none md:rounded-t-none md:rounded-l-2xl md:border-t-0 md:border-l md:p-8
+          left-0 right-0 bottom-0 max-h-[90vh] rounded-t-2xl border-t px-4 py-6
+          md:left-auto md:inset-y-0 md:right-0 md:w-full md:max-w-lg md:max-h-none md:rounded-t-none md:rounded-l-2xl md:border-t-0 md:border-l md:px-8 md:py-8
           ${isAnimating ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"}
         `}
       >
