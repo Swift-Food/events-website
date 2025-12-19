@@ -339,7 +339,7 @@ export default function EventDetailsPage() {
             {/* 2×2 Grid on sm-md, Flex column on lg+ */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:flex lg:flex-col">
               {/* Top Left: Image with Status Badge */}
-              <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/10 bg-card-secondary-background sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+              <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-neutral-700 bg-card-secondary-background sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
                 {event.eventImage ? (
                   <Image
                     src={event.eventImage}
@@ -399,7 +399,7 @@ export default function EventDetailsPage() {
               </div>
 
               {/* Date & Time Card - Bottom left on tablet, normal on mobile/desktop */}
-              <div className="rounded-xl border border-white/10 bg-card-background p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+              <div className="rounded-xl border border-neutral-700 bg-card-background p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Date & Time
                 </h3>
@@ -456,7 +456,7 @@ export default function EventDetailsPage() {
               </div>
 
               {/* Location Card - Bottom right */}
-              <div className="rounded-xl border border-white/10 bg-card-background p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+              <div className="rounded-xl border border-neutral-700 bg-card-background p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Location
                 </h3>
@@ -548,7 +548,7 @@ export default function EventDetailsPage() {
               </div>
 
               {/* Event Stats Card */}
-              <div className="rounded-xl border border-white/10 bg-card-background p-6">
+              <div className="rounded-xl border border-neutral-700 bg-card-background p-6">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Event Stats
                 </h3>
@@ -620,7 +620,7 @@ export default function EventDetailsPage() {
 
             {/* Tickets */}
             {event.eventTickets && event.eventTickets.length > 0 && (
-              <div className="rounded-xl bg-card-background backdrop-blur-xl p-6">
+              <div className="rounded-xl bg-card-background backdrop-blur-xl p-6 border border-neutral-700">
                 <h2 className="mb-4 text-2xl font-semibold text-foreground">
                   Tickets
                 </h2>
@@ -680,7 +680,7 @@ export default function EventDetailsPage() {
                   <button
                     onClick={() => selectedTicketId && handleRegister(selectedTicketId)}
                     disabled={!selectedTicketId || isRegistering}
-                    className="w-full mt-4 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full mt-4 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isRegistering ? (
                       <>
@@ -698,7 +698,7 @@ export default function EventDetailsPage() {
             )}
 
             {/* Description */}
-            <div className="rounded-xl bg-card-background backdrop-blur-xl p-6">
+            <div className=" p-6">
               <h2 className="mb-4 text-lg font-semibold text-muted-foreground ">
                 About this event
               </h2>
