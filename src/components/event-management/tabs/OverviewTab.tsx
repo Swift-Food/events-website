@@ -52,7 +52,7 @@ export function OverviewTab({ eventData, onEditClick }: OverviewTabProps) {
   const ticketStats = getTicketStats();
 
   return (
-    <div className="space-y-6 bg-card-background p-4 sm:p-6 rounded-xl">
+    <div className="space-y-6 bg-card-background p-4 sm:p-6 rounded-xl border border-neutral-700">
       {/* Header row: Image, Title, Badge, Edit button (desktop) */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4 min-w-0">

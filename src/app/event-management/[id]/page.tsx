@@ -175,8 +175,8 @@ export default function EventManagementPage() {
           {/* Event Title & Preview Button */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">{eventData.name}</h1>
-              <p className="text-sm text-muted-foreground mt-1">Event Management</p>
+              <h1 className="text-lg sm:text-2xl font-bold text-foreground">{eventData.name}</h1>
+              {/* <p className="text-sm text-muted-foreground mt-1">Event Management</p> */}
             </div>
             <button
               onClick={() => router.push(`/events/${eventId}`)}
