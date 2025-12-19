@@ -20,7 +20,7 @@ export const GuestManagementHeader = ({
               <Users className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">
+              <h1 className="text-lg sm:text-3xl font-bold text-foreground">
                 Guest Management
               </h1>
               <p className="text-sm text-muted-foreground">

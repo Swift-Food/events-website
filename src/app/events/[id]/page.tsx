@@ -21,7 +21,6 @@ import {
   Loader2,
   Check,
   X,
-  Settings,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -310,16 +309,16 @@ export default function EventDetailsPage() {
       <div className="mx-auto max-w-6xl px-6 py-8">
         {/* Management Banner */}
         {canManageEvent && (
-          <div className="mb-6 flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-4 py-3">
-            <span className="text-sm font-medium text-primary">
-              You are managing this event
+          <div className="mb-6 flex items-center justify-between rounded-lg border border-pink-500/30 bg-pink-500/10 px-4 py-3">
+            <span className="text-sm text-neutral-300">
+              You have manage access for this event.
             </span>
             <Link
               href={`/event-management/${eventId}`}
-              className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/80"
+              className="flex items-center gap-1 rounded-full bg-pink-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-pink-600"
             >
-              <Settings className="h-4 w-4" />
-              Manage Event
+              Manage
+              <span className="text-xs">↗</span>
             </Link>
           </div>
         )}

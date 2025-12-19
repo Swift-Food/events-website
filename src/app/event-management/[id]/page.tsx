@@ -169,18 +169,32 @@ export default function EventManagementPage() {
 
   return (
     <div className="relative min-h-screen bg-background">
+      {/* Preview Banner - Mobile only */}
+      <div className="sm:hidden border-y border-purple-500/30 bg-purple-500/10">
+        <div className="px-6 py-3 flex items-center justify-between">
+          <span className="text-sm text-neutral-300">
+            You are currently editing this event.
+          </span>
+          <button
+            onClick={() => router.push(`/events/${eventId}`)}
+            className="flex items-center gap-1 rounded-full bg-purple-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-purple-600"
+          >
+            Preview
+            <span className="text-xs">↗</span>
+          </button>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="">
         <div className="mx-auto max-w-6xl px-6 py-6">
           {/* Event Title & Preview Button */}
           <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-lg sm:text-2xl font-bold text-foreground">{eventData.name}</h1>
-              {/* <p className="text-sm text-muted-foreground mt-1">Event Management</p> */}
-            </div>
+            <h1 className="text-lg sm:text-2xl font-bold text-foreground">{eventData.name}</h1>
+            {/* Preview Button - Desktop only */}
             <button
               onClick={() => router.push(`/events/${eventId}`)}
-              className="flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-sm font-semibold text-purple-400 transition-colors hover:bg-purple-500/20"
+              className="hidden sm:flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-sm font-semibold text-purple-400 transition-colors hover:bg-purple-500/20"
             >
               <Eye className="h-4 w-4" />
               Preview Event
