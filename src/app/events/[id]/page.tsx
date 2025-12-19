@@ -624,7 +624,7 @@ export default function EventDetailsPage() {
                 <h2 className="mb-4 text-2xl font-semibold text-foreground">
                   Tickets
                 </h2>
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {event.eventTickets.map((ticket) => {
                     const remaining = ticket.quantityLeft ?? 0;
                     const isSelected = selectedTicketId === ticket.id;
@@ -634,7 +634,7 @@ export default function EventDetailsPage() {
                       <div
                         key={ticket.id}
                         onClick={() => !isSoldOut && event.status === EventStatus.PUBLISHED && setSelectedTicketId(ticket.id)}
-                        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border p-4 transition-all ${
+                        className={`flex items-center justify-between gap-2 sm:gap-4 rounded-xl border p-3 sm:p-4 transition-all ${
                           isSoldOut || event.status !== EventStatus.PUBLISHED
                             ? "border-white/10 bg-card-secondary-background opacity-50 cursor-not-allowed"
                             : isSelected
@@ -642,29 +642,29 @@ export default function EventDetailsPage() {
                               : "border-white/10 bg-card-secondary-background cursor-pointer hover:border-white/20"
                         }`}
                       >
-                        <div className="flex items-center gap-3 flex-1">
+                        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                           {event.status === EventStatus.PUBLISHED && !isSoldOut && (
                             <div
-                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                              className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                                 isSelected ? "border-primary" : "border-white/30"
                               }`}
                             >
                               {isSelected && (
-                                <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+                                <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-primary" />
                               )}
                             </div>
                           )}
-                          <div>
-                            <h3 className="font-semibold text-foreground">
+                          <div className="min-w-0">
+                            <h3 className="text-sm sm:text-base font-semibold text-foreground break-words">
                               {ticket.name}
                             </h3>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-xs sm:text-sm text-muted-foreground">
                               {isSoldOut ? "Sold out" : `${remaining} left`}
                             </p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-xl font-bold text-foreground">
+                        <div className="text-right shrink-0">
+                          <p className="text-base sm:text-xl font-bold text-foreground">
                             {Number(ticket.price) === 0
                               ? "Free"
                               : `£${Number(ticket.price).toFixed(2)}`}
