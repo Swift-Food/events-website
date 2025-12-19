@@ -40,7 +40,7 @@ export default function EventDescriptionModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
       <div className="flex h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-zinc-900 p-6 text-foreground border border-zinc-800">
         <div className="mb-4 flex flex-shrink-0 items-center justify-between">
-          <h2 className="text-xl font-semibold">
+          <h2 className="text-md sm:text-xl font-semibold">
             Edit Event Description
           </h2>
           <div className="flex items-center gap-3">

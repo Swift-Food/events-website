@@ -139,7 +139,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
       type="button"
       onClick={onClick}
       title={title}
-      className={`rounded-md p-1.5 transition ${
+      className={`rounded-md p-1.5 sm:p-2 transition ${
         isActive
           ? "bg-white/20 text-white"
           : "text-zinc-400 hover:text-white hover:bg-white/10"
@@ -150,7 +150,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
   );
 
   const ToolbarDivider = () => (
-    <div className="h-5 w-px bg-zinc-700 mx-1" />
+    <div className="h-5 sm:h-6 w-px bg-zinc-700 mx-1 sm:mx-2" />
   );
 
   const isLinkActive = editor.isActive("link");
@@ -167,7 +167,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
             isActive={editor.isActive("heading", { level: 1 })}
             title="Heading 1"
           >
-            <Heading1 className="h-4 w-4" />
+            <Heading1 className="h-4 w-4 sm:h-5 sm:w-5" />
           </ToolbarButton>
 
           <ToolbarButton
@@ -177,7 +177,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
             isActive={editor.isActive("heading", { level: 2 })}
             title="Heading 2"
           >
-            <Heading2 className="h-4 w-4" />
+            <Heading2 className="h-4 w-4 sm:h-5 sm:w-5" />
           </ToolbarButton>
 
           <ToolbarButton
@@ -187,7 +187,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
             isActive={editor.isActive("heading", { level: 3 })}
             title="Heading 3"
           >
-            <Heading3 className="h-4 w-4" />
+            <Heading3 className="h-4 w-4 sm:h-5 sm:w-5" />
           </ToolbarButton>
 
           <ToolbarButton
@@ -195,7 +195,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
             isActive={editor.isActive("paragraph")}
             title="Paragraph"
           >
-            <Type className="h-4 w-4" />
+            <Type className="h-4 w-4 sm:h-5 sm:w-5" />
           </ToolbarButton>
 
           <ToolbarDivider />
@@ -206,7 +206,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
             isActive={editor.isActive("bold")}
             title="Bold"
           >
-            <Bold className="h-4 w-4" />
+            <Bold className="h-4 w-4 sm:h-5 sm:w-5" />
           </ToolbarButton>
 
           <ToolbarButton
@@ -214,7 +214,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
             isActive={editor.isActive("italic")}
             title="Italic"
           >
-            <Italic className="h-4 w-4" />
+            <Italic className="h-4 w-4 sm:h-5 sm:w-5" />
           </ToolbarButton>
 
           <ToolbarButton
@@ -222,7 +222,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
             isActive={editor.isActive("underline")}
             title="Underline"
           >
-            <UnderlineIcon className="h-4 w-4" />
+            <UnderlineIcon className="h-4 w-4 sm:h-5 sm:w-5" />
           </ToolbarButton>
 
           <ToolbarDivider />
@@ -233,7 +233,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
             isActive={editor.isActive("bulletList")}
             title="Bullet List"
           >
-            <List className="h-4 w-4" />
+            <List className="h-4 w-4 sm:h-5 sm:w-5" />
           </ToolbarButton>
 
           <ToolbarButton
@@ -241,7 +241,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
             isActive={editor.isActive("orderedList")}
             title="Numbered List"
           >
-            <ListOrdered className="h-4 w-4" />
+            <ListOrdered className="h-4 w-4 sm:h-5 sm:w-5" />
           </ToolbarButton>
 
           <ToolbarButton
@@ -249,7 +249,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
             isActive={editor.isActive("blockquote")}
             title="Blockquote"
           >
-            <Quote className="h-4 w-4" />
+            <Quote className="h-4 w-4 sm:h-5 sm:w-5" />
           </ToolbarButton>
 
           <ToolbarDivider />
@@ -261,9 +261,9 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
             title={isLinkActive ? "Remove Link" : "Add Link"}
           >
             {isLinkActive ? (
-              <Unlink className="h-4 w-4" />
+              <Unlink className="h-4 w-4 sm:h-5 sm:w-5" />
             ) : (
-              <Link2 className="h-4 w-4" />
+              <Link2 className="h-4 w-4 sm:h-5 sm:w-5" />
             )}
           </ToolbarButton>
 
@@ -271,7 +271,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
             onClick={() => editor.chain().focus().setHorizontalRule().run()}
             title="Divider"
           >
-            <Minus className="h-4 w-4" />
+            <Minus className="h-4 w-4 sm:h-5 sm:w-5" />
           </ToolbarButton>
         </div>
       )}
