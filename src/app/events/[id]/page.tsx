@@ -620,7 +620,7 @@ export default function EventDetailsPage() {
 
             {/* Tickets */}
             {event.eventTickets && event.eventTickets.length > 0 && (
-              <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
+              <div className="rounded-xl bg-card-background backdrop-blur-xl p-6">
                 <h2 className="mb-4 text-2xl font-semibold text-foreground">
                   Tickets
                 </h2>
@@ -677,7 +677,7 @@ export default function EventDetailsPage() {
             )}
 
             {/* Description */}
-            <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
+            <div className="rounded-xl bg-card-background backdrop-blur-xl p-6">
               <h2 className="mb-4 text-lg font-semibold text-muted-foreground ">
                 About this event
               </h2>
