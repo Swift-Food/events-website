@@ -40,6 +40,7 @@ export default function EventManagementPage() {
     router.push(`/event-management/${eventId}?tab=${tab}`);
   };
 
+  // Fetch event data only when eventId changes
   useEffect(() => {
     const fetchEvent = async () => {
       if (!eventId) {
@@ -53,19 +54,6 @@ export default function EventManagementPage() {
         const data = await eventService.getEventById(eventId);
         setEventData(data);
         setError(null);
-
-        if (user && data.owner?.user?.id) {
-          const authorized = user.id === data.owner.user.id;
-          setIsAuthorized(authorized);
-
-          if (!authorized) {
-            setError("You are not authorized to manage this event");
-            toast.error("You do not have permission to edit this event");
-          }
-        } else if (!user) {
-          setIsAuthorized(false);
-          setError("You must be logged in to manage events");
-        }
       } catch (err: any) {
         console.error("Error fetching event:", err);
         const errorMessage = err.response?.data?.message || "Failed to load event";
@@ -77,7 +65,24 @@ export default function EventManagementPage() {
     };
 
     fetchEvent();
-  }, [eventId, user]);
+  }, [eventId]);
+
+  // Check authorization separately when user or eventData changes
+  useEffect(() => {
+    if (!eventData) return;
+
+    if (user && eventData.owner?.user?.id) {
+      const authorized = user.id === eventData.owner.user.id;
+      setIsAuthorized(authorized);
+
+      if (!authorized) {
+        setError("You are not authorized to manage this event");
+      }
+    } else if (!user && !authLoading) {
+      setIsAuthorized(false);
+      setError("You must be logged in to manage events");
+    }
+  }, [user, eventData, authLoading]);
 
   // Loading state
   if (isLoading || authLoading) {
