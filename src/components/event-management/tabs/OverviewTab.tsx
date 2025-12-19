@@ -52,12 +52,12 @@ export function OverviewTab({ eventData, onEditClick }: OverviewTabProps) {
   const ticketStats = getTicketStats();
 
   return (
-    <div className="space-y-6 bg-card-background p-6 rounded-xl">
-      {/* Header row: Image, Title, Badge, Edit button */}
+    <div className="space-y-6 bg-card-background p-4 sm:p-6 rounded-xl">
+      {/* Header row: Image, Title, Badge, Edit button (desktop) */}
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 min-w-0">
           {/* Event Image */}
-          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-card-secondary-background">
+          <div className="relative h-16 w-16 sm:h-24 sm:w-24 shrink-0 overflow-hidden rounded-xl bg-card-secondary-background">
             {eventData.eventImage ? (
               <Image
                 src={eventData.eventImage}
@@ -70,23 +70,28 @@ export function OverviewTab({ eventData, onEditClick }: OverviewTabProps) {
                 className="flex h-full w-full items-center justify-center"
                 style={{ backgroundColor: eventData.eventColor || "#3b82f6" }}
               >
-                <ImageIcon className="h-10 w-10 text-white/30" />
+                <ImageIcon className="h-8 w-8 sm:h-10 sm:w-10 text-white/30" />
               </div>
             )}
           </div>
 
           {/* Title and badge */}
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold text-foreground">{eventData.name}</h2>
-            <span className="rounded-md bg-green-500/20 px-2 py-0.5 text-xs font-medium capitalize text-green-400">
-              {eventData.status}
-            </span>
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+              <h2 className="text-lg sm:text-2xl font-bold text-foreground truncate">
+                {eventData.name}
+              </h2>
+              <span className="self-start sm:self-center rounded-md bg-green-500/20 px-2 py-0.5 text-xs font-medium capitalize text-green-400 shrink-0">
+                {eventData.status}
+              </span>
+            </div>
           </div>
         </div>
 
+        {/* Edit button - desktop only */}
         <button
           onClick={onEditClick}
-          className="flex items-center gap-2 rounded-md border border-neutral-700 bg-card-secondary-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
+          className="hidden sm:flex items-center gap-2 rounded-md border border-neutral-700 bg-card-secondary-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
         >
           <Edit className="h-4 w-4" />
           Edit Event Details
@@ -108,7 +113,7 @@ export function OverviewTab({ eventData, onEditClick }: OverviewTabProps) {
       )}
 
       {/* Info Row */}
-      <div className="grid gap-8 sm:grid-cols-3">
+      <div className="grid gap-6 sm:gap-8 sm:grid-cols-3">
         {/* When */}
         <div className="flex gap-4">
           {isSameDay(eventData.startDateTime, eventData.endDateTime) ? (
@@ -193,6 +198,17 @@ export function OverviewTab({ eventData, onEditClick }: OverviewTabProps) {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Edit Button - mobile only */}
+      <div className="flex justify-end sm:hidden">
+        <button
+          onClick={onEditClick}
+          className="flex items-center gap-2 rounded-md border border-neutral-700 bg-card-secondary-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
+        >
+          <Edit className="h-4 w-4" />
+          Edit Event Details
+        </button>
       </div>
     </div>
   );
