@@ -67,7 +67,15 @@ export default function EventDescriptionModal({
     onClose();
   };
 
+  const hasUnsavedChanges = localDescription !== description;
+
   const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      const confirmed = window.confirm(
+        "You have unsaved changes. Are you sure you want to close without saving?"
+      );
+      if (!confirmed) return;
+    }
     setLocalDescription(description); // Reset to saved value
     onClose();
   };
