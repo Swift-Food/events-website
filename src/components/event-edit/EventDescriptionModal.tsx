@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { X, Eye, Pencil } from "lucide-react";
 import Tiptap from "@/components/Tiptap";
 import { useEventCreation } from "@/context/EventCreationContext";
@@ -18,6 +18,8 @@ export default function EventDescriptionModal({
   const [localDescription, setLocalDescription] = useState(description);
   const [isEditMode, setIsEditMode] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
+  const [viewportOffset, setViewportOffset] = useState(0);
 
   // Update localDescription whenever the modal opens or description changes
   useEffect(() => {
@@ -35,6 +37,29 @@ export default function EventDescriptionModal({
     }
   }, [isOpen]);
 
+  // Track visual viewport height and offset for mobile keyboard
+  const updateViewport = useCallback(() => {
+    if (window.visualViewport) {
+      setViewportHeight(window.visualViewport.height);
+      setViewportOffset(window.visualViewport.offsetTop);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const viewport = window.visualViewport;
+    if (viewport) {
+      updateViewport();
+      viewport.addEventListener("resize", updateViewport);
+      viewport.addEventListener("scroll", updateViewport);
+      return () => {
+        viewport.removeEventListener("resize", updateViewport);
+        viewport.removeEventListener("scroll", updateViewport);
+      };
+    }
+  }, [isOpen, updateViewport]);
+
   if (!isOpen) return null;
 
   const handleSave = () => {
@@ -47,10 +72,18 @@ export default function EventDescriptionModal({
     onClose();
   };
 
+  // Only apply dynamic positioning on mobile (below sm breakpoint)
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+  const hasKeyboard = isMobile && viewportHeight;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center bg-black/80 sm:p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center bg-black/80 sm:p-4"
+      style={hasKeyboard ? { height: `${viewportHeight}px`, top: `${viewportOffset}px` } : {}}
+    >
       <div
-        className={`flex h-[90vh] w-full sm:max-w-4xl flex-col rounded-t-2xl sm:rounded-2xl bg-zinc-900 p-4 sm:p-6 text-foreground border border-zinc-800 transition-transform duration-300 ease-out ${
+        style={hasKeyboard ? { maxHeight: `${viewportHeight}px` } : {}}
+        className={`flex h-full sm:h-[90vh] w-full sm:max-w-4xl flex-col rounded-t-2xl sm:rounded-2xl bg-zinc-900 p-4 sm:p-6 text-foreground border border-zinc-800 transition-transform duration-300 ease-out ${
           isVisible ? "translate-y-0" : "translate-y-full sm:translate-y-0"
         }`}
       >
