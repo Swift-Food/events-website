@@ -456,39 +456,44 @@ export default function EventDetailsPage() {
               </div>
 
               {/* Location Card - Bottom right */}
-              <div className="rounded-xl border border-neutral-700 bg-card-background p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
-                <h3 className="mb-4 text-lg font-semibold text-foreground">
-                  Location
-                </h3>
+              <div className="rounded-xl border border-neutral-700 bg-card-background overflow-hidden sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
                 {event.address ? (
                   <>
-                    <div className="mb-4 flex items-start gap-3">
-                      <MapPin className="h-5 w-5 text-primary" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          {event.address.addressLine1}
-                        </p>
-                        {event.address.addressLine2 && (
-                          <p className="text-sm text-muted-foreground">
-                            {event.address.addressLine2}
-                          </p>
-                        )}
-                        <p className="text-sm text-muted-foreground">
-                          {event.address.city}, {event.address.zipcode}
-                        </p>
+                    {/* Map Area */}
+                    {event.address.location?.latitude && event.address.location?.longitude ? (
+                      <GoogleMap
+                        latitude={event.address.location.latitude}
+                        longitude={event.address.location.longitude}
+                        title={event.address.name}
+                        className="h-40 w-full !rounded-none"
+                      />
+                    ) : (
+                      <div className="h-40 w-full bg-card-secondary-background flex flex-col items-center justify-center gap-2">
+                        <MapPin className="h-5 w-5 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Map</span>
                       </div>
-                    </div>
+                    )}
 
-                    {/* Google Map */}
-                    <GoogleMap
-                      latitude={event.address.location?.latitude}
-                      longitude={event.address.location?.longitude}
-                      title={event.address.name}
-                      className="h-32 sm:h-32 lg:h-48 w-full"
-                    />
+                    {/* Address Details */}
+                    <div className="p-4">
+                      <p className="text-sm text-muted-foreground">
+                        {[
+                          event.address.addressLine1,
+                          event.address.addressLine2,
+                          event.address.city,
+                          event.address.zipcode
+                        ].filter(Boolean).join(', ')}
+                      </p>
+                    </div>
                   </>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Location TBD</p>
+                  <div className="p-6">
+                    <div className="h-32 w-full bg-card-secondary-background rounded-lg flex flex-col items-center justify-center gap-2 mb-4">
+                      <MapPin className="h-5 w-5 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Map</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Location TBD</p>
+                  </div>
                 )}
               </div>
             </div>
