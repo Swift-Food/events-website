@@ -441,7 +441,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Tab Content */}
-          <div className="p-6">
+          <div className="p-3 sm:p-6">
             {isLoadingCurrentTab ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
