@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth/authContext";
 import { RegisterDto } from "@/types/user";
 import { validatePassword } from "@/lib/utils/passwordValidation";
 import PasswordRequirements from "./PasswordRequirements";
+import { GoogleOAuthButton, AppleOAuthButton } from "./OAuthButtons";
 
 interface RegisterFormProps {
   onSuccess?: () => void;
@@ -197,7 +198,32 @@ export default function RegisterForm({
 
       {/* Step 1: Register */}
       {step === "register" && (
-        <form onSubmit={handleRegister} className="space-y-4">
+        <>
+          {/* OAuth Buttons */}
+          <div className="space-y-3 mb-4">
+            <GoogleOAuthButton
+              isRegister={true}
+              onSuccess={onSuccess}
+            />
+            <AppleOAuthButton
+              isRegister={true}
+              onSuccess={onSuccess}
+            />
+          </div>
+
+          {/* Divider */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-foreground/10"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-card-background text-muted-foreground">
+                Or register with email
+              </span>
+            </div>
+          </div>
+
+          <form onSubmit={handleRegister} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
               Email Address
@@ -346,6 +372,7 @@ export default function RegisterForm({
             )}
           </button>
         </form>
+        </>
       )}
 
       {/* Step 2: Verify */}

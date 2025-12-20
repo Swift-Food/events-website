@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "@/styles/globals.css";
 import Navbar from "../components/layout/Navbar";
 import { AuthProvider } from "@/lib/auth/authContext";
@@ -27,6 +28,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Script
+          src="https://accounts.google.com/gsi/client"
+          strategy="beforeInteractive"
+        />
+        <Script
+          src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"
+          strategy="beforeInteractive"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -36,7 +47,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
           </div>
         </AuthProvider>
-        <Toaster 
+        <Toaster
           position="top-right"
           richColors
           closeButton

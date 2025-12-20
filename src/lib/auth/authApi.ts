@@ -158,6 +158,46 @@ export const authApi = {
   },
 
   /**
+   * Apple Sign-In Login for Event Users
+   */
+  appleLogin: async (
+    idToken: string,
+    inviteToken?: string,
+    inviteType?: 'collaborator' | 'ticket'
+  ): Promise<{ access_token: string; refresh_token: string }> => {
+    const payload = {
+      idToken,
+      inviteToken,
+      inviteType,
+    };
+    const response = await apiClient.post<{
+      access_token: string;
+      refresh_token: string;
+    }>("/auth/apple-login-event-user", payload);
+    return response.data;
+  },
+
+  /**
+   * Apple Sign-In Register for Event Users
+   */
+  appleRegister: async (
+    idToken: string,
+    inviteToken?: string,
+    inviteType?: 'collaborator' | 'ticket'
+  ): Promise<{ access_token: string; refresh_token: string }> => {
+    const payload = {
+      idToken,
+      inviteToken,
+      inviteType,
+    };
+    const response = await apiClient.post<{
+      access_token: string;
+      refresh_token: string;
+    }>("/auth/apple-register-event-user", payload);
+    return response.data;
+  },
+
+  /**
    * Decode JWT token (client-side only - for reading payload)
    */
   decodeJWT: (token: string) => {
