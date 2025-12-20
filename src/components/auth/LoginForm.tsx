@@ -96,10 +96,12 @@ export default function LoginForm({
         <div className="space-y-3 mb-4">
           <GoogleOAuthButton
             isRegister={false}
+            redirectTo={redirectTo}
             onSuccess={onClose}
           />
           <AppleOAuthButton
             isRegister={false}
+            redirectTo={redirectTo}
             onSuccess={onClose}
           />
         </div>

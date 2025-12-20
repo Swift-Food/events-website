@@ -6,6 +6,7 @@ interface OAuthButtonsProps {
   isRegister?: boolean;
   inviteToken?: string;
   inviteType?: "collaborator" | "ticket";
+  redirectTo?: string;
   onSuccess?: () => void;
   onError?: (error: string) => void;
 }
@@ -14,6 +15,7 @@ export function GoogleOAuthButton({
   isRegister = false,
   inviteToken,
   inviteType,
+  redirectTo,
   onSuccess,
   onError,
 }: OAuthButtonsProps) {
@@ -21,6 +23,7 @@ export function GoogleOAuthButton({
     isRegister,
     inviteToken,
     inviteType,
+    redirectTo,
     onSuccess,
     onError,
   });
@@ -90,6 +93,7 @@ export function AppleOAuthButton({
   isRegister = false,
   inviteToken,
   inviteType,
+  redirectTo,
   onSuccess,
   onError,
 }: OAuthButtonsProps) {
@@ -97,6 +101,7 @@ export function AppleOAuthButton({
     isRegister,
     inviteToken,
     inviteType,
+    redirectTo,
     onSuccess,
     onError,
   });

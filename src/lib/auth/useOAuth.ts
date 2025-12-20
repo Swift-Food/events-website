@@ -31,6 +31,7 @@ interface UseOAuthOptions {
   isRegister?: boolean;
   inviteToken?: string;
   inviteType?: "collaborator" | "ticket";
+  redirectTo?: string;
   onSuccess?: () => void;
   onError?: (error: string) => void;
 }
@@ -39,6 +40,7 @@ export function useOAuth({
   isRegister = false,
   inviteToken,
   inviteType,
+  redirectTo,
   onSuccess,
   onError,
 }: UseOAuthOptions = {}) {
@@ -144,11 +146,11 @@ export function useOAuth({
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push("/");
+        router.push(redirectTo || "/");
       }
 
       // Force reload to update auth context
-      window.location.href = "/";
+      window.location.href = redirectTo || "/";
     } catch (error: any) {
       console.error("Google OAuth error:", error);
       const errorMessage =
@@ -226,11 +228,11 @@ export function useOAuth({
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push("/");
+        router.push(redirectTo || "/");
       }
 
       // Force reload to update auth context
-      window.location.href = "/";
+      window.location.href = redirectTo || "/";
     } catch (error: any) {
       console.error("Apple OAuth error:", error);
       const errorMessage =
