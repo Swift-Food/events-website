@@ -913,7 +913,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] justify-center bg-background px-6">
+    <div className="flex min-h-[calc(100vh-64px)] justify-center bg-background px-6 pb-4">
       <div className="flex w-full max-w-5xl flex-col gap-6 text-foreground lg:flex-row">
         <section className="flex flex-col gap-5 rounded-3xl lg:p-7 lg:w-96 lg:shrink-0 lg:sticky lg:top-20 lg:self-start sm:flex-row lg:flex-col">
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background backdrop-blur-sm  sm:flex-1 sm:basis-0 lg:w-full lg:flex-none">
@@ -1337,17 +1337,20 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
               <button
                 type="button"
                 onClick={() => setIsTicketListExpanded(!isTicketListExpanded)}
-                className="w-full flex justify-center pt-3 pb-1 transition-all hover:bg-white/5 rounded-xl cursor-pointer"
-                aria-label={
-                  isTicketListExpanded
-                    ? "Collapse ticket list"
-                    : "Expand ticket list"
-                }
+                className="w-full flex items-center justify-center gap-2 py-2 transition-all hover:bg-white/5 rounded-xl cursor-pointer"
               >
                 {isTicketListExpanded ? (
-                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                  <>
+                    <span className="text-sm text-muted-foreground">Hide tickets</span>
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                  </>
                 ) : (
-                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  <>
+                    <span className="text-sm text-muted-foreground">
+                      Show {ticketTypes.length} ticket{ticketTypes.length > 1 ? "s" : ""}
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  </>
                 )}
               </button>
             )}
@@ -1446,17 +1449,20 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                   onClick={() =>
                     setIsFormFieldListExpanded(!isFormFieldListExpanded)
                   }
-                  className="w-full flex justify-center pt-3 pb-1 transition-all hover:bg-white/5 rounded-xl cursor-pointer"
-                  aria-label={
-                    isFormFieldListExpanded
-                      ? "Collapse form field list"
-                      : "Expand form field list"
-                  }
+                  className="w-full flex items-center justify-center gap-2 py-2 transition-all hover:bg-white/5 rounded-xl cursor-pointer"
                 >
                   {isFormFieldListExpanded ? (
-                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                    <>
+                      <span className="text-sm text-muted-foreground">Hide fields</span>
+                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                    </>
                   ) : (
-                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                    <>
+                      <span className="text-sm text-muted-foreground">
+                        Show {formFields.length} field{formFields.length > 1 ? "s" : ""}
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </>
                   )}
                 </button>
               )}
