@@ -333,7 +333,7 @@ export default function EventDetailsPage() {
         </button>
 
         {/* Main Content - Responsive Layout */}
-        <div className="flex flex-col gap-6 lg:flex-row">
+        <div className="flex flex-col gap-6 lg:flex-row-reverse">
           {/* Left Column - Image and Sidebar */}
           <section className="flex flex-col gap-6 lg:w-96 lg:shrink-0">
             {/* 2×2 Grid on sm-md, Flex column on lg+ */}
