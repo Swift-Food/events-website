@@ -619,83 +619,98 @@ export default function EventDetailsPage() {
             </div>
 
             {/* Tickets */}
-            {event.eventTickets && event.eventTickets.length > 0 && (
-              <div className="rounded-xl bg-card-background backdrop-blur-xl p-6 border border-neutral-700">
-                <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                  Tickets
-                </h2>
-                <div className="space-y-2 sm:space-y-3">
-                  {event.eventTickets.map((ticket) => {
-                    const remaining = ticket.quantityLeft ?? 0;
-                    const isSelected = selectedTicketId === ticket.id;
-                    const isSoldOut = remaining <= 0 || !ticket.isAvailable;
+            {event.eventTickets && event.eventTickets.length > 0 && (() => {
+              const isEventEnded = new Date(event.endDateTime) < new Date();
+              const hasAvailableTickets = event.eventTickets.some(t => (t.quantityLeft ?? 0) > 0 && t.isAvailable);
+              const canRegister = event.status === EventStatus.PUBLISHED && !isEventEnded && hasAvailableTickets;
+              const showClosedMessage = isEventEnded || !hasAvailableTickets;
 
-                    return (
-                      <div
-                        key={ticket.id}
-                        onClick={() => !isSoldOut && event.status === EventStatus.PUBLISHED && setSelectedTicketId(ticket.id)}
-                        className={`flex items-center justify-between gap-2 sm:gap-4 rounded-xl border p-3 sm:p-4 transition-all ${
-                          isSoldOut || event.status !== EventStatus.PUBLISHED
-                            ? "border-white/10 bg-card-secondary-background opacity-50 cursor-not-allowed"
-                            : isSelected
-                              ? "border-primary bg-primary/10 cursor-pointer"
-                              : "border-white/10 bg-card-secondary-background cursor-pointer hover:border-white/20"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                          {event.status === EventStatus.PUBLISHED && !isSoldOut && (
-                            <div
-                              className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                                isSelected ? "border-primary" : "border-white/30"
-                              }`}
-                            >
-                              {isSelected && (
-                                <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-primary" />
-                              )}
+              return (
+                <div className="rounded-xl bg-card-background backdrop-blur-xl p-6 border border-neutral-700">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-2xl font-semibold text-foreground">
+                      Tickets
+                    </h2>
+                    {showClosedMessage && (
+                      <span className="text-sm text-muted-foreground">
+                        Registration closed
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-2 sm:space-y-3">
+                    {event.eventTickets.map((ticket) => {
+                      const remaining = ticket.quantityLeft ?? 0;
+                      const isSelected = selectedTicketId === ticket.id;
+                      const isSoldOut = remaining <= 0 || !ticket.isAvailable;
+                      const isDisabled = isSoldOut || !canRegister;
+
+                      return (
+                        <div
+                          key={ticket.id}
+                          onClick={() => !isDisabled && setSelectedTicketId(ticket.id)}
+                          className={`flex items-center justify-between gap-2 sm:gap-4 rounded-xl border p-3 sm:p-4 transition-all ${
+                            isDisabled
+                              ? "border-white/10 bg-card-secondary-background opacity-50 cursor-not-allowed"
+                              : isSelected
+                                ? "border-primary bg-primary/10 cursor-pointer"
+                                : "border-white/10 bg-card-secondary-background cursor-pointer hover:border-white/20"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                            {canRegister && !isSoldOut && (
+                              <div
+                                className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                                  isSelected ? "border-primary" : "border-white/30"
+                                }`}
+                              >
+                                {isSelected && (
+                                  <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-primary" />
+                                )}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <h3 className="text-sm sm:text-base font-semibold text-foreground break-words">
+                                {ticket.name}
+                              </h3>
+                              <p className="text-xs sm:text-sm text-muted-foreground">
+                                {isSoldOut ? "Sold out" : `${remaining} left`}
+                              </p>
                             </div>
-                          )}
-                          <div className="min-w-0">
-                            <h3 className="text-sm sm:text-base font-semibold text-foreground break-words">
-                              {ticket.name}
-                            </h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground">
-                              {isSoldOut ? "Sold out" : `${remaining} left`}
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-base sm:text-xl font-bold text-foreground">
+                              {Number(ticket.price) === 0
+                                ? "Free"
+                                : `£${Number(ticket.price).toFixed(2)}`}
                             </p>
                           </div>
                         </div>
-                        <div className="text-right shrink-0">
-                          <p className="text-base sm:text-xl font-bold text-foreground">
-                            {Number(ticket.price) === 0
-                              ? "Free"
-                              : `£${Number(ticket.price).toFixed(2)}`}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
 
-                {/* Single Register Button */}
-                {event.status === EventStatus.PUBLISHED && event.eventTickets.some(t => (t.quantityLeft ?? 0) > 0 && t.isAvailable) && (
-                  <button
-                    onClick={() => selectedTicketId && handleRegister(selectedTicketId)}
-                    disabled={!selectedTicketId || isRegistering}
-                    className="w-full mt-4 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {isRegistering ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Registering...
-                      </>
-                    ) : selectedTicketId ? (
-                      "Register"
-                    ) : (
-                      "Select a ticket to register"
-                    )}
-                  </button>
-                )}
-              </div>
-            )}
+                  {/* Single Register Button */}
+                  {canRegister && event.eventTickets.some(t => (t.quantityLeft ?? 0) > 0 && t.isAvailable) && (
+                    <button
+                      onClick={() => selectedTicketId && handleRegister(selectedTicketId)}
+                      disabled={!selectedTicketId || isRegistering}
+                      className="w-full mt-4 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {isRegistering ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Registering...
+                        </>
+                      ) : selectedTicketId ? (
+                        "Register"
+                      ) : (
+                        "Select a ticket to register"
+                      )}
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Description */}
             <div className=" p-6">
