@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { Menu, X, User, LogOut, UserCircle, Ticket } from "lucide-react";
@@ -74,7 +75,14 @@ export default function Navbar() {
               <Menu className="h-6 w-6" />
             </button>
 
-            <Link href="/" className="text-lg font-semibold tracking-tight">
+            <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
+              <Image
+                src="/logo.svg"
+                alt="Prismo logo"
+                width={24}
+                height={24}
+                className="invert"
+              />
               Prismo
             </Link>
 
