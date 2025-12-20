@@ -418,7 +418,7 @@ export default function ProfilePage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap transition-all border-b-2 ${
+                  className={`flex items-center gap-2 px-4 py-3 sm:px-6 sm:py-4 text-sm font-medium whitespace-nowrap transition-all border-b-2 ${
                     activeTab === tab.id
                       ? "border-primary text-primary"
                       : "border-transparent text-muted-foreground hover:text-foreground hover:border-foreground/20"
