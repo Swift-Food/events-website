@@ -81,7 +81,7 @@ export default function Navbar() {
                 alt="Prismo logo"
                 width={24}
                 height={24}
-                className="invert"
+                className="invert hidden sm:block"
               />
               Prismo
             </Link>
