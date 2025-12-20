@@ -19,7 +19,7 @@ import {
   Calendar,
   Ticket,
   LogOut,
-  Settings,
+  // Settings,
   ChevronRight,
   Plus,
   CalendarCheck,
@@ -352,13 +352,13 @@ export default function ProfilePage() {
                 <Plus className="h-4 w-4" />
                 Create Event
               </Link>
-              <Link
+              {/* <Link
                 href="/settings"
                 className="flex items-center justify-center gap-2 rounded-full bg-card-secondary-background px-5 py-2.5 text-sm font-medium text-foreground transition-all hover:bg-white/15"
               >
                 <Settings className="h-4 w-4" />
                 Settings
-              </Link>
+              </Link> */}
               <button
                 onClick={handleLogout}
                 disabled={isLoggingOut}
