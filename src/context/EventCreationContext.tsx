@@ -27,6 +27,8 @@ interface EventCreationContextType {
   setDescription: Dispatch<SetStateAction<string>>;
 
   // Address details
+  venueName: string;
+  setVenueName: Dispatch<SetStateAction<string>>;
   addressLine1: string;
   setAddressLine1: Dispatch<SetStateAction<string>>;
   addressLine2: string;
@@ -87,6 +89,7 @@ type EventDraft = {
   end: string;
   location: string;
   description: string;
+  venueName: string;
   addressLine1: string;
   addressLine2: string;
   city: string;
@@ -159,6 +162,7 @@ export function EventCreationProvider({
   const [description, setDescription] = useState(storedDraft.description ?? "");
 
   // Address details
+  const [venueName, setVenueName] = useState(storedDraft.venueName ?? "");
   const [addressLine1, setAddressLine1] = useState(storedDraft.addressLine1 ?? "");
   const [addressLine2, setAddressLine2] = useState(storedDraft.addressLine2 ?? "");
   const [city, setCity] = useState(storedDraft.city ?? "");
@@ -240,6 +244,7 @@ export function EventCreationProvider({
       end,
       location,
       description,
+      venueName,
       addressLine1,
       addressLine2,
       city,
@@ -278,6 +283,7 @@ export function EventCreationProvider({
     start,
     ticketTypes,
     formFields,
+    venueName,
     addressLine1,
     addressLine2,
     city,
@@ -299,6 +305,7 @@ export function EventCreationProvider({
     setEnd(newTimes.end);
     setLocation("");
     setDescription("");
+    setVenueName("");
     setAddressLine1("");
     setAddressLine2("");
     setCity("");
@@ -332,6 +339,8 @@ export function EventCreationProvider({
         setLocation,
         description,
         setDescription,
+        venueName,
+        setVenueName,
         addressLine1,
         setAddressLine1,
         addressLine2,

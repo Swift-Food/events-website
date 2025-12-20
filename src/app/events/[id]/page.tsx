@@ -476,6 +476,11 @@ export default function EventDetailsPage() {
 
                     {/* Address Details */}
                     <div className="p-4">
+                      {event.address.name && event.address.name !== event.name && (
+                        <h3 className="font-semibold text-foreground mb-1">
+                          {event.address.name}
+                        </h3>
+                      )}
                       <p className="text-sm text-muted-foreground">
                         {[
                           event.address.addressLine1,

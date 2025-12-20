@@ -62,6 +62,8 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     setEnd,
     location,
     setLocation,
+    venueName,
+    setVenueName,
     addressLine1,
     setAddressLine1,
     addressLine2,
@@ -156,6 +158,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
 
       // Address data
       if (initialData.address) {
+        setVenueName(initialData.address.name || "");
         setAddressLine1(initialData.address.addressLine1 || "");
         setAddressLine2(initialData.address.addressLine2 || "");
         setCity(initialData.address.city || "");
@@ -437,6 +440,11 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
       setAddressValidationError(null);
     }
 
+    // Set venue name from Google Places
+    if (buildingName) {
+      setVenueName(buildingName);
+    }
+
     // Update address fields
     // For establishments, use the building name if street is empty
     if (buildingName && !street) {
@@ -582,7 +590,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
         endDateTime: end,
         isPrivate: false,
         addressData: {
-          name: eventName,
+          name: venueName || undefined,
           addressLine1: addressLine1,
           addressLine2: addressLine2 || undefined,
           city: city,
@@ -1113,6 +1121,20 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                       </p>
                     </div>
                   )}
+                </div>
+
+                {/* Venue Name */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Venue Name (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={venueName}
+                    onChange={(e) => setVenueName(e.target.value)}
+                    placeholder="e.g., UCL Student Centre, The Grand Hall"
+                    className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40"
+                  />
                 </div>
 
                 {/* Address Line 1 */}
