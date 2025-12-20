@@ -13,6 +13,7 @@ import {
 } from "@/services/event-user.service";
 import { EventResponseDto } from "@/types/event";
 import EventCard from "@/components/EventCard";
+import HorizontalEventCard from "@/components/HorizontalEventCard";
 import {
   User,
   Calendar,
@@ -448,17 +449,32 @@ export default function ProfilePage() {
             ) : currentEvents.length === 0 ? (
               <EmptyState activeTab={activeTab} />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {currentEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    isHostedEvent={
-                      activeTab === "hosting" || activeTab === "past"
-                    }
-                  />
-                ))}
-              </div>
+              <>
+                {/* Mobile: Horizontal cards */}
+                <div className="flex flex-col gap-3 md:hidden">
+                  {currentEvents.map((event) => (
+                    <HorizontalEventCard
+                      key={event.id}
+                      event={event}
+                      isHostedEvent={
+                        activeTab === "hosting" || activeTab === "past"
+                      }
+                    />
+                  ))}
+                </div>
+                {/* Desktop: Grid of regular cards */}
+                <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {currentEvents.map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      isHostedEvent={
+                        activeTab === "hosting" || activeTab === "past"
+                      }
+                    />
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
