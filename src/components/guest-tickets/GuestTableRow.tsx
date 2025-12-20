@@ -79,13 +79,13 @@ export const GuestTableRow = ({
 
  
   return (
-    <tr className="border-b border-border transition-colors hover:bg-white/5">
+    <tr className="border-b border-neutral-700 last:border-b-0 transition-colors hover:bg-white/5">
       <td className="p-4">
         <input
           type="checkbox"
           checked={isSelected}
           onChange={() => onToggleSelect(guest.id)}
-          className="h-4 w-4 rounded border-border bg-input-background text-primary focus:ring-2 focus:ring-primary"
+          className="h-4 w-4 rounded border-neutral-700 bg-input-background text-primary focus:ring-2 focus:ring-primary"
         />
       </td>
       <td className="p-4">

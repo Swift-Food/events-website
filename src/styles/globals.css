@@ -66,3 +66,184 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: 700;
 }
+
+/* Tiptap Editor Styles */
+.tiptap-editor {
+  color: white;
+}
+
+.tiptap-editor .ProseMirror {
+  outline: none;
+  min-height: 100%;
+}
+
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: "Start typing...";
+  color: #71717a;
+  float: left;
+  pointer-events: none;
+  height: 0;
+}
+
+.tiptap-editor h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 2rem;
+  margin-top: 1.0rem;
+  margin-bottom: 0.75rem;
+  color: white;
+}
+
+.tiptap-editor h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.75rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.625rem;
+  color: white;
+}
+
+.tiptap-editor h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.5rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.tiptap-editor p {
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tiptap-editor ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+}
+
+.tiptap-editor ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+}
+
+.tiptap-editor li {
+  margin-top: 0.125rem;
+  margin-bottom: 0.125rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+}
+
+.tiptap-editor hr {
+  border: none;
+  border-top: 2px solid rgba(255, 255, 255, 0.2);
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.tiptap-editor blockquote {
+  border-left: 4px solid rgba(255, 255, 255, 0.3);
+  padding-left: 0.875rem;
+  margin-left: 0;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.tiptap-editor strong {
+  font-weight: 700;
+}
+
+.tiptap-editor em {
+  font-style: italic;
+}
+
+.tiptap-editor code {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.8125rem;
+}
+
+.tiptap-editor a {
+  color: #60a5fa;
+  text-decoration: underline;
+  transition: color 150ms;
+  cursor: text;
+}
+
+.tiptap-editor a:hover {
+  color: #93c5fd;
+}
+
+.tiptap-view-mode a {
+  cursor: pointer !important;
+}
+
+/* Tiptap Desktop Styles */
+@media (min-width: 768px) {
+  .tiptap-editor h1 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .tiptap-editor h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .tiptap-editor h3 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    margin-top: 1.25rem;
+    margin-bottom: 0.625rem;
+  }
+
+  .tiptap-editor p {
+    font-size: 1rem;
+    line-height: 1.75rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .tiptap-editor ul,
+  .tiptap-editor ol {
+    padding-left: 1.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .tiptap-editor li {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+  }
+
+  .tiptap-editor hr {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tiptap-editor blockquote {
+    padding-left: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .tiptap-editor code {
+    font-size: 0.875rem;
+  }
+}

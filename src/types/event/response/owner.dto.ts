@@ -7,6 +7,7 @@ import { User } from "@/types/user";
 
 export interface EventOwnerResponseDto {
   id: string;
-  organizationName: string;
+  userId: string;
+  organizationName: string | null;
   user: User;
 }

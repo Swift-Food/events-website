@@ -44,13 +44,13 @@ export const GuestFilters = ({
           placeholder="Search by name or email..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full rounded-xl bg-card-secondary-background py-3.5 pl-12 pr-4 text-foreground placeholder-muted-foreground outline-none transition-all focus:bg-white/15 focus:ring-2 focus:ring-primary"
+          className="w-full rounded-xl bg-card-background py-3.5 pl-12 pr-4 text-foreground placeholder-muted-foreground outline-none transition-all focus:bg-card-secondary-background focus:ring-2 focus:ring-primary"
         />
       </div>
 
       {/* Filter Tabs */}
       <div className="overflow-x-auto">
-        <div className="flex gap-2 border-b border-border pb-2">
+        <div className="flex gap-2">
           {filters.map((filter) => (
             <button
               key={filter.value}

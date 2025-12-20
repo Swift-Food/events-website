@@ -22,6 +22,7 @@ import {
   Check,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import Image from "next/image";
 import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
@@ -50,6 +51,9 @@ export default function EventDetailsPage() {
   const [paymentData, setPaymentData] = useState<PaymentFlowState | null>(null);
   const [successTicketDetails, setSuccessTicketDetails] = useState<Pick<PaymentFlowState['ticketDetails'], 'ticketName' | 'eventName'> | null>(null);
 
+  // Check if user can manage this event
+  const [canManageEvent, setCanManageEvent] = useState(false);
+
   useEffect(() => {
     const fetchEventDetails = async () => {
       try {
@@ -71,39 +75,38 @@ export default function EventDetailsPage() {
     }
   }, [eventId]);
 
-  // Check if user is host or collaborator and redirect to management page
+  // Check if user is owner or collaborator
   useEffect(() => {
-    const checkUserRoleAndRedirect = async () => {
-      if (!event || !isAuthenticated || !user) return;
+    const checkCanManageEvent = async () => {
+      if (!event || !isAuthenticated || !user) {
+        setCanManageEvent(false);
+        return;
+      }
 
+      // Check if user is the event owner
+      const isOwner = event.owner?.user?.id === user.id;
+      if (isOwner) {
+        setCanManageEvent(true);
+        return;
+      }
+
+      // Check if user is a collaborator
       try {
-        // Check if user is the event owner (host)
-        const isOwner = event.owner?.user?.id === user.id;
-
-        if (isOwner) {
-          router.push(`/event-management/${eventId}`);
-          return;
-        }
-
-        // Check if user is a collaborator
         const collaboratorsData = await eventCollaboratorService.getCollaborators(eventId);
         const isCollaborator = collaboratorsData.collaborators.some(
           (collab) =>
             collab.inviteAccepted &&
             collab.eventUser?.id === user.eventUser?.id
         );
-
-        if (isCollaborator) {
-          router.push(`/event-management/${eventId}`);
-        }
+        setCanManageEvent(isCollaborator);
       } catch (err) {
-        // Silently fail - user might not have permission to view collaborators
-        console.log("Could not check collaborator status:", err);
+        // User might not have permission to view collaborators
+        setCanManageEvent(false);
       }
     };
 
-    checkUserRoleAndRedirect();
-  }, [event, isAuthenticated, user, eventId, router]);
+    checkCanManageEvent();
+  }, [event, isAuthenticated, user, eventId]);
 
   const selectedTicket = event?.eventTickets?.find(
     (t) => t.id === selectedTicketId
@@ -304,6 +307,22 @@ export default function EventDetailsPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-6xl px-6 py-8">
+        {/* Management Banner */}
+        {canManageEvent && (
+          <div className="mb-6 flex items-center justify-between rounded-lg border border-pink-500/30 bg-pink-500/10 px-4 py-3">
+            <span className="text-sm text-neutral-300">
+              You have manage access for this event.
+            </span>
+            <Link
+              href={`/event-management/${eventId}`}
+              className="flex items-center gap-1 rounded-full bg-pink-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-pink-600"
+            >
+              Manage
+              <span className="text-xs">↗</span>
+            </Link>
+          </div>
+        )}
+
         {/* Back Button */}
         <button
           onClick={() => router.push("/events")}
@@ -320,7 +339,7 @@ export default function EventDetailsPage() {
             {/* 2×2 Grid on sm-md, Flex column on lg+ */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:flex lg:flex-col">
               {/* Top Left: Image with Status Badge */}
-              <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/10 bg-card-secondary-background sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+              <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-neutral-700 bg-card-secondary-background sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
                 {event.eventImage ? (
                   <Image
                     src={event.eventImage}
@@ -380,7 +399,7 @@ export default function EventDetailsPage() {
               </div>
 
               {/* Date & Time Card - Bottom left on tablet, normal on mobile/desktop */}
-              <div className="rounded-xl border border-white/10 bg-card-background p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+              <div className="rounded-xl border border-neutral-700 bg-card-background p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Date & Time
                 </h3>
@@ -437,7 +456,7 @@ export default function EventDetailsPage() {
               </div>
 
               {/* Location Card - Bottom right */}
-              <div className="rounded-xl border border-white/10 bg-card-background p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+              <div className="rounded-xl border border-neutral-700 bg-card-background p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Location
                 </h3>
@@ -529,7 +548,7 @@ export default function EventDetailsPage() {
               </div>
 
               {/* Event Stats Card */}
-              <div className="rounded-xl border border-white/10 bg-card-background p-6">
+              <div className="rounded-xl border border-neutral-700 bg-card-background p-6">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Event Stats
                 </h3>
@@ -600,65 +619,101 @@ export default function EventDetailsPage() {
             </div>
 
             {/* Tickets */}
-            {event.eventTickets && event.eventTickets.length > 0 && (
-              <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
-                <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                  Tickets
-                </h2>
-                <div className="space-y-3">
-                  {event.eventTickets.map((ticket) => {
-                    const remaining = ticket.quantityLeft ?? 0;
-                    const isSelected = selectedTicketId === ticket.id;
-                    const isSoldOut = remaining <= 0 || !ticket.isAvailable;
+            {event.eventTickets && event.eventTickets.length > 0 && (() => {
+              const isEventEnded = new Date(event.endDateTime) < new Date();
+              const hasAvailableTickets = event.eventTickets.some(t => (t.quantityLeft ?? 0) > 0 && t.isAvailable);
+              const canRegister = event.status === EventStatus.PUBLISHED && !isEventEnded && hasAvailableTickets;
+              const showClosedMessage = isEventEnded || !hasAvailableTickets;
 
-                    return (
-                      <div
-                        key={ticket.id}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-white/10 bg-card-secondary-background p-4"
-                      >
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-foreground">
-                            {ticket.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {isSoldOut ? "Sold out" : `${remaining} left`}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className="text-right">
-                            <p className="text-xl font-bold text-foreground">
+              return (
+                <div className="rounded-xl bg-card-background backdrop-blur-xl p-6 border border-neutral-700">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-2xl font-semibold text-foreground">
+                      Tickets
+                    </h2>
+                    {showClosedMessage && (
+                      <span className="text-sm text-muted-foreground">
+                        Registration closed
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-2 sm:space-y-3">
+                    {event.eventTickets.map((ticket) => {
+                      const remaining = ticket.quantityLeft ?? 0;
+                      const isSelected = selectedTicketId === ticket.id;
+                      const isSoldOut = remaining <= 0 || !ticket.isAvailable;
+                      const isDisabled = isSoldOut || !canRegister;
+
+                      return (
+                        <div
+                          key={ticket.id}
+                          onClick={() => !isDisabled && setSelectedTicketId(ticket.id)}
+                          className={`flex items-center justify-between gap-2 sm:gap-4 rounded-xl border p-3 sm:p-4 transition-all ${
+                            isDisabled
+                              ? "border-white/10 bg-card-secondary-background opacity-50 cursor-not-allowed"
+                              : isSelected
+                                ? "border-primary bg-primary/10 cursor-pointer"
+                                : "border-white/10 bg-card-secondary-background cursor-pointer hover:border-white/20"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                            {canRegister && !isSoldOut && (
+                              <div
+                                className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                                  isSelected ? "border-primary" : "border-white/30"
+                                }`}
+                              >
+                                {isSelected && (
+                                  <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-primary" />
+                                )}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <h3 className="text-sm sm:text-base font-semibold text-foreground break-words">
+                                {ticket.name}
+                              </h3>
+                              <p className="text-xs sm:text-sm text-muted-foreground">
+                                {isSoldOut ? "Sold out" : `${remaining} left`}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-base sm:text-xl font-bold text-foreground">
                               {Number(ticket.price) === 0
                                 ? "Free"
                                 : `£${Number(ticket.price).toFixed(2)}`}
                             </p>
                           </div>
-                          {event.status === EventStatus.PUBLISHED &&
-                            !isSoldOut && (
-                              <button
-                                onClick={() => handleRegister(ticket.id)}
-                                disabled={isRegistering && isSelected}
-                                className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary/80 hover:scale-105 shadow-lg shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                              >
-                                {isRegistering && isSelected ? (
-                                  <>
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    Registering...
-                                  </>
-                                ) : (
-                                  "Register"
-                                )}
-                              </button>
-                            )}
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
+
+                  {/* Single Register Button */}
+                  {canRegister && event.eventTickets.some(t => (t.quantityLeft ?? 0) > 0 && t.isAvailable) && (
+                    <button
+                      onClick={() => selectedTicketId && handleRegister(selectedTicketId)}
+                      disabled={!selectedTicketId || isRegistering}
+                      className="w-full mt-4 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {isRegistering ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Registering...
+                        </>
+                      ) : selectedTicketId ? (
+                        "Register"
+                      ) : (
+                        "Select a ticket to register"
+                      )}
+                    </button>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Description */}
-            <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
+            <div className=" p-6">
               <h2 className="mb-4 text-lg font-semibold text-muted-foreground ">
                 About this event
               </h2>
@@ -874,118 +929,6 @@ export default function EventDetailsPage() {
         </div>
       )}
 
-      {/* Tiptap Styling */}
-      <style jsx global>{`
-        .tiptap-editor {
-          color: white;
-        }
-
-        .tiptap-editor .ProseMirror {
-          outline: none;
-        }
-
-        .tiptap-editor h1 {
-          font-size: 2.25rem;
-          font-weight: 700;
-          line-height: 2.5rem;
-          margin-top: 2.5rem;
-          margin-bottom: 1rem;
-          color: white;
-        }
-
-        .tiptap-editor h2 {
-          font-size: 1.875rem;
-          font-weight: 600;
-          line-height: 2.25rem;
-          margin-top: 2rem;
-          margin-bottom: 0.875rem;
-          color: white;
-        }
-
-        .tiptap-editor h3 {
-          font-size: 1.5rem;
-          font-weight: 600;
-          line-height: 2rem;
-          margin-top: 1.5rem;
-          margin-bottom: 0.75rem;
-          color: white;
-        }
-
-        .tiptap-editor p {
-          font-size: 1rem;
-          line-height: 1.75rem;
-          margin-top: 0.5rem;
-          margin-bottom: 0.5rem;
-          color: rgba(255, 255, 255, 0.9);
-        }
-
-        .tiptap-editor ul {
-          list-style-type: disc;
-          padding-left: 1.5rem;
-          margin-top: 0.5rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .tiptap-editor ol {
-          list-style-type: decimal;
-          padding-left: 1.5rem;
-          margin-top: 0.5rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .tiptap-editor li {
-          margin-top: 0.25rem;
-          margin-bottom: 0.25rem;
-          color: rgba(255, 255, 255, 0.9);
-        }
-
-        .tiptap-editor hr {
-          border: none;
-          border-top: 2px solid rgba(255, 255, 255, 0.2);
-          margin-top: 1.5rem;
-          margin-bottom: 1.5rem;
-        }
-
-        .tiptap-editor blockquote {
-          border-left: 4px solid rgba(255, 255, 255, 0.3);
-          padding-left: 1rem;
-          margin-left: 0;
-          margin-top: 1rem;
-          margin-bottom: 1rem;
-          font-style: italic;
-          color: rgba(255, 255, 255, 0.7);
-        }
-
-        .tiptap-editor strong {
-          font-weight: 700;
-        }
-
-        .tiptap-editor em {
-          font-style: italic;
-        }
-
-        .tiptap-editor code {
-          background-color: rgba(255, 255, 255, 0.1);
-          padding: 0.125rem 0.25rem;
-          border-radius: 0.25rem;
-          font-family: monospace;
-          font-size: 0.875rem;
-        }
-
-        .tiptap-editor a {
-          color: #60a5fa;
-          text-decoration: underline;
-          transition: color 150ms;
-        }
-
-        .tiptap-editor a:hover {
-          color: #93c5fd;
-        }
-
-        .tiptap-view-mode a {
-          cursor: pointer !important;
-        }
-      `}</style>
     </div>
   );
 }

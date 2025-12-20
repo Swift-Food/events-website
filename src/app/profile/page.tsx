@@ -13,6 +13,7 @@ import {
 } from "@/services/event-user.service";
 import { EventResponseDto } from "@/types/event";
 import EventCard from "@/components/EventCard";
+import HorizontalEventCard from "@/components/HorizontalEventCard";
 import {
   User,
   Calendar,
@@ -161,6 +162,7 @@ export default function ProfilePage() {
           updatedAt: new Date(),
           owner: {
             id: "",
+            userId: "",
             organizationName: "",
             user: {
               id: "",
@@ -174,8 +176,11 @@ export default function ProfilePage() {
             id: "",
             name: "",
             addressLine1: "",
+            addressLine2: null,
+            flat: null,
             city: "TBD",
             zipcode: "",
+            location: null,
           },
           categories: [],
           attendeesCount: 0,
@@ -202,6 +207,7 @@ export default function ProfilePage() {
           updatedAt: new Date(),
           owner: {
             id: "",
+            userId: "",
             organizationName: "",
             user: {
               id: "",
@@ -215,8 +221,11 @@ export default function ProfilePage() {
             id: "",
             name: "",
             addressLine1: "",
+            addressLine2: null,
+            flat: null,
             city: "TBD",
             zipcode: "",
+            location: null,
           },
           categories: [],
           attendeesCount: 0,
@@ -409,7 +418,7 @@ export default function ProfilePage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap transition-all border-b-2 ${
+                  className={`flex items-center gap-2 px-4 py-3 sm:px-6 sm:py-4 text-sm font-medium whitespace-nowrap transition-all border-b-2 ${
                     activeTab === tab.id
                       ? "border-primary text-primary"
                       : "border-transparent text-muted-foreground hover:text-foreground hover:border-foreground/20"
@@ -432,7 +441,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Tab Content */}
-          <div className="p-6">
+          <div className="p-3 sm:p-6">
             {isLoadingCurrentTab ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -440,17 +449,32 @@ export default function ProfilePage() {
             ) : currentEvents.length === 0 ? (
               <EmptyState activeTab={activeTab} />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {currentEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    isHostedEvent={
-                      activeTab === "hosting" || activeTab === "past"
-                    }
-                  />
-                ))}
-              </div>
+              <>
+                {/* Mobile: Horizontal cards */}
+                <div className="flex flex-col gap-3 md:hidden">
+                  {currentEvents.map((event) => (
+                    <HorizontalEventCard
+                      key={event.id}
+                      event={event}
+                      isHostedEvent={
+                        activeTab === "hosting" || activeTab === "past"
+                      }
+                    />
+                  ))}
+                </div>
+                {/* Desktop: Grid of regular cards */}
+                <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {currentEvents.map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      isHostedEvent={
+                        activeTab === "hosting" || activeTab === "past"
+                      }
+                    />
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>

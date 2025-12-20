@@ -1,25 +1,46 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import EventForm from "@/components/EventForm";
 import { eventService } from "@/services/event.service";
 import { EventResponseDto } from "@/types";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";
-import { CollaboratorManagement } from "@/components/event-collaborators/CollaboratorManagement";
+import { Eye, X } from "lucide-react";
+
+// Tab components
+import {
+  OverviewTab,
+  GuestsTab,
+  RegistrationTab,
+  TeamTab,
+  CateringTab,
+} from "@/components/event-management/tabs";
+
+type TabType = "overview" | "guests" | "registration" | "team" | "catering";
 
 export default function EventManagementPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const eventId = params.id as string;
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+
+  // Get current tab from URL, default to "overview"
+  const currentTab = (searchParams.get("tab") as TabType) || "overview";
 
   const [eventData, setEventData] = useState<EventResponseDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
+  const setTab = (tab: TabType) => {
+    router.push(`/event-management/${eventId}?tab=${tab}`);
+  };
+
+  // Fetch event data only when eventId changes
   useEffect(() => {
     const fetchEvent = async () => {
       if (!eventId) {
@@ -31,29 +52,11 @@ export default function EventManagementPage() {
       try {
         setIsLoading(true);
         const data = await eventService.getEventById(eventId);
-        console.log("Event management fetched data: ", data);
         setEventData(data);
         setError(null);
-
-        // Authorization check
-        if (user && data.owner?.user?.id) {
-          console.log("user and data", JSON.stringify(user),JSON.stringify(data.owner?.user) )
-          const authorized = user.id === data.owner.user.id;
-          console.log("authorized", authorized)
-          setIsAuthorized(authorized);
-
-          if (!authorized) {
-            setError("You are not authorized to manage this event");
-            toast.error("You do not have permission to edit this event");
-          }
-        } else if (!user) {
-          setIsAuthorized(false);
-          setError("You must be logged in to manage events");
-        }
       } catch (err: any) {
         console.error("Error fetching event:", err);
-        const errorMessage =
-          err.response?.data?.message || "Failed to load event";
+        const errorMessage = err.response?.data?.message || "Failed to load event";
         setError(errorMessage);
         toast.error(errorMessage);
       } finally {
@@ -62,8 +65,26 @@ export default function EventManagementPage() {
     };
 
     fetchEvent();
-  }, [eventId, user]);
+  }, [eventId]);
 
+  // Check authorization separately when user or eventData changes
+  useEffect(() => {
+    if (!eventData) return;
+
+    if (user && eventData.owner?.user?.id) {
+      const authorized = user.id === eventData.owner.user.id;
+      setIsAuthorized(authorized);
+
+      if (!authorized) {
+        setError("You are not authorized to manage this event");
+      }
+    } else if (!user && !authLoading) {
+      setIsAuthorized(false);
+      setError("You must be logged in to manage events");
+    }
+  }, [user, eventData, authLoading]);
+
+  // Loading state
   if (isLoading || authLoading) {
     return (
       <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background">
@@ -75,17 +96,14 @@ export default function EventManagementPage() {
     );
   }
 
+  // Auth required
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background px-6">
         <div className="text-center max-w-md">
           <div className="mb-4 text-6xl">🔒</div>
-          <h1 className="mb-2 text-2xl font-bold text-foreground">
-            Authentication Required
-          </h1>
-          <p className="mb-6 text-muted-foreground">
-            You must be logged in to manage events.
-          </p>
+          <h1 className="mb-2 text-2xl font-bold text-foreground">Authentication Required</h1>
+          <p className="mb-6 text-muted-foreground">You must be logged in to manage events.</p>
           <button
             onClick={() => router.push("/auth")}
             className="rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground transition-all hover:bg-primary/90"
@@ -97,17 +115,15 @@ export default function EventManagementPage() {
     );
   }
 
+  // Unauthorized
   if (isAuthorized === false) {
     return (
       <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background px-6">
         <div className="text-center max-w-md">
           <div className="mb-4 text-6xl">🚫</div>
-          <h1 className="mb-2 text-2xl font-bold text-foreground">
-            Unauthorized Access
-          </h1>
+          <h1 className="mb-2 text-2xl font-bold text-foreground">Unauthorized Access</h1>
           <p className="mb-6 text-muted-foreground">
-            You do not have permission to manage this event. Only the event
-            owner can edit event details.
+            You do not have permission to manage this event.
           </p>
           <div className="flex gap-3 justify-center">
             <button
@@ -116,26 +132,19 @@ export default function EventManagementPage() {
             >
               Browse Events
             </button>
-            <button
-              onClick={() => router.push("/profile")}
-              className="rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground transition-all hover:bg-primary/90"
-            >
-              My Profile
-            </button>
           </div>
         </div>
       </div>
     );
   }
 
+  // Error state
   if (error || !eventData) {
     return (
       <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background px-6">
         <div className="text-center max-w-md">
           <div className="mb-4 text-6xl">⚠️</div>
-          <h1 className="mb-2 text-2xl font-bold text-foreground">
-            Failed to Load Event
-          </h1>
+          <h1 className="mb-2 text-2xl font-bold text-foreground">Failed to Load Event</h1>
           <p className="mb-6 text-muted-foreground">
             {error || "The event could not be found or loaded."}
           </p>
@@ -150,44 +159,117 @@ export default function EventManagementPage() {
     );
   }
 
+  const tabs: { id: TabType; label: string }[] = [
+    { id: "overview", label: "Overview" },
+    { id: "guests", label: "Guests" },
+    { id: "registration", label: "Registration" },
+    { id: "team", label: "Team" },
+    { id: "catering", label: "Catering" },
+  ];
 
   return (
     <div className="relative min-h-screen bg-background">
-      {/* Floating Manage Guests Button */}
-      <div className="fixed right-8 top-24 z-50">
-        <button
-          onClick={() => router.push(`/event-management/${eventId}/guest-management`)}
-          className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+      {/* Preview Banner - Mobile only */}
+      <div className="sm:hidden border-y border-purple-500/30 bg-purple-500/10">
+        <div className="px-6 py-3 flex items-center justify-between">
+          <span className="text-sm text-neutral-300">
+            You are currently editing this event.
+          </span>
+          <button
+            onClick={() => router.push(`/events/${eventId}`)}
+            className="flex items-center gap-1 rounded-full bg-purple-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-purple-600"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-            />
-          </svg>
-          Manage Guests
-        </button>
+            Preview
+            <span className="text-xs">↗</span>
+          </button>
+        </div>
       </div>
 
-      {/* Event Form */}
-      <EventForm mode="edit" eventId={eventId} initialData={eventData} />
+      {/* Header */}
+      <div className="">
+        <div className="mx-auto max-w-6xl px-6 py-6">
+          {/* Event Title & Preview Button */}
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-lg sm:text-2xl font-bold text-foreground">{eventData.name}</h1>
+            {/* Preview Button - Desktop only */}
+            <button
+              onClick={() => router.push(`/events/${eventId}`)}
+              className="hidden sm:flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-sm font-semibold text-purple-400 transition-colors hover:bg-purple-500/20"
+            >
+              <Eye className="h-4 w-4" />
+              Preview Event
+            </button>
+          </div>
 
-      {/* Collaborator Management Section */}
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <CollaboratorManagement
-          eventId={eventId}
-          ownerId={eventData.owner?.user?.id}
-          isCompact={true}
-        />
+          {/* Tabs */}
+          <div className="flex gap-6 border-b border-neutral-700 -mb-px overflow-x-auto scrollbar-hide">
+            {tabs.map((tab) => {
+              const isActive = currentTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setTab(tab.id)}
+                  className={`relative shrink-0 whitespace-nowrap pb-3 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {tab.label}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
+
+      {/* Tab Content */}
+      <div className="mx-auto max-w-6xl px-6 py-8">
+        {currentTab === "overview" && (
+          <OverviewTab eventData={eventData} onEditClick={() => setShowEditModal(true)} />
+        )}
+
+        {currentTab === "guests" && <GuestsTab eventId={eventId} />}
+
+        {currentTab === "registration" && <RegistrationTab />}
+
+        {currentTab === "team" && (
+          <TeamTab eventId={eventId} ownerId={eventData.owner?.user?.id} />
+        )}
+        {currentTab === "catering" && <CateringTab/>}
+      </div>
+
+      {/* Edit Event Slide-out Modal */}
+      {showEditModal && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowEditModal(false)}
+          />
+
+          {/* Slide-out Panel */}
+          <div className="fixed right-0 top-0 z-50 h-full w-full max-w-4xl overflow-y-auto bg-background shadow-2xl animate-in slide-in-from-right duration-300">
+            {/* Modal Header */}
+            <div className="sticky top-0 z-10 flex items-center justify-end  bg-background px-6 py-4">
+              {/* <h2 className="text-lg font-semibold text-foreground">Edit Event</h2> */}
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Event Form */}
+
+            <EventForm mode="edit" eventId={eventId} initialData={eventData} />
+          </div>
+        </>
+      )}
     </div>
   );
 }

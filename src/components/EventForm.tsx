@@ -913,10 +913,10 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] justify-center bg-background px-6 py-12">
-      <div className="flex w-full max-w-6xl flex-col gap-6 text-foreground lg:flex-row">
-        <section className="flex flex-col gap-5 rounded-3xl bg-card-background  p-7 lg:w-96 lg:shrink-0 lg:sticky lg:top-20 lg:self-start sm:flex-row lg:flex-col">
-          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background backdrop-blur-sm shadow-lg  sm:flex-1 sm:basis-0 lg:w-full lg:flex-none">
+    <div className="flex min-h-[calc(100vh-64px)] justify-center bg-background px-6 pb-4">
+      <div className="flex w-full max-w-5xl flex-col gap-6 text-foreground lg:flex-row">
+        <section className="flex flex-col gap-5 rounded-3xl lg:p-7 lg:w-96 lg:shrink-0 lg:sticky lg:top-20 lg:self-start sm:flex-row lg:flex-col">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background backdrop-blur-sm  sm:flex-1 sm:basis-0 lg:w-full lg:flex-none">
             {coverPreview ? (
               <img
                 src={coverPreview}
@@ -936,7 +936,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
             <div className="absolute bottom-4 right-4 flex flex-wrap gap-2">
               <label
                 htmlFor="cover-upload"
-                className="rounded-full bg-primary/90 backdrop-blur-md px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-xl transition-all hover:bg-primary hover:scale-105 cursor-pointer"
+                className="rounded-full bg-primary/90 backdrop-blur-md px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary hover:scale-105 cursor-pointer"
               >
                 Change cover
               </label>
@@ -944,7 +944,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                 <button
                   type="button"
                   onClick={handleImageRemove}
-                  className="rounded-full bg-white/20 backdrop-blur-md px-5 py-2.5 text-sm font-medium text-foreground shadow-xl transition-all hover:bg-white/30 hover:scale-105"
+                  className="rounded-full bg-white/20 backdrop-blur-md px-5 py-2.5 text-sm font-medium text-foreground transition-all hover:bg-white/30 hover:scale-105"
                 >
                   Remove
                 </button>
@@ -959,7 +959,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
               onChange={handleImageChange}
             />
           </div>
-          <div className="rounded-2xl bg-card-secondary-background backdrop-blur-xl text-sm sm:flex-1 lg:flex-none lg:aspect-auto">
+          <div className="rounded-2xl bg-card-background backdrop-blur-xl text-sm sm:flex-1 lg:flex-none lg:aspect-auto">
             <div className="p-5">
               <div className="flex items-center justify-between text-muted-foreground">
                 <div>
@@ -1002,7 +1002,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
               <button
                 type="button"
                 onClick={handleClearForm}
-                className="flex items-center gap-2 rounded-2xl bg-red-500/10 backdrop-blur-md px-5 py-3 text-red-400 transition-all hover:bg-red-500/20 hover:scale-105 shadow-lg cursor-pointer"
+                className="flex items-center gap-2 rounded-2xl bg-red-500/10 backdrop-blur-md px-5 py-3 text-red-400 transition-all hover:bg-red-500/20 hover:scale-105 cursor-pointer"
                 title="Clear entire form"
               >
                 <Trash2 className="h-5 w-5" />
@@ -1011,12 +1011,12 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
             )}
           </div>
 
-          <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
+          <div className="rounded-xl backdrop-blur-xl pl-4 py-4">
             <div className="flex gap-5">
               <div className="flex flex-col items-center py-3">
-                <div className="h-3.5 w-3.5 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
+                <div className="h-3.5 w-3.5 rounded-full bg-primary"></div>
                 <div className="my-2 w-0.5 flex-1 rounded-full bg-primary/30"></div>
-                <div className="h-3.5 w-3.5 rounded-full bg-primary/30 shadow-md"></div>
+                <div className="h-3.5 w-3.5 rounded-full bg-primary/30"></div>
               </div>
 
               <div className="flex flex-1 flex-col gap-4">
@@ -1029,7 +1029,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                     value={start}
                     min={new Date().toISOString().slice(0, 16)}
                     onChange={(e) => setStart(e.target.value)}
-                    className="flex-1 rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner"
+                    className="flex-1 rounded-xl bg-card-background px-4 py-3.5 text-foreground outline-none"
                   />
                 </div>
 
@@ -1041,7 +1041,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                     type="datetime-local"
                     value={end}
                     onChange={(e) => setEnd(e.target.value)}
-                    className="flex-1 rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none shadow-inner"
+                    className="flex-1 rounded-xl bg-card-background px-4 py-3.5 text-foreground outline-none"
                   />
                 </div>
               </div>
@@ -1051,13 +1051,13 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
           <button
             type="button"
             onClick={handleDescriptionClick}
-            className="flex w-full items-center justify-center gap-3 rounded-3xl bg-card-background backdrop-blur-xl px-6 py-4 text-foreground text-base transition-all hover:bg-white/15 font-semibold shadow-xl cursor-pointer"
+            className="flex w-full items-center justify-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-6 py-3 text-foreground text-base transition-all font-semibold cursor-pointer"
           >
             <Edit className="h-5 w-5" />
             <span>Edit Description</span>
           </button>
 
-          <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 shadow-xl">
+          <div className="rounded-xl bg-card-background backdrop-blur-xl px-4 py-3">
             <div
               className="flex items-center justify-between cursor-pointer"
               onClick={() => setIsLocationExpanded(!isLocationExpanded)}
@@ -1104,7 +1104,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                     ref={locationInputRef}
                     type="text"
                     placeholder="Search for building, venue, or address..."
-                    className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner border-2 border-transparent focus:border-primary transition-all"
+                    className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 border-2 border-transparent focus:border-primary transition-all"
                   />
                   {addressValidationError && (
                     <div className="mt-2 p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
@@ -1125,7 +1125,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                     value={addressLine1}
                     onChange={(e) => setAddressLine1(e.target.value)}
                     placeholder="Street address"
-                    className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
+                    className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40"
                   />
                 </div>
 
@@ -1139,7 +1139,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                     value={addressLine2}
                     onChange={(e) => setAddressLine2(e.target.value)}
                     placeholder="Apartment, suite, building, etc."
-                    className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
+                    className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40"
                   />
                 </div>
 
@@ -1154,7 +1154,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       placeholder="City"
-                      className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
+                      className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40"
                     />
                   </div>
                   <div>
@@ -1175,7 +1175,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                         }
                       }}
                       placeholder="e.g., SW1A 1AA"
-                      className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 shadow-inner"
+                      className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40"
                     />
                     {postcode && validateUKPostcode(postcode) && (
                       <p className="mt-1 text-sm text-green-400">
@@ -1205,7 +1205,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
             )}
           </div>
 
-          <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 space-y-5 shadow-xl">
+          <div className="rounded-xl bg-card-background backdrop-blur-xl p-6 space-y-5">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-base font-semibold text-foreground">
@@ -1222,7 +1222,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
               <button
                 type="button"
                 onClick={handleAddTicketClick}
-                className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 hover:scale-105"
+                className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:scale-105"
               >
                 <Plus className="h-4 w-4" />
                 Add Ticket
@@ -1277,7 +1277,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                 {ticketTypes.map((ticket) => (
                   <div
                     key={ticket.id}
-                    className="rounded-2xl bg-card-secondary-background backdrop-blur-xl p-4 shadow-lg"
+                    className="rounded-2xl bg-card-secondary-background backdrop-blur-xl p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
@@ -1337,17 +1337,20 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
               <button
                 type="button"
                 onClick={() => setIsTicketListExpanded(!isTicketListExpanded)}
-                className="w-full flex justify-center pt-3 pb-1 transition-all hover:bg-white/5 rounded-xl cursor-pointer"
-                aria-label={
-                  isTicketListExpanded
-                    ? "Collapse ticket list"
-                    : "Expand ticket list"
-                }
+                className="w-full flex items-center justify-center gap-2 py-2 transition-all hover:bg-white/5 rounded-xl cursor-pointer"
               >
                 {isTicketListExpanded ? (
-                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                  <>
+                    <span className="text-sm text-muted-foreground">Hide tickets</span>
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                  </>
                 ) : (
-                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  <>
+                    <span className="text-sm text-muted-foreground">
+                      Show {ticketTypes.length} ticket{ticketTypes.length > 1 ? "s" : ""}
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  </>
                 )}
               </button>
             )}
@@ -1369,7 +1372,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                 <button
                   type="button"
                   onClick={handleAddFormFieldClick}
-                  className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 hover:scale-105"
+                  className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:scale-105"
                 >
                   <Plus className="h-4 w-4" />
                   Add Field
@@ -1382,7 +1385,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                   {formFields.map((field) => (
                     <div
                       key={field.id}
-                      className="rounded-2xl bg-card-secondary-background backdrop-blur-xl p-4 shadow-lg"
+                      className="rounded-2xl bg-card-secondary-background backdrop-blur-xl p-4"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1">
@@ -1446,17 +1449,20 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                   onClick={() =>
                     setIsFormFieldListExpanded(!isFormFieldListExpanded)
                   }
-                  className="w-full flex justify-center pt-3 pb-1 transition-all hover:bg-white/5 rounded-xl cursor-pointer"
-                  aria-label={
-                    isFormFieldListExpanded
-                      ? "Collapse form field list"
-                      : "Expand form field list"
-                  }
+                  className="w-full flex items-center justify-center gap-2 py-2 transition-all hover:bg-white/5 rounded-xl cursor-pointer"
                 >
                   {isFormFieldListExpanded ? (
-                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                    <>
+                      <span className="text-sm text-muted-foreground">Hide fields</span>
+                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                    </>
                   ) : (
-                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                    <>
+                      <span className="text-sm text-muted-foreground">
+                        Show {formFields.length} field{formFields.length > 1 ? "s" : ""}
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </>
                   )}
                 </button>
               )}
@@ -1474,14 +1480,14 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
               <button
                 type="button"
                 onClick={() => setRequireApproval((prev) => !prev)}
-                className={`h-7 w-14 rounded-full transition-all shadow-inner ${
+                className={`h-7 w-14 rounded-full transition-all ${
                   requireApproval
-                    ? "bg-primary shadow-lg shadow-primary/30"
+                    ? "bg-primary"
                     : "bg-card-secondary-background"
                 }`}
               >
                 <span
-                  className={`block h-6 w-6 rounded-full transition-all shadow-lg ${
+                  className={`block h-6 w-6 rounded-full transition-all ${
                     requireApproval
                       ? "translate-x-7 bg-primary-foreground"
                       : "translate-x-0.5 bg-foreground"
@@ -1511,7 +1517,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="w-full rounded-full bg-primary py-5 text-center text-lg font-bold text-primary-foreground transition-all hover:shadow-2xl hover:shadow-primary/50 hover:scale-[1.02] shadow-xl shadow-primary/30 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-foreground py-2 text-center text-lg font-semibold text-black transition-all hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting
               ? `${mode === "create" ? "Creating" : "Updating"} Event...`
@@ -1522,7 +1528,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
 
       {isCropModalOpen && imageToCrop && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-          <div className="w-full max-w-3xl rounded-3xl bg-card-background backdrop-blur-2xl p-8 text-foreground shadow-2xl">
+          <div className="w-full max-w-3xl rounded-3xl bg-card-background backdrop-blur-2xl p-8 text-foreground">
             <h2 className="mb-6 text-3xl font-bold">Crop Image</h2>
 
             <div className="relative h-[500px] w-full rounded-2xl bg-black">
@@ -1558,7 +1564,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                   type="button"
                   onClick={handleCropCancel}
                   disabled={isUploadingImage}
-                  className="flex-1 rounded-full bg-card-background backdrop-blur-md py-4 text-center font-semibold text-foreground transition-all hover:bg-white/15 shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 rounded-full bg-card-background backdrop-blur-md py-4 text-center font-semibold text-foreground transition-all hover:bg-white/15 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
@@ -1566,7 +1572,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                   type="button"
                   onClick={handleCropSave}
                   disabled={isUploadingImage}
-                  className="flex-1 rounded-full bg-primary py-4 text-center font-bold text-primary-foreground transition-all hover:shadow-2xl hover:shadow-primary/30 hover:scale-105 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 rounded-full bg-primary py-4 text-center font-bold text-primary-foreground transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isUploadingImage ? "Uploading..." : "Save"}
                 </button>
