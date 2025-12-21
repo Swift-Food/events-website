@@ -40,30 +40,31 @@ export default function EventManagementPage() {
     router.push(`/event-management/${eventId}?tab=${tab}`);
   };
 
-  // Fetch event data only when eventId changes
+  // Fetch event data
+  const fetchEvent = async (showLoading = true) => {
+    if (!eventId) {
+      setError("Event ID is missing");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      if (showLoading) setIsLoading(true);
+      const data = await eventService.getEventById(eventId);
+      setEventData(data);
+      setError(null);
+    } catch (err: any) {
+      console.error("Error fetching event:", err);
+      const errorMessage = err.response?.data?.message || "Failed to load event";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      if (showLoading) setIsLoading(false);
+    }
+  };
+
+  // Fetch event data on mount and when eventId changes
   useEffect(() => {
-    const fetchEvent = async () => {
-      if (!eventId) {
-        setError("Event ID is missing");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        const data = await eventService.getEventById(eventId);
-        setEventData(data);
-        setError(null);
-      } catch (err: any) {
-        console.error("Error fetching event:", err);
-        const errorMessage = err.response?.data?.message || "Failed to load event";
-        setError(errorMessage);
-        toast.error(errorMessage);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchEvent();
   }, [eventId]);
 
@@ -234,7 +235,9 @@ export default function EventManagementPage() {
 
         {currentTab === "guests" && <GuestsTab eventId={eventId} />}
 
-        {currentTab === "registration" && <RegistrationTab eventData={eventData} />}
+        {currentTab === "registration" && (
+          <RegistrationTab eventData={eventData} onRefresh={() => fetchEvent(false)} />
+        )}
 
         {currentTab === "team" && (
           <TeamTab eventId={eventId} ownerId={eventData.owner?.user?.id} />

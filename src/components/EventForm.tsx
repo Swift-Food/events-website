@@ -512,16 +512,14 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
   }, [addressLine1, addressLine2, city, postcode, setLocation]);
 
   // Handle ticket operations (only for CREATE mode, since EDIT mode handles tickets immediately)
-  const handleTicketOperations = async (eventId: string) => {
+  const handleTicketOperations = async (createdEventId: string) => {
     const errors: string[] = [];
 
     // Only handle ticket creation for CREATE mode
     // In EDIT mode, tickets are created/updated/deleted immediately via handleSaveTicket/handleDeleteTicket
     if (mode === "create") {
-      // Map frontend ticket types to API format
-      const mapTicketToPayload = (ticket: TicketType): CreateEventTicketDto => ({
-        id: ticket.id,
-        eventId: eventId,
+      // Map frontend ticket types to API format (without eventId, as it's passed separately)
+      const mapTicketToPayload = (ticket: TicketType) => ({
         name: ticket.name,
         description: ticket.description || "",
         price: ticket.isFree ? 0 : ticket.price,
@@ -540,7 +538,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
       // Create all tickets for new event
       for (const ticket of ticketTypes) {
         try {
-          await eventTicketService.createTicket(mapTicketToPayload(ticket));
+          await eventTicketService.createTicket(createdEventId, mapTicketToPayload(ticket));
         } catch (error: any) {
           console.error(`Failed to create ticket ${ticket.name}:`, error);
           errors.push(`Failed to create ticket "${ticket.name}"`);
@@ -804,10 +802,8 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
   const handleSaveTicket = async (ticket: TicketType) => {
     const isExistingTicket = ticketToEdit && originalTickets.some(t => t.id === ticket.id);
 
-    // Map ticket to API format
-    const mapTicketToPayload = (t: TicketType): CreateEventTicketDto => ({
-      id: t.id,
-      eventId: eventId,
+    // Map ticket to API format (without eventId, as it's passed separately for create)
+    const mapTicketToPayload = (t: TicketType) => ({
       name: t.name,
       description: t.description || "",
       price: t.isFree ? 0 : t.price,
@@ -827,15 +823,15 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
       // In edit mode, make immediate backend calls
       try {
         if (ticketToEdit && isExistingTicket) {
-          // Update existing ticket
+          // Update existing ticket (PUT /tickets/:id)
           await eventTicketService.updateTicket(ticket.id, mapTicketToPayload(ticket));
           updateTicketType(ticket);
           // Update in originalTickets too
           setOriginalTickets(prev => prev.map(t => t.id === ticket.id ? ticket : t));
           toast.success(`"${ticket.name}" updated successfully`);
         } else {
-          // Create new ticket
-          const response = await eventTicketService.createTicket(mapTicketToPayload(ticket));
+          // Create new ticket (POST /tickets/event/:eventId)
+          const response = await eventTicketService.createTicket(eventId, mapTicketToPayload(ticket));
           // Update the ticket with the backend-generated ID if needed
           const ticketWithId = { ...ticket, id: response.id };
           addTicketType(ticketWithId);

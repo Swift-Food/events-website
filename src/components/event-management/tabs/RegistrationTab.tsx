@@ -1,21 +1,122 @@
 "use client";
 
-import { EventResponseDto } from "@/types";
+import { useState, useEffect } from "react";
+import { EventResponseDto, TicketType } from "@/types";
+import { EventTicketResponseDto } from "@/types/event-ticket/response/ticket.dto";
 import { Ticket, Plus, Edit, Lock, Unlock, Trash2, MessageSquare, AlignLeft, CircleDot, CheckSquare, HelpCircle } from "lucide-react";
+import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
+import { eventTicketService } from "@/services/event-ticket.service";
+import { toast } from "sonner";
 
 interface RegistrationTabProps {
   eventData: EventResponseDto;
-  onCreateTicket?: () => void;
-  onEditTicket?: (ticketId: string) => void;
-  onDeleteTicket?: (ticketId: string) => void;
+  onRefresh?: () => void | Promise<void>;
 }
 
-export function RegistrationTab({ eventData, onCreateTicket, onEditTicket, onDeleteTicket }: RegistrationTabProps) {
-  const tickets = eventData.eventTickets || [];
+export function RegistrationTab({ eventData, onRefresh }: RegistrationTabProps) {
+  const [tickets, setTickets] = useState<EventTicketResponseDto[]>(eventData.eventTickets || []);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [ticketToEdit, setTicketToEdit] = useState<TicketType | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  const formatPrice = (price: string | number) => {
+  // Sync tickets when eventData changes from parent
+  useEffect(() => {
+    setTickets(eventData.eventTickets || []);
+  }, [eventData.eventTickets]);
+
+  // Convert backend ticket to frontend TicketType for the modal
+  const convertToTicketType = (ticket: EventTicketResponseDto): TicketType => {
+    const price = parseFloat(ticket.price) || 0;
+    return {
+      id: ticket.id,
+      name: ticket.name,
+      description: ticket.description || "",
+      isFree: price === 0,
+      price: price,
+      isSingleUse: ticket.isSingleUse ?? true,
+      quantity: ticket.quantityTotal,
+    };
+  };
+
+  const handleCreateTicket = () => {
+    setTicketToEdit(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditTicket = (ticketId: string) => {
+    const ticket = tickets.find((t) => t.id === ticketId);
+    if (ticket) {
+      setTicketToEdit(convertToTicketType(ticket));
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleSaveTicket = async (ticket: TicketType) => {
+    const isEditing = ticketToEdit !== null;
+
+    const payload = {
+      name: ticket.name,
+      description: ticket.description || "",
+      price: ticket.isFree ? 0 : ticket.price,
+      isPaid: !ticket.isFree,
+      isSingleUse: ticket.isSingleUse ?? true,
+      quantityTotal: ticket.quantity || 100,
+      isPrivate: false,
+    };
+
+    console.log("Creating/updating ticket with payload:", payload);
+    console.log("Event ID:", eventData.id);
+
+    try {
+      if (isEditing) {
+        const updated = await eventTicketService.updateTicket(ticket.id, payload);
+        setTickets((prev) => prev.map((t) => (t.id === ticket.id ? updated : t)));
+        toast.success(`"${ticket.name}" updated successfully`);
+      } else {
+        const created = await eventTicketService.createTicket(eventData.id, payload);
+        setTickets((prev) => [...prev, created]);
+        toast.success(`"${ticket.name}" created successfully`);
+      }
+      setIsModalOpen(false);
+      onRefresh?.();
+    } catch (error: any) {
+      console.error("Failed to save ticket:", error);
+      console.error("Error response data:", error.response?.data);
+      const errorMessage = error.response?.data?.message
+        || (Array.isArray(error.response?.data?.errors) ? error.response.data.errors.join(", ") : null)
+        || `Failed to save "${ticket.name}"`;
+      toast.error(errorMessage);
+      throw error; // Re-throw so the modal stays open
+    }
+  };
+
+  const handleDeleteTicket = async (ticketId: string) => {
+    const ticket = tickets.find((t) => t.id === ticketId);
+    if (!ticket) return;
+
+    const confirmed = confirm(
+      `Are you sure you want to delete "${ticket.name}"? This action cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setIsDeleting(ticketId);
+    try {
+      await eventTicketService.deleteTicket(ticketId);
+      setTickets((prev) => prev.filter((t) => t.id !== ticketId));
+      toast.success(`"${ticket.name}" deleted successfully`);
+      onRefresh?.();
+    } catch (error: any) {
+      console.error("Failed to delete ticket:", error);
+      toast.error(error.response?.data?.message || `Failed to delete "${ticket.name}"`);
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  const formatPrice = (price: string | number | undefined | null) => {
+    if (price === undefined || price === null) return "Free";
     const numPrice = typeof price === "string" ? parseFloat(price) : price;
-    if (numPrice === 0) return "Free";
+    if (isNaN(numPrice) || numPrice === 0) return "Free";
     return `£${numPrice.toFixed(2)}`;
   };
 
@@ -61,7 +162,7 @@ export function RegistrationTab({ eventData, onCreateTicket, onEditTicket, onDel
             <h2 className="text-lg font-semibold text-foreground">Ticket Types</h2>
           </div>
           <button
-            onClick={onCreateTicket}
+            onClick={handleCreateTicket}
             className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <Plus className="h-4 w-4" />
@@ -79,7 +180,7 @@ export function RegistrationTab({ eventData, onCreateTicket, onEditTicket, onDel
               Create your first ticket type to start accepting registrations.
             </p>
             <button
-              onClick={onCreateTicket}
+              onClick={handleCreateTicket}
               className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
             >
               <Plus className="h-4 w-4" />
@@ -129,18 +230,21 @@ export function RegistrationTab({ eventData, onCreateTicket, onEditTicket, onDel
                   </div>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => onEditTicket?.(ticket.id)}
+                      onClick={() => handleEditTicket(ticket.id)}
                       className="flex items-center gap-2 rounded-md border border-neutral-700 bg-card-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-background/80"
                     >
                       <Edit className="h-4 w-4" />
                       <span className="hidden sm:inline">Edit</span>
                     </button>
                     <button
-                      onClick={() => onDeleteTicket?.(ticket.id)}
-                      className="flex items-center gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20"
+                      onClick={() => handleDeleteTicket(ticket.id)}
+                      disabled={isDeleting === ticket.id}
+                      className="flex items-center gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Trash2 className="h-4 w-4" />
-                      <span className="hidden sm:inline">Delete</span>
+                      <span className="hidden sm:inline">
+                        {isDeleting === ticket.id ? "Deleting..." : "Delete"}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -194,6 +298,12 @@ export function RegistrationTab({ eventData, onCreateTicket, onEditTicket, onDel
         )}
       </div>
 
+      <TicketTypeModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveTicket}
+        ticketToEdit={ticketToEdit}
+      />
     </div>
   );
 }
