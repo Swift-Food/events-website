@@ -34,7 +34,7 @@ export default function MyTicketsPage() {
 
   const [tickets, setTickets] = useState<GuestTicketWithEventResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterType>("upcoming");
+  const [filter, setFilter] = useState<FilterType>("active");
   const [refundingTicketId, setRefundingTicketId] = useState<string | null>(
     null
   );
@@ -226,14 +226,14 @@ export default function MyTicketsPage() {
 
   const filters: { id: FilterType; label: string; icon: React.ReactNode }[] = [
     {
-      id: "upcoming",
-      label: "Upcoming",
-      icon: <Calendar className="h-4 w-4" />,
-    },
-    {
       id: "active",
       label: "Active",
       icon: <CheckCircle2 className="h-4 w-4" />,
+    },
+    {
+      id: "upcoming",
+      label: "Upcoming",
+      icon: <Calendar className="h-4 w-4" />,
     },
     { id: "pending", label: "Pending", icon: <Clock className="h-4 w-4" /> },
     { id: "past", label: "Past", icon: <Ticket className="h-4 w-4" /> },
