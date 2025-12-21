@@ -266,8 +266,8 @@ export default function MyTicketsPage() {
             <ArrowLeft className="h-4 w-4" />
             Back to Profile
           </Link> */}
-          <h1 className="text-3xl font-bold text-foreground">My Tickets</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">My Tickets</h1>
+          <p className="text-muted-foreground text-md mt-2">
             View and manage your event tickets
           </p>
         </div>

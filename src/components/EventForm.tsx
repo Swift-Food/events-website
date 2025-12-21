@@ -631,7 +631,6 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
           toast.error("Event ID is missing");
           return;
         }
-        console.log("event data", JSON.stringify(eventData));
         const response = await eventService.updateEvent(eventId, eventData);
         if (response.success) {
           // In edit mode, tickets are already handled immediately via handleSaveTicket/handleDeleteTicket
