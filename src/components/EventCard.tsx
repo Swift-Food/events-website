@@ -24,11 +24,27 @@ export default function EventCard({ event, isHostedEvent = false }: EventCardPro
     0
   ) || 0;
 
+  // Check if event is currently ongoing
+  const now = new Date();
+  const isOngoing =
+    new Date(event.startDateTime) <= now &&
+    new Date(event.endDateTime) > now;
+
   return (
     <Link
       href={isHostedEvent ? `/event-management/${event.id}` : `/events/${event.id}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-card-background transition-all hover:border-white/20 hover:shadow-2xl"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-card-background transition-all hover:border-white/20 hover:shadow-2xl"
     >
+      {/* Ongoing Badge */}
+      {isOngoing && (
+        <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-green-500/90 px-2 py-1 backdrop-blur-sm">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-white"></span>
+          </span>
+          <span className="text-xs font-semibold text-white">LIVE</span>
+        </div>
+      )}
       {/* Event Image */}
       <div className="relative aspect-video w-full flex-shrink-0 overflow-hidden bg-card-secondary-background">
         {event.eventImage ? (
@@ -46,21 +62,6 @@ export default function EventCard({ event, isHostedEvent = false }: EventCardPro
             <Calendar className="h-16 w-16 text-white/50" />
           </div>
         )}
-
-        {/* Status Badge */}
-        {/* <div className="absolute right-3 top-3">
-          <span
-            className={`rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-sm ${
-              event.status === EventStatus.PUBLISHED
-                ? "bg-green-500/80 text-white"
-                : event.status === EventStatus.CANCELLED
-                ? "bg-red-500/80 text-white"
-                : "bg-gray-500/80 text-white"
-            }`}
-          >
-            {event.status}
-          </span>
-        </div> */}
       </div>
 
       {/* Event Details */}

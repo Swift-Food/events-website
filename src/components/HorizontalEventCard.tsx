@@ -48,11 +48,27 @@ export default function HorizontalEventCard({
 
   const primaryCategory = event.categories?.[0];
 
+  // Check if event is currently ongoing
+  const now = new Date();
+  const isOngoing =
+    new Date(event.startDateTime) <= now &&
+    new Date(event.endDateTime) > now;
+
   return (
     <Link
       href={isHostedEvent ? `/event-management/${event.id}` : `/events/${event.id}`}
-      className="group flex gap-4 overflow-hidden rounded-2xl border border-white/10 bg-card-background p-4 transition-all hover:border-white/20 hover:shadow-2xl"
+      className="group relative flex gap-4 overflow-hidden rounded-2xl border border-white/10 bg-card-background p-4 transition-all hover:border-white/20 hover:shadow-2xl"
     >
+      {/* Ongoing Badge */}
+      {isOngoing && (
+        <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full bg-green-500/90 px-1.5 py-0.5 backdrop-blur-sm">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white"></span>
+          </span>
+          <span className="text-[10px] font-semibold text-white">LIVE</span>
+        </div>
+      )}
       {/* Event Image */}
       <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-card-secondary-background">
         {event.eventImage ? (
