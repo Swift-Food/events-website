@@ -32,7 +32,6 @@ export const GuestTableRow = ({
   onPromote,
 }: GuestTableRowProps) => {
   const [showMenu, setShowMenu] = useState(false);
-  console.log("guest is", JSON.stringify(guest))
   const getStatusBadge = () => {
     const statusConfig = {
       checked_in: {  // ← Add this
