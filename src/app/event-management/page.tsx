@@ -38,7 +38,7 @@ export default function EventManagementPage() {
     setLoading(true);
     setError(null);
     try {
-      const result = await eventService.getMyEvents();
+      const result = await eventService.getManagedEvents();
       setEvents(result.events ?? []);
     } catch (err) {
       console.error("Failed to fetch events:", err);

@@ -49,6 +49,14 @@ class EventService {
     return response.data;
   }
 
+  async getManagedEvents(query?: { skip?: number; take?: number }): Promise<EventListResponseDto> {
+    const response: AxiosResponse<EventListResponseDto> = await apiClient.get(
+      `${this.baseUrl}/managed`,
+      { params: query }
+    );
+    return response.data;
+  }
+
   async getEventById(id: string): Promise<EventResponseDto> {
     const response: AxiosResponse<EventResponseDto> = await apiClient.get(
       `${this.baseUrl}/${id}`
