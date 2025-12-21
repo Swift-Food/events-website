@@ -230,11 +230,11 @@ export default function MyTicketsPage() {
       label: "Active",
       icon: <CheckCircle2 className="h-4 w-4" />,
     },
-    {
-      id: "upcoming",
-      label: "Upcoming",
-      icon: <Calendar className="h-4 w-4" />,
-    },
+    // {
+    //   id: "upcoming",
+    //   label: "Upcoming",
+    //   icon: <Calendar className="h-4 w-4" />,
+    // },
     { id: "pending", label: "Pending", icon: <Clock className="h-4 w-4" /> },
     { id: "past", label: "Past", icon: <Ticket className="h-4 w-4" /> },
     { id: "all", label: "All", icon: <Ticket className="h-4 w-4" /> },
@@ -296,7 +296,7 @@ export default function MyTicketsPage() {
         ) : filteredTickets.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="rounded-full bg-card-secondary-background p-4 text-muted-foreground mb-4">
-              <Ticket className="h-12 w-12" />
+              <Ticket className="h-12 w-12"/>
             </div>
             <h3 className="text-lg font-semibold text-foreground mb-2">
               No tickets found
