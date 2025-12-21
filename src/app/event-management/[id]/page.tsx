@@ -234,7 +234,7 @@ export default function EventManagementPage() {
 
         {currentTab === "guests" && <GuestsTab eventId={eventId} />}
 
-        {currentTab === "registration" && <RegistrationTab />}
+        {currentTab === "registration" && <RegistrationTab eventData={eventData} />}
 
         {currentTab === "team" && (
           <TeamTab eventId={eventId} ownerId={eventData.owner?.user?.id} />
