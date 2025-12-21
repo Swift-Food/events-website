@@ -115,10 +115,10 @@ export default function Navbar() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/event-creation"
-              className={`rounded-full bg-foreground px-5 py-2 text-sm font-semibold text-background transition-colors hover:bg-zinc-100 hover:text-black ${!isAuthenticated ? 'hidden sm:inline-flex' : ''}`}
+              className={`rounded-full bg-foreground px-3 py-1.5 text-xs font-semibold text-background transition-colors hover:bg-zinc-100 hover:text-black sm:px-5 sm:py-2 sm:text-sm ${!isAuthenticated ? 'hidden sm:inline-flex' : ''}`}
             >
               Create Event
             </Link>
@@ -180,7 +180,7 @@ export default function Navbar() {
               </div>
             ) : (
               <Link
-                className="rounded-full border border-white/20 px-5 py-2 text-sm font-semibold text-zinc-300 transition-colors hover:border-white/40 hover:bg-white/5 hover:text-white cursor-pointer"
+                className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition-colors hover:border-white/40 hover:bg-white/5 hover:text-white cursor-pointer sm:px-5 sm:py-2 sm:text-sm"
                 aria-label="Sign in"
                 href={"/auth"}
               >
