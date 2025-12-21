@@ -6,11 +6,23 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { paymentService } from "@/services/payment.service";
-import { GuestTicketWithEventResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
+import {
+  GuestTicketWithEventResponseDto,
+  GuestTicketStatus,
+} from "@/types/guest-ticket";
 import type { PaymentFlowState } from "@/types/payment";
 import { TicketCard } from "@/components/tickets";
-import PaymentModal, { PaymentSuccessModal } from "@/components/payments/PaymentModal";
-import { Ticket, Calendar, CheckCircle2, Clock, Loader2, ArrowLeft } from "lucide-react";
+import PaymentModal, {
+  PaymentSuccessModal,
+} from "@/components/payments/PaymentModal";
+import {
+  Ticket,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  Loader2,
+  // ArrowLeft
+} from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -23,14 +35,21 @@ export default function MyTicketsPage() {
   const [tickets, setTickets] = useState<GuestTicketWithEventResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>("upcoming");
-  const [refundingTicketId, setRefundingTicketId] = useState<string | null>(null);
+  const [refundingTicketId, setRefundingTicketId] = useState<string | null>(
+    null
+  );
 
   // Payment state
-  const [processingPaymentTicketId, setProcessingPaymentTicketId] = useState<string | null>(null);
+  const [processingPaymentTicketId, setProcessingPaymentTicketId] = useState<
+    string | null
+  >(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [paymentData, setPaymentData] = useState<PaymentFlowState | null>(null);
-  const [successTicketDetails, setSuccessTicketDetails] = useState<{ ticketName: string; eventName: string } | null>(null);
+  const [successTicketDetails, setSuccessTicketDetails] = useState<{
+    ticketName: string;
+    eventName: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -60,16 +79,22 @@ export default function MyTicketsPage() {
   const handleRefund = async (ticketId: string) => {
     try {
       // First check eligibility
-      const eligibility = await guestTicketService.checkRefundEligibility(ticketId);
+      const eligibility = await guestTicketService.checkRefundEligibility(
+        ticketId
+      );
 
       if (!eligibility.eligible) {
-        toast.error(eligibility.reason || "This ticket is not eligible for refund");
+        toast.error(
+          eligibility.reason || "This ticket is not eligible for refund"
+        );
         return;
       }
 
       // Confirm with user
       const confirmed = window.confirm(
-        `Are you sure you want to refund this ticket? You will receive £${eligibility.refundAmount?.toFixed(2) || "0.00"} back.`
+        `Are you sure you want to refund this ticket? You will receive £${
+          eligibility.refundAmount?.toFixed(2) || "0.00"
+        } back.`
       );
 
       if (!confirmed) return;
@@ -107,7 +132,9 @@ export default function MyTicketsPage() {
 
     try {
       setProcessingPaymentTicketId(ticketId);
-      const paymentResponse = await paymentService.createTicketPaymentIntent(ticketId);
+      const paymentResponse = await paymentService.createTicketPaymentIntent(
+        ticketId
+      );
 
       if (paymentResponse.success && paymentResponse.clientSecret) {
         setPaymentData({
@@ -127,7 +154,10 @@ export default function MyTicketsPage() {
       }
     } catch (error: any) {
       console.error("Payment setup failed:", error);
-      toast.error(error.response?.data?.message || "Failed to setup payment. Please try again.");
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to setup payment. Please try again."
+      );
     } finally {
       setProcessingPaymentTicketId(null);
     }
@@ -148,7 +178,9 @@ export default function MyTicketsPage() {
     if (paymentData?.guestTicketId) {
       setTickets((prev) =>
         prev.map((t) =>
-          t.id === paymentData.guestTicketId ? { ...t, status: GuestTicketStatus.ACTIVE } : t
+          t.id === paymentData.guestTicketId
+            ? { ...t, status: GuestTicketStatus.ACTIVE }
+            : t
         )
       );
     }
@@ -173,21 +205,36 @@ export default function MyTicketsPage() {
 
     switch (filter) {
       case "upcoming":
-        return isUpcoming && ticket.status !== GuestTicketStatus.CANCELLED && ticket.status !== GuestTicketStatus.REFUNDED;
+        return (
+          isUpcoming &&
+          ticket.status !== GuestTicketStatus.CANCELLED &&
+          ticket.status !== GuestTicketStatus.REFUNDED
+        );
       case "past":
         return !isUpcoming;
       case "active":
         return ticket.status === GuestTicketStatus.ACTIVE;
       case "pending":
-        return ticket.status === GuestTicketStatus.PENDING_APPROVAL || ticket.status === GuestTicketStatus.PENDING_PAYMENT;
+        return (
+          ticket.status === GuestTicketStatus.PENDING_APPROVAL ||
+          ticket.status === GuestTicketStatus.PENDING_PAYMENT
+        );
       default:
         return true;
     }
   });
 
   const filters: { id: FilterType; label: string; icon: React.ReactNode }[] = [
-    { id: "upcoming", label: "Upcoming", icon: <Calendar className="h-4 w-4" /> },
-    { id: "active", label: "Active", icon: <CheckCircle2 className="h-4 w-4" /> },
+    {
+      id: "upcoming",
+      label: "Upcoming",
+      icon: <Calendar className="h-4 w-4" />,
+    },
+    {
+      id: "active",
+      label: "Active",
+      icon: <CheckCircle2 className="h-4 w-4" />,
+    },
     { id: "pending", label: "Pending", icon: <Clock className="h-4 w-4" /> },
     { id: "past", label: "Past", icon: <Ticket className="h-4 w-4" /> },
     { id: "all", label: "All", icon: <Ticket className="h-4 w-4" /> },
@@ -210,13 +257,13 @@ export default function MyTicketsPage() {
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <Link
+          {/* <Link
             href="/profile"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Profile
-          </Link>
+          </Link> */}
           <h1 className="text-3xl font-bold text-foreground">My Tickets</h1>
           <p className="text-muted-foreground mt-2">
             View and manage your event tickets
