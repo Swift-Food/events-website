@@ -50,72 +50,7 @@ export function useOAuth({
   const [isLoading, setIsLoading] = useState(false);
 
   // Initialize Google Sign-In
-  useEffect(() => {
-    const initializeGoogle = () => {
-      if (window.google?.accounts?.id && process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
-        try {
-          window.google.accounts.id.initialize({
-            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-            callback: handleGoogleCallback, // Fresh reference each time
-            auto_select: false,
-          });
-          setIsGoogleLoaded(true);
-          console.log("Google initialized with fresh callback");
-        } catch (error) {
-          console.error("Failed to initialize Google Sign-In:", error);
-        }
-      }
-    };
 
-    if (window.google?.accounts?.id) {
-      initializeGoogle();
-    } else {
-      const checkGoogle = setInterval(() => {
-        if (window.google?.accounts?.id) {
-          initializeGoogle();
-          clearInterval(checkGoogle);
-        }
-      }, 100);
-
-      return () => clearInterval(checkGoogle);
-    }
-  }, [isRegister, inviteToken, inviteType, redirectTo, onSuccess, onError]); // Add all dependencies
-
-  // Initialize Apple Sign-In
-  useEffect(() => {
-    const initializeApple = () => {
-      if (window.AppleID?.auth) {
-        try {
-          window.AppleID.auth.init({
-            clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
-            scope: "name email",
-            redirectURI: process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI,
-            usePopup: true,
-          });
-          setIsAppleLoaded(true);
-        } catch (error) {
-          console.error("Failed to initialize Apple Sign-In:", error);
-        }
-      }
-    };
-
-    // Check if Apple script is already loaded
-    if (window.AppleID?.auth) {
-      initializeApple();
-    } else {
-      // Wait for script to load
-      const checkApple = setInterval(() => {
-        if (window.AppleID?.auth) {
-          initializeApple();
-          clearInterval(checkApple);
-        }
-      }, 100);
-
-      return () => clearInterval(checkApple);
-    }
-  }, []);
-
-  // Handle Google OAuth callback
   const handleGoogleCallback = useCallback(async (response: any) => {
     console.log("Google callback fired!", response);
     setIsLoading(true);
@@ -161,6 +96,74 @@ export function useOAuth({
       setIsLoading(false);
     }
   }, [isRegister, inviteToken, inviteType, redirectTo, onSuccess, onError, router]);
+  
+  useEffect(() => {
+    const initializeGoogle = () => {
+      if (window.google?.accounts?.id && process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+            callback: handleGoogleCallback, // Fresh reference each time
+            auto_select: false,
+          });
+          setIsGoogleLoaded(true);
+          console.log("Google initialized with fresh callback");
+        } catch (error) {
+          console.error("Failed to initialize Google Sign-In:", error);
+        }
+      }
+    };
+
+    if (window.google?.accounts?.id) {
+      initializeGoogle();
+    } else {
+      const checkGoogle = setInterval(() => {
+        if (window.google?.accounts?.id) {
+          initializeGoogle();
+          clearInterval(checkGoogle);
+        }
+      }, 100);
+
+      return () => clearInterval(checkGoogle);
+    }
+  }, [isRegister, inviteToken, inviteType, redirectTo, handleGoogleCallback, onSuccess, onError]); // Add all dependencies
+
+  // Initialize Apple Sign-In
+  useEffect(() => {
+    const initializeApple = () => {
+      if (window.AppleID?.auth) {
+        try {
+          window.AppleID.auth.init({
+            clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
+            scope: "name email",
+            redirectURI: process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI,
+            usePopup: true,
+          });
+          setIsAppleLoaded(true);
+        } catch (error) {
+          console.error("Failed to initialize Apple Sign-In:", error);
+        }
+      }
+    };
+
+    // Check if Apple script is already loaded
+    if (window.AppleID?.auth) {
+      initializeApple();
+    } else {
+      // Wait for script to load
+      const checkApple = setInterval(() => {
+        if (window.AppleID?.auth) {
+          initializeApple();
+          clearInterval(checkApple);
+        }
+      }, 100);
+
+      return () => clearInterval(checkApple);
+    }
+  }, []);
+
+  // Handle Google OAuth callback
+  
 
   // Trigger Google Sign-In
   const signInWithGoogle = () => {
