@@ -108,7 +108,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <Link
               href="/event-creation"
-              className="rounded-full bg-foreground px-3 py-1.5 text-xs sm:px-5 sm:py-2 sm:text-sm font-semibold text-background transition-colors hover:bg-zinc-100 hover:text-black"
+              className="rounded-full bg-foreground px-5 py-2 text-sm font-semibold text-background transition-colors hover:bg-zinc-100 hover:text-black"
             >
               Create Event
             </Link>
