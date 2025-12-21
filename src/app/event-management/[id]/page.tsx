@@ -240,7 +240,11 @@ export default function EventManagementPage() {
         {currentTab === "guests" && <GuestsTab eventId={eventId} />}
 
         {currentTab === "registration" && (
-          <RegistrationTab eventData={eventData} onRefresh={() => fetchEvent(false)} />
+          <RegistrationTab
+            eventData={eventData}
+            onRefresh={() => fetchEvent(false)}
+            onScanClick={() => router.push(`/event-management/${eventId}/scanner`)}
+          />
         )}
 
         {currentTab === "team" && (

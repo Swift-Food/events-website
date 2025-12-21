@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { EventResponseDto, TicketType } from "@/types";
 import { EventTicketResponseDto } from "@/types/event-ticket/response/ticket.dto";
-import { Ticket, Plus, Edit, Lock, Unlock, Trash2, MessageSquare, AlignLeft, CircleDot, CheckSquare, HelpCircle } from "lucide-react";
+import { Ticket, Plus, Edit, Lock, Unlock, Trash2, MessageSquare, AlignLeft, CircleDot, CheckSquare, HelpCircle, ScanLine } from "lucide-react";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import { eventTicketService } from "@/services/event-ticket.service";
 import { toast } from "sonner";
@@ -11,9 +11,10 @@ import { toast } from "sonner";
 interface RegistrationTabProps {
   eventData: EventResponseDto;
   onRefresh?: () => void | Promise<void>;
+  onScanClick?: () => void;
 }
 
-export function RegistrationTab({ eventData, onRefresh }: RegistrationTabProps) {
+export function RegistrationTab({ eventData, onRefresh, onScanClick }: RegistrationTabProps) {
   const [tickets, setTickets] = useState<EventTicketResponseDto[]>(eventData.eventTickets || []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ticketToEdit, setTicketToEdit] = useState<TicketType | null>(null);
@@ -161,13 +162,22 @@ export function RegistrationTab({ eventData, onRefresh }: RegistrationTabProps) 
             </div>
             <h2 className="text-lg font-semibold text-foreground">Ticket Types</h2>
           </div>
-          <button
-            onClick={handleCreateTicket}
-            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Add Ticket</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onScanClick}
+              className="flex items-center gap-2 rounded-lg border border-neutral-700 bg-card-secondary-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
+            >
+              <ScanLine className="h-4 w-4" />
+              <span className="hidden sm:inline">Scan</span>
+            </button>
+            <button
+              onClick={handleCreateTicket}
+              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Add Ticket</span>
+            </button>
+          </div>
         </div>
 
         {tickets.length === 0 ? (
