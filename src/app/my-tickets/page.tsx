@@ -213,7 +213,9 @@ export default function MyTicketsPage() {
       case "past":
         return !isUpcoming;
       case "active":
-        return ticket.status === GuestTicketStatus.ACTIVE;
+        const eventEndDate = new Date(ticket.eventEndDateTime);
+        const hasEnded = eventEndDate < now;
+        return ticket.status === GuestTicketStatus.ACTIVE && !hasEnded;
       case "pending":
         return (
           ticket.status === GuestTicketStatus.PENDING_APPROVAL ||
