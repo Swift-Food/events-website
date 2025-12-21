@@ -63,7 +63,10 @@ export default function EventManagementPage() {
   );
 
   const pastEvents = useMemo(
-    () => events.filter((event) => new Date(event.startDateTime) <= now),
+    () =>
+      events
+        .filter((event) => new Date(event.startDateTime) <= now)
+        .sort((a, b) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime()),
     [events]
   );
 
