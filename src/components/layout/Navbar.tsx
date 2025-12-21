@@ -60,7 +60,7 @@ export default function Navbar() {
   const handleProtectedNavClick = (e: React.MouseEvent, href: string, requiresAuth?: boolean) => {
     if (requiresAuth && !isAuthenticated) {
       e.preventDefault();
-      router.push("/auth");
+      router.push(`/auth?redirect=${encodeURIComponent(href)}`);
     }
   };
 
