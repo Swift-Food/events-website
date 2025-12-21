@@ -9,8 +9,8 @@ import { useAuth } from "@/lib/auth/authContext";
 
 const navLinks = [
   // { href: "/", label: "Home" },
-  { href: "/my-tickets", label: "Tickets" },
-  { href: "/event-management", label: "Manage" },
+  { href: "/my-tickets", label: "Tickets", requiresAuth: true },
+  { href: "/event-management", label: "Manage", requiresAuth: true },
   // { href: "/profile", label: "Profile" },
 ];
 
@@ -57,6 +57,13 @@ export default function Navbar() {
     }
   };
 
+  const handleProtectedNavClick = (e: React.MouseEvent, href: string, requiresAuth?: boolean) => {
+    if (requiresAuth && !isAuthenticated) {
+      e.preventDefault();
+      router.push("/auth");
+    }
+  };
+
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-white/10 bg-background">
@@ -76,7 +83,8 @@ export default function Navbar() {
             {/* Mobile Icon Navigation */}
             <nav className="flex gap-1 sm:hidden">
               <Link
-                href="/events"
+                href="/my-tickets"
+                onClick={(e) => handleProtectedNavClick(e, "/my-tickets", true)}
                 className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
                 aria-label="Tickets"
               >
@@ -84,6 +92,7 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/event-management"
+                onClick={(e) => handleProtectedNavClick(e, "/event-management", true)}
                 className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
                 aria-label="Manage"
               >
@@ -97,6 +106,7 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
+                  onClick={(e) => handleProtectedNavClick(e, link.href, link.requiresAuth)}
                   className="transition-colors hover:text-white"
                 >
                   {link.label}
