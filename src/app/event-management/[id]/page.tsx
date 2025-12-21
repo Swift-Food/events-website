@@ -230,7 +230,11 @@ export default function EventManagementPage() {
       {/* Tab Content */}
       <div className="mx-auto max-w-6xl px-6 py-8">
         {currentTab === "overview" && (
-          <OverviewTab eventData={eventData} onEditClick={() => setShowEditModal(true)} />
+          <OverviewTab
+            eventData={eventData}
+            onEditClick={() => setShowEditModal(true)}
+            onScanClick={() => router.push(`/event-management/${eventId}/scanner`)}
+          />
         )}
 
         {currentTab === "guests" && <GuestsTab eventId={eventId} />}

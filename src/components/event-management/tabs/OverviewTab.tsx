@@ -1,15 +1,16 @@
 "use client";
 
 import { EventResponseDto } from "@/types";
-import { MapPin, Edit, Users, ImageIcon } from "lucide-react";
+import { MapPin, Edit, Users, ImageIcon, ScanLine } from "lucide-react";
 import Image from "next/image";
 
 interface OverviewTabProps {
   eventData: EventResponseDto;
   onEditClick: () => void;
+  onScanClick: () => void;
 }
 
-export function OverviewTab({ eventData, onEditClick }: OverviewTabProps) {
+export function OverviewTab({ eventData, onEditClick, onScanClick }: OverviewTabProps) {
   const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleDateString("en-US", {
       weekday: "long",
@@ -88,14 +89,23 @@ export function OverviewTab({ eventData, onEditClick }: OverviewTabProps) {
           </div>
         </div>
 
-        {/* Edit button - desktop only */}
-        <button
-          onClick={onEditClick}
-          className="hidden sm:flex items-center gap-2 rounded-md border border-neutral-700 bg-card-secondary-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
-        >
-          <Edit className="h-4 w-4" />
-          Edit Event Details
-        </button>
+        {/* Action buttons - desktop only */}
+        <div className="hidden sm:flex items-center gap-2">
+          <button
+            onClick={onScanClick}
+            className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            <ScanLine className="h-4 w-4" />
+            Scan Tickets
+          </button>
+          <button
+            onClick={onEditClick}
+            className="flex items-center gap-2 rounded-md border border-neutral-700 bg-card-secondary-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
+          >
+            <Edit className="h-4 w-4" />
+            Edit Event
+          </button>
+        </div>
       </div>
 
       {/* Categories */}
@@ -200,14 +210,21 @@ export function OverviewTab({ eventData, onEditClick }: OverviewTabProps) {
         </div>
       </div>
 
-      {/* Edit Button - mobile only */}
-      <div className="flex justify-end sm:hidden">
+      {/* Action buttons - mobile only */}
+      <div className="flex justify-end gap-2 sm:hidden">
+        <button
+          onClick={onScanClick}
+          className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          <ScanLine className="h-4 w-4" />
+          Scan
+        </button>
         <button
           onClick={onEditClick}
           className="flex items-center gap-2 rounded-md border border-neutral-700 bg-card-secondary-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
         >
           <Edit className="h-4 w-4" />
-          Edit Event Details
+          Edit
         </button>
       </div>
     </div>
