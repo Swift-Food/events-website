@@ -109,7 +109,7 @@ export const CollaboratorManagement = ({
 
   if (isCompact) {
     return (
-      <div className="rounded-2xl bg-card-secondary-background p-6">
+      <div className="rounded-2xl bg-card-background p-6">
         {/* Compact Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -199,7 +199,7 @@ export const CollaboratorManagement = ({
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-xl bg-card-secondary-background p-6 transition-all hover:bg-white/15">
+        <div className="rounded-xl bg-card-background p-6 transition-all hover:bg-white/15">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
@@ -215,7 +215,7 @@ export const CollaboratorManagement = ({
           </div>
         </div>
 
-        <div className="rounded-xl bg-card-secondary-background p-6 transition-all hover:bg-white/15">
+        <div className="rounded-xl bg-card-background p-6 transition-all hover:bg-white/15">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
@@ -231,7 +231,7 @@ export const CollaboratorManagement = ({
           </div>
         </div>
 
-        <div className="rounded-xl bg-card-secondary-background p-6 transition-all hover:bg-white/15">
+        <div className="rounded-xl bg-card-background p-6 transition-all hover:bg-white/15">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
@@ -249,7 +249,7 @@ export const CollaboratorManagement = ({
       </div>
 
       {/* Collaborators List */}
-      <div className="rounded-2xl bg-card-secondary-background p-6">
+      <div className="rounded-2xl bg-card-background p-6">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
