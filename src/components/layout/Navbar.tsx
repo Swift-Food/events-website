@@ -4,25 +4,21 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Menu, X, User, LogOut, UserCircle, Ticket } from "lucide-react";
+import { User, LogOut, UserCircle, Ticket, Calendar, ChartNoAxesGantt } from "lucide-react";
 import { useAuth } from "@/lib/auth/authContext";
 
 const navLinks = [
   // { href: "/", label: "Home" },
-  { href: "/events", label: "Activity" },
+  { href: "/events", label: "Tickets" },
   { href: "/event-management", label: "Manage" },
   // { href: "/profile", label: "Profile" },
 ];
 
 export default function Navbar() {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { isAuthenticated, logout, user, refreshProfile } = useAuth();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-
-  const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
-  const closeDrawer = () => setIsDrawerOpen(false);
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -65,26 +61,35 @@ export default function Navbar() {
     <>
       <header className="sticky top-0 z-50 border-b border-white/10 bg-background">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          {/* Mobile Drawer Button */}
           <div className="flex items-center gap-4">
-            <button
-              onClick={toggleDrawer}
-              className="text-zinc-300 transition-colors hover:text-white sm:hidden"
-              aria-label="Toggle menu"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
-
             <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
               <Image
                 src="/logo.svg"
                 alt="Prismo logo"
                 width={24}
                 height={24}
-                className="invert hidden sm:block"
+                className="invert"
               />
-              Prismo
+              <span className="hidden sm:inline">Prismo</span>
             </Link>
+
+            {/* Mobile Icon Navigation */}
+            <nav className="flex gap-1 sm:hidden">
+              <Link
+                href="/events"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+                aria-label="Tickets"
+              >
+                <Ticket className="h-5 w-5" />
+              </Link>
+              <Link
+                href="/event-management"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+                aria-label="Manage"
+              >
+                <ChartNoAxesGantt className="h-5 w-5" />
+              </Link>
+            </nav>
 
             {/* Desktop Navigation */}
             <nav className="ml-8 hidden gap-6 text-sm font-medium text-zinc-300 sm:flex">
@@ -176,48 +181,6 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Drawer Overlay */}
-      {isDrawerOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 sm:hidden"
-          onClick={closeDrawer}
-        />
-      )}
-
-      {/* Mobile Drawer */}
-      <div
-        className={`fixed left-0 top-0 z-50 h-full w-64 transform bg-background transition-transform duration-300 ease-in-out sm:hidden ${
-          isDrawerOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="flex h-full flex-col border-r border-white/10">
-          {/* Drawer Header */}
-          <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
-            <span className="text-lg font-semibold tracking-tight">Menu</span>
-            <button
-              onClick={closeDrawer}
-              className="text-zinc-300 transition-colors hover:text-white"
-              aria-label="Close menu"
-            >
-              <X className="h-6 w-6" />
-            </button>
-          </div>
-
-          {/* Drawer Navigation Links */}
-          <nav className="flex flex-col gap-1 p-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={closeDrawer}
-                className="rounded-lg px-4 py-3 text-sm font-medium text-zinc-300 transition-colors hover:bg-white/5 hover:text-white"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </div>
     </>
   );
 }
