@@ -383,6 +383,21 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     const place = autocompleteRef.current?.getPlace();
     if (!place) return;
 
+    // Clear all address fields first to prevent stale data
+    setVenueName("");
+    setAddressLine1("");
+    setAddressLine2("");
+    setCity("");
+    setPostcode("");
+    setLatitude(null);
+    setLongitude(null);
+    setLocation("");
+
+    // Clear the search input field
+    if (locationInputRef.current) {
+      locationInputRef.current.value = "";
+    }
+
     // Store place_id for validation
     if (place.place_id) {
       setSelectedPlaceId(place.place_id);
