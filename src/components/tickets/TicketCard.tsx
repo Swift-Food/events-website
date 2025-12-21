@@ -106,14 +106,14 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 pt-3 border-t border-foreground/10">
+          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-foreground/10">
             {canShowQR && (
               <button
                 onClick={() => setShowQRModal(true)}
-                className="flex items-center justify-center gap-2 px-3 py-2.5 sm:flex-1 sm:px-4 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
+                className="flex items-center justify-center p-2.5 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-colors"
+                aria-label="View QR Code"
               >
-                <QrCode className="h-4 w-4" />
-                <span className="hidden sm:inline">View QR Code</span>
+                <QrCode className="h-5 w-5" />
               </button>
             )}
 
@@ -121,11 +121,11 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
               <button
                 onClick={() => onCompletePayment(ticket.id)}
                 disabled={isProcessingPayment}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 {isProcessingPayment ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin shrink-0" />
                     Processing...
                   </>
                 ) : (
@@ -136,9 +136,9 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
 
             <Link
               href={`/events/${ticket.eventId}`}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-foreground/10 text-foreground rounded-xl text-sm font-medium hover:bg-foreground/20 transition-colors"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-foreground/10 text-foreground rounded-xl text-sm font-medium hover:bg-foreground/20 transition-colors whitespace-nowrap"
             >
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-4 w-4 shrink-0" />
               View Event
             </Link>
 
@@ -146,7 +146,7 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
               <button
                 onClick={() => onRefund(ticket.id)}
                 disabled={isRefunding}
-                className="px-4 py-2.5 bg-red-500/10 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                className="px-4 py-2.5 bg-red-500/10 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/20 transition-colors disabled:opacity-50 whitespace-nowrap"
               >
                 {isRefunding ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
