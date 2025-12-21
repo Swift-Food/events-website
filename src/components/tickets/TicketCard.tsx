@@ -2,8 +2,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { GuestTicketWithEventResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
-import { Calendar, Ticket, QrCode, X, Clock, CheckCircle2, XCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Calendar, Ticket, QrCode, X, Clock, CheckCircle2, XCircle, AlertCircle, Loader2, ExternalLink } from "lucide-react";
 import TicketQRCode from "./TicketQRCode";
 import { format } from "date-fns";
 
@@ -109,24 +110,10 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
             {canShowQR && (
               <button
                 onClick={() => setShowQRModal(true)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
+                className="flex items-center justify-center gap-2 px-3 py-2.5 sm:flex-1 sm:px-4 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
               >
                 <QrCode className="h-4 w-4" />
-                View QR Code
-              </button>
-            )}
-
-            {ticket.status === GuestTicketStatus.ACTIVE && isUpcoming && onRefund && (
-              <button
-                onClick={() => onRefund(ticket.id)}
-                disabled={isRefunding}
-                className="px-4 py-2.5 bg-red-500/10 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/20 transition-colors disabled:opacity-50"
-              >
-                {isRefunding ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  "Refund"
-                )}
+                <span className="hidden sm:inline">View QR Code</span>
               </button>
             )}
 
@@ -143,6 +130,28 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
                   </>
                 ) : (
                   "Complete Payment"
+                )}
+              </button>
+            )}
+
+            <Link
+              href={`/events/${ticket.eventId}`}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-foreground/10 text-foreground rounded-xl text-sm font-medium hover:bg-foreground/20 transition-colors"
+            >
+              <ExternalLink className="h-4 w-4" />
+              View Event
+            </Link>
+
+            {ticket.status === GuestTicketStatus.ACTIVE && isUpcoming && onRefund && (
+              <button
+                onClick={() => onRefund(ticket.id)}
+                disabled={isRefunding}
+                className="px-4 py-2.5 bg-red-500/10 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/20 transition-colors disabled:opacity-50"
+              >
+                {isRefunding ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Refund"
                 )}
               </button>
             )}
