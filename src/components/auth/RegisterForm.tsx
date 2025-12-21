@@ -341,7 +341,7 @@ export default function RegisterForm({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full font-semibold py-3 px-4 rounded-xl transition-all shadow-xl shadow-primary/30 bg-primary hover:bg-primary/90 text-primary-foreground hover:shadow-2xl hover:shadow-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full font-semibold py-3 px-4 rounded-xl transition-all bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <span className="flex items-center justify-center">
@@ -409,7 +409,7 @@ export default function RegisterForm({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full font-semibold py-3 px-4 rounded-xl transition-all shadow-xl shadow-primary/30 bg-primary hover:bg-primary/90 text-primary-foreground hover:shadow-2xl hover:shadow-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full font-semibold py-3 px-4 rounded-xl transition-all  bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <span className="flex items-center justify-center">
