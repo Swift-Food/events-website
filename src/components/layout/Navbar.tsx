@@ -157,7 +157,7 @@ export default function Navbar() {
                         <UserCircle className="h-4 w-4" />
                         Profile
                       </button>
-                      <button
+                      {/* <button
                         className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/5 hover:text-white"
                         onClick={() => {
                           router.push("/my-tickets");
@@ -166,7 +166,7 @@ export default function Navbar() {
                       >
                         <Ticket className="h-4 w-4" />
                         My Tickets
-                      </button>
+                      </button> */}
                       <button
                         className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/5 hover:text-red-400"
                         onClick={handleLogout}
