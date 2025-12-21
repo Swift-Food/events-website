@@ -30,7 +30,7 @@ export default function EventCataloguePage() {
     try {
       console.log("Calling eventsApi.findAll...");
       const result: EventListResponseDto = await eventsApi.findAll({
-        // search: searchTerm || undefined,
+        search: searchTerm || undefined,
         skip: (currentPage - 1) * eventsPerPage,
         take: eventsPerPage,
       });
