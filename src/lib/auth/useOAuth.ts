@@ -118,6 +118,8 @@ export function useOAuth({
 
   // Handle Google OAuth callback
   const handleGoogleCallback = async (response: any) => {
+    console.log("Google callback fired!", response);
+
     setIsLoading(true);
     try {
       const idToken = response.credential;
@@ -177,7 +179,8 @@ export function useOAuth({
       console.error("NEXT_PUBLIC_GOOGLE_CLIENT_ID is not set");
       return;
     }
-
+    console.log("trying to login with google")
+    console.log("Client ID:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
     try {
       window.google?.accounts.id.prompt();
     } catch (error) {
