@@ -478,7 +478,7 @@ interface StatsCardProps {
 
 function StatsCard({ label, value, icon, isLoading, isText }: StatsCardProps) {
   return (
-    <div className="rounded-2xl bg-card-background backdrop-blur-xl p-5">
+    <div className="rounded-2xl bg-card-background backdrop-blur-xl p-5 flex justify-start items-center">
       <div className="flex items-center gap-3">
         <div className="rounded-full bg-primary/20 p-2.5 text-primary">
           {icon}
