@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authApi } from "./authApi";
 import { toast } from "sonner";
@@ -52,25 +52,24 @@ export function useOAuth({
   // Initialize Google Sign-In
   useEffect(() => {
     const initializeGoogle = () => {
-      if (window.google?.accounts?.id) {
+      if (window.google?.accounts?.id && process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
         try {
           window.google.accounts.id.initialize({
             client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-            callback: handleGoogleCallback,
+            callback: handleGoogleCallback, // Fresh reference each time
             auto_select: false,
           });
           setIsGoogleLoaded(true);
+          console.log("Google initialized with fresh callback");
         } catch (error) {
           console.error("Failed to initialize Google Sign-In:", error);
         }
       }
     };
 
-    // Check if Google script is already loaded
     if (window.google?.accounts?.id) {
       initializeGoogle();
     } else {
-      // Wait for script to load
       const checkGoogle = setInterval(() => {
         if (window.google?.accounts?.id) {
           initializeGoogle();
@@ -80,7 +79,7 @@ export function useOAuth({
 
       return () => clearInterval(checkGoogle);
     }
-  }, []);
+  }, [isRegister, inviteToken, inviteType, redirectTo, onSuccess, onError]); // Add all dependencies
 
   // Initialize Apple Sign-In
   useEffect(() => {
@@ -117,41 +116,37 @@ export function useOAuth({
   }, []);
 
   // Handle Google OAuth callback
-  const handleGoogleCallback = async (response: any) => {
+  const handleGoogleCallback = useCallback(async (response: any) => {
     console.log("Google callback fired!", response);
-
     setIsLoading(true);
     try {
       const idToken = response.credential;
-
+  
       let result;
       if (isRegister) {
         result = await authApi.googleRegister(idToken, inviteToken, inviteType);
       } else {
         result = await authApi.googleLogin(idToken, inviteToken, inviteType);
       }
-
-      // Store tokens in localStorage
+  
       localStorage.setItem("auth_token", result.access_token);
       localStorage.setItem("refresh_token", result.refresh_token);
-
-      // Fetch user profile
+  
       const user = await authApi.getProfile();
       localStorage.setItem("user_data", JSON.stringify(user));
-
+  
       toast.success(
         isRegister
           ? "Successfully registered with Google!"
           : "Successfully signed in with Google!"
       );
-
+  
       if (onSuccess) {
         onSuccess();
       } else {
         router.push(redirectTo || "/");
       }
-
-      // Force reload to update auth context
+  
       window.location.href = redirectTo || "/";
     } catch (error: any) {
       console.error("Google OAuth error:", error);
@@ -165,7 +160,7 @@ export function useOAuth({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isRegister, inviteToken, inviteType, redirectTo, onSuccess, onError, router]);
 
   // Trigger Google Sign-In
   const signInWithGoogle = () => {
