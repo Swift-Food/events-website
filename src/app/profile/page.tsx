@@ -318,59 +318,43 @@ export default function ProfilePage() {
     <div className="min-h-[calc(100vh-64px)] bg-background">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Profile Header */}
-        <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 sm:p-8 shadow-xl mb-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-            {/* Avatar */}
-            <div className="relative">
-              <div className="h-24 w-24 rounded-full bg-primary/20 flex items-center justify-center ring-4 ring-primary/20">
-                <User className="h-12 w-12 text-primary" />
+        <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 sm:p-8 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+            {/* Avatar + User Info */}
+            <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
+              {/* Avatar */}
+              <div className="relative shrink-0">
+                <div className="h-16 w-16 sm:h-24 sm:w-24 rounded-full bg-primary/20 flex items-center justify-center ring-4 ring-primary/20">
+                  <User className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
+                </div>
+              </div>
+
+              {/* User Info */}
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl sm:text-3xl font-bold text-foreground truncate">
+                  {user.firstName && user.lastName
+                    ? `${user.firstName} ${user.lastName}`
+                    : user.username}
+                </h1>
+                <p className="text-muted-foreground mt-1 truncate">@{user.username}</p>
+                <p className="text-muted-foreground text-sm mt-1 truncate">{user.email}</p>
+                {eventUser?.organizationName && (
+                  <p className="text-primary text-sm font-medium mt-2 truncate">
+                    {eventUser.organizationName}
+                  </p>
+                )}
               </div>
             </div>
 
-            {/* User Info */}
-            <div className="flex-1">
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-                {user.firstName && user.lastName
-                  ? `${user.firstName} ${user.lastName}`
-                  : user.username}
-              </h1>
-              <p className="text-muted-foreground mt-1">@{user.username}</p>
-              <p className="text-muted-foreground text-sm mt-1">{user.email}</p>
-              {eventUser?.organizationName && (
-                <p className="text-primary text-sm font-medium mt-2">
-                  {eventUser.organizationName}
-                </p>
-              )}
-            </div>
-
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <div className="shrink-0">
               <Link
                 href="/event-creation"
-                className="flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 hover:scale-105"
+                className="flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:scale-105"
               >
                 <Plus className="h-4 w-4" />
                 Create Event
               </Link>
-              {/* <Link
-                href="/settings"
-                className="flex items-center justify-center gap-2 rounded-full bg-card-secondary-background px-5 py-2.5 text-sm font-medium text-foreground transition-all hover:bg-white/15"
-              >
-                <Settings className="h-4 w-4" />
-                Settings
-              </Link> */}
-              <button
-                onClick={handleLogout}
-                disabled={isLoggingOut}
-                className="flex items-center justify-center gap-2 rounded-full bg-red-500/10 px-5 py-2.5 text-sm font-medium text-red-400 transition-all hover:bg-red-500/20 disabled:opacity-50"
-              >
-                {isLoggingOut ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <LogOut className="h-4 w-4" />
-                )}
-                Logout
-              </button>
             </div>
           </div>
         </div>
@@ -410,7 +394,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Tabs */}
-        <div className="rounded-3xl bg-card-background backdrop-blur-xl shadow-xl overflow-hidden">
+        <div className="rounded-3xl bg-card-background backdrop-blur-xl overflow-hidden">
           {/* Tab Navigation */}
           <div className="border-b border-foreground/10">
             <div className="flex overflow-x-auto scrollbar-hide">
@@ -494,7 +478,7 @@ interface StatsCardProps {
 
 function StatsCard({ label, value, icon, isLoading, isText }: StatsCardProps) {
   return (
-    <div className="rounded-2xl bg-card-background backdrop-blur-xl p-5 shadow-lg">
+    <div className="rounded-2xl bg-card-background backdrop-blur-xl p-5">
       <div className="flex items-center gap-3">
         <div className="rounded-full bg-primary/20 p-2.5 text-primary">
           {icon}
@@ -556,7 +540,7 @@ function EmptyState({ activeTab }: EmptyStateProps) {
       <p className="text-muted-foreground mb-6 max-w-sm">{description}</p>
       <Link
         href={action.href}
-        className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 hover:scale-105"
+        className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:scale-105"
       >
         {action.label}
         <ChevronRight className="h-4 w-4" />
