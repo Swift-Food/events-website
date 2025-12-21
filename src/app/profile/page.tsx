@@ -350,7 +350,7 @@ export default function ProfilePage() {
             <div className="shrink-0">
               <Link
                 href="/event-creation"
-                className="flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:scale-105"
+                className="flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 <Plus className="h-4 w-4" />
                 Create Event
