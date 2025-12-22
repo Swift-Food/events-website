@@ -71,11 +71,16 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        // Check if click is on the parent button (which has its own toggle logic)
         const target = event.target as HTMLElement;
-        if (!target.closest('[data-location-trigger]')) {
-          onClose();
+        // Check if click is on the parent button (which has its own toggle logic)
+        if (target.closest('[data-location-trigger]')) {
+          return;
         }
+        // Check if click is on Google Places autocomplete dropdown
+        if (target.closest('.pac-container')) {
+          return;
+        }
+        onClose();
       }
     };
 
