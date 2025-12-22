@@ -504,15 +504,13 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-xs text-muted-foreground">
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              <span className="text-xs text-muted-foreground whitespace-nowrap">
                                 {getQuestionTypeLabel(question.type)}
+                                {question.options && question.options.length > 0 && (
+                                  <> • {question.options.length} options</>
+                                )}
                               </span>
-                              {question.options && question.options.length > 0 && (
-                                <span className="text-xs text-muted-foreground">
-                                  • {question.options.length} options
-                                </span>
-                              )}
                             </div>
                           </div>
 
