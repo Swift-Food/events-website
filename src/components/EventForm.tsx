@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin } from "lucide-react";
+import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X } from "lucide-react";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
 import CapacityModal from "@/components/event-edit/CapacityModal";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
@@ -926,7 +926,28 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                     </>
                   )}
                 </div>
-                <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isLocationModalOpen ? 'rotate-180' : ''}`} />
+                {addressLine1 ? (
+                  <div
+                    role="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setVenueName("");
+                      setAddressLine1("");
+                      setAddressLine2("");
+                      setCity("");
+                      setPostcode("");
+                      setLatitude(null);
+                      setLongitude(null);
+                      setLocation("");
+                      setIsLocationModalOpen(false);
+                    }}
+                    className="p-1 rounded-full hover:bg-white/10 transition-all"
+                  >
+                    <X className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+                  </div>
+                ) : (
+                  <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isLocationModalOpen ? 'rotate-180' : ''}`} />
+                )}
               </button>
 
               {/* Location Dropdown */}
