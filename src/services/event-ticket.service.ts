@@ -11,10 +11,11 @@ class EventTicketService {
 
   /**
    * Create a new event ticket type
+   * POST /tickets/event/:eventId
    */
-  async createTicket(data: CreateEventTicketDto): Promise<EventTicketResponseDto> {
+  async createTicket(eventId: string, data: Omit<CreateEventTicketDto, 'eventId'>): Promise<EventTicketResponseDto> {
     const response: AxiosResponse<EventTicketResponseDto> = await apiClient.post(
-      this.baseUrl,
+      `${this.baseUrl}/event/${eventId}`,
       data
     );
     return response.data;
