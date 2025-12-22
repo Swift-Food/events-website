@@ -495,7 +495,7 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                             <button
                               onClick={() => handleMoveQuestion(ticket.id, index, "up")}
                               disabled={index === 0}
