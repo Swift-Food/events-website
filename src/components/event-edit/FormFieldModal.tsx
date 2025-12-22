@@ -118,18 +118,18 @@ export default function FormFieldModal({
       {/* Panel - slides from right on desktop, from bottom on mobile */}
       <div
         className={`absolute bg-background text-foreground border-white/10 overflow-y-auto transition-transform duration-300 ease-out
-          left-0 right-0 bottom-0 max-h-[90vh] rounded-t-2xl border-t px-4 py-6
+          left-0 right-0 bottom-0 max-h-[90vh] rounded-t-2xl border-t px-5 py-6
           md:left-auto md:inset-y-0 md:right-0 md:w-full md:max-w-lg md:max-h-none md:rounded-t-none md:rounded-l-2xl md:border-t-0 md:border-l md:px-8 md:py-8
           ${isAnimating ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-y-0 md:translate-x-full"}
         `}
       >
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-primary/20 p-3">
-              <FileText className="h-6 w-6 text-primary" />
+            <div className="rounded-full bg-primary/20 p-2.5">
+              <FileText className="h-5 w-5 text-primary" />
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold">
-              {fieldToEdit ? "Edit Form Field" : "Add Form Field"}
+            <h2 className="text-xl md:text-2xl font-bold">
+              {fieldToEdit ? "Edit Question" : "Add Question"}
             </h2>
           </div>
           <button
@@ -138,31 +138,31 @@ export default function FormFieldModal({
             className="rounded-full p-2 transition-all hover:bg-white/10"
             aria-label="Close modal"
           >
-            <X className="h-6 w-6" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         <div className="space-y-4">
           {/* Question */}
-          <div className="rounded-xl bg-card-background backdrop-blur-xl p-5">
-            <label className="text-base font-semibold text-foreground block mb-3">
+          <div>
+            <label className="text-sm font-medium text-foreground block mb-1.5">
               Question <span className="text-red-400">*</span>
             </label>
             <textarea
               value={localQuestion}
               onChange={(e) => setLocalQuestion(e.target.value)}
               rows={2}
-              className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground text-md font-semibold outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
+              className="w-full rounded-xl bg-card-background px-4 py-3 text-foreground text-base md:text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
               placeholder="e.g., What is your dietary preference?"
             />
           </div>
 
           {/* Field Type */}
-          <div className="rounded-xl bg-card-background backdrop-blur-xl p-5">
-            <label className="text-base font-semibold text-foreground block mb-3">
+          <div>
+            <label className="text-sm font-medium text-foreground block mb-1.5">
               Field Type
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               {FIELD_TYPES.map((type) => (
                 <button
                   key={type.value}
@@ -177,10 +177,10 @@ export default function FormFieldModal({
                       setLocalOptions([]);
                     }
                   }}
-                  className={`rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                  className={`rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
                     localType === type.value
-                      ? "bg-primary text-primary-foreground scale-105"
-                      : "bg-card-secondary-background text-muted-foreground hover:bg-white/15"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-card-background text-muted-foreground hover:bg-white/15"
                   }`}
                 >
                   {type.label}
@@ -191,25 +191,25 @@ export default function FormFieldModal({
 
           {/* Options - only shown for select types */}
           {isSelectType && (
-            <div className="rounded-xl bg-card-background backdrop-blur-xl p-5">
-              <label className="text-base font-semibold text-foreground block mb-3">
+            <div>
+              <label className="text-sm font-medium text-foreground block mb-1.5">
                 Options <span className="text-red-400">*</span>
               </label>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {/* List of options */}
                 {localOptions.map((option, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-2 rounded-xl bg-card-secondary-background p-3"
+                    className="flex items-center gap-2 rounded-xl bg-card-background px-4 py-2.5"
                   >
-                    <span className="flex-1 text-foreground">{option}</span>
+                    <span className="flex-1 text-sm text-foreground">{option}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveOption(index)}
-                      className="rounded-full p-1.5 transition-all hover:bg-red-500/20"
+                      className="rounded-full p-1 transition-all hover:bg-red-500/20"
                       aria-label="Remove option"
                     >
-                      <Trash2 className="h-4 w-4 text-red-400" />
+                      <Trash2 className="h-3.5 w-3.5 text-red-400" />
                     </button>
                   </div>
                 ))}
@@ -226,16 +226,16 @@ export default function FormFieldModal({
                         handleAddOption();
                       }
                     }}
-                    className="flex-1 rounded-xl bg-input-background px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    className="flex-1 rounded-xl bg-card-background px-4 py-2.5 text-foreground text-base md:text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                     placeholder="Add an option..."
                   />
                   <button
                     type="button"
                     onClick={handleAddOption}
-                    className="rounded-xl bg-primary px-4 py-3 text-primary-foreground transition-all hover:bg-primary/90 hover:scale-105"
+                    className="rounded-xl bg-primary px-3 py-2.5 text-primary-foreground transition-all hover:bg-primary/90"
                     aria-label="Add option"
                   >
-                    <Plus className="h-5 w-5" />
+                    <Plus className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -243,51 +243,49 @@ export default function FormFieldModal({
           )}
 
           {/* Required Toggle */}
-          <div className="rounded-xl bg-card-background backdrop-blur-xl p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-base font-semibold text-foreground">
-                  Required Field
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Users must answer this question
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setLocalRequired(!localRequired)}
-                className={`h-7 w-14 rounded-full transition-all ${
-                  localRequired
-                    ? "bg-primary"
-                    : "bg-card-secondary-background"
-                }`}
-              >
-                <span
-                  className={`block h-6 w-6 rounded-full transition-all ${
-                    localRequired
-                      ? "translate-x-7 bg-primary-foreground"
-                      : "translate-x-0.5 bg-foreground"
-                  }`}
-                />
-              </button>
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                Required Field
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Users must answer this question
+              </p>
             </div>
+            <button
+              type="button"
+              onClick={() => setLocalRequired(!localRequired)}
+              className={`h-6 w-11 rounded-full transition-all ${
+                localRequired
+                  ? "bg-primary"
+                  : "bg-card-background"
+              }`}
+            >
+              <span
+                className={`block h-5 w-5 rounded-full transition-all ${
+                  localRequired
+                    ? "translate-x-5 bg-primary-foreground"
+                    : "translate-x-0.5 bg-foreground"
+                }`}
+              />
+            </button>
           </div>
         </div>
 
-        <div className="mt-8 flex gap-4">
+        <div className="mt-6 flex gap-3">
           <button
             type="button"
             onClick={handleCancel}
-            className="flex-1 rounded-xl bg-white/10 backdrop-blur-md py-3 text-center font-semibold text-foreground transition-all hover:bg-white/15 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="flex-1 rounded-xl bg-white/10 backdrop-blur-md py-2.5 text-center text-sm font-medium text-foreground transition-all hover:bg-white/15 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="flex-1 rounded-xl bg-primary py-3 text-center font-bold text-primary-foreground transition-all hover:scale-105 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="flex-1 rounded-xl bg-primary py-2.5 text-center text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {fieldToEdit ? "Update" : "Add"} Field
+            {fieldToEdit ? "Update" : "Add"} Question
           </button>
         </div>
       </div>
