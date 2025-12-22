@@ -199,32 +199,42 @@ export default function MyTicketsPage() {
 
   const now = new Date();
 
-  const filteredTickets = tickets.filter((ticket) => {
-    const eventDate = new Date(ticket.eventStartDateTime);
-    const isUpcoming = eventDate > now;
+  const filteredTickets = tickets
+    .filter((ticket) => {
+      const eventDate = new Date(ticket.eventStartDateTime);
+      const isUpcoming = eventDate > now;
 
-    switch (filter) {
-      case "upcoming":
-        return (
-          isUpcoming &&
-          ticket.status !== GuestTicketStatus.CANCELLED &&
-          ticket.status !== GuestTicketStatus.REFUNDED
-        );
-      case "past":
-        return !isUpcoming;
-      case "active":
-        const eventEndDate = new Date(ticket.eventEndDateTime);
-        const hasEnded = eventEndDate < now;
-        return ticket.status === GuestTicketStatus.ACTIVE && !hasEnded;
-      case "pending":
-        return (
-          ticket.status === GuestTicketStatus.PENDING_APPROVAL ||
-          ticket.status === GuestTicketStatus.PENDING_PAYMENT
-        );
-      default:
-        return true;
-    }
-  });
+      switch (filter) {
+        case "upcoming":
+          return (
+            isUpcoming &&
+            ticket.status !== GuestTicketStatus.CANCELLED &&
+            ticket.status !== GuestTicketStatus.REFUNDED
+          );
+        case "past":
+          return !isUpcoming;
+        case "active":
+          const eventEndDate = new Date(ticket.eventEndDateTime);
+          const hasEnded = eventEndDate < now;
+          return ticket.status === GuestTicketStatus.ACTIVE && !hasEnded;
+        case "pending":
+          return (
+            ticket.status === GuestTicketStatus.PENDING_APPROVAL ||
+            ticket.status === GuestTicketStatus.PENDING_PAYMENT
+          );
+        default:
+          return true;
+      }
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.eventStartDateTime).getTime();
+      const dateB = new Date(b.eventStartDateTime).getTime();
+      // Ascending for active/pending, descending for past/all
+      if (filter === "active" || filter === "pending" || filter === "upcoming") {
+        return dateA - dateB;
+      }
+      return dateB - dateA;
+    });
 
   const filters: { id: FilterType; label: string; icon: React.ReactNode }[] = [
     {

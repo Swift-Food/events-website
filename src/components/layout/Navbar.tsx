@@ -69,7 +69,7 @@ export default function Navbar() {
       <header className="sticky top-0 z-50 border-b border-white/10 bg-background">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
+            <Link href="/" className="flex items-center gap-1 text-lg font-semibold tracking-tight">
               <Image
                 src="/logo.svg"
                 alt="Prismo logo"
@@ -77,7 +77,7 @@ export default function Navbar() {
                 height={24}
                 className="invert"
               />
-              <span className="hidden sm:inline">Prismo</span>
+              <span className="hidden sm:inline font-normal">PRISMO</span>
             </Link>
 
             {/* Mobile Icon Navigation */}
