@@ -4,19 +4,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { Edit, Trash2, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
 import CapacityModal from "@/components/event-edit/CapacityModal";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import FormFieldModal from "@/components/event-edit/FormFieldModal";
+import LocationModal from "@/components/event-edit/LocationModal";
+import GoogleMap from "@/components/GoogleMap";
 import {
   EventCreationProvider,
   useEventCreation,
 } from "@/context/EventCreationContext";
 import { TicketType, UpdateEventDto } from "@/types";
 import { FormField } from "@/types";
-import { GOOGLE_MAPS_CONFIG } from "@/constants/google-maps";
-import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
 import { eventService } from "@/services/event.service";
 import { eventTicketService } from "@/services/event-ticket.service";
 import { imageService } from "@/services/image.service";
@@ -28,13 +28,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";
 import { AlertTriangle, ExternalLink } from "lucide-react";
-
-// Load Google Maps script
-declare global {
-  interface Window {
-    initAutocomplete?: () => void;
-  }
-}
 
 // UK Postcode validation regex
 const UK_POSTCODE_REGEX = /^([A-Z]{1,2}\d{1,2}[A-Z]?)\s?(\d[A-Z]{2})$/i;
@@ -106,7 +99,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
   const [isFormFieldModalOpen, setIsFormFieldModalOpen] = useState(false);
   const [fieldToEdit, setFieldToEdit] = useState<FormField | null>(null);
   const [isFormFieldListExpanded, setIsFormFieldListExpanded] = useState(true);
-  const [isLocationExpanded, setIsLocationExpanded] = useState(true);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -123,15 +116,6 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
   const [isStartingOnboarding, setIsStartingOnboarding] = useState(false);
 
   console.log("Ticket Types: ", ticketTypes);
-  // Address-related state (local UI only)
-  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
-  const [addressValidationError, setAddressValidationError] = useState<
-    string | null
-  >(null);
-
-  // Google Places Autocomplete refs
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const locationInputRef = useRef<HTMLInputElement | null>(null);
 
   const [isInitialDataLoaded, setIsInitialDataLoaded] = useState(false);
 
@@ -337,152 +321,6 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     }
   };
 
-  // Initialize Google Places Autocomplete
-  useEffect(() => {
-    const initializeAutocomplete = () => {
-      if (!locationInputRef.current || !window.google?.maps?.places) return;
-
-      autocompleteRef.current = new google.maps.places.Autocomplete(
-        locationInputRef.current,
-        {
-          // Remove types restriction to allow both addresses and establishments
-          componentRestrictions: {
-            country: GOOGLE_MAPS_CONFIG.COUNTRY_RESTRICTION,
-          },
-          fields: [
-            "address_components",
-            "formatted_address",
-            "geometry",
-            "name",
-            "place_id",
-          ],
-          // Bias results towards London (good for UCL and other UK universities)
-          bounds: {
-            north: 51.6723,
-            south: 51.3844,
-            east: 0.1485,
-            west: -0.3514,
-          },
-          strictBounds: false, // Allow results outside bounds but prioritize within
-        }
-      );
-
-      autocompleteRef.current.addListener("place_changed", handlePlaceSelect);
-    };
-
-    loadGoogleMapsScript().then(initializeAutocomplete);
-
-    return () => {
-      if (autocompleteRef.current) {
-        google.maps.event.clearInstanceListeners(autocompleteRef.current);
-      }
-    };
-  }, []);
-
-  const handlePlaceSelect = () => {
-    const place = autocompleteRef.current?.getPlace();
-    if (!place) return;
-
-    // Clear all address fields first to prevent stale data
-    setVenueName("");
-    setAddressLine1("");
-    setAddressLine2("");
-    setCity("");
-    setPostcode("");
-    setLatitude(null);
-    setLongitude(null);
-    setLocation("");
-
-    // Clear the search input field
-    if (locationInputRef.current) {
-      locationInputRef.current.value = "";
-    }
-
-    // Store place_id for validation
-    if (place.place_id) {
-      setSelectedPlaceId(place.place_id);
-    }
-
-    let street = "";
-    let cityName = "";
-    let postcodeValue = "";
-    let country = "";
-    let buildingName = "";
-
-    // Get the place name (for establishments like "Roberts Building")
-    if (place.name) {
-      buildingName = place.name;
-    }
-
-    // Parse address components if available
-    if (place.address_components) {
-      place.address_components.forEach((component) => {
-        const types = component.types;
-
-        if (types.includes("street_number")) {
-          street = component.long_name + " ";
-        }
-        if (types.includes("route")) {
-          street += component.long_name;
-        }
-        if (types.includes("locality") || types.includes("postal_town")) {
-          cityName = component.long_name;
-        }
-        if (types.includes("postal_code")) {
-          postcodeValue = component.long_name;
-        }
-        if (types.includes("country")) {
-          country = component.short_name;
-        }
-        // Also check for premise (building name in address components)
-        if (types.includes("premise") && !buildingName) {
-          buildingName = component.long_name;
-        }
-      });
-    }
-
-    if (place.geometry?.location) {
-      setLatitude(place.geometry.location.lat());
-      setLongitude(place.geometry.location.lng());
-    }
-
-    // Validate if address is in UK
-    if (country && country !== "GB") {
-      setAddressValidationError(
-        "Sorry, we only support addresses within the United Kingdom."
-      );
-    } else {
-      setAddressValidationError(null);
-    }
-
-    // Set venue name from Google Places
-    if (buildingName) {
-      setVenueName(buildingName);
-    }
-
-    // Update address fields
-    // For establishments, use the building name if street is empty
-    if (buildingName && !street) {
-      setAddressLine1(buildingName);
-    } else if (street) {
-      setAddressLine1(street.trim());
-      // Put building name in address line 2 if it exists and is different from street
-      if (buildingName && !street.includes(buildingName)) {
-        setAddressLine2(buildingName);
-      }
-    }
-
-    setCity(cityName);
-    setPostcode(postcodeValue);
-
-    // Update location field with formatted address or name
-    if (place.formatted_address) {
-      setLocation(place.formatted_address);
-    } else if (buildingName) {
-      setLocation(buildingName);
-    }
-  };
-
   // Helper to map frontend field types to backend QuestionType
   const mapFieldTypeToQuestionType = (fieldType: string): QuestionType => {
     switch (fieldType) {
@@ -498,18 +336,6 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
         return QuestionType.SHORT_TEXT;
     }
   };
-
-  // Update location when address fields change
-  useEffect(() => {
-    if (addressLine1 || city || postcode) {
-      const fullAddress = [addressLine1, addressLine2, city, postcode]
-        .filter(Boolean)
-        .join(", ");
-      if (fullAddress) {
-        setLocation(fullAddress);
-      }
-    }
-  }, [addressLine1, addressLine2, city, postcode, setLocation]);
 
   // Handle ticket operations (only for CREATE mode, since EDIT mode handles tickets immediately)
   const handleTicketOperations = async (createdEventId: string) => {
@@ -918,15 +744,10 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
       )
     ) {
       clearForm();
-      // Also clear local file input and address-related state
+      // Also clear local file input
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-      if (locationInputRef.current) {
-        locationInputRef.current.value = "";
-      }
-      setSelectedPlaceId(null);
-      setAddressValidationError(null);
     }
   };
 
@@ -1075,165 +896,56 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
             <span>Edit Description</span>
           </button>
 
-          <div className="rounded-xl bg-card-background backdrop-blur-xl px-4 py-3">
-            <div
-              className="flex items-center justify-between cursor-pointer"
-              onClick={() => setIsLocationExpanded(!isLocationExpanded)}
-              role="button"
-              aria-label={
-                isLocationExpanded ? "Collapse location" : "Expand location"
-              }
-            >
-              <label className="text-base text-foreground font-semibold cursor-pointer">
-                Event Location
-              </label>
-              <div className="rounded-full p-2">
-                {isLocationExpanded ? (
-                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                )}
-              </div>
-            </div>
-
-            {/* Display full address when collapsed */}
-            {!isLocationExpanded && location && (
-              <div className="mt-3 p-3 bg-card-secondary-background rounded-xl">
-                <p className="text-sm text-foreground font-medium">
-                  {location}
-                </p>
-              </div>
-            )}
-
-            {/* Show all fields when expanded */}
-            {isLocationExpanded && (
-              <>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Search for a building, venue, or address - or enter details
-                  manually
-                </p>
-
-                {/* Google Places Autocomplete Search */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Search Location
-                  </label>
-                  <input
-                    ref={locationInputRef}
-                    type="text"
-                    placeholder="Search for building, venue, or address..."
-                    className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40 border-2 border-transparent focus:border-primary transition-all"
-                  />
-                  {addressValidationError && (
-                    <div className="mt-2 p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
-                      <p className="text-sm text-red-400">
-                        {addressValidationError}
+          {/* Event Location */}
+          <div className="space-y-4">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsLocationModalOpen(!isLocationModalOpen)}
+                className="flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer"
+              >
+                <MapPin className="h-5 w-5 text-muted-foreground" />
+                <div className="flex-1 text-left">
+                  {addressLine1 ? (
+                    <>
+                      <p className="text-base font-semibold text-foreground">
+                        {venueName || addressLine1}
                       </p>
-                    </div>
+                      <p className="text-sm text-muted-foreground">
+                        {[addressLine1, addressLine2, city, postcode].filter(Boolean).join(", ")}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-base font-semibold text-foreground">
+                        Add Event Location
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Set the venue address
+                      </p>
+                    </>
                   )}
                 </div>
+                <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isLocationModalOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-                {/* Venue Name */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Venue Name (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={venueName}
-                    onChange={(e) => setVenueName(e.target.value)}
-                    placeholder="e.g., UCL Student Centre, The Grand Hall"
-                    className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40"
-                  />
-                </div>
+              {/* Location Dropdown */}
+              {isLocationModalOpen && (
+                <LocationModal
+                  isOpen={isLocationModalOpen}
+                  onClose={() => setIsLocationModalOpen(false)}
+                />
+              )}
+            </div>
 
-                {/* Address Line 1 */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Address Line 1
-                  </label>
-                  <input
-                    type="text"
-                    value={addressLine1}
-                    onChange={(e) => setAddressLine1(e.target.value)}
-                    placeholder="Street address"
-                    className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40"
-                  />
-                </div>
-
-                {/* Address Line 2 */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Address Line 2 (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={addressLine2}
-                    onChange={(e) => setAddressLine2(e.target.value)}
-                    placeholder="Apartment, suite, building, etc."
-                    className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40"
-                  />
-                </div>
-
-                {/* City and Postcode */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      City
-                    </label>
-                    <input
-                      type="text"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      placeholder="City"
-                      className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Postcode
-                    </label>
-                    <input
-                      type="text"
-                      value={postcode}
-                      onChange={(e) =>
-                        setPostcode(e.target.value.toUpperCase())
-                      }
-                      onBlur={(e) => {
-                        // Validate on blur
-                        const value = e.target.value.trim();
-                        if (value && !validateUKPostcode(value)) {
-                          // Could add error state here if needed
-                        }
-                      }}
-                      placeholder="e.g., SW1A 1AA"
-                      className="w-full rounded-xl bg-input-background px-4 py-3.5 text-foreground outline-none placeholder:text-muted-foreground/40"
-                    />
-                    {postcode && validateUKPostcode(postcode) && (
-                      <p className="mt-1 text-sm text-green-400">
-                        ✓ Valid UK postcode
-                      </p>
-                    )}
-                    {postcode && !validateUKPostcode(postcode) && (
-                      <p className="mt-1 text-sm text-red-400">
-                        Please enter a valid UK postcode
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Display full formatted address */}
-                {location && (
-                  <div className="mt-4 p-3 bg-card-secondary-background rounded-xl">
-                    <p className="text-xs text-muted-foreground mb-1">
-                      Full Address:
-                    </p>
-                    <p className="text-sm text-foreground font-medium">
-                      {location}
-                    </p>
-                  </div>
-                )}
-              </>
+            {/* Google Map - shown when location is set */}
+            {latitude !== null && longitude !== null && !isLocationModalOpen && (
+              <GoogleMap
+                latitude={latitude}
+                longitude={longitude}
+                title={venueName || addressLine1}
+                className="h-48 w-full rounded-xl"
+              />
             )}
           </div>
 
