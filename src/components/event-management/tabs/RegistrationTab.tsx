@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { EventResponseDto, TicketType, FormField, QuestionType } from "@/types";
 import { EventTicketResponseDto, QuestionBlock } from "@/types/event-ticket/response/ticket.dto";
-import { Ticket, Plus, Edit, Lock, Unlock, Trash2, MessageSquare, AlignLeft, CircleDot, CheckSquare, HelpCircle, ScanLine } from "lucide-react";
+import { Ticket, Plus, Edit, Lock, Unlock, Trash2, MessageSquare, AlignLeft, CircleDot, CheckSquare, HelpCircle, ScanLine, ChevronUp, ChevronDown } from "lucide-react";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import FormFieldModal from "@/components/event-edit/FormFieldModal";
 import { eventTicketService } from "@/services/event-ticket.service";
@@ -306,6 +306,40 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
     }
   };
 
+  const handleMoveQuestion = async (ticketId: string, fromIndex: number, direction: "up" | "down") => {
+    const ticket = tickets.find((t) => t.id === ticketId);
+    if (!ticket || !ticket.questionForm) return;
+
+    const toIndex = direction === "up" ? fromIndex - 1 : fromIndex + 1;
+
+    // Check bounds
+    if (toIndex < 0 || toIndex >= ticket.questionForm.length) return;
+
+    // Create a copy and swap positions
+    const reorderedQuestions = [...ticket.questionForm];
+    [reorderedQuestions[fromIndex], reorderedQuestions[toIndex]] =
+      [reorderedQuestions[toIndex], reorderedQuestions[fromIndex]];
+
+    // Convert to DTO format
+    const updatedQuestions = reorderedQuestions.map((q) => ({
+      question: q.question,
+      type: mapBackendTypeToQuestionType(q.type),
+      options: q.options,
+      required: q.required,
+    }));
+
+    try {
+      const updated = await eventTicketService.updateTicket(ticketId, {
+        questionForm: updatedQuestions,
+      });
+      setTickets((prev) => prev.map((t) => (t.id === ticketId ? updated : t)));
+      onRefresh?.();
+    } catch (error: any) {
+      console.error("Failed to reorder questions:", error);
+      toast.error(error.response?.data?.message || "Failed to reorder questions");
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Ticket Types Card */}
@@ -462,6 +496,22 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                             </div>
                           </div>
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => handleMoveQuestion(ticket.id, index, "up")}
+                              disabled={index === 0}
+                              className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                              title="Move up"
+                            >
+                              <ChevronUp className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleMoveQuestion(ticket.id, index, "down")}
+                              disabled={index === (ticket.questionForm?.length || 0) - 1}
+                              className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                              title="Move down"
+                            >
+                              <ChevronDown className="h-3.5 w-3.5" />
+                            </button>
                             <button
                               onClick={() => handleEditQuestion(ticket.id, index)}
                               className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
