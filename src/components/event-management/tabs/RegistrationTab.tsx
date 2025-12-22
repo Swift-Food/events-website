@@ -470,8 +470,28 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                       {ticket.questionForm.map((question, index) => (
                         <div
                           key={index}
-                          className="flex items-start gap-3 rounded-md bg-card-background p-3 group"
+                          className="flex items-start gap-2 sm:gap-3 rounded-md bg-card-background p-3 group"
                         >
+                          {/* Mobile ordering buttons - left side, vertically stacked */}
+                          <div className="flex flex-col gap-0.5 sm:hidden">
+                            <button
+                              onClick={() => handleMoveQuestion(ticket.id, index, "up")}
+                              disabled={index === 0}
+                              className="rounded p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                              title="Move up"
+                            >
+                              <ChevronUp className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleMoveQuestion(ticket.id, index, "down")}
+                              disabled={index === (ticket.questionForm?.length || 0) - 1}
+                              className="rounded p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                              title="Move down"
+                            >
+                              <ChevronDown className="h-4 w-4" />
+                            </button>
+                          </div>
+
                           <div className="flex items-center justify-center rounded bg-primary/10 p-1.5 text-primary">
                             {getQuestionTypeIcon(question.type)}
                           </div>
@@ -495,11 +515,14 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                               )}
                             </div>
                           </div>
+
+                          {/* Action buttons - edit/delete always, ordering on desktop only */}
                           <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                            {/* Desktop ordering buttons */}
                             <button
                               onClick={() => handleMoveQuestion(ticket.id, index, "up")}
                               disabled={index === 0}
-                              className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                              className="hidden sm:block rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                               title="Move up"
                             >
                               <ChevronUp className="h-3.5 w-3.5" />
@@ -507,7 +530,7 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                             <button
                               onClick={() => handleMoveQuestion(ticket.id, index, "down")}
                               disabled={index === (ticket.questionForm?.length || 0) - 1}
-                              className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                              className="hidden sm:block rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                               title="Move down"
                             >
                               <ChevronDown className="h-3.5 w-3.5" />
