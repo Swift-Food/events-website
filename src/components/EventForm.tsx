@@ -940,7 +940,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
             )}
           </div>
 
-          <div className="rounded-xl bg-card-background backdrop-blur-xl p-6 space-y-5">
+          <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 md:p-6 space-y-5">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-base font-semibold text-foreground">
@@ -1012,7 +1012,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                 {ticketTypes.map((ticket) => (
                   <div
                     key={ticket.id}
-                    className="rounded-2xl bg-card-secondary-background backdrop-blur-xl overflow-hidden"
+                    className="rounded-xl bg-card-secondary-background backdrop-blur-xl overflow-hidden"
                   >
                     {/* Ticket Header */}
                     <div className="flex items-start justify-between gap-3 p-4">
@@ -1065,7 +1065,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                     </div>
 
                     {/* Registration Questions */}
-                    <div className="border-t border-foreground/10 bg-card-background/50 px-4 py-3">
+                    <div className="border-t border-foreground/10 bg-card-background/50 px-2 py-2 md:px-4 md:py-3">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <HelpCircle className="h-4 w-4 text-muted-foreground" />

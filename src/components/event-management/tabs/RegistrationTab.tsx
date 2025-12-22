@@ -343,7 +343,7 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
   return (
     <div className="space-y-6">
       {/* Ticket Types Card */}
-      <div className="rounded-xl border border-neutral-700 bg-card-background p-4 sm:p-6">
+      <div className="rounded-xl border border-neutral-700 bg-card-background p-3 sm:p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-primary/20 p-2">
