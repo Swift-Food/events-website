@@ -196,11 +196,11 @@ export default function TicketTypeModal({
             <label className="text-base font-semibold text-foreground block mb-2">
               Price
             </label>
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
               <div className="flex-1">
                 {localIsFree ? (
                   <div className="rounded-xl bg-card-background px-4 py-3.5">
-                    <p className="text-base font-semibold text-foreground">
+                    <p className="text-lg font-semibold text-foreground">
                       Free Ticket
                     </p>
                   </div>
@@ -225,9 +225,9 @@ export default function TicketTypeModal({
                 <button
                   type="button"
                   onClick={() => setLocalIsFree(true)}
-                  className={`rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${
+                  className={`rounded-xl px-5 py-3.5 text-sm font-medium transition-all ${
                     localIsFree
-                      ? "bg-primary text-primary-foreground scale-105"
+                      ? "bg-primary text-primary-foreground"
                       : "bg-card-background text-muted-foreground hover:bg-white/15"
                   }`}
                 >
@@ -236,9 +236,9 @@ export default function TicketTypeModal({
                 <button
                   type="button"
                   onClick={() => setLocalIsFree(false)}
-                  className={`rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${
+                  className={`rounded-xl px-5 py-3.5 text-sm font-medium transition-all ${
                     !localIsFree
-                      ? "bg-primary text-primary-foreground scale-105"
+                      ? "bg-primary text-primary-foreground"
                       : "bg-card-background text-muted-foreground hover:bg-white/15"
                   }`}
                 >
