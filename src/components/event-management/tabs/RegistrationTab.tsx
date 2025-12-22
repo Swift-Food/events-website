@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { EventResponseDto, TicketType } from "@/types";
-import { EventTicketResponseDto } from "@/types/event-ticket/response/ticket.dto";
+import { EventResponseDto, TicketType, FormField, QuestionType } from "@/types";
+import { EventTicketResponseDto, QuestionBlock } from "@/types/event-ticket/response/ticket.dto";
 import { Ticket, Plus, Edit, Lock, Unlock, Trash2, MessageSquare, AlignLeft, CircleDot, CheckSquare, HelpCircle, ScanLine } from "lucide-react";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
+import FormFieldModal from "@/components/event-edit/FormFieldModal";
 import { eventTicketService } from "@/services/event-ticket.service";
 import { toast } from "sonner";
 
@@ -19,6 +20,12 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ticketToEdit, setTicketToEdit] = useState<TicketType | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+  // Form field modal state for editing questions
+  const [isFormFieldModalOpen, setIsFormFieldModalOpen] = useState(false);
+  const [fieldToEdit, setFieldToEdit] = useState<FormField | null>(null);
+  const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
+  const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
 
   // Sync tickets when eventData changes from parent
   useEffect(() => {
@@ -151,6 +158,154 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
     }
   };
 
+  // Convert backend QuestionBlock to frontend FormField
+  const convertQuestionBlockToFormField = (question: QuestionBlock, index: number): FormField => {
+    let fieldType: "short-text" | "long-text" | "single-select" | "multi-select" = "short-text";
+    if (question.type === "longText") fieldType = "long-text";
+    else if (question.type === "singleSelect") fieldType = "single-select";
+    else if (question.type === "multiSelect") fieldType = "multi-select";
+    else if (question.type === "shortText") fieldType = "short-text";
+
+    return {
+      id: `question-${index}`,
+      question: question.question,
+      type: fieldType,
+      options: question.options || [],
+      required: question.required,
+    };
+  };
+
+  // Convert frontend FormField type to backend QuestionType
+  const mapFieldTypeToQuestionType = (fieldType: string): QuestionType => {
+    switch (fieldType) {
+      case "short-text":
+        return QuestionType.SHORT_TEXT;
+      case "long-text":
+        return QuestionType.LONG_TEXT;
+      case "single-select":
+        return QuestionType.SINGLE_SELECT;
+      case "multi-select":
+        return QuestionType.MULTI_SELECT;
+      default:
+        return QuestionType.SHORT_TEXT;
+    }
+  };
+
+  const handleAddQuestion = (ticketId: string) => {
+    setActiveTicketId(ticketId);
+    setFieldToEdit(null);
+    setEditingQuestionIndex(null);
+    setIsFormFieldModalOpen(true);
+  };
+
+  const handleEditQuestion = (ticketId: string, questionIndex: number) => {
+    const ticket = tickets.find((t) => t.id === ticketId);
+    if (!ticket || !ticket.questionForm || !ticket.questionForm[questionIndex]) return;
+
+    const question = ticket.questionForm[questionIndex];
+    const formField = convertQuestionBlockToFormField(question, questionIndex);
+
+    setActiveTicketId(ticketId);
+    setFieldToEdit(formField);
+    setEditingQuestionIndex(questionIndex);
+    setIsFormFieldModalOpen(true);
+  };
+
+  // Convert backend question type string to QuestionType enum
+  const mapBackendTypeToQuestionType = (type: string): QuestionType => {
+    switch (type) {
+      case "shortText":
+        return QuestionType.SHORT_TEXT;
+      case "longText":
+        return QuestionType.LONG_TEXT;
+      case "singleSelect":
+        return QuestionType.SINGLE_SELECT;
+      case "multiSelect":
+        return QuestionType.MULTI_SELECT;
+      default:
+        return QuestionType.SHORT_TEXT;
+    }
+  };
+
+  const handleSaveQuestion = async (field: FormField) => {
+    if (!activeTicketId) return;
+
+    const ticket = tickets.find((t) => t.id === activeTicketId);
+    if (!ticket) return;
+
+    // Build updated question form - convert existing questions to proper DTO format
+    const currentQuestions = (ticket.questionForm || []).map((q) => ({
+      question: q.question,
+      type: mapBackendTypeToQuestionType(q.type),
+      options: q.options,
+      required: q.required,
+    }));
+
+    const newQuestion = {
+      question: field.question,
+      type: mapFieldTypeToQuestionType(field.type),
+      options: field.options,
+      required: field.required,
+    };
+
+    let updatedQuestions;
+    if (editingQuestionIndex !== null) {
+      // Editing existing question
+      updatedQuestions = currentQuestions.map((q, idx) =>
+        idx === editingQuestionIndex ? newQuestion : q
+      );
+    } else {
+      // Adding new question
+      updatedQuestions = [...currentQuestions, newQuestion];
+    }
+
+    try {
+      const updated = await eventTicketService.updateTicket(activeTicketId, {
+        questionForm: updatedQuestions,
+      });
+      setTickets((prev) => prev.map((t) => (t.id === activeTicketId ? updated : t)));
+      toast.success(editingQuestionIndex !== null ? "Question updated successfully" : "Question added successfully");
+      setIsFormFieldModalOpen(false);
+      onRefresh?.();
+    } catch (error: any) {
+      console.error("Failed to save question:", error);
+      toast.error(error.response?.data?.message || "Failed to save question");
+    }
+  };
+
+  const handleDeleteQuestion = async (ticketId: string, questionIndex: number) => {
+    const ticket = tickets.find((t) => t.id === ticketId);
+    if (!ticket || !ticket.questionForm) return;
+
+    const question = ticket.questionForm[questionIndex];
+    const confirmed = confirm(
+      `Are you sure you want to delete the question "${question.question}"?`
+    );
+    if (!confirmed) return;
+
+    // Remove the question at the given index and convert to proper DTO format
+    const updatedQuestions = ticket.questionForm
+      .filter((_, idx) => idx !== questionIndex)
+      .map((q) => ({
+        question: q.question,
+        type: mapBackendTypeToQuestionType(q.type),
+        options: q.options,
+        required: q.required,
+      }));
+
+    try {
+      const updated = await eventTicketService.updateTicket(ticketId, {
+        questionForm: updatedQuestions,
+      });
+      setTickets((prev) => prev.map((t) => (t.id === ticketId ? updated : t)));
+      toast.success("Question deleted successfully");
+      onRefresh?.();
+    } catch (error: any) {
+      console.error("Failed to delete question:", error);
+      toast.error(error.response?.data?.message || "Failed to delete question");
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Ticket Types Card */}
@@ -260,19 +415,28 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                 </div>
 
                 {/* Registration Questions */}
-                {ticket.questionForm && ticket.questionForm.length > 0 && (
-                  <div className="border-t border-neutral-700 bg-card-background/50 px-4 py-3">
-                    <div className="flex items-center gap-2 mb-3">
+                <div className="border-t border-neutral-700 bg-card-background/50 px-4 py-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
                       <HelpCircle className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium text-muted-foreground">
-                        Registration Questions ({ticket.questionForm.length})
+                        Registration Questions ({ticket.questionForm?.length || 0})
                       </span>
                     </div>
+                    <button
+                      onClick={() => handleAddQuestion(ticket.id)}
+                      className="flex items-center gap-1.5 rounded-md bg-primary/20 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/30"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Add Question
+                    </button>
+                  </div>
+                  {ticket.questionForm && ticket.questionForm.length > 0 ? (
                     <div className="space-y-2">
                       {ticket.questionForm.map((question, index) => (
                         <div
                           key={index}
-                          className="flex items-start gap-3 rounded-md bg-card-background p-3"
+                          className="flex items-start gap-3 rounded-md bg-card-background p-3 group"
                         >
                           <div className="flex items-center justify-center rounded bg-primary/10 p-1.5 text-primary">
                             {getQuestionTypeIcon(question.type)}
@@ -297,11 +461,31 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                               )}
                             </div>
                           </div>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => handleEditQuestion(ticket.id, index)}
+                              className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+                              title="Edit question"
+                            >
+                              <Edit className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteQuestion(ticket.id, index)}
+                              className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-red-500/20 hover:text-red-400"
+                              title="Delete question"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-2">
+                      No questions added yet
+                    </p>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -313,6 +497,18 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveTicket}
         ticketToEdit={ticketToEdit}
+      />
+
+      <FormFieldModal
+        isOpen={isFormFieldModalOpen}
+        onClose={() => {
+          setIsFormFieldModalOpen(false);
+          setActiveTicketId(null);
+          setFieldToEdit(null);
+          setEditingQuestionIndex(null);
+        }}
+        onSave={handleSaveQuestion}
+        fieldToEdit={fieldToEdit}
       />
     </div>
   );
