@@ -126,10 +126,10 @@ export default function TicketTypeModal({
       >
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-primary/20 p-3">
-              <Ticket className="h-6 w-6 text-primary" />
+            <div className="rounded-full bg-primary/20 p-2.5">
+              <Ticket className="h-5 w-5 text-primary" />
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold">
+            <h2 className="text-xl md:text-2xl font-bold">
               {ticketToEdit ? "Edit Ticket" : "Add Ticket Type"}
             </h2>
           </div>
@@ -139,42 +139,42 @@ export default function TicketTypeModal({
             className="rounded-full p-2 transition-all hover:bg-white/10"
             aria-label="Close modal"
           >
-            <X className="h-6 w-6" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           {/* Ticket Name */}
           <div>
-            <label className="text-base font-semibold text-foreground block mb-2">
+            <label className="text-sm font-medium text-foreground block mb-1.5">
               Ticket Name <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
               value={localName}
               onChange={(e) => setLocalName(e.target.value)}
-              className="w-full rounded-xl bg-card-background px-4 py-3.5 text-foreground text-md font-semibold outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+              className="w-full rounded-xl bg-card-background px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all"
               placeholder="e.g., General Admission, VIP, Early Bird"
             />
           </div>
 
           {/* Ticket Description */}
           <div>
-            <label className="text-base font-semibold text-foreground block mb-2">
+            <label className="text-sm font-medium text-foreground block mb-1.5">
               Description
             </label>
             <textarea
               value={localDescription}
               onChange={(e) => setLocalDescription(e.target.value)}
               rows={3}
-              className="w-full rounded-xl bg-card-background px-4 py-3.5 text-foreground outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
+              className="w-full rounded-xl bg-card-background px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
               placeholder="Optional description of this ticket type..."
             />
           </div>
 
           {/* Quantity */}
           <div>
-            <label className="text-base font-semibold text-foreground block mb-2">
+            <label className="text-sm font-medium text-foreground block mb-1.5">
               Quantity Available <span className="text-red-400">*</span>
             </label>
             <input
@@ -183,30 +183,30 @@ export default function TicketTypeModal({
               max="100000"
               value={localQuantity}
               onChange={(e) => setLocalQuantity(e.target.value)}
-              className="w-full rounded-xl bg-card-background px-4 py-3.5 text-foreground text-lg font-semibold outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+              className="w-full rounded-xl bg-card-background px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all"
               placeholder="100"
             />
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-xs text-muted-foreground mt-1.5">
               Number of tickets available must be within 1 - 100,000
             </p>
           </div>
 
           {/* Price Toggle */}
           <div>
-            <label className="text-base font-semibold text-foreground block mb-2">
+            <label className="text-sm font-medium text-foreground block mb-1.5">
               Price
             </label>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <div className="flex-1">
                 {localIsFree ? (
-                  <div className="h-12 flex items-center rounded-xl bg-card-background px-4">
-                    <p className="text-lg font-semibold text-foreground">
+                  <div className="h-11 flex items-center rounded-xl bg-card-background px-4">
+                    <p className="text-sm font-medium text-foreground">
                       Free Ticket
                     </p>
                   </div>
                 ) : (
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground text-lg font-semibold">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground text-sm font-medium">
                       £
                     </span>
                     <input
@@ -215,7 +215,7 @@ export default function TicketTypeModal({
                       step="0.01"
                       value={localPrice}
                       onChange={(e) => setLocalPrice(e.target.value)}
-                      className="w-full h-12 rounded-xl bg-card-background pl-9 pr-4 text-foreground text-lg font-semibold outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                      className="w-full h-11 rounded-xl bg-card-background pl-8 pr-4 text-foreground text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                       placeholder="0.00"
                     />
                   </div>
@@ -225,7 +225,7 @@ export default function TicketTypeModal({
                 <button
                   type="button"
                   onClick={() => setLocalIsFree(true)}
-                  className={`h-12 rounded-xl px-5 text-sm font-medium transition-all ${
+                  className={`h-11 rounded-xl px-4 text-sm font-medium transition-all ${
                     localIsFree
                       ? "bg-primary text-primary-foreground"
                       : "bg-card-background text-muted-foreground hover:bg-white/15"
@@ -236,7 +236,7 @@ export default function TicketTypeModal({
                 <button
                   type="button"
                   onClick={() => setLocalIsFree(false)}
-                  className={`h-12 rounded-xl px-5 text-sm font-medium transition-all ${
+                  className={`h-11 rounded-xl px-4 text-sm font-medium transition-all ${
                     !localIsFree
                       ? "bg-primary text-primary-foreground"
                       : "bg-card-background text-muted-foreground hover:bg-white/15"
@@ -251,26 +251,26 @@ export default function TicketTypeModal({
           {/* Single Use Toggle */}
           <div className="flex items-center justify-between py-2">
             <div>
-              <p className="text-base font-semibold text-foreground">
+              <p className="text-sm font-medium text-foreground">
                 Single-Use Ticket
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Ticket will be invalidated after first use
               </p>
             </div>
             <button
               type="button"
               onClick={() => setLocalIsSingleUse(!localIsSingleUse)}
-              className={`h-7 w-14 rounded-full transition-all ${
+              className={`h-6 w-11 rounded-full transition-all ${
                 localIsSingleUse
                   ? "bg-primary"
                   : "bg-card-background"
               }`}
             >
               <span
-                className={`block h-6 w-6 rounded-full transition-all ${
+                className={`block h-5 w-5 rounded-full transition-all ${
                   localIsSingleUse
-                    ? "translate-x-7 bg-primary-foreground"
+                    ? "translate-x-5 bg-primary-foreground"
                     : "translate-x-0.5 bg-foreground"
                 }`}
               />
@@ -278,12 +278,12 @@ export default function TicketTypeModal({
           </div>
         </div>
 
-        <div className="mt-8 flex gap-4">
+        <div className="mt-6 flex gap-3">
           <button
             type="button"
             onClick={handleCancel}
             disabled={isSaving}
-            className="flex-1 rounded-xl bg-white/10 backdrop-blur-md py-3 text-center font-semibold text-foreground transition-all hover:bg-white/15 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="flex-1 rounded-xl bg-white/10 backdrop-blur-md py-2.5 text-center text-sm font-medium text-foreground transition-all hover:bg-white/15 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
@@ -291,7 +291,7 @@ export default function TicketTypeModal({
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="flex-1 rounded-xl bg-primary py-3 text-center font-bold text-primary-foreground transition-all hover:scale-105 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="flex-1 rounded-xl bg-primary py-2.5 text-center text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSaving ? "Saving..." : ticketToEdit ? "Update Ticket" : "Add Ticket"}
           </button>
