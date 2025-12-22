@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X } from "lucide-react";
+import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare } from "lucide-react";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import FormFieldModal from "@/components/event-edit/FormFieldModal";
@@ -17,7 +17,6 @@ import {
 import { TicketType, UpdateEventDto } from "@/types";
 import { FormField } from "@/types";
 import { eventService } from "@/services/event.service";
-import { eventTicketService } from "@/services/event-ticket.service";
 import { imageService } from "@/services/image.service";
 import { paymentService } from "@/services/payment.service";
 import { CreateEventDto, QuestionType, CreateEventTicketDto } from "@/types";
@@ -94,7 +93,8 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
   const [isTicketListExpanded, setIsTicketListExpanded] = useState(true);
   const [isFormFieldModalOpen, setIsFormFieldModalOpen] = useState(false);
   const [fieldToEdit, setFieldToEdit] = useState<FormField | null>(null);
-  const [isFormFieldListExpanded, setIsFormFieldListExpanded] = useState(true);
+  const [activeTicketIdForQuestions, setActiveTicketIdForQuestions] = useState<string | null>(null);
+  const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
@@ -156,46 +156,22 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
         setCoverName("event-cover.png");
       }
 
-      // Load tickets
+      // Load tickets with their questions
       if (initialData.eventTickets && initialData.eventTickets.length > 0) {
         const ticketsToLoad = initialData.eventTickets.map((ticket: EventTicketResponseDto, index: number) => {
           const price = parseFloat(ticket.price) || 0;
-          return {
-            id: ticket.id || `ticket-${index}`,
-            name: ticket.name,
-            description: ticket.description || "",
-            isFree: price === 0,
-            price: price,
-            isSingleUse: ticket.isSingleUse ?? true,
-            quantity: ticket.quantityTotal || 100,
-          };
-        });
 
-        // Set tickets directly (replaces existing tickets)
-        setTicketTypes(ticketsToLoad);
-        // Store original tickets for comparison in edit mode
-        setOriginalTickets(ticketsToLoad);
-
-        // Load form fields from the first ticket's question form
-        const firstTicket = initialData.eventTickets[0];
-        if (firstTicket.questionForm && firstTicket.questionForm.length > 0) {
-          const fieldsToLoad = firstTicket.questionForm.map(
-            (question: QuestionBlock, index: number) => {
-              // Map backend question type to frontend field type
-              let fieldType:
-                | "short-text"
-                | "long-text"
-                | "single-select"
-                | "multi-select" = "short-text";
+          // Map question form for this ticket
+          const questionForm = (ticket.questionForm || []).map(
+            (question: QuestionBlock, qIndex: number) => {
+              let fieldType: "short-text" | "long-text" | "single-select" | "multi-select" = "short-text";
               if (question.type === "longText") fieldType = "long-text";
-              else if (question.type === "singleSelect")
-                fieldType = "single-select";
-              else if (question.type === "multiSelect")
-                fieldType = "multi-select";
+              else if (question.type === "singleSelect") fieldType = "single-select";
+              else if (question.type === "multiSelect") fieldType = "multi-select";
               else if (question.type === "shortText") fieldType = "short-text";
 
               return {
-                id: `field-${index}`,
+                id: `field-${qIndex}`,
                 question: question.question,
                 type: fieldType,
                 options: question.options || [],
@@ -204,9 +180,22 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
             }
           );
 
-          // Set form fields directly (replaces existing fields)
-          setFormFields(fieldsToLoad);
-        }
+          return {
+            id: ticket.id || `ticket-${index}`,
+            name: ticket.name,
+            description: ticket.description || "",
+            isFree: price === 0,
+            price: price,
+            isSingleUse: ticket.isSingleUse ?? true,
+            quantity: ticket.quantityTotal || 100,
+            questionForm: questionForm,
+          };
+        });
+
+        // Set tickets directly (replaces existing tickets)
+        setTicketTypes(ticketsToLoad);
+        // Store original tickets for comparison in edit mode
+        setOriginalTickets(ticketsToLoad);
       }
 
       // Mark as loaded to prevent re-loading
@@ -324,44 +313,6 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     }
   };
 
-  // Handle ticket operations (only for CREATE mode, since EDIT mode handles tickets immediately)
-  const handleTicketOperations = async (createdEventId: string) => {
-    const errors: string[] = [];
-
-    // Only handle ticket creation for CREATE mode
-    // In EDIT mode, tickets are created/updated/deleted immediately via handleSaveTicket/handleDeleteTicket
-    if (mode === "create") {
-      // Map frontend ticket types to API format (without eventId, as it's passed separately)
-      const mapTicketToPayload = (ticket: TicketType) => ({
-        name: ticket.name,
-        description: ticket.description || "",
-        price: ticket.isFree ? 0 : ticket.price,
-        isPaid: !ticket.isFree,
-        isSingleUse: ticket.isSingleUse ?? true,
-        quantityTotal: ticket.quantity || 100,
-        questionForm: formFields.map((field) => ({
-          question: field.question,
-          type: mapFieldTypeToQuestionType(field.type),
-          options: field.options,
-          required: field.required,
-        })),
-        isPrivate: false,
-      });
-
-      // Create all tickets for new event
-      for (const ticket of ticketTypes) {
-        try {
-          await eventTicketService.createTicket(createdEventId, mapTicketToPayload(ticket));
-        } catch (error: any) {
-          console.error(`Failed to create ticket ${ticket.name}:`, error);
-          errors.push(`Failed to create ticket "${ticket.name}"`);
-        }
-      }
-    }
-
-    return errors;
-  };
-
   const handleSubmit = async () => {
     // Validation
     if (!eventName.trim()) {
@@ -405,7 +356,25 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     setIsSubmitting(true);
 
     try {
-      // Prepare event data WITHOUT tickets (tickets will be managed separately)
+      // Map tickets to API format
+      const ticketsPayload = ticketTypes.map((ticket) => ({
+        id: mode === "edit" && originalTickets.some(t => t.id === ticket.id) ? ticket.id : undefined,
+        name: ticket.name,
+        description: ticket.description || "",
+        price: ticket.isFree ? 0 : ticket.price,
+        isPaid: !ticket.isFree,
+        isSingleUse: ticket.isSingleUse ?? true,
+        quantityTotal: ticket.quantity || 100,
+        questionForm: (ticket.questionForm || []).map((field) => ({
+          question: field.question,
+          type: mapFieldTypeToQuestionType(field.type),
+          options: field.options,
+          required: field.required,
+        })),
+        isPrivate: false,
+      }));
+
+      // Prepare event data WITH tickets
       const eventData: CreateEventDto | UpdateEventDto = {
         name: eventName,
         description: description || "",
@@ -428,38 +397,28 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
         },
         categoryIds: [],
         eventUrl: undefined,
-        // DO NOT include tickets in event payload
+        tickets: ticketsPayload,
       };
 
       let createdOrUpdatedEventId: string;
 
       if (mode === "create") {
-        // Create event first
+        // Create event with tickets
         const response = await eventService.createEvent(eventData as CreateEventDto);
         if (response.success) {
           createdOrUpdatedEventId = response.event.id;
-
-          // Then create tickets
-          const ticketErrors = await handleTicketOperations(createdOrUpdatedEventId);
-
-          if (ticketErrors.length > 0) {
-            toast.warning(`Event created, but some tickets failed: ${ticketErrors.join(", ")}`);
-          } else {
-            toast.success("Event and tickets created successfully!");
-          }
-
+          toast.success("Event created successfully!");
           clearForm();
           router.push(`/events/${createdOrUpdatedEventId}`);
         }
       } else {
-        // Edit mode - use update API
+        // Edit mode - update event with tickets
         if (!eventId) {
           toast.error("Event ID is missing");
           return;
         }
         const response = await eventService.updateEvent(eventId, eventData);
         if (response.success) {
-          // In edit mode, tickets are already handled immediately via handleSaveTicket/handleDeleteTicket
           toast.success("Event updated successfully!");
           router.push(`/events/${eventId}`);
         }
@@ -612,116 +571,139 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     setIsTicketTypeModalOpen(true);
   };
 
-  const handleSaveTicket = async (ticket: TicketType) => {
-    const isExistingTicket = ticketToEdit && originalTickets.some(t => t.id === ticket.id);
-
-    // Map ticket to API format (without eventId, as it's passed separately for create)
-    const mapTicketToPayload = (t: TicketType) => ({
-      name: t.name,
-      description: t.description || "",
-      price: t.isFree ? 0 : t.price,
-      isPaid: !t.isFree,
-      isSingleUse: t.isSingleUse ?? true,
-      quantityTotal: t.quantity || 100,
-      questionForm: formFields.map((field) => ({
-        question: field.question,
-        type: mapFieldTypeToQuestionType(field.type),
-        options: field.options,
-        required: field.required,
-      })),
-      isPrivate: false,
-    });
-
-    if (mode === "edit" && eventId) {
-      // In edit mode, make immediate backend calls
-      try {
-        if (ticketToEdit && isExistingTicket) {
-          // Update existing ticket (PUT /tickets/:id)
-          await eventTicketService.updateTicket(ticket.id, mapTicketToPayload(ticket));
-          updateTicketType(ticket);
-          // Update in originalTickets too
-          setOriginalTickets(prev => prev.map(t => t.id === ticket.id ? ticket : t));
-          toast.success(`"${ticket.name}" updated successfully`);
-        } else {
-          // Create new ticket (POST /tickets/event/:eventId)
-          const response = await eventTicketService.createTicket(eventId, mapTicketToPayload(ticket));
-          // Update the ticket with the backend-generated ID if needed
-          const ticketWithId = { ...ticket, id: response.id };
-          addTicketType(ticketWithId);
-          // Also add to originalTickets since it now exists in backend
-          setOriginalTickets(prev => [...prev, ticketWithId]);
-          toast.success(`"${ticket.name}" created successfully`);
-        }
-      } catch (error: any) {
-        console.error("Failed to save ticket:", error);
-        toast.error(error.response?.data?.message || `Failed to save "${ticket.name}"`);
-        return; // Don't update state if backend call failed
-      }
+  const handleSaveTicket = (ticket: TicketType) => {
+    // Just update local state - actual save happens when clicking Create/Update Event
+    if (ticketToEdit) {
+      updateTicketType(ticket);
     } else {
-      // In create mode, just update state (tickets will be created when event is created)
-      if (ticketToEdit) {
-        updateTicketType(ticket);
-      } else {
-        addTicketType(ticket);
-      }
+      addTicketType(ticket);
     }
   };
 
-  const handleDeleteTicket = async (ticketId: string) => {
+  const handleDeleteTicket = (ticketId: string) => {
     const ticketToDelete = ticketTypes.find(t => t.id === ticketId);
     if (!ticketToDelete) return;
 
     const ticketName = ticketToDelete.name;
-    const isExistingTicket = originalTickets.some(t => t.id === ticketId);
 
-    const message = mode === "edit" && isExistingTicket
-      ? `Are you sure you want to delete "${ticketName}"? This action cannot be undone.`
-      : `Are you sure you want to remove "${ticketName}"?`;
-
-    if (confirm(message)) {
-      // If in edit mode and this is an existing ticket (not newly added), delete it from backend
-      if (mode === "edit" && isExistingTicket) {
-        try {
-          await eventTicketService.deleteTicket(ticketId);
-          // Remove from frontend state after successful backend deletion
-          deleteTicketType(ticketId);
-          // Also remove from originalTickets so it won't be processed again on save
-          setOriginalTickets(prev => prev.filter(t => t.id !== ticketId));
-          toast.success(`"${ticketName}" deleted successfully`);
-        } catch (error: any) {
-          console.error(`Failed to delete ticket ${ticketId}:`, error);
-          toast.error(error.response?.data?.message || `Failed to delete "${ticketName}"`);
-        }
-      } else {
-        // In create mode, just remove from state
-        deleteTicketType(ticketId);
-        toast.success(`"${ticketName}" removed`);
-      }
+    if (confirm(`Are you sure you want to remove "${ticketName}"?`)) {
+      deleteTicketType(ticketId);
     }
   };
 
-  const handleAddFormFieldClick = () => {
+  // Question type helpers
+  const getQuestionTypeIcon = (type: string) => {
+    switch (type) {
+      case "short-text":
+        return <MessageSquare className="h-3.5 w-3.5" />;
+      case "long-text":
+        return <AlignLeft className="h-3.5 w-3.5" />;
+      case "single-select":
+        return <CircleDot className="h-3.5 w-3.5" />;
+      case "multi-select":
+        return <CheckSquare className="h-3.5 w-3.5" />;
+      default:
+        return <HelpCircle className="h-3.5 w-3.5" />;
+    }
+  };
+
+  const getQuestionTypeLabel = (type: string) => {
+    switch (type) {
+      case "short-text":
+        return "Short Text";
+      case "long-text":
+        return "Long Text";
+      case "single-select":
+        return "Single Select";
+      case "multi-select":
+        return "Multi Select";
+      default:
+        return type;
+    }
+  };
+
+  // Question management handlers (per-ticket)
+  const handleAddQuestion = (ticketId: string) => {
+    setActiveTicketIdForQuestions(ticketId);
     setFieldToEdit(null);
+    setEditingQuestionIndex(null);
     setIsFormFieldModalOpen(true);
   };
 
-  const handleEditFormFieldClick = (field: FormField) => {
-    setFieldToEdit(field);
+  const handleEditQuestion = (ticketId: string, questionIndex: number) => {
+    const ticket = ticketTypes.find((t) => t.id === ticketId);
+    if (!ticket || !ticket.questionForm || !ticket.questionForm[questionIndex]) return;
+
+    const question = ticket.questionForm[questionIndex];
+    setActiveTicketIdForQuestions(ticketId);
+    setFieldToEdit({ ...question, id: `question-${questionIndex}` });
+    setEditingQuestionIndex(questionIndex);
     setIsFormFieldModalOpen(true);
   };
 
-  const handleSaveFormField = (field: FormField) => {
-    if (fieldToEdit) {
-      updateFormField(field);
+  const handleSaveQuestion = (field: FormField) => {
+    if (!activeTicketIdForQuestions) return;
+
+    const ticket = ticketTypes.find((t) => t.id === activeTicketIdForQuestions);
+    if (!ticket) return;
+
+    const currentQuestions = ticket.questionForm || [];
+
+    let updatedQuestions: FormField[];
+    if (editingQuestionIndex !== null) {
+      // Editing existing question
+      updatedQuestions = currentQuestions.map((q, idx) =>
+        idx === editingQuestionIndex ? field : q
+      );
     } else {
-      addFormField(field);
+      // Adding new question
+      updatedQuestions = [...currentQuestions, field];
     }
+
+    // Update the ticket with new questions
+    updateTicketType({
+      ...ticket,
+      questionForm: updatedQuestions,
+    });
+
+    setIsFormFieldModalOpen(false);
+    setActiveTicketIdForQuestions(null);
+    setFieldToEdit(null);
+    setEditingQuestionIndex(null);
   };
 
-  const handleDeleteFormField = (fieldId: string) => {
-    if (confirm("Are you sure you want to delete this form field?")) {
-      deleteFormField(fieldId);
-    }
+  const handleDeleteQuestion = (ticketId: string, questionIndex: number) => {
+    const ticket = ticketTypes.find((t) => t.id === ticketId);
+    if (!ticket || !ticket.questionForm) return;
+
+    const question = ticket.questionForm[questionIndex];
+    const confirmed = confirm(
+      `Are you sure you want to delete the question "${question.question}"?`
+    );
+    if (!confirmed) return;
+
+    const updatedQuestions = ticket.questionForm.filter((_, idx) => idx !== questionIndex);
+    updateTicketType({
+      ...ticket,
+      questionForm: updatedQuestions,
+    });
+  };
+
+  const handleMoveQuestion = (ticketId: string, fromIndex: number, direction: "up" | "down") => {
+    const ticket = ticketTypes.find((t) => t.id === ticketId);
+    if (!ticket || !ticket.questionForm) return;
+
+    const toIndex = direction === "up" ? fromIndex - 1 : fromIndex + 1;
+    if (toIndex < 0 || toIndex >= ticket.questionForm.length) return;
+
+    const reorderedQuestions = [...ticket.questionForm];
+    [reorderedQuestions[fromIndex], reorderedQuestions[toIndex]] =
+      [reorderedQuestions[toIndex], reorderedQuestions[fromIndex]];
+
+    updateTicketType({
+      ...ticket,
+      questionForm: reorderedQuestions,
+    });
   };
 
   const handleClearForm = () => {
@@ -1030,9 +1012,10 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                 {ticketTypes.map((ticket) => (
                   <div
                     key={ticket.id}
-                    className="rounded-2xl bg-card-secondary-background backdrop-blur-xl p-4"
+                    className="rounded-2xl bg-card-secondary-background backdrop-blur-xl overflow-hidden"
                   >
-                    <div className="flex items-start justify-between gap-3">
+                    {/* Ticket Header */}
+                    <div className="flex items-start justify-between gap-3 p-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <p className="text-base font-semibold text-foreground">
@@ -1080,6 +1063,123 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                         </button>
                       </div>
                     </div>
+
+                    {/* Registration Questions */}
+                    <div className="border-t border-foreground/10 bg-card-background/50 px-4 py-3">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm font-medium text-muted-foreground">
+                            Registration Questions ({ticket.questionForm?.length || 0})
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleAddQuestion(ticket.id)}
+                          className="flex items-center gap-1.5 rounded-md bg-primary/20 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/30"
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                          Add Question
+                        </button>
+                      </div>
+                      {ticket.questionForm && ticket.questionForm.length > 0 ? (
+                        <div className="space-y-2">
+                          {ticket.questionForm.map((question, index) => (
+                            <div
+                              key={index}
+                              className="flex items-start gap-2 sm:gap-3 rounded-md bg-card-background p-3 group"
+                            >
+                              {/* Mobile ordering buttons - left side, vertically stacked */}
+                              <div className="flex flex-col gap-0.5 sm:hidden">
+                                <button
+                                  type="button"
+                                  onClick={() => handleMoveQuestion(ticket.id, index, "up")}
+                                  disabled={index === 0}
+                                  className="rounded p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                                  title="Move up"
+                                >
+                                  <ChevronUp className="h-4 w-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleMoveQuestion(ticket.id, index, "down")}
+                                  disabled={index === (ticket.questionForm?.length || 0) - 1}
+                                  className="rounded p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                                  title="Move down"
+                                >
+                                  <ChevronDown className="h-4 w-4" />
+                                </button>
+                              </div>
+
+                              <div className="flex items-center justify-center rounded bg-primary/10 p-1.5 text-primary">
+                                {getQuestionTypeIcon(question.type)}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <p className="text-sm text-foreground">{question.question}</p>
+                                  {question.required && (
+                                    <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-xs text-red-400">
+                                      Required
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                    {getQuestionTypeLabel(question.type)}
+                                    {question.options && question.options.length > 0 && (
+                                      <> • {question.options.length} options</>
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Action buttons - edit/delete always, ordering on desktop only */}
+                              <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                {/* Desktop ordering buttons */}
+                                <button
+                                  type="button"
+                                  onClick={() => handleMoveQuestion(ticket.id, index, "up")}
+                                  disabled={index === 0}
+                                  className="hidden sm:block rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                  title="Move up"
+                                >
+                                  <ChevronUp className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleMoveQuestion(ticket.id, index, "down")}
+                                  disabled={index === (ticket.questionForm?.length || 0) - 1}
+                                  className="hidden sm:block rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                  title="Move down"
+                                >
+                                  <ChevronDown className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleEditQuestion(ticket.id, index)}
+                                  className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+                                  title="Edit question"
+                                >
+                                  <Edit className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteQuestion(ticket.id, index)}
+                                  className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-red-500/20 hover:text-red-400"
+                                  title="Delete question"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground text-center py-2">
+                          No questions added yet
+                        </p>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1107,119 +1207,6 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                 )}
               </button>
             )}
-
-            <div className="pt-5 border-t border-foreground/10">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-base font-semibold text-foreground">
-                    Form Fields
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {formFields.length === 0
-                      ? "No form fields added"
-                      : `${formFields.length} field${
-                          formFields.length > 1 ? "s" : ""
-                        }`}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleAddFormFieldClick}
-                  className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:scale-105"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Field
-                </button>
-              </div>
-
-              {/* List of Form Fields */}
-              {formFields.length > 0 && isFormFieldListExpanded && (
-                <div className="space-y-3 mt-5">
-                  {formFields.map((field) => (
-                    <div
-                      key={field.id}
-                      className="rounded-2xl bg-card-secondary-background backdrop-blur-xl p-4"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className="text-base font-semibold text-foreground">
-                              {field.question}
-                            </p>
-                            {field.required && (
-                              <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
-                                Required
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {field.type === "short-text" && "Short Text"}
-                            {field.type === "long-text" && "Long Text"}
-                            {field.type === "single-select" && "Single Select"}
-                            {field.type === "multi-select" && "Multi Select"}
-                          </p>
-                          {field.options && field.options.length > 0 && (
-                            <div className="mt-2 flex flex-wrap gap-1.5">
-                              {field.options.map((option, idx) => (
-                                <span
-                                  key={idx}
-                                  className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-foreground"
-                                >
-                                  {option}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleEditFormFieldClick(field)}
-                            className="rounded-full p-2 transition-all hover:bg-white/10"
-                            aria-label="Edit field"
-                          >
-                            <Edit className="h-4 w-4 text-muted-foreground" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteFormField(field.id)}
-                            className="rounded-full p-2 transition-all hover:bg-red-500/20"
-                            aria-label="Delete field"
-                          >
-                            <Trash2 className="h-4 w-4 text-red-400" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Expand/Collapse Button */}
-              {formFields.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setIsFormFieldListExpanded(!isFormFieldListExpanded)
-                  }
-                  className="w-full flex items-center justify-center gap-2 py-2 transition-all hover:bg-white/5 rounded-xl cursor-pointer"
-                >
-                  {isFormFieldListExpanded ? (
-                    <>
-                      <span className="text-sm text-muted-foreground">Hide fields</span>
-                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-sm text-muted-foreground">
-                        Show {formFields.length} field{formFields.length > 1 ? "s" : ""}
-                      </span>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
 
             <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
               <div>
@@ -1333,8 +1320,13 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
 
       <FormFieldModal
         isOpen={isFormFieldModalOpen}
-        onClose={() => setIsFormFieldModalOpen(false)}
-        onSave={handleSaveFormField}
+        onClose={() => {
+          setIsFormFieldModalOpen(false);
+          setActiveTicketIdForQuestions(null);
+          setFieldToEdit(null);
+          setEditingQuestionIndex(null);
+        }}
+        onSave={handleSaveQuestion}
         fieldToEdit={fieldToEdit}
       />
     </div>

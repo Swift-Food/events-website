@@ -3,6 +3,8 @@
  * Used for UI state management in event creation flow
  */
 
+import { FormField } from "@/types/form";
+
 export interface TicketType {
   id: string;
   name: string;
@@ -11,4 +13,5 @@ export interface TicketType {
   price: number;
   isSingleUse: boolean;
   quantity: number;
+  questionForm?: FormField[];
 }
