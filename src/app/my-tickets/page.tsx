@@ -310,7 +310,7 @@ export default function MyTicketsPage() {
             </p>
             <Link
               href="/events"
-              className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 hover:scale-105"
+              className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90"
             >
               Browse Events
             </Link>
