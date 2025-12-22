@@ -6,7 +6,6 @@ import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
 import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X } from "lucide-react";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
-import CapacityModal from "@/components/event-edit/CapacityModal";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import FormFieldModal from "@/components/event-edit/FormFieldModal";
 import LocationModal from "@/components/event-edit/LocationModal";
@@ -76,8 +75,6 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     deleteTicketType,
     requireApproval,
     setRequireApproval,
-    capacity,
-    setCapacity,
     formFields,
     setFormFields,
     addFormField,
@@ -92,7 +89,6 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
 
   // Local state for UI only
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
-  const [isCapacityModalOpen, setIsCapacityModalOpen] = useState(false);
   const [isTicketTypeModalOpen, setIsTicketTypeModalOpen] = useState(false);
   const [ticketToEdit, setTicketToEdit] = useState<TicketType | null>(null);
   const [isTicketListExpanded, setIsTicketListExpanded] = useState(true);
@@ -211,15 +207,6 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
           // Set form fields directly (replaces existing fields)
           setFormFields(fieldsToLoad);
         }
-      }
-
-      // Set capacity (sum of all ticket quantities)
-      if (initialData.eventTickets && initialData.eventTickets.length > 0) {
-        const totalCapacity = initialData.eventTickets.reduce(
-          (sum: number, ticket: EventTicketResponseDto) => sum + (ticket.quantityTotal || 0),
-          0
-        );
-        setCapacity(totalCapacity.toString());
       }
 
       // Mark as loaded to prevent re-loading
@@ -901,6 +888,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
             <div className="relative">
               <button
                 type="button"
+                data-location-trigger
                 onClick={() => setIsLocationModalOpen(!isLocationModalOpen)}
                 className="flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer"
               >
@@ -1260,22 +1248,6 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                 />
               </button>
             </div>
-            <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
-              <div>
-                <p className="text-base font-semibold text-foreground">
-                  Capacity
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">{capacity}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsCapacityModalOpen(true)}
-                className="rounded-full p-2 transition-all hover:bg-card-background"
-                aria-label="Edit capacity settings"
-              >
-                <Edit className="h-5 w-5 text-muted-foreground" />
-              </button>
-            </div>
           </div>
 
           <button
@@ -1350,11 +1322,6 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
       <EventDescriptionModal
         isOpen={isDescriptionModalOpen}
         onClose={() => setIsDescriptionModalOpen(false)}
-      />
-
-      <CapacityModal
-        isOpen={isCapacityModalOpen}
-        onClose={() => setIsCapacityModalOpen(false)}
       />
 
       <TicketTypeModal
