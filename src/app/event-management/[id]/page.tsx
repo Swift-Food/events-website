@@ -250,7 +250,7 @@ export default function EventManagementPage() {
         {currentTab === "team" && (
           <TeamTab eventId={eventId} ownerId={eventData.owner?.user?.id} />
         )}
-        {currentTab === "catering" && <CateringTab/>}
+        {currentTab === "catering" && <CateringTab eventData={eventData} />}
       </div>
 
       {/* Edit Event Slide-out Modal */}
