@@ -26,3 +26,6 @@ export * from './guest-ticket';
 
 // User types (already exists)
 export * from './user';
+
+// Catering types
+export * from './catering';
