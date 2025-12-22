@@ -199,7 +199,7 @@ export default function TicketTypeModal({
             <div className="flex items-center gap-4">
               <div className="flex-1">
                 {localIsFree ? (
-                  <div className="rounded-xl bg-card-background px-4 py-3.5">
+                  <div className="h-12 flex items-center rounded-xl bg-card-background px-4">
                     <p className="text-lg font-semibold text-foreground">
                       Free Ticket
                     </p>
@@ -215,7 +215,7 @@ export default function TicketTypeModal({
                       step="0.01"
                       value={localPrice}
                       onChange={(e) => setLocalPrice(e.target.value)}
-                      className="w-full rounded-xl bg-card-background pl-9 pr-4 py-3.5 text-foreground text-lg font-semibold outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                      className="w-full h-12 rounded-xl bg-card-background pl-9 pr-4 text-foreground text-lg font-semibold outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                       placeholder="0.00"
                     />
                   </div>
@@ -225,7 +225,7 @@ export default function TicketTypeModal({
                 <button
                   type="button"
                   onClick={() => setLocalIsFree(true)}
-                  className={`rounded-xl px-5 py-3.5 text-sm font-medium transition-all ${
+                  className={`h-12 rounded-xl px-5 text-sm font-medium transition-all ${
                     localIsFree
                       ? "bg-primary text-primary-foreground"
                       : "bg-card-background text-muted-foreground hover:bg-white/15"
@@ -236,7 +236,7 @@ export default function TicketTypeModal({
                 <button
                   type="button"
                   onClick={() => setLocalIsFree(false)}
-                  className={`rounded-xl px-5 py-3.5 text-sm font-medium transition-all ${
+                  className={`h-12 rounded-xl px-5 text-sm font-medium transition-all ${
                     !localIsFree
                       ? "bg-primary text-primary-foreground"
                       : "bg-card-background text-muted-foreground hover:bg-white/15"
