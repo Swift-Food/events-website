@@ -17,6 +17,24 @@ import { Loader, Link as LinkIcon, Copy, Check } from "lucide-react";
 
 type FilterStatus = "all" | "approved" | "pending" | "waitlisted" | "rejected" | "checked_in";
 
+/**
+ * Extract guest display name with proper fallbacks
+ */
+function getGuestDisplayName(guest: GuestTicketResponseDto['guest'] | undefined): string {
+  if (!guest) return "";
+
+  const eventUserName = `${guest.firstName || ""} ${guest.lastName || ""}`.trim();
+  if (eventUserName) return eventUserName;
+
+  if (guest.user) {
+    const userName = `${guest.user.firstName || ""} ${guest.user.lastName || ""}`.trim();
+    if (userName) return userName;
+    if (guest.user.username) return guest.user.username;
+  }
+
+  return "";
+}
+
 export default function GuestManagementPage() {
   const params = useParams();
   const router = useRouter();
@@ -189,8 +207,8 @@ export default function GuestManagementPage() {
   
     const matchesSearch =
       searchQuery === "" ||
-      `${guest.guest.firstName} ${guest.guest.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      guest.guest.user.email.toLowerCase().includes(searchQuery.toLowerCase());
+      getGuestDisplayName(guest.guest).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (guest.guest?.user?.email || "").toLowerCase().includes(searchQuery.toLowerCase());
   
     return matchesStatus && matchesSearch;
   });

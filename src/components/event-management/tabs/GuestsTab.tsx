@@ -18,6 +18,28 @@ import { toast } from "sonner";
 
 type FilterStatus = "all" | "approved" | "pending" | "waitlisted" | "rejected" | "checked_in";
 
+/**
+ * Extract guest display name with proper fallbacks (for search filtering)
+ */
+function getGuestDisplayName(guest: GuestTicketResponseDto['guest'] | undefined): string {
+  if (!guest) return "";
+
+  // Try EventUser firstName/lastName first
+  const eventUserName = `${guest.firstName || ""} ${guest.lastName || ""}`.trim();
+  if (eventUserName) return eventUserName;
+
+  // Try nested User firstName/lastName
+  if (guest.user) {
+    const userName = `${guest.user.firstName || ""} ${guest.user.lastName || ""}`.trim();
+    if (userName) return userName;
+
+    // Try username
+    if (guest.user.username) return guest.user.username;
+  }
+
+  return "";
+}
+
 interface GuestsTabProps {
   eventId: string;
 }
@@ -181,10 +203,10 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
 
     const matchesSearch =
       searchQuery === "" ||
-      `${guest.guest.firstName} ${guest.guest.lastName}`
+      getGuestDisplayName(guest.guest)
         .toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
-      guest.guest.user.email.toLowerCase().includes(searchQuery.toLowerCase());
+      (guest.guest?.user?.email || "").toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesStatus && matchesSearch;
   });

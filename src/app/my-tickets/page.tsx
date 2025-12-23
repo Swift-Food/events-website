@@ -17,16 +17,14 @@ import PaymentModal, {
 } from "@/components/payments/PaymentModal";
 import {
   Ticket,
-  Calendar,
   CheckCircle2,
   Clock,
   Loader2,
-  // ArrowLeft
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 
-type FilterType = "all" | "upcoming" | "past" | "active" | "pending" | "cancelled";
+type FilterType = "all" | "upcoming" | "checked_in" | "active" | "pending" | "cancelled";
 
 export default function MyTicketsPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -244,8 +242,8 @@ export default function MyTicketsPage() {
             ticket.status !== GuestTicketStatus.CANCELLED &&
             ticket.status !== GuestTicketStatus.REFUNDED
           );
-        case "past":
-          return !isUpcoming;
+        case "checked_in":
+          return ticket.status === GuestTicketStatus.CHECKED_IN;
         case "active":
           const eventEndDate = new Date(ticket.eventEndDateTime);
           const hasEnded = eventEndDate < now;
@@ -282,7 +280,7 @@ export default function MyTicketsPage() {
     },
     { id: "pending", label: "Pending", icon: <Clock className="h-4 w-4" /> },
     { id: "cancelled", label: "Cancelled", icon: <Ticket className="h-4 w-4" /> },
-    { id: "past", label: "Past", icon: <Calendar className="h-4 w-4" /> },
+    { id: "checked_in", label: "Checked In", icon: <CheckCircle2 className="h-4 w-4" /> },
     { id: "all", label: "All", icon: <Ticket className="h-4 w-4" /> },
   ];
 

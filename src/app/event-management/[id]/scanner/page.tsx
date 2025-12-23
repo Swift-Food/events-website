@@ -29,6 +29,35 @@ interface CheckInStats {
   percentageCheckedIn: number;
 }
 
+/**
+ * Extract guest display name with proper fallbacks
+ */
+function getGuestDisplayName(guest: GuestTicketResponseDto['guest'] | undefined): string {
+  if (!guest) return "Guest";
+
+  // Try EventUser firstName/lastName first
+  const eventUserName = `${guest.firstName || ""} ${guest.lastName || ""}`.trim();
+  if (eventUserName) return eventUserName;
+
+  // Try nested User firstName/lastName
+  if (guest.user) {
+    const userName = `${guest.user.firstName || ""} ${guest.user.lastName || ""}`.trim();
+    if (userName) return userName;
+
+    // Try username
+    if (guest.user.username) return guest.user.username;
+
+    // Use email prefix as last resort before "Guest"
+    if (guest.user.email) {
+      const emailPrefix = guest.user.email.split("@")[0];
+      // Capitalize first letter
+      return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+    }
+  }
+
+  return "Guest";
+}
+
 interface ScanResult {
   success: boolean;
   ticket?: GuestTicketResponseDto;
@@ -113,11 +142,7 @@ export default function CheckInPage() {
 
     try {
       const result = await guestTicketService.checkInTicket(qrCode);
-
-      // Extract guest name from the guest object
-      const guestName = result.guest
-        ? `${result.guest.firstName || ""} ${result.guest.lastName || ""}`.trim() || "Guest"
-        : "Guest";
+      const guestName = getGuestDisplayName(result.guest);
 
       const scanResult: ScanResult = {
         success: true,

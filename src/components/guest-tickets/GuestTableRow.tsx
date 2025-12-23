@@ -12,6 +12,55 @@ import {
 import { useState } from "react";
 import { GuestActionMenu } from "./GuestActionMenu";
 
+/**
+ * Extract guest display name with proper fallbacks
+ */
+function getGuestDisplayName(guest: GuestTicketResponseDto['guest'] | undefined): string {
+  if (!guest) return "Guest";
+
+  // Try EventUser firstName/lastName first
+  const eventUserName = `${guest.firstName || ""} ${guest.lastName || ""}`.trim();
+  if (eventUserName) return eventUserName;
+
+  // Try nested User firstName/lastName
+  if (guest.user) {
+    const userName = `${guest.user.firstName || ""} ${guest.user.lastName || ""}`.trim();
+    if (userName) return userName;
+
+    // Try username
+    if (guest.user.username) return guest.user.username;
+
+    // Use email prefix as last resort before "Guest"
+    if (guest.user.email) {
+      const emailPrefix = guest.user.email.split("@")[0];
+      return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+    }
+  }
+
+  return "Guest";
+}
+
+/**
+ * Get initials for avatar
+ */
+function getGuestInitials(guest: GuestTicketResponseDto['guest'] | undefined): string {
+  if (!guest) return "?";
+
+  // Try lastName initial first
+  if (guest.lastName) return guest.lastName.charAt(0).toUpperCase();
+  if (guest.firstName) return guest.firstName.charAt(0).toUpperCase();
+
+  // Try nested user
+  if (guest.user) {
+    if (guest.user.lastName) return guest.user.lastName.charAt(0).toUpperCase();
+    if (guest.user.firstName) return guest.user.firstName.charAt(0).toUpperCase();
+    if (guest.user.username) return guest.user.username.charAt(0).toUpperCase();
+    if (guest.user.email) return guest.user.email.charAt(0).toUpperCase();
+  }
+
+  return "?";
+}
+
 interface GuestTableRowProps {
   guest: GuestTicketResponseDto;
   isSelected: boolean;
@@ -90,11 +139,11 @@ export const GuestTableRow = ({
       <td className="p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-            {(guest.guest?.lastName || "").charAt(0).toUpperCase()}
+            {getGuestInitials(guest.guest)}
           </div>
           <div>
-            <p className="font-medium text-foreground">{guest.guest.firstName} {guest.guest.lastName}</p>
-            <p className="font-medium text-foreground">{guest.guest.user.email}</p>
+            <p className="font-medium text-foreground">{getGuestDisplayName(guest.guest)}</p>
+            <p className="text-sm text-muted-foreground">{guest.guest?.user?.email || "No email"}</p>
           </div>
         </div>
       </td>
