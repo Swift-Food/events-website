@@ -62,6 +62,10 @@ export interface GuestTicketResponseDto {
   questionAnswers: Record<string, any> | null;
   qrCode: string | null;
   qrCodeImageUrl: string | null;
+  /** Short 8-character check-in code for manual entry (raw, no hyphen) */
+  checkInCode: string | null;
+  /** Formatted check-in code with hyphen for display (e.g., "ABCD-1234") */
+  checkInCodeFormatted: string | null;
   purchaseDateTime: Date | null;
   checkInDateTime: Date | null;
   createdAt: Date;

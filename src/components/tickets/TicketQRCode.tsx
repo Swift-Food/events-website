@@ -9,6 +9,8 @@ interface TicketQRCodeProps {
   qrCode: string;
   ticketName: string;
   eventName: string;
+  /** Short check-in code formatted with hyphen (e.g., "ABCD-1234") */
+  checkInCodeFormatted?: string | null;
   size?: number;
   showDownload?: boolean;
 }
@@ -17,6 +19,7 @@ export default function TicketQRCode({
   qrCode,
   ticketName,
   eventName,
+  checkInCodeFormatted,
   size = 200,
   showDownload = true,
 }: TicketQRCodeProps) {
@@ -99,6 +102,16 @@ export default function TicketQRCode({
           includeMargin={false}
         />
       </div>
+
+      {/* Short check-in code for manual entry */}
+      {checkInCodeFormatted && (
+        <div className="text-center">
+          <p className="text-xs text-muted-foreground mb-1">Manual entry code</p>
+          <p className="font-mono text-lg font-bold tracking-widest text-foreground">
+            {checkInCodeFormatted}
+          </p>
+        </div>
+      )}
 
       {showDownload && (
         <button

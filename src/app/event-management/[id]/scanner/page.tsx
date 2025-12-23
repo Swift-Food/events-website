@@ -17,6 +17,7 @@ import {
   Users,
   Loader2,
   RotateCcw,
+  Keyboard,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -66,6 +67,10 @@ export default function CheckInPage() {
 
   // Recent check-ins
   const [recentCheckIns, setRecentCheckIns] = useState<ScanResult[]>([]);
+
+  // Manual code entry
+  const [manualCode, setManualCode] = useState("");
+  const [isManualProcessing, setIsManualProcessing] = useState(false);
 
   // Load event and stats
   useEffect(() => {
@@ -281,6 +286,63 @@ export default function CheckInPage() {
     }
   };
 
+  const handleManualCheckIn = async () => {
+    const code = manualCode.trim();
+    if (!code || isManualProcessing) return;
+
+    setIsManualProcessing(true);
+    setLastScanResult(null);
+
+    try {
+      const result = await guestTicketService.checkInByCode(code);
+      const guestName = getGuestDisplayName(result.guest);
+
+      const scanResult: ScanResult = {
+        success: true,
+        ticket: result,
+        message: "Check-in successful!",
+        guestName,
+      };
+
+      setLastScanResult(scanResult);
+      setRecentCheckIns(prev => [scanResult, ...prev].slice(0, 5));
+      setManualCode("");
+
+      // Update stats
+      setStats(prev => prev ? {
+        ...prev,
+        checkedIn: prev.checkedIn + 1,
+        pending: prev.pending - 1,
+        percentageCheckedIn: ((prev.checkedIn + 1) / prev.totalTickets) * 100,
+      } : null);
+
+      // Vibrate on success
+      if (navigator.vibrate) {
+        navigator.vibrate(200);
+      }
+
+      toast.success(`${guestName} checked in!`);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Failed to check in";
+
+      const scanResult: ScanResult = {
+        success: false,
+        message: errorMessage,
+      };
+
+      setLastScanResult(scanResult);
+
+      // Vibrate pattern for error
+      if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]);
+      }
+
+      toast.error(errorMessage);
+    } finally {
+      setIsManualProcessing(false);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -430,6 +492,44 @@ export default function CheckInPage() {
               </button>
             </div>
           )}
+        </div>
+
+        {/* Manual Code Entry */}
+        <div className="rounded-2xl bg-card-background border border-white/5 overflow-hidden mb-6">
+          <div className="p-4 border-b border-white/5">
+            <div className="flex items-center gap-2">
+              <Keyboard className="h-5 w-5 text-primary" />
+              <span className="font-medium text-foreground">Manual Entry</span>
+            </div>
+          </div>
+          <div className="p-4">
+            <p className="text-sm text-muted-foreground mb-3">
+              Enter the 8-character code shown on the guest&apos;s ticket
+            </p>
+            <div className="flex gap-3">
+              <input
+                type="text"
+                value={manualCode}
+                onChange={(e) => setManualCode(e.target.value.toUpperCase())}
+                onKeyDown={(e) => e.key === "Enter" && handleManualCheckIn()}
+                placeholder="XXXX-XXXX"
+                maxLength={9}
+                className="flex-1 rounded-xl bg-card-secondary-background border border-white/10 px-4 py-3 text-center font-mono text-lg tracking-widest uppercase text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+              <button
+                onClick={handleManualCheckIn}
+                disabled={!manualCode.trim() || isManualProcessing}
+                className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isManualProcessing ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="h-5 w-5" />
+                )}
+                Check In
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Last Scan Result */}
