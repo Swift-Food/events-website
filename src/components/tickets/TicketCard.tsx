@@ -385,7 +385,7 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
       {/* QR Code Modal */}
       {showQRModal && ticket.qrCode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-card-background rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-white/5">
+          <div className="bg-card-background rounded-xl p-6 max-w-sm w-full shadow-2xl border border-white/5">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-foreground">Your Ticket</h3>
               <button
