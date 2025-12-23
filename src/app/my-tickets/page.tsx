@@ -26,7 +26,7 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 
-type FilterType = "all" | "upcoming" | "past" | "active" | "pending";
+type FilterType = "all" | "upcoming" | "past" | "active" | "pending" | "cancelled";
 
 export default function MyTicketsPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -127,12 +127,6 @@ export default function MyTicketsPage() {
   };
 
   const handleCancel = async (ticketId: string) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to cancel this ticket? This action cannot be undone."
-    );
-
-    if (!confirmed) return;
-
     try {
       setCancellingTicketId(ticketId);
       const result = await guestTicketService.cancelTicket(ticketId);
@@ -255,6 +249,11 @@ export default function MyTicketsPage() {
             ticket.status === GuestTicketStatus.PENDING_APPROVAL ||
             ticket.status === GuestTicketStatus.PENDING_PAYMENT
           );
+        case "cancelled":
+          return (
+            ticket.status === GuestTicketStatus.CANCELLED ||
+            ticket.status === GuestTicketStatus.REFUNDED
+          );
         default:
           return true;
       }
@@ -275,13 +274,9 @@ export default function MyTicketsPage() {
       label: "Active",
       icon: <CheckCircle2 className="h-4 w-4" />,
     },
-    // {
-    //   id: "upcoming",
-    //   label: "Upcoming",
-    //   icon: <Calendar className="h-4 w-4" />,
-    // },
     { id: "pending", label: "Pending", icon: <Clock className="h-4 w-4" /> },
-    { id: "past", label: "Past", icon: <Ticket className="h-4 w-4" /> },
+    { id: "cancelled", label: "Cancelled", icon: <Ticket className="h-4 w-4" /> },
+    { id: "past", label: "Past", icon: <Calendar className="h-4 w-4" /> },
     { id: "all", label: "All", icon: <Ticket className="h-4 w-4" /> },
   ];
 
