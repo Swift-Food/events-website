@@ -81,7 +81,9 @@ export default function MyTicketsPage() {
 
   const handleRefund = async (ticketId: string) => {
     try {
-      // First check eligibility
+      setRefundingTicketId(ticketId);
+
+      // Check eligibility
       const eligibility = await guestTicketService.checkRefundEligibility(
         ticketId
       );
@@ -93,22 +95,16 @@ export default function MyTicketsPage() {
         return;
       }
 
-      // Confirm with user
-      const confirmed = window.confirm(
-        `Are you sure you want to refund this ticket? You will receive £${
-          eligibility.refundAmount?.toFixed(2) || "0.00"
-        } back.`
-      );
-
-      if (!confirmed) return;
-
-      setRefundingTicketId(ticketId);
+      // Process refund
       const result = await guestTicketService.refundTicket(ticketId, {
         reason: "User requested refund",
       });
 
       if (result.success) {
-        toast.success(result.message || "Refund processed successfully");
+        toast.success(
+          result.message ||
+            `Refund of £${eligibility.refundAmount?.toFixed(2) || "0.00"} processed successfully`
+        );
         // Update ticket status locally
         setTickets((prev) =>
           prev.map((t) =>

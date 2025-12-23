@@ -4,7 +4,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { GuestTicketWithEventResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
-import { Calendar, Ticket, QrCode, X, Clock, CheckCircle2, XCircle, AlertCircle, Loader2, ExternalLink, AlertTriangle } from "lucide-react";
+import { Calendar, Ticket, QrCode, X, Clock, CheckCircle2, XCircle, AlertCircle, Loader2, ExternalLink, AlertTriangle, RotateCcw } from "lucide-react";
 import TicketQRCode from "./TicketQRCode";
 import { format } from "date-fns";
 
@@ -26,7 +26,9 @@ function ConfirmModal({
   title,
   message,
   confirmText,
+  loadingText,
   isLoading,
+  variant = "danger",
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -34,20 +36,30 @@ function ConfirmModal({
   title: string;
   message: string;
   confirmText: string;
+  loadingText?: string;
   isLoading?: boolean;
+  variant?: "danger" | "warning";
 }) {
   if (!isOpen) return null;
 
+  const iconBg = variant === "danger" ? "bg-red-500/20" : "bg-amber-500/20";
+  const iconColor = variant === "danger" ? "text-red-400" : "text-amber-400";
+  const buttonBg = variant === "danger" ? "bg-red-500 hover:bg-red-600" : "bg-amber-500 hover:bg-amber-600";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="bg-card-background rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+      <div className="bg-card-background rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-white/5">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-full bg-red-500/20">
-            <AlertTriangle className="h-5 w-5 text-red-400" />
+          <div className={`p-2.5 rounded-full ${iconBg}`}>
+            {variant === "danger" ? (
+              <AlertTriangle className={`h-5 w-5 ${iconColor}`} />
+            ) : (
+              <RotateCcw className={`h-5 w-5 ${iconColor}`} />
+            )}
           </div>
           <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         </div>
-        <p className="text-muted-foreground text-sm mb-6">{message}</p>
+        <p className="text-muted-foreground text-sm mb-6 leading-relaxed">{message}</p>
         <div className="flex gap-3">
           <button
             onClick={onClose}
@@ -59,12 +71,12 @@ function ConfirmModal({
           <button
             onClick={onConfirm}
             disabled={isLoading}
-            className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-medium hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className={`flex-1 px-4 py-2.5 ${buttonBg} text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2`}
           >
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Cancelling...
+                {loadingText || "Processing..."}
               </>
             ) : (
               confirmText
@@ -122,14 +134,17 @@ const statusConfig: Record<GuestTicketStatus, { label: string; color: string; ic
 export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePayment, isProcessingPayment, onCancel, isCancelling }: TicketCardProps) {
   const [showQRModal, setShowQRModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showRefundModal, setShowRefundModal] = useState(false);
 
   const status = statusConfig[ticket.status] || statusConfig[GuestTicketStatus.ACTIVE];
   const eventDate = new Date(ticket.eventStartDateTime);
   const isUpcoming = eventDate > new Date();
   const canShowQR = ticket.status === GuestTicketStatus.ACTIVE && ticket.qrCode;
   const isPendingPayment = ticket.status === GuestTicketStatus.PENDING_PAYMENT;
+  const isActive = ticket.status === GuestTicketStatus.ACTIVE;
   const canCancel = (ticket.status === GuestTicketStatus.PENDING_PAYMENT ||
     ticket.status === GuestTicketStatus.PENDING_APPROVAL) && isUpcoming && onCancel;
+  const canRefund = isActive && isUpcoming && onRefund;
 
   const handleCancelClick = () => {
     setShowCancelModal(true);
@@ -142,20 +157,36 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
     setShowCancelModal(false);
   };
 
+  const handleRefundClick = () => {
+    setShowRefundModal(true);
+  };
+
+  const handleConfirmRefund = () => {
+    if (onRefund) {
+      onRefund(ticket.id);
+    }
+    setShowRefundModal(false);
+  };
+
   return (
     <>
-      <div className="rounded-2xl bg-card-background backdrop-blur-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+      <div className="rounded-2xl bg-card-background border border-white/5 overflow-hidden shadow-lg hover:shadow-xl transition-all hover:border-white/10">
         {/* Event Image */}
-        <div className="relative h-32 bg-gradient-to-br from-primary/20 to-primary/5">
-          {ticket.eventImage && (
+        <div className="relative h-36 bg-gradient-to-br from-primary/20 to-primary/5">
+          {ticket.eventImage ? (
             <img
               src={ticket.eventImage}
               alt={ticket.eventName}
               className="w-full h-full object-cover"
             />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Ticket className="h-12 w-12 text-primary/30" />
+            </div>
           )}
+          <div className="absolute inset-0 bg-gradient-to-t from-card-background/80 to-transparent" />
           <div className="absolute top-3 right-3">
-            <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${status.color}`}>
+            <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm ${status.color}`}>
               {status.icon}
               {status.label}
             </span>
@@ -169,79 +200,111 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
           </h3>
 
           <div className="flex items-center gap-2 text-muted-foreground text-sm mb-3">
-            <Ticket className="h-4 w-4" />
+            <Ticket className="h-4 w-4 text-primary/60" />
             <span>{ticket.ticketName}</span>
           </div>
 
-          <div className="space-y-2 mb-4">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <Calendar className="h-4 w-4 shrink-0" />
-              <span>{format(eventDate, "EEE, MMM d, yyyy 'at' h:mm a")}</span>
-            </div>
+          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-5">
+            <Calendar className="h-4 w-4 shrink-0 text-primary/60" />
+            <span>{format(eventDate, "EEE, MMM d, yyyy 'at' h:mm a")}</span>
           </div>
 
-          {/* Actions - Stacked layout for pending payment */}
-          <div className="pt-3 border-t border-foreground/10 space-y-3">
-            {/* Primary actions row */}
-            <div className="flex items-center gap-2">
-              {canShowQR && (
-                <button
-                  onClick={() => setShowQRModal(true)}
-                  className="flex items-center justify-center p-2.5 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-colors"
-                  aria-label="View QR Code"
-                >
-                  <QrCode className="h-5 w-5" />
-                </button>
-              )}
-
-              {isPendingPayment && onCompletePayment && (
-                <button
-                  onClick={() => onCompletePayment(ticket.id)}
-                  disabled={isProcessingPayment}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isProcessingPayment ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    "Complete Payment"
+          {/* Actions */}
+          <div className="pt-4 border-t border-white/5 space-y-3">
+            {/* Active ticket layout */}
+            {isActive && (
+              <>
+                <div className="flex items-center gap-2">
+                  {canShowQR && (
+                    <button
+                      onClick={() => setShowQRModal(true)}
+                      className="flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors flex-1"
+                      aria-label="View QR Code"
+                    >
+                      <QrCode className="h-4 w-4" />
+                      View QR Code
+                    </button>
                   )}
-                </button>
-              )}
+                  <Link
+                    href={`/events/${ticket.eventId}`}
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white/5 text-foreground rounded-xl text-sm font-medium hover:bg-white/10 transition-colors flex-1"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Event Details
+                  </Link>
+                </div>
+                {canRefund && (
+                  <button
+                    onClick={handleRefundClick}
+                    disabled={isRefunding}
+                    className="w-full px-4 py-2.5 bg-transparent border border-red-500/30 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/10 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {isRefunding ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Processing Refund...
+                      </>
+                    ) : (
+                      <>
+                        <RotateCcw className="h-4 w-4" />
+                        Request Refund
+                      </>
+                    )}
+                  </button>
+                )}
+              </>
+            )}
 
-              {!isPendingPayment && (
-                <Link
-                  href={`/events/${ticket.eventId}`}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-foreground/10 text-foreground rounded-xl text-sm font-medium hover:bg-foreground/20 transition-colors"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  View Event
-                </Link>
-              )}
-
-              {ticket.status === GuestTicketStatus.ACTIVE && isUpcoming && onRefund && (
-                <button
-                  onClick={() => onRefund(ticket.id)}
-                  disabled={isRefunding}
-                  className="px-4 py-2.5 bg-red-500/10 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/20 transition-colors disabled:opacity-50"
-                >
-                  {isRefunding ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    "Refund"
-                  )}
-                </button>
-              )}
-            </div>
-
-            {/* Secondary actions for pending payment */}
+            {/* Pending payment layout */}
             {isPendingPayment && (
-              <div className="flex items-center gap-2">
+              <>
+                {onCompletePayment && (
+                  <button
+                    onClick={() => onCompletePayment(ticket.id)}
+                    disabled={isProcessingPayment}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isProcessingPayment ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      "Complete Payment"
+                    )}
+                  </button>
+                )}
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/events/${ticket.eventId}`}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white/5 text-foreground rounded-xl text-sm font-medium hover:bg-white/10 transition-colors"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    View Event
+                  </Link>
+                  {canCancel && (
+                    <button
+                      onClick={handleCancelClick}
+                      disabled={isCancelling}
+                      className="px-4 py-2.5 bg-transparent border border-red-500/30 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                    >
+                      {isCancelling ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Cancel"
+                      )}
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* Other status layout (not active, not pending payment) */}
+            {!isActive && !isPendingPayment && (
+              <>
                 <Link
                   href={`/events/${ticket.eventId}`}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-foreground/10 text-foreground rounded-xl text-sm font-medium hover:bg-foreground/20 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white/5 text-foreground rounded-xl text-sm font-medium hover:bg-white/10 transition-colors"
                 >
                   <ExternalLink className="h-4 w-4" />
                   View Event
@@ -250,31 +313,16 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
                   <button
                     onClick={handleCancelClick}
                     disabled={isCancelling}
-                    className="px-4 py-2.5 bg-red-500/10 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                    className="w-full px-4 py-2.5 bg-transparent border border-red-500/30 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/10 transition-colors disabled:opacity-50"
                   >
                     {isCancelling ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      "Cancel"
+                      "Cancel Ticket"
                     )}
                   </button>
                 )}
-              </div>
-            )}
-
-            {/* Cancel button for pending approval (non-payment pending) */}
-            {!isPendingPayment && canCancel && (
-              <button
-                onClick={handleCancelClick}
-                disabled={isCancelling}
-                className="w-full px-4 py-2.5 bg-red-500/10 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/20 transition-colors disabled:opacity-50"
-              >
-                {isCancelling ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  "Cancel Ticket"
-                )}
-              </button>
+              </>
             )}
           </div>
         </div>
@@ -288,13 +336,28 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
         title="Cancel Ticket"
         message="Are you sure you want to cancel this ticket? This action cannot be undone."
         confirmText="Yes, Cancel"
+        loadingText="Cancelling..."
         isLoading={isCancelling}
+        variant="danger"
+      />
+
+      {/* Refund Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showRefundModal}
+        onClose={() => setShowRefundModal(false)}
+        onConfirm={handleConfirmRefund}
+        title="Request Refund"
+        message="Are you sure you want to request a refund for this ticket? The refund amount will be credited back to your original payment method."
+        confirmText="Yes, Refund"
+        loadingText="Processing..."
+        isLoading={isRefunding}
+        variant="warning"
       />
 
       {/* QR Code Modal */}
       {showQRModal && ticket.qrCode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-card-background rounded-3xl p-6 max-w-sm w-full shadow-2xl">
+          <div className="bg-card-background rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-white/5">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-foreground">Your Ticket</h3>
               <button
