@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { EventResponseDto } from "@/types";
-import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, AlertTriangle, Loader2, CreditCard } from "lucide-react";
+import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, AlertTriangle, Loader2, CreditCard, Upload, FileSpreadsheet, X } from "lucide-react";
 import Image from "next/image";
 import { guestTicketService } from "@/services/guest-ticket.service";
+import { eventTicketService } from "@/services/event-ticket.service";
 import { toast } from "sonner";
 
 interface OverviewTabProps {
@@ -21,6 +22,13 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
   const [isLoadingRefundInfo, setIsLoadingRefundInfo] = useState(false);
   const [isRefunding, setIsRefunding] = useState(false);
   const [refundComplete, setRefundComplete] = useState(false);
+
+  // CSV upload modal state
+  const [showCsvUploadModal, setShowCsvUploadModal] = useState(false);
+  const [selectedCsvTicketId, setSelectedCsvTicketId] = useState<string>("");
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [replaceEmails, setReplaceEmails] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Fetch refundable ticket info when modal opens
   useEffect(() => {
@@ -102,6 +110,53 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
   };
 
   const ticketStats = getTicketStats();
+
+  const handleOpenCsvUploadModal = () => {
+    setShowCsvUploadModal(true);
+    setSelectedCsvTicketId("");
+    setCsvFile(null);
+    setReplaceEmails(false);
+  };
+
+  const handleCsvFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.name.endsWith(".csv")) {
+        toast.error("Please select a CSV file");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size must be less than 5MB");
+        return;
+      }
+      setCsvFile(file);
+    }
+  };
+
+  const handleCsvUpload = async () => {
+    if (!selectedCsvTicketId || !csvFile) {
+      toast.error("Please select a ticket type and upload a CSV file");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const result = await eventTicketService.uploadApprovedEmailsCsv(
+        selectedCsvTicketId,
+        csvFile,
+        replaceEmails
+      );
+      toast.success(`Added ${result.added} approved emails (${result.total} total)`);
+      setShowCsvUploadModal(false);
+      setCsvFile(null);
+      setSelectedCsvTicketId("");
+      setReplaceEmails(false);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to upload CSV");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -233,6 +288,14 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
 
           <div className="flex items-center gap-2">
             <button
+              onClick={handleOpenCsvUploadModal}
+              className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
+              title="Upload approved emails CSV"
+            >
+              <Upload className="h-4 w-4" />
+              <span className="hidden sm:inline">Upload CSV</span>
+            </button>
+            <button
               onClick={onEditClick}
               className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
             >
@@ -361,6 +424,128 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
                   "Delete Event"
                 )}
               </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* CSV Upload Modal */}
+      {showCsvUploadModal && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm"
+            onClick={() => setShowCsvUploadModal(false)}
+          />
+          <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-card-background border border-white/5 p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-foreground">Upload Approved Emails</h3>
+              <button
+                onClick={() => setShowCsvUploadModal(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Upload a CSV file with approved invitee emails for a specific ticket type.
+              </p>
+
+              {/* Ticket Selection */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Select Ticket Type
+                </label>
+                <select
+                  value={selectedCsvTicketId}
+                  onChange={(e) => setSelectedCsvTicketId(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none"
+                >
+                  <option value="">Choose a ticket type...</option>
+                  {eventData.eventTickets?.map((ticket) => (
+                    <option key={ticket.id} value={ticket.id}>
+                      {ticket.name} ({ticket.quantityLeft} available)
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* File Upload */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  CSV File
+                </label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleCsvFileChange}
+                    className="hidden"
+                    id="csv-file-input-overview"
+                  />
+                  <label
+                    htmlFor="csv-file-input-overview"
+                    className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 bg-white/5 p-4 transition-colors hover:border-white/30"
+                  >
+                    {csvFile ? (
+                      <div className="flex items-center gap-2 text-sm text-foreground">
+                        <FileSpreadsheet className="h-5 w-5 text-green-400" />
+                        {csvFile.name}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Upload className="h-5 w-5" />
+                        Click to upload CSV (max 5MB)
+                      </div>
+                    )}
+                  </label>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  CSV should have an &quot;email&quot; column header, or emails in the first column.
+                </p>
+              </div>
+
+              {/* Replace Option */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="replace-emails-overview"
+                  checked={replaceEmails}
+                  onChange={(e) => setReplaceEmails(e.target.checked)}
+                  className="h-4 w-4 rounded border-white/20 bg-white/5 text-primary focus:ring-primary"
+                />
+                <label htmlFor="replace-emails-overview" className="text-sm text-foreground">
+                  Replace existing approved emails
+                </label>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setShowCsvUploadModal(false)}
+                  className="flex-1 rounded-xl bg-white/5 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCsvUpload}
+                  disabled={!selectedCsvTicketId || !csvFile || isUploading}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4" />
+                      Upload
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </>
