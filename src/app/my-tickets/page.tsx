@@ -38,6 +38,9 @@ export default function MyTicketsPage() {
   const [refundingTicketId, setRefundingTicketId] = useState<string | null>(
     null
   );
+  const [cancellingTicketId, setCancellingTicketId] = useState<string | null>(
+    null
+  );
 
   // Payment state
   const [processingPaymentTicketId, setProcessingPaymentTicketId] = useState<
@@ -120,6 +123,36 @@ export default function MyTicketsPage() {
       toast.error(error.response?.data?.message || "Failed to process refund");
     } finally {
       setRefundingTicketId(null);
+    }
+  };
+
+  const handleCancel = async (ticketId: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to cancel this ticket? This action cannot be undone."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setCancellingTicketId(ticketId);
+      const result = await guestTicketService.cancelTicket(ticketId);
+
+      if (result.success) {
+        toast.success(result.message || "Ticket cancelled successfully");
+        // Update ticket status locally
+        setTickets((prev) =>
+          prev.map((t) =>
+            t.id === ticketId ? { ...t, status: GuestTicketStatus.CANCELLED } : t
+          )
+        );
+      } else {
+        toast.error(result.message || "Failed to cancel ticket");
+      }
+    } catch (error: any) {
+      console.error("Cancel failed:", error);
+      toast.error(error.response?.data?.message || "Failed to cancel ticket");
+    } finally {
+      setCancellingTicketId(null);
     }
   };
 
@@ -335,6 +368,8 @@ export default function MyTicketsPage() {
                 isRefunding={refundingTicketId === ticket.id}
                 onCompletePayment={handleCompletePayment}
                 isProcessingPayment={processingPaymentTicketId === ticket.id}
+                onCancel={handleCancel}
+                isCancelling={cancellingTicketId === ticket.id}
               />
             ))}
           </div>

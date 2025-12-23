@@ -14,6 +14,8 @@ interface TicketCardProps {
   isRefunding?: boolean;
   onCompletePayment?: (ticketId: string) => void;
   isProcessingPayment?: boolean;
+  onCancel?: (ticketId: string) => void;
+  isCancelling?: boolean;
 }
 
 const statusConfig: Record<GuestTicketStatus, { label: string; color: string; icon: React.ReactNode }> = {
@@ -59,7 +61,7 @@ const statusConfig: Record<GuestTicketStatus, { label: string; color: string; ic
   },
 };
 
-export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePayment, isProcessingPayment }: TicketCardProps) {
+export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePayment, isProcessingPayment, onCancel, isCancelling }: TicketCardProps) {
   const [showQRModal, setShowQRModal] = useState(false);
 
   const status = statusConfig[ticket.status] || statusConfig[GuestTicketStatus.ACTIVE];
@@ -152,6 +154,23 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   "Refund"
+                )}
+              </button>
+            )}
+
+            {/* Cancel button for unpaid tickets */}
+            {(ticket.status === GuestTicketStatus.PENDING_PAYMENT ||
+              ticket.status === GuestTicketStatus.PENDING_APPROVAL) &&
+              isUpcoming && onCancel && (
+              <button
+                onClick={() => onCancel(ticket.id)}
+                disabled={isCancelling}
+                className="px-4 py-2.5 bg-red-500/10 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/20 transition-colors disabled:opacity-50 whitespace-nowrap"
+              >
+                {isCancelling ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Cancel"
                 )}
               </button>
             )}
