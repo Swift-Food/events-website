@@ -75,11 +75,11 @@ class EventTicketService {
     ticketId: string,
     file: File,
     replace: boolean = false
-  ): Promise<{ added: number; total: number }> {
+  ): Promise<{ success: boolean; message: string }> {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response: AxiosResponse<{ added: number; total: number }> =
+    const response: AxiosResponse<{ success: boolean; message: string }> =
       await apiClient.post(
         `${this.baseUrl}/${ticketId}/approved-emails/upload${replace ? "?replace=true" : ""}`,
         formData,
