@@ -510,7 +510,14 @@ export default function CheckInPage() {
               <input
                 type="text"
                 value={manualCode}
-                onChange={(e) => setManualCode(e.target.value.toUpperCase())}
+                onChange={(e) => {
+                  // Strip non-alphanumeric, uppercase, auto-insert hyphen after 4 chars
+                  const raw = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+                  const formatted = raw.length > 4
+                    ? `${raw.slice(0, 4)}-${raw.slice(4, 8)}`
+                    : raw;
+                  setManualCode(formatted);
+                }}
                 onKeyDown={(e) => e.key === "Enter" && handleManualCheckIn()}
                 placeholder="XXXX-XXXX"
                 maxLength={9}
