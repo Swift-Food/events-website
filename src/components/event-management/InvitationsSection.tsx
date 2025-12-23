@@ -12,7 +12,7 @@ export function InvitationsSection({ onInviteClick }: InvitationsSectionProps) {
       <div>
         <h3 className="text-sm font-semibold text-foreground">Invitations</h3>
         <p className="text-sm text-muted-foreground">
-          Invite subscribers, contacts and past guests via email or SMS.Invite guests via CSV or invitation link.
+        Invite guests via CSV upload (auto-sends invitations) or shareable invitation link.
         </p>
       </div>
       <button
