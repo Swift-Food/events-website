@@ -378,7 +378,7 @@ export default function EventPreviewModal({
               )}
 
               {/* Event Image */}
-              <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-neutral-700 bg-card-secondary-background mb-6">
+              <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-neutral-700 bg-card-secondary-background mb-6">
                 {event.eventImage ? (
                   <Image
                     src={event.eventImage}
