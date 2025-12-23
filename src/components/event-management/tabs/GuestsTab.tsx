@@ -15,6 +15,7 @@ import { GuestStatsCards } from "@/components/guest-tickets/GuestTicketStatsCard
 import { GuestFilters, GuestTable, BulkActionBar } from "@/components/guest-tickets";
 import { Loader, Link as LinkIcon, Copy, Check, X, Upload } from "lucide-react";
 import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
+import { InvitationsSection } from "@/components/event-management/InvitationsSection";
 import { toast } from "sonner";
 
 type FilterStatus = "all" | "approved" | "pending" | "waitlisted" | "rejected" | "checked_in";
@@ -285,6 +286,8 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
           waitlistedCount={guests.filter((g) => g.status === GuestTicketStatus.WAITLISTED).length}
           rejectedCount={guests.filter((g) => g.status === GuestTicketStatus.CANCELLED).length}
         />
+
+        <InvitationsSection onInviteClick={handleOpenCsvUploadModal} />
 
         <GuestFilters
           filterStatus={filterStatus}

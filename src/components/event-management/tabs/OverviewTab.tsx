@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { EventResponseDto } from "@/types";
 import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, AlertTriangle, Loader2, CreditCard, Upload } from "lucide-react";
 import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
+import { InvitationsSection } from "@/components/event-management/InvitationsSection";
 import Image from "next/image";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { toast } from "sonner";
@@ -261,6 +262,8 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
           </div>
         </div>
       </div>
+
+      <InvitationsSection onInviteClick={() => setShowCsvUploadModal(true)} />
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
