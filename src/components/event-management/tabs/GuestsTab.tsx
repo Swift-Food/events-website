@@ -325,7 +325,7 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
       {/* Invite Modal */}
       {showInviteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-card-background border border-white/10 p-6 shadow-xl">
+          <div className="w-[calc(100%-2rem)] max-w-md rounded-2xl bg-card-background border border-white/10 p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <button
