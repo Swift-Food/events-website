@@ -164,10 +164,7 @@ export function BundleDetailsModal({
                 ${bundle.pricePerPerson}/person • Serves {bundle.baseGuestCount} people
               </p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">Total Items</p>
-              <p className="text-xl font-semibold text-foreground">{bundle.items.length}</p>
-            </div>
+ 
           </div>
         </div>
 
