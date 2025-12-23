@@ -13,7 +13,8 @@ import { EventTicketResponseDto } from "@/types/event-ticket/response/ticket.dto
 import { GuestManagementHeader } from "@/components/guest-tickets/GuestManagementHeader";
 import { GuestStatsCards } from "@/components/guest-tickets/GuestTicketStatsCard";
 import { GuestFilters, GuestTable, BulkActionBar } from "@/components/guest-tickets";
-import { Loader, Link as LinkIcon, Copy, Check, X, Upload, FileSpreadsheet } from "lucide-react";
+import { Loader, Link as LinkIcon, Copy, Check, X, Upload } from "lucide-react";
+import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
 import { toast } from "sonner";
 
 type FilterStatus = "all" | "approved" | "pending" | "waitlisted" | "rejected" | "checked_in";
@@ -67,10 +68,6 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
 
   // CSV upload modal state
   const [showCsvUploadModal, setShowCsvUploadModal] = useState(false);
-  const [selectedCsvTicketId, setSelectedCsvTicketId] = useState<string>("");
-  const [csvFile, setCsvFile] = useState<File | null>(null);
-  const [replaceEmails, setReplaceEmails] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     fetchGuestData();
@@ -207,51 +204,8 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
       const tickets = await eventTicketService.getEventTickets(eventId);
       setAvailableTickets(tickets);
       setShowCsvUploadModal(true);
-      setSelectedCsvTicketId("");
-      setCsvFile(null);
-      setReplaceEmails(false);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to load ticket types");
-    }
-  };
-
-  const handleCsvFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (!file.name.endsWith(".csv")) {
-        toast.error("Please select a CSV file");
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("File size must be less than 5MB");
-        return;
-      }
-      setCsvFile(file);
-    }
-  };
-
-  const handleCsvUpload = async () => {
-    if (!selectedCsvTicketId || !csvFile) {
-      toast.error("Please select a ticket type and upload a CSV file");
-      return;
-    }
-
-    try {
-      setIsUploading(true);
-      const result = await eventTicketService.uploadApprovedEmailsCsv(
-        selectedCsvTicketId,
-        csvFile,
-        replaceEmails
-      );
-      toast.success(`Added ${result.added} approved emails (${result.total} total)`);
-      setShowCsvUploadModal(false);
-      setCsvFile(null);
-      setSelectedCsvTicketId("");
-      setReplaceEmails(false);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to upload CSV");
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -452,123 +406,11 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
         </div>
       )}
 
-      {/* CSV Upload Modal */}
-      {showCsvUploadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-card-background border border-white/10 p-6 shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground">Upload Approved Emails</h3>
-              <button
-                onClick={() => setShowCsvUploadModal(false)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Upload a CSV file with approved invitee emails for a specific ticket type.
-              </p>
-
-              {/* Ticket Selection */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Select Ticket Type
-                </label>
-                <select
-                  value={selectedCsvTicketId}
-                  onChange={(e) => setSelectedCsvTicketId(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-card-secondary-background px-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none"
-                >
-                  <option value="">Choose a ticket type...</option>
-                  {availableTickets.map((ticket) => (
-                    <option key={ticket.id} value={ticket.id}>
-                      {ticket.name} ({ticket.quantityLeft} available)
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* File Upload */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  CSV File
-                </label>
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept=".csv"
-                    onChange={handleCsvFileChange}
-                    className="hidden"
-                    id="csv-file-input"
-                  />
-                  <label
-                    htmlFor="csv-file-input"
-                    className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 bg-card-secondary-background p-4 transition-colors hover:border-white/30"
-                  >
-                    {csvFile ? (
-                      <div className="flex items-center gap-2 text-sm text-foreground">
-                        <FileSpreadsheet className="h-5 w-5 text-green-400" />
-                        {csvFile.name}
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Upload className="h-5 w-5" />
-                        Click to upload CSV (max 5MB)
-                      </div>
-                    )}
-                  </label>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  CSV should have an &quot;email&quot; column header, or emails in the first column.
-                </p>
-              </div>
-
-              {/* Replace Option */}
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="replace-emails"
-                  checked={replaceEmails}
-                  onChange={(e) => setReplaceEmails(e.target.checked)}
-                  className="h-4 w-4 rounded border-white/20 bg-card-secondary-background text-primary focus:ring-primary"
-                />
-                <label htmlFor="replace-emails" className="text-sm text-foreground">
-                  Replace existing approved emails
-                </label>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => setShowCsvUploadModal(false)}
-                  className="flex-1 rounded-xl bg-white/5 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCsvUpload}
-                  disabled={!selectedCsvTicketId || !csvFile || isUploading}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
-                >
-                  {isUploading ? (
-                    <>
-                      <Loader className="h-4 w-4 animate-spin" />
-                      Uploading...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-4 w-4" />
-                      Upload
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <CsvUploadModal
+        isOpen={showCsvUploadModal}
+        onClose={() => setShowCsvUploadModal(false)}
+        tickets={availableTickets}
+      />
     </>
   );
 }
