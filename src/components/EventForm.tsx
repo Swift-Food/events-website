@@ -136,6 +136,9 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
       setStart(formatDateTimeForInput(initialData.startDateTime));
       setEnd(formatDateTimeForInput(initialData.endDateTime));
 
+      // Require approval (isPrivate)
+      setRequireApproval(initialData.isPrivate || false);
+
       // Address data
       if (initialData.address) {
         setVenueName(initialData.address.name || "");
@@ -383,7 +386,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
         ownerEventUserId: eventUser.id,
         startDateTime: start,
         endDateTime: end,
-        isPrivate: false,
+        isPrivate: requireApproval,
         addressData: {
           name: venueName || undefined,
           addressLine1: addressLine1,
