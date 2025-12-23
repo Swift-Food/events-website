@@ -85,10 +85,10 @@ export default function GuestManagementPage() {
     }
   };
 
-  const handleApprove = async (ticketId: string) => {
+  const handleApprove = async (ticketId: string, reason?: string) => {
     try {
       setIsReviewLoading(true);
-      await guestTicketService.approveTicket(ticketId);
+      await guestTicketService.approveTicket(ticketId, reason);
       toast.success("Guest approved successfully");
       setShowReviewModal(false);
       setReviewGuest(null);

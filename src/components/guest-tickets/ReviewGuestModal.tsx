@@ -11,7 +11,7 @@ interface ReviewGuestModalProps {
   isOpen: boolean;
   guest: ReviewableGuest | null;
   onClose: () => void;
-  onApprove: (ticketId: string) => void;
+  onApprove: (ticketId: string, reason?: string) => void;
   onReject: (ticketId: string, reason?: string) => void;
   isLoading?: boolean;
 }
@@ -62,8 +62,8 @@ export function ReviewGuestModal({
   onReject,
   isLoading = false,
 }: ReviewGuestModalProps) {
-  const [rejectReason, setRejectReason] = useState("");
-  const [showRejectForm, setShowRejectForm] = useState(false);
+  const [reason, setReason] = useState("");
+  const [activeAction, setActiveAction] = useState<"approve" | "reject" | null>(null);
 
   if (!isOpen || !guest) return null;
 
@@ -71,23 +71,34 @@ export function ReviewGuestModal({
   const hasQuestions = questionAnswers && Object.keys(questionAnswers).length > 0;
 
   const handleApprove = () => {
-    onApprove(guest.id);
+    if (activeAction === "approve") {
+      onApprove(guest.id, reason || undefined);
+      setReason("");
+      setActiveAction(null);
+    } else {
+      setActiveAction("approve");
+    }
   };
 
   const handleReject = () => {
-    if (showRejectForm) {
-      onReject(guest.id, rejectReason || undefined);
-      setRejectReason("");
-      setShowRejectForm(false);
+    if (activeAction === "reject") {
+      onReject(guest.id, reason || undefined);
+      setReason("");
+      setActiveAction(null);
     } else {
-      setShowRejectForm(true);
+      setActiveAction("reject");
     }
   };
 
   const handleClose = () => {
-    setRejectReason("");
-    setShowRejectForm(false);
+    setReason("");
+    setActiveAction(null);
     onClose();
+  };
+
+  const handleCancelAction = () => {
+    setReason("");
+    setActiveAction(null);
   };
 
   return (
@@ -166,16 +177,16 @@ export function ReviewGuestModal({
             </div>
           )}
 
-          {/* Reject Reason Form */}
-          {showRejectForm && (
+          {/* Reason Form */}
+          {activeAction && (
             <div className="mt-6 space-y-3">
               <label className="text-sm font-medium text-foreground">
-                Rejection Reason (optional)
+                {activeAction === "approve" ? "Approval" : "Rejection"} Reason (optional)
               </label>
               <textarea
-                value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
-                placeholder="Enter a reason for rejection..."
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder={`Enter a reason for ${activeAction === "approve" ? "approval" : "rejection"}...`}
                 className="w-full rounded-xl bg-input-background border border-white/10 p-3 text-foreground placeholder-muted-foreground outline-none focus:ring-2 focus:ring-primary resize-none"
                 rows={3}
               />
@@ -185,23 +196,34 @@ export function ReviewGuestModal({
 
         {/* Footer Actions */}
         <div className="flex items-center justify-end gap-3 p-6 border-t border-white/10">
-          {showRejectForm ? (
+          {activeAction ? (
             <>
               <button
-                onClick={() => setShowRejectForm(false)}
+                onClick={handleCancelAction}
                 disabled={isLoading}
                 className="rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
                 Cancel
               </button>
-              <button
-                onClick={handleReject}
-                disabled={isLoading}
-                className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
-              >
-                <XCircle className="h-4 w-4" />
-                Confirm Reject
-              </button>
+              {activeAction === "approve" ? (
+                <button
+                  onClick={handleApprove}
+                  disabled={isLoading}
+                  className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Confirm Approve
+                </button>
+              ) : (
+                <button
+                  onClick={handleReject}
+                  disabled={isLoading}
+                  className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                >
+                  <XCircle className="h-4 w-4" />
+                  Confirm Reject
+                </button>
+              )}
             </>
           ) : (
             <>
