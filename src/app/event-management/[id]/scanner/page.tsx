@@ -17,7 +17,6 @@ import {
   Users,
   Loader2,
   RotateCcw,
-  Keyboard,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -61,13 +60,9 @@ export default function CheckInPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const lastScannedRef = useRef<string>("");
   const [cameraAspectRatio, setCameraAspectRatio] = useState<number | null>(null);
-  const [viewfinderSize, setViewfinderSize] = useState(200); // Default 200px on mobile
+  const [viewfinderSize, setViewfinderSize] = useState(200);
   const [isResizing, setIsResizing] = useState(false);
   const resizeStartRef = useRef<{ startY: number; startSize: number } | null>(null);
-
-  // Manual entry state - visible by default
-  const [showManualEntry, setShowManualEntry] = useState(true);
-  const [manualCode, setManualCode] = useState("");
 
   // Recent check-ins
   const [recentCheckIns, setRecentCheckIns] = useState<ScanResult[]>([]);
@@ -238,14 +233,6 @@ export default function CheckInPage() {
     }
   };
 
-  const handleManualSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!manualCode.trim()) return;
-
-    await handleCheckIn(manualCode.trim());
-    setManualCode("");
-  };
-
   // Viewfinder resize handlers
   const handleResizeStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     e.preventDefault();
@@ -312,7 +299,7 @@ export default function CheckInPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-2xl px-4 py-6">
+      <div className="mx-auto max-w-4xl px-4 py-6">
         {/* Header */}
         <div className="mb-6">
           <Link
@@ -346,28 +333,17 @@ export default function CheckInPage() {
 
         {/* Scanner Area */}
         <div className="rounded-2xl bg-card-background border border-white/5 overflow-hidden mb-6">
-          <div className="p-4 border-b border-white/5 flex items-center justify-between">
+          <div className="p-4 border-b border-white/5">
             <div className="flex items-center gap-2">
               <Camera className="h-5 w-5 text-primary" />
               <span className="font-medium text-foreground">QR Scanner</span>
             </div>
-            <button
-              onClick={() => setShowManualEntry(!showManualEntry)}
-              className={`flex items-center gap-1.5 text-sm transition-colors ${
-                showManualEntry
-                  ? "text-primary hover:text-primary/80"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Keyboard className="h-4 w-4" />
-              {showManualEntry ? "Hide Manual" : "Manual Entry"}
-            </button>
           </div>
 
-          {/* Scanner Container - uses detected camera ratio on mobile, square on desktop */}
+          {/* Scanner Container - uses detected camera ratio, full width */}
           <div
-            className={`relative max-h-[400px] bg-black overflow-hidden ${
-              !cameraAspectRatio ? "aspect-square" : ""
+            className={`relative bg-black overflow-hidden ${
+              !cameraAspectRatio ? "aspect-[4/3]" : ""
             }`}
             style={cameraAspectRatio ? { aspectRatio: `${cameraAspectRatio}` } : undefined}
           >
@@ -437,28 +413,6 @@ export default function CheckInPage() {
                 <CameraOff className="h-4 w-4" />
                 Stop Scanning
               </button>
-            </div>
-          )}
-
-          {/* Manual Entry */}
-          {showManualEntry && (
-            <div className="p-4 border-t border-white/5">
-              <form onSubmit={handleManualSubmit} className="flex gap-2">
-                <input
-                  type="text"
-                  value={manualCode}
-                  onChange={(e) => setManualCode(e.target.value)}
-                  placeholder="Enter QR code manually..."
-                  className="flex-1 px-4 py-2.5 bg-card-secondary-background border border-white/10 rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50"
-                />
-                <button
-                  type="submit"
-                  disabled={!manualCode.trim() || isProcessing}
-                  className="px-4 py-2.5 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-all disabled:opacity-50"
-                >
-                  Check In
-                </button>
-              </form>
             </div>
           )}
         </div>
