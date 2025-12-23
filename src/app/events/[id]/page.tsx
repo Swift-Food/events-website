@@ -307,10 +307,37 @@ export default function EventDetailsPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Management Banner - Mobile (full width) */}
+      {canManageEvent && (
+        <div className="sm:hidden border-y border-pink-500/30 bg-pink-500/10">
+          <div className="px-6 py-3 flex flex-col gap-3">
+            <span className="text-sm text-neutral-300">
+              You have manage access for this event.
+            </span>
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/event-management/${eventId}/scanner`}
+                className="flex items-center gap-1.5 rounded-full bg-green-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-green-600"
+              >
+                <QrCode className="h-4 w-4" />
+                Check-In
+              </Link>
+              <Link
+                href={`/event-management/${eventId}`}
+                className="flex items-center gap-1 rounded-full bg-pink-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-pink-600"
+              >
+                Manage
+                <span className="text-xs">↗</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mx-auto max-w-6xl px-6 py-8">
-        {/* Management Banner */}
+        {/* Management Banner - Desktop */}
         {canManageEvent && (
-          <div className="mb-6 flex items-center justify-between rounded-lg border border-pink-500/30 bg-pink-500/10 px-4 py-3">
+          <div className="hidden sm:flex mb-6 items-center justify-between rounded-lg border border-pink-500/30 bg-pink-500/10 px-4 py-3">
             <span className="text-sm text-neutral-300">
               You have manage access for this event.
             </span>

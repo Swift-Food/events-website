@@ -66,7 +66,7 @@ export const GuestStatsCards = ({
         return (
           <div
             key={card.label}
-            className="rounded-lg bg-card-background p-6 transition-all hover:bg-white/15"
+            className="rounded-lg bg-card-background p-6 transition-all"
           >
             <div className="flex items-center justify-between">
               <div>
