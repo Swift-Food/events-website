@@ -60,6 +60,10 @@ export default function CheckInPage() {
   const [lastScanResult, setLastScanResult] = useState<ScanResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const lastScannedRef = useRef<string>("");
+  const [cameraAspectRatio, setCameraAspectRatio] = useState<number | null>(null);
+  const [viewfinderSize, setViewfinderSize] = useState(200); // Default 200px on mobile
+  const [isResizing, setIsResizing] = useState(false);
+  const resizeStartRef = useRef<{ startY: number; startSize: number } | null>(null);
 
   // Manual entry state - visible by default
   const [showManualEntry, setShowManualEntry] = useState(true);
@@ -211,6 +215,15 @@ export default function CheckInPage() {
         }
       );
       setIsScanning(true);
+
+      // Detect camera aspect ratio from video element
+      setTimeout(() => {
+        const videoElement = document.querySelector("#qr-scanner-container video") as HTMLVideoElement;
+        if (videoElement && videoElement.videoWidth && videoElement.videoHeight) {
+          const ratio = videoElement.videoWidth / videoElement.videoHeight;
+          setCameraAspectRatio(ratio);
+        }
+      }, 500);
     } catch (err) {
       console.error("Failed to start scanner:", err);
       toast.error("Failed to access camera. Please allow camera permissions.");
@@ -221,6 +234,7 @@ export default function CheckInPage() {
     if (scanner && scanner.isScanning) {
       await scanner.stop();
       setIsScanning(false);
+      setCameraAspectRatio(null);
     }
   };
 
@@ -231,6 +245,45 @@ export default function CheckInPage() {
     await handleCheckIn(manualCode.trim());
     setManualCode("");
   };
+
+  // Viewfinder resize handlers
+  const handleResizeStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    e.preventDefault();
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    resizeStartRef.current = { startY: clientY, startSize: viewfinderSize };
+    setIsResizing(true);
+  }, [viewfinderSize]);
+
+  const handleResizeMove = useCallback((e: TouchEvent | MouseEvent) => {
+    if (!resizeStartRef.current || !isResizing) return;
+
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const deltaY = resizeStartRef.current.startY - clientY;
+    const newSize = Math.max(120, Math.min(300, resizeStartRef.current.startSize + deltaY * 2));
+    setViewfinderSize(newSize);
+  }, [isResizing]);
+
+  const handleResizeEnd = useCallback(() => {
+    resizeStartRef.current = null;
+    setIsResizing(false);
+  }, []);
+
+  // Add resize event listeners
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener('mousemove', handleResizeMove);
+      window.addEventListener('mouseup', handleResizeEnd);
+      window.addEventListener('touchmove', handleResizeMove);
+      window.addEventListener('touchend', handleResizeEnd);
+
+      return () => {
+        window.removeEventListener('mousemove', handleResizeMove);
+        window.removeEventListener('mouseup', handleResizeEnd);
+        window.removeEventListener('touchmove', handleResizeMove);
+        window.removeEventListener('touchend', handleResizeEnd);
+      };
+    }
+  }, [isResizing, handleResizeMove, handleResizeEnd]);
 
   const refreshStats = async () => {
     try {
@@ -311,9 +364,44 @@ export default function CheckInPage() {
             </button>
           </div>
 
-          {/* Scanner Container */}
-          <div className="relative aspect-square max-h-[400px] bg-black">
+          {/* Scanner Container - uses detected camera ratio on mobile, square on desktop */}
+          <div
+            className={`relative max-h-[400px] bg-black overflow-hidden ${
+              !cameraAspectRatio ? "aspect-square" : ""
+            }`}
+            style={cameraAspectRatio ? { aspectRatio: `${cameraAspectRatio}` } : undefined}
+          >
             <div id="qr-scanner-container" className="w-full h-full" />
+
+            {/* Custom viewfinder overlay - only show when scanning */}
+            {isScanning && (
+              <div className="absolute inset-0">
+                {/* Darkened edges */}
+                <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+                {/* Clear center square - resizable */}
+                <div
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                  style={{ width: viewfinderSize, height: viewfinderSize }}
+                >
+                  {/* Cut out the center */}
+                  <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.4)' }} />
+                  {/* Corner brackets */}
+                  <div className="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-white rounded-tl-lg pointer-events-none" />
+                  <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-white rounded-tr-lg pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-white rounded-bl-lg pointer-events-none" />
+                  <div className="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-white rounded-br-lg pointer-events-none" />
+                  {/* Resize handle - bottom center */}
+                  <div
+                    className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 cursor-ns-resize touch-none"
+                    onMouseDown={handleResizeStart}
+                    onTouchStart={handleResizeStart}
+                  >
+                    <div className="w-10 h-1 bg-white/60 rounded-full" />
+                    <span className="text-[10px] text-white/60 select-none">Drag to resize</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {!isScanning && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-card-secondary-background">
@@ -333,7 +421,7 @@ export default function CheckInPage() {
 
             {/* Processing Overlay */}
             {isProcessing && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
                 <Loader2 className="h-12 w-12 animate-spin text-white" />
               </div>
             )}
