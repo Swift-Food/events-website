@@ -49,7 +49,7 @@ export const GuestTable = ({
         <table className="w-full">
           <thead>
             <tr className="border-b border-neutral-700">
-              <th className="hidden md:table-cell p-4 text-left">
+              <th className="p-3 md:p-4 text-left">
                 <input
                   type="checkbox"
                   checked={selectedGuests.size === guests.length && guests.length > 0}

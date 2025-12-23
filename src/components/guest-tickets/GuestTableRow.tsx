@@ -154,7 +154,7 @@ export const GuestTableRow = ({
       className="border-b border-neutral-700 last:border-b-0 transition-colors hover:bg-white/5 cursor-pointer"
       onClick={handleRowClick}
     >
-      <td className="hidden md:table-cell p-4">
+      <td className="p-3 md:p-4">
         <input
           type="checkbox"
           checked={isSelected}
