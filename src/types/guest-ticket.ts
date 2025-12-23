@@ -205,11 +205,9 @@ export interface RefundEligibilityResult {
  * Reservation mode for invite links
  */
 export enum ReservationMode {
-  /** First come first serve - tickets given on registration */
-  FCFS = "fcfs",
 
-  /** Reserve tickets for specific people */
-  RESERVED = "reserved",
+  IMMEDIATE = 'immediate',
+  ON_ACCEPTANCE = 'on_acceptance',
 }
 
 /**

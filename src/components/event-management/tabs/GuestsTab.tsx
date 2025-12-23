@@ -172,7 +172,7 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
         eventTicketId: ticketId,
         bypassPayment: false,
         bypassApproval: true,
-        reservationMode: ReservationMode.FCFS,
+        reservationMode: ReservationMode.ON_ACCEPTANCE,
         maxUses: 100,
       });
       setGeneratedLink(response.inviteLink);
