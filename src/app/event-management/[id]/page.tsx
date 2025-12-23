@@ -70,7 +70,7 @@ export default function EventManagementPage() {
       setIsDeleting(true);
       await eventService.deleteEvent(eventId);
       toast.success("Event deleted successfully");
-      router.push("/events");
+      router.push("/profile");
     } catch (err: any) {
       console.error("Error deleting event:", err);
       const errorMessage = err.response?.data?.message || "Failed to delete event";
