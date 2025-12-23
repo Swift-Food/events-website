@@ -13,7 +13,7 @@ import { EventTicketResponseDto } from "@/types/event-ticket/response/ticket.dto
 import { GuestManagementHeader } from "@/components/guest-tickets/GuestManagementHeader";
 import { GuestStatsCards } from "@/components/guest-tickets/GuestTicketStatsCard";
 import { GuestFilters, GuestTable, BulkActionBar } from "@/components/guest-tickets";
-import { Loader, Link as LinkIcon, Copy, Check, X } from "lucide-react";
+import { Loader, Link as LinkIcon, Copy, Check, X, ArrowLeft } from "lucide-react";
 import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
 import { InviteGuestsModal } from "@/components/event-management/InviteGuestsModal";
 import { InvitationsSection } from "@/components/event-management/InvitationsSection";
@@ -214,6 +214,18 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
     }
   };
 
+  const handleBackFromCsv = () => {
+    setShowCsvUploadModal(false);
+    setShowInviteGuestsModal(true);
+  };
+
+  const handleBackFromLink = () => {
+    setShowInviteModal(false);
+    setGeneratedLink("");
+    setIsCopied(false);
+    setShowInviteGuestsModal(true);
+  };
+
   const filteredGuests = guests.filter((guest) => {
     const matchesStatus =
       filterStatus === "all" ||
@@ -258,7 +270,7 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
 
   return (
     <>
-      <div>
+      <div className="space-y-4">
         <div className="mb-6">
           <GuestManagementHeader
             eventId={eventId}
@@ -315,7 +327,15 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-2xl bg-card-background border border-white/10 p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground">Generate Invite Link</h3>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleBackFromLink}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+                <h3 className="text-lg font-semibold text-foreground">Generate Invite Link</h3>
+              </div>
               <button
                 onClick={() => setShowInviteModal(false)}
                 className="text-muted-foreground hover:text-foreground"
@@ -403,10 +423,10 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
         onSelectCsv={handleOpenCsvUploadModal}
         onSelectLink={handleOpenInviteModal}
       />
-
       <CsvUploadModal
         isOpen={showCsvUploadModal}
         onClose={() => setShowCsvUploadModal(false)}
+        onBack={handleBackFromCsv}
         tickets={availableTickets}
       />
     </>

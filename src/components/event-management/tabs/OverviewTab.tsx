@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { EventResponseDto } from "@/types";
-import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, AlertTriangle, Loader2, CreditCard, Link as LinkIcon, Copy, Check, X } from "lucide-react";
+import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, AlertTriangle, Loader2, CreditCard, Link as LinkIcon, Copy, Check, X, ArrowLeft } from "lucide-react";
 import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
 import { InviteGuestsModal } from "@/components/event-management/InviteGuestsModal";
 import { InvitationsSection } from "@/components/event-management/InvitationsSection";
@@ -151,6 +151,18 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
     } catch {
       toast.error("Failed to copy link");
     }
+  };
+
+  const handleBackFromCsv = () => {
+    setShowCsvUploadModal(false);
+    setShowInviteGuestsModal(true);
+  };
+
+  const handleBackFromLink = () => {
+    setShowInviteLinkModal(false);
+    setGeneratedLink("");
+    setIsCopied(false);
+    setShowInviteGuestsModal(true);
   };
 
   return (
@@ -428,6 +440,7 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
       <CsvUploadModal
         isOpen={showCsvUploadModal}
         onClose={() => setShowCsvUploadModal(false)}
+        onBack={handleBackFromCsv}
         tickets={eventData.eventTickets || []}
       />
 
@@ -440,7 +453,15 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
           />
           <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-card-background border border-white/5 p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-foreground">Generate Invite Link</h3>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleBackFromLink}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+                <h3 className="text-lg font-semibold text-foreground">Generate Invite Link</h3>
+              </div>
               <button
                 onClick={() => setShowInviteLinkModal(false)}
                 className="text-muted-foreground hover:text-foreground"

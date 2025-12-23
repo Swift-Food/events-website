@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Upload, FileSpreadsheet, Loader2 } from "lucide-react";
+import { X, Upload, FileSpreadsheet, Loader2, ArrowLeft } from "lucide-react";
 import { eventTicketService } from "@/services/event-ticket.service";
 import { toast } from "sonner";
 
@@ -14,20 +14,30 @@ interface TicketOption {
 interface CsvUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onBack?: () => void;
   tickets: TicketOption[];
 }
 
-export function CsvUploadModal({ isOpen, onClose, tickets }: CsvUploadModalProps) {
+export function CsvUploadModal({ isOpen, onClose, onBack, tickets }: CsvUploadModalProps) {
   const [selectedTicketId, setSelectedTicketId] = useState<string>("");
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [replaceEmails, setReplaceEmails] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleClose = () => {
+  const resetState = () => {
     setSelectedTicketId("");
     setCsvFile(null);
     setReplaceEmails(false);
+  };
+
+  const handleClose = () => {
+    resetState();
     onClose();
+  };
+
+  const handleBack = () => {
+    resetState();
+    onBack?.();
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +87,17 @@ export function CsvUploadModal({ isOpen, onClose, tickets }: CsvUploadModalProps
       />
       <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-card-background border border-white/5 p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-foreground">Upload Approved Emails</h3>
+          <div className="flex items-center gap-2">
+            {onBack && (
+              <button
+                onClick={handleBack}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+            )}
+            <h3 className="text-lg font-semibold text-foreground">Upload Approved Emails</h3>
+          </div>
           <button
             onClick={handleClose}
             className="text-muted-foreground hover:text-foreground"
