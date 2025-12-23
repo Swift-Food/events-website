@@ -107,19 +107,36 @@ export default function CheckInPage() {
   // Cleanup scanner on unmount
   useEffect(() => {
     return () => {
-      if (scanner?.isScanning) {
-        scanner.stop().catch(console.error);
+      if (scanner) {
+        (async () => {
+          try {
+            if (scanner.isScanning) {
+              await scanner.stop();
+            }
+            await scanner.clear();
+          } catch {
+            // Ignore cleanup errors
+          }
+        })();
       }
     };
   }, [scanner]);
 
   // Stop scanner when page loses visibility (tab switch, minimize, etc.)
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden && scanner?.isScanning) {
-        scanner.stop().then(() => {
-          setIsScanning(false);
-        }).catch(console.error);
+    const handleVisibilityChange = async () => {
+      if (document.hidden && scanner) {
+        try {
+          if (scanner.isScanning) {
+            await scanner.stop();
+          }
+          await scanner.clear();
+        } catch {
+          // Ignore cleanup errors
+        }
+        setScanner(null);
+        setIsScanning(false);
+        setCameraAspectRatio(null);
       }
     };
 
@@ -194,12 +211,22 @@ export default function CheckInPage() {
 
   const startScanning = async () => {
     try {
-      // Initialize scanner lazily on first use
-      let qrScanner = scanner;
-      if (!qrScanner) {
-        qrScanner = new Html5Qrcode("qr-scanner-container");
-        setScanner(qrScanner);
+      // Clean up existing scanner if it exists
+      if (scanner) {
+        try {
+          if (scanner.isScanning) {
+            await scanner.stop();
+          }
+          await scanner.clear();
+        } catch {
+          // Ignore cleanup errors
+        }
+        setScanner(null);
       }
+
+      // Create a fresh scanner instance
+      const qrScanner = new Html5Qrcode("qr-scanner-container");
+      setScanner(qrScanner);
 
       await qrScanner.start(
         { facingMode: "environment" },
@@ -224,15 +251,39 @@ export default function CheckInPage() {
           setCameraAspectRatio(ratio);
         }
       }, 500);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to start scanner:", err);
-      toast.error("Failed to access camera. Please allow camera permissions.");
+      // Clean up the scanner on failure
+      if (scanner) {
+        try {
+          await scanner.clear();
+        } catch {
+          // Ignore
+        }
+        setScanner(null);
+      }
+
+      if (err?.name === "NotReadableError") {
+        toast.error("Camera is in use by another app. Please close other apps using the camera and try again.");
+      } else if (err?.name === "NotAllowedError") {
+        toast.error("Camera permission denied. Please allow camera access in your browser settings.");
+      } else {
+        toast.error("Failed to access camera. Please check permissions and try again.");
+      }
     }
   };
 
   const stopScanning = async () => {
-    if (scanner && scanner.isScanning) {
-      await scanner.stop();
+    if (scanner) {
+      try {
+        if (scanner.isScanning) {
+          await scanner.stop();
+        }
+        await scanner.clear();
+      } catch {
+        // Ignore cleanup errors
+      }
+      setScanner(null);
       setIsScanning(false);
       setCameraAspectRatio(null);
     }
@@ -495,18 +546,18 @@ export default function CheckInPage() {
         </div>
 
         {/* Manual Code Entry */}
-        <div className="rounded-2xl bg-card-background border border-white/5 overflow-hidden mb-6">
-          <div className="p-4 border-b border-white/5">
-            <div className="flex items-center gap-2">
-              <Keyboard className="h-5 w-5 text-primary" />
-              <span className="font-medium text-foreground">Manual Entry</span>
+        <div className="rounded-xl bg-card-background border border-white/5 overflow-hidden mb-6">
+          <div className="px-3 py-2.5 border-b border-white/5">
+            <div className="flex items-center gap-1.5">
+              <Keyboard className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-foreground">Manual Entry</span>
             </div>
           </div>
-          <div className="p-4">
-            <p className="text-sm text-muted-foreground mb-3">
-              Enter the 8-character code shown on the guest&apos;s ticket
+          <div className="p-3">
+            <p className="text-xs text-muted-foreground mb-2">
+              Enter the 8-character code from the ticket
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <input
                 type="text"
                 value={manualCode}
@@ -521,19 +572,19 @@ export default function CheckInPage() {
                 onKeyDown={(e) => e.key === "Enter" && handleManualCheckIn()}
                 placeholder="XXXX-XXXX"
                 maxLength={9}
-                className="flex-1 rounded-xl bg-card-secondary-background border border-white/10 px-4 py-3 text-center font-mono text-lg tracking-widest uppercase text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="flex-1 rounded-lg bg-card-secondary-background border border-white/10 px-3 py-2 text-center font-mono text-sm sm:text-base tracking-wider uppercase text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
               <button
                 onClick={handleManualCheckIn}
                 disabled={!manualCode.trim() || isManualProcessing}
-                className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
               >
                 {isManualProcessing ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <CheckCircle2 className="h-5 w-5" />
+                  <CheckCircle2 className="h-4 w-4" />
                 )}
-                Check In
+                <span className="hidden sm:inline">Check In</span>
               </button>
             </div>
           </div>
