@@ -210,63 +210,58 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
           </div>
 
           {/* Actions */}
-          <div className="pt-4 border-t border-white/5 space-y-3">
+          <div className="pt-4 border-t border-white/5">
             {/* Active ticket layout */}
             {isActive && (
-              <>
-                <div className="flex items-center gap-2">
-                  {canShowQR && (
-                    <button
-                      onClick={() => setShowQRModal(true)}
-                      className="flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors flex-1"
-                      aria-label="View QR Code"
-                    >
-                      <QrCode className="h-4 w-4" />
-                      View QR Code
-                    </button>
-                  )}
-                  <Link
-                    href={`/events/${ticket.eventId}`}
-                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white/5 text-foreground rounded-xl text-sm font-medium hover:bg-white/10 transition-colors flex-1"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    Event Details
-                  </Link>
-                </div>
-                {canRefund && (
+              <div className="space-y-3">
+                {canShowQR && (
                   <button
-                    onClick={handleRefundClick}
-                    disabled={isRefunding}
-                    className="w-full px-4 py-2.5 bg-transparent border border-red-500/30 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/10 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                    onClick={() => setShowQRModal(true)}
+                    className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    aria-label="View QR Code"
                   >
-                    {isRefunding ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Processing Refund...
-                      </>
-                    ) : (
-                      <>
-                        <RotateCcw className="h-4 w-4" />
-                        Request Refund
-                      </>
-                    )}
+                    <QrCode className="h-5 w-5" />
+                    Show Ticket QR
                   </button>
                 )}
-              </>
+                <div className="flex items-center justify-between pt-1">
+                  <Link
+                    href={`/events/${ticket.eventId}`}
+                    className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Event Details
+                  </Link>
+                  {canRefund && (
+                    <button
+                      onClick={handleRefundClick}
+                      disabled={isRefunding}
+                      className="flex items-center gap-1.5 text-sm text-red-400/80 hover:text-red-400 transition-colors disabled:opacity-50"
+                    >
+                      {isRefunding ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <RotateCcw className="h-3.5 w-3.5" />
+                      )}
+                      {isRefunding ? "Processing..." : "Request Refund"}
+                    </button>
+                  )}
+                </div>
+              </div>
             )}
 
             {/* Pending payment layout */}
             {isPendingPayment && (
-              <>
+              <div className="space-y-3">
                 {onCompletePayment && (
                   <button
                     onClick={() => onCompletePayment(ticket.id)}
                     disabled={isProcessingPayment}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-amber-600 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
                   >
                     {isProcessingPayment ? (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-5 w-5 animate-spin" />
                         Processing...
                       </>
                     ) : (
@@ -274,55 +269,59 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
                     )}
                   </button>
                 )}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between pt-1">
                   <Link
                     href={`/events/${ticket.eventId}`}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white/5 text-foreground rounded-xl text-sm font-medium hover:bg-white/10 transition-colors"
+                    className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    <ExternalLink className="h-4 w-4" />
-                    View Event
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Event Details
                   </Link>
                   {canCancel && (
                     <button
                       onClick={handleCancelClick}
                       disabled={isCancelling}
-                      className="px-4 py-2.5 bg-transparent border border-red-500/30 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                      className="flex items-center gap-1.5 text-sm text-red-400/80 hover:text-red-400 transition-colors disabled:opacity-50"
                     >
                       {isCancelling ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : (
-                        "Cancel"
+                        <XCircle className="h-3.5 w-3.5" />
                       )}
+                      {isCancelling ? "Cancelling..." : "Cancel"}
                     </button>
                   )}
                 </div>
-              </>
+              </div>
             )}
 
             {/* Other status layout (not active, not pending payment) */}
             {!isActive && !isPendingPayment && (
-              <>
+              <div className="space-y-3">
                 <Link
                   href={`/events/${ticket.eventId}`}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white/5 text-foreground rounded-xl text-sm font-medium hover:bg-white/10 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/5 text-foreground rounded-xl text-sm font-medium hover:bg-white/10 transition-colors"
                 >
                   <ExternalLink className="h-4 w-4" />
                   View Event
                 </Link>
                 {canCancel && (
-                  <button
-                    onClick={handleCancelClick}
-                    disabled={isCancelling}
-                    className="w-full px-4 py-2.5 bg-transparent border border-red-500/30 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/10 transition-colors disabled:opacity-50"
-                  >
-                    {isCancelling ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      "Cancel Ticket"
-                    )}
-                  </button>
+                  <div className="flex justify-center">
+                    <button
+                      onClick={handleCancelClick}
+                      disabled={isCancelling}
+                      className="flex items-center gap-1.5 text-sm text-red-400/80 hover:text-red-400 transition-colors disabled:opacity-50"
+                    >
+                      {isCancelling ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <XCircle className="h-3.5 w-3.5" />
+                      )}
+                      {isCancelling ? "Cancelling..." : "Cancel Ticket"}
+                    </button>
+                  </div>
                 )}
-              </>
+              </div>
             )}
           </div>
         </div>
