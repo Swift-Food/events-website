@@ -21,6 +21,14 @@ export interface StripeConnectStatus {
   detailsSubmitted: boolean;
   accountType: 'express' | 'standard' | 'custom' | null;
   dashboardUrl: string | null;
+  // Verification requirements
+  requiresVerification: boolean;
+  verificationPending: boolean;
+  currentlyDue: string[];
+  eventuallyDue: string[];
+  pastDue: string[];
+  disabledReason: string | null;
+  pendingVerification: string[];
 }
 
 /**

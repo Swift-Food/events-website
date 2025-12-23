@@ -16,6 +16,9 @@ import {
   Loader2,
   RefreshCw,
   Banknote,
+  ShieldAlert,
+  FileCheck,
+  Clock,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -29,6 +32,13 @@ const DEFAULT_STATUS: StripeConnectStatus = {
   detailsSubmitted: false,
   accountType: null,
   dashboardUrl: null,
+  requiresVerification: false,
+  verificationPending: false,
+  currentlyDue: [],
+  eventuallyDue: [],
+  pastDue: [],
+  disabledReason: null,
+  pendingVerification: [],
 };
 
 export default function StripeConnectCard({ onStatusChange }: StripeConnectCardProps) {
@@ -201,6 +211,133 @@ export default function StripeConnectCard({ onStatusChange }: StripeConnectCardP
             </>
           )}
         </button>
+      </StripeConnectCardLayout>
+    );
+  }
+
+  // Check if verification is needed (even if "onboarded")
+  const hasVerificationIssues = status.requiresVerification ||
+    status.currentlyDue.length > 0 ||
+    status.eventuallyDue.length > 0 ||
+    status.pastDue.length > 0;
+
+  const hasUrgentIssues = status.pastDue.length > 0 || status.currentlyDue.length > 0;
+
+  // Show verification required state
+  if (hasVerificationIssues && !status.verificationPending) {
+    return (
+      <StripeConnectCardLayout
+        icon={<ShieldAlert className="h-5 w-5" />}
+        iconBgClass={hasUrgentIssues ? "bg-red-500/20" : "bg-amber-500/20"}
+        iconColorClass={hasUrgentIssues ? "text-red-400" : "text-amber-400"}
+        title="Verification Required"
+        subtitle="Complete identity verification to continue"
+      >
+        <AlertBox variant="warning">
+          <p className="text-sm text-amber-300 font-medium">
+            {hasUrgentIssues ? 'Action Required' : 'Verification Needed'}
+          </p>
+          <p className="text-sm text-amber-300/80 mt-1">
+            {status.pastDue.length > 0
+              ? 'Your account requires immediate attention. Payouts may be paused until verification is complete.'
+              : 'To continue receiving payments, please verify your identity. This is a quick one-time process required by financial regulations.'}
+          </p>
+        </AlertBox>
+
+        <div className="space-y-2 mb-4">
+          <StatusItem label="Account Created" completed />
+          <StatusItem label="Details Submitted" completed={status.detailsSubmitted} />
+          <StatusItem
+            label="Identity Verified"
+            completed={!status.requiresVerification && status.currentlyDue.length === 0}
+          />
+          <StatusItem label="Payouts Enabled" completed={status.payoutsEnabled} />
+        </div>
+
+        {/* Show what's needed */}
+        <div className="bg-white/5 rounded-lg p-3 mb-4">
+          <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1.5">
+            <FileCheck className="h-3.5 w-3.5" />
+            What you'll need:
+          </p>
+          <ul className="text-xs text-foreground/80 space-y-1 ml-5 list-disc">
+            <li>A valid government-issued ID (passport, driver's license, or national ID)</li>
+            <li>Takes about 2 minutes to complete</li>
+          </ul>
+        </div>
+
+        <button
+          onClick={handleRefreshOnboarding}
+          disabled={isOnboarding}
+          className={`w-full flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-black transition-all disabled:opacity-50 ${
+            hasUrgentIssues
+              ? 'bg-red-500 hover:bg-red-400'
+              : 'bg-amber-500 hover:bg-amber-400'
+          }`}
+        >
+          {isOnboarding ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading...
+            </>
+          ) : (
+            <>
+              <ShieldAlert className="h-4 w-4" />
+              Complete Verification
+              <ExternalLink className="h-4 w-4" />
+            </>
+          )}
+        </button>
+
+        <p className="text-xs text-muted-foreground text-center mt-3">
+          Verification is required by law for all payment platforms
+        </p>
+      </StripeConnectCardLayout>
+    );
+  }
+
+  // Verification is pending (submitted, waiting for Stripe to verify)
+  if (status.verificationPending) {
+    return (
+      <StripeConnectCardLayout
+        icon={<Clock className="h-5 w-5" />}
+        iconBgClass="bg-blue-500/20"
+        iconColorClass="text-blue-400"
+        title="Verification Pending"
+        subtitle="Your documents are being reviewed"
+      >
+        <AlertBox variant="success">
+          <div className="flex gap-3">
+            <Clock className="h-5 w-5 text-blue-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm text-blue-300 font-medium">Under Review</p>
+              <p className="text-sm text-blue-300/80 mt-1">
+                Your identity documents have been submitted and are being verified. This usually takes just a few minutes.
+              </p>
+            </div>
+          </div>
+        </AlertBox>
+
+        <div className="space-y-2 mb-4">
+          <StatusItem label="Account Created" completed />
+          <StatusItem label="Details Submitted" completed />
+          <StatusItem label="Documents Submitted" completed />
+          <StatusItem label="Verification Complete" completed={false} />
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={fetchStatus}
+            className="flex-1 flex items-center justify-center gap-2 rounded-full bg-blue-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-400"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Check Status
+          </button>
+        </div>
+
+        <p className="text-xs text-muted-foreground text-center mt-3">
+          We'll notify you once verification is complete
+        </p>
       </StripeConnectCardLayout>
     );
   }
