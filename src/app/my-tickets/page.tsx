@@ -190,19 +190,20 @@ export default function MyTicketsPage() {
     }
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = async () => {
     setShowPaymentModal(false);
-    if (paymentData) {
-      setSuccessTicketDetails({
-        ticketName: paymentData.ticketDetails.ticketName,
-        eventName: paymentData.ticketDetails.eventName,
-      });
-    }
-    setShowSuccessModal(true);
-    setPaymentData(null);
 
-    // Update ticket status locally
+    // Confirm payment with backend (backup to webhooks)
+    // This ensures the ticket is activated even if webhook is slow/fails
     if (paymentData?.guestTicketId) {
+      try {
+        await paymentService.confirmTicketPayment(paymentData.guestTicketId);
+      } catch (error) {
+        // Log but don't fail - webhook should handle it
+        console.error("Failed to confirm payment with backend:", error);
+      }
+
+      // Update ticket status locally
       setTickets((prev) =>
         prev.map((t) =>
           t.id === paymentData.guestTicketId
@@ -211,6 +212,15 @@ export default function MyTicketsPage() {
         )
       );
     }
+
+    if (paymentData) {
+      setSuccessTicketDetails({
+        ticketName: paymentData.ticketDetails.ticketName,
+        eventName: paymentData.ticketDetails.eventName,
+      });
+    }
+    setShowSuccessModal(true);
+    setPaymentData(null);
   };
 
   const handlePaymentClose = () => {

@@ -24,6 +24,7 @@ const API_ROUTES = {
   },
   PAYMENTS: {
     TICKET: (ticketId: string) => `/payments/ticket/${ticketId}`,
+    TICKET_CONFIRM: (ticketId: string) => `/payments/ticket/${ticketId}/confirm`,
     FEE_CONFIG: '/payments/test/fee-config',
     VERIFY_SPLIT: (paymentIntentId: string) => `/payments/test/verify-split/${paymentIntentId}`,
     ORGANIZER_STATUS: (eventUserId: string) => `/payments/test/organizer-status/${eventUserId}`,
@@ -88,6 +89,18 @@ class PaymentService {
   async createTicketPaymentIntent(guestTicketId: string): Promise<CreateTicketPaymentResponse> {
     const response: AxiosResponse<CreateTicketPaymentResponse> = await apiClient.post(
       API_ROUTES.PAYMENTS.TICKET(guestTicketId)
+    );
+    return response.data;
+  }
+
+  /**
+   * Confirm ticket payment after Stripe confirms on frontend
+   * This is a backup to webhooks - ensures ticket is activated even if webhook is slow/fails
+   * @param guestTicketId - The ID of the guest ticket
+   */
+  async confirmTicketPayment(guestTicketId: string): Promise<{ success: boolean; message?: string; guestTicketId?: string }> {
+    const response = await apiClient.post(
+      API_ROUTES.PAYMENTS.TICKET_CONFIRM(guestTicketId)
     );
     return response.data;
   }
