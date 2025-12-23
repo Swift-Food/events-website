@@ -12,6 +12,7 @@ interface GuestTableProps {
   onCheckIn: (qrCode: string) => void;
   onPromote: (ticketId: string) => void;
   onReview?: (guest: GuestTicketResponseDto) => void;
+  onRowClick?: (guest: GuestTicketResponseDto) => void;
 }
 
 export const GuestTable = ({
@@ -24,6 +25,7 @@ export const GuestTable = ({
   onCheckIn,
   onPromote,
   onReview,
+  onRowClick,
 }: GuestTableProps) => {
   if (guests.length === 0) {
     return (
@@ -47,7 +49,7 @@ export const GuestTable = ({
         <table className="w-full">
           <thead>
             <tr className="border-b border-neutral-700">
-              <th className="p-4 text-left">
+              <th className="hidden md:table-cell p-4 text-left">
                 <input
                   type="checkbox"
                   checked={selectedGuests.size === guests.length && guests.length > 0}
@@ -61,13 +63,13 @@ export const GuestTable = ({
               <th className="p-4 text-left text-sm font-semibold text-muted-foreground">
                 Status
               </th>
-              <th className="p-4 text-left text-sm font-semibold text-muted-foreground">
+              <th className="hidden md:table-cell p-4 text-left text-sm font-semibold text-muted-foreground">
                 Registered
               </th>
-              <th className="p-4 text-left text-sm font-semibold text-muted-foreground">
+              <th className="hidden md:table-cell p-4 text-left text-sm font-semibold text-muted-foreground">
                 Ticket Type
               </th>
-              <th className="p-4 text-right text-sm font-semibold text-muted-foreground">
+              <th className="hidden md:table-cell p-4 text-right text-sm font-semibold text-muted-foreground">
                 Actions
               </th>
             </tr>
@@ -84,6 +86,7 @@ export const GuestTable = ({
                 onCheckIn={onCheckIn}
                 onPromote={onPromote}
                 onReview={onReview}
+                onRowClick={onRowClick}
               />
             ))}
           </tbody>

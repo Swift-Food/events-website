@@ -71,6 +71,7 @@ interface GuestTableRowProps {
   onCheckIn: (qrCode: string) => void;
   onPromote: (ticketId: string) => void;
   onReview?: (guest: GuestTicketResponseDto) => void;
+  onRowClick?: (guest: GuestTicketResponseDto) => void;
 }
 
 export const GuestTableRow = ({
@@ -82,6 +83,7 @@ export const GuestTableRow = ({
   onCheckIn,
   onPromote,
   onReview,
+  onRowClick,
 }: GuestTableRowProps) => {
   const [showMenu, setShowMenu] = useState(false);
   const getStatusBadge = () => {
@@ -134,9 +136,25 @@ export const GuestTableRow = ({
   };
 
  
+  const handleRowClick = (e: React.MouseEvent) => {
+    // Don't trigger row click if clicking on interactive elements
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('input') ||
+      target.closest('button') ||
+      target.closest('[role="menu"]')
+    ) {
+      return;
+    }
+    onRowClick?.(guest);
+  };
+
   return (
-    <tr className="border-b border-neutral-700 last:border-b-0 transition-colors hover:bg-white/5">
-      <td className="p-4">
+    <tr
+      className="border-b border-neutral-700 last:border-b-0 transition-colors hover:bg-white/5 cursor-pointer"
+      onClick={handleRowClick}
+    >
+      <td className="hidden md:table-cell p-4">
         <input
           type="checkbox"
           checked={isSelected}
@@ -158,10 +176,9 @@ export const GuestTableRow = ({
       <td className="p-4">
         <div className="flex items-center">
           {getStatusBadge()}
-    
         </div>
       </td>
-      <td className="p-4">
+      <td className="hidden md:table-cell p-4">
         <p className="text-sm text-foreground">
           {format(new Date(guest.createdAt), "MMM d, yyyy")}
         </p>
@@ -169,12 +186,12 @@ export const GuestTableRow = ({
           {format(new Date(guest.createdAt), "h:mm a")}
         </p>
       </td>
-      <td className="p-4">
+      <td className="hidden md:table-cell p-4">
         <p className="text-sm text-foreground">
           {guest.ticketName || "—"}
         </p>
       </td>
-      <td className="p-4">
+      <td className="hidden md:table-cell p-4">
         <div className="flex items-center justify-end gap-2">
           {guest.status === GuestTicketStatus.PENDING_APPROVAL && onReview && (
             <button

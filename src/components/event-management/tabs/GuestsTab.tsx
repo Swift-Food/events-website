@@ -12,7 +12,7 @@ import {
 import { EventTicketResponseDto } from "@/types/event-ticket/response/ticket.dto";
 import { GuestManagementHeader } from "@/components/guest-tickets/GuestManagementHeader";
 import { GuestStatsCards } from "@/components/guest-tickets/GuestTicketStatsCard";
-import { GuestFilters, GuestTable, BulkActionBar, ReviewGuestModal } from "@/components/guest-tickets";
+import { GuestFilters, GuestTable, BulkActionBar, ReviewGuestModal, GuestDetailsModal } from "@/components/guest-tickets";
 import { Loader, Link as LinkIcon, Copy, Check, X, ArrowLeft } from "lucide-react";
 import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
 import { InviteGuestsModal } from "@/components/event-management/InviteGuestsModal";
@@ -79,6 +79,10 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
   const [reviewGuest, setReviewGuest] = useState<GuestTicketResponseDto | AdminTicketResponseDto | null>(null);
   const [isReviewLoading, setIsReviewLoading] = useState(false);
 
+  // Guest details modal state
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [detailsGuest, setDetailsGuest] = useState<GuestTicketResponseDto | null>(null);
+
   useEffect(() => {
     fetchGuestData();
   }, [eventId]);
@@ -141,6 +145,16 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
   const handleCloseReview = () => {
     setShowReviewModal(false);
     setReviewGuest(null);
+  };
+
+  const handleOpenDetails = (guest: GuestTicketResponseDto) => {
+    setDetailsGuest(guest);
+    setShowDetailsModal(true);
+  };
+
+  const handleCloseDetails = () => {
+    setShowDetailsModal(false);
+    setDetailsGuest(null);
   };
 
   const handleCheckIn = async (qrCode: string) => {
@@ -344,6 +358,7 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
           onCheckIn={handleCheckIn}
           onPromote={handlePromoteFromWaitlist}
           onReview={handleOpenReview}
+          onRowClick={handleOpenDetails}
         />
       </div>
 
@@ -461,6 +476,16 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
         onApprove={handleApprove}
         onReject={handleReject}
         isLoading={isReviewLoading}
+      />
+      <GuestDetailsModal
+        isOpen={showDetailsModal}
+        guest={detailsGuest}
+        onClose={handleCloseDetails}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        onCheckIn={handleCheckIn}
+        onPromote={handlePromoteFromWaitlist}
+        onReview={handleOpenReview}
       />
     </>
   );
