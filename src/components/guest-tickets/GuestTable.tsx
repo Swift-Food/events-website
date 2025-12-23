@@ -11,6 +11,7 @@ interface GuestTableProps {
   onReject: (ticketId: string, reason?: string) => void;
   onCheckIn: (qrCode: string) => void;
   onPromote: (ticketId: string) => void;
+  onReview?: (guest: GuestTicketResponseDto) => void;
 }
 
 export const GuestTable = ({
@@ -22,6 +23,7 @@ export const GuestTable = ({
   onReject,
   onCheckIn,
   onPromote,
+  onReview,
 }: GuestTableProps) => {
   if (guests.length === 0) {
     return (
@@ -81,6 +83,7 @@ export const GuestTable = ({
                 onReject={onReject}
                 onCheckIn={onCheckIn}
                 onPromote={onPromote}
+                onReview={onReview}
               />
             ))}
           </tbody>

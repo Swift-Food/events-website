@@ -121,6 +121,7 @@ export interface AdminTicketResponseDto {
   eventName: string;
   guestEmail: string;
   guestName: string;
+  guest: EventUser;
   ticketName: string;
   status: GuestTicketStatus;
   questionAnswers: Record<string, any> | null;

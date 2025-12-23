@@ -10,12 +10,10 @@ import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";
 import { GuestManagementHeader } from "@/components/guest-tickets/GuestManagementHeader";
 import { GuestStatsCards } from "@/components/guest-tickets/GuestTicketStatsCard";
-import { GuestFilters } from "@/components/guest-tickets";
-import { GuestTable } from "@/components/guest-tickets";
-import { BulkActionBar } from "@/components/guest-tickets";
+import { GuestFilters, GuestTable, BulkActionBar, ReviewGuestModal } from "@/components/guest-tickets";
 import { Loader, Link as LinkIcon, Copy, Check } from "lucide-react";
 
-type FilterStatus = "all" | "approved" | "pending" | "waitlisted" | "rejected" | "checked_in";
+type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in";
 
 /**
  * Extract guest display name from EventUser
@@ -51,6 +49,11 @@ export default function GuestManagementPage() {
   const [isCopied, setIsCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Review modal state
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewGuest, setReviewGuest] = useState<GuestTicketResponseDto | null>(null);
+  const [isReviewLoading, setIsReviewLoading] = useState(false);
+
   useEffect(() => {
     if (!isAuthenticated && !authLoading) {
       router.push("/auth");
@@ -84,22 +87,42 @@ export default function GuestManagementPage() {
 
   const handleApprove = async (ticketId: string) => {
     try {
+      setIsReviewLoading(true);
       await guestTicketService.approveTicket(ticketId);
       toast.success("Guest approved successfully");
+      setShowReviewModal(false);
+      setReviewGuest(null);
       await fetchGuestData();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to approve guest");
+    } finally {
+      setIsReviewLoading(false);
     }
   };
 
   const handleReject = async (ticketId: string, reason?: string) => {
     try {
+      setIsReviewLoading(true);
       await guestTicketService.rejectTicket(ticketId, reason);
       toast.success("Guest rejected");
+      setShowReviewModal(false);
+      setReviewGuest(null);
       await fetchGuestData();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to reject guest");
+    } finally {
+      setIsReviewLoading(false);
     }
+  };
+
+  const handleOpenReview = (guest: GuestTicketResponseDto) => {
+    setReviewGuest(guest);
+    setShowReviewModal(true);
+  };
+
+  const handleCloseReview = () => {
+    setShowReviewModal(false);
+    setReviewGuest(null);
   };
 
   const handleCheckIn = async (qrCode: string) => {
@@ -192,14 +215,13 @@ export default function GuestManagementPage() {
   const filteredGuests = guests.filter((guest) => {
     const matchesStatus =
       filterStatus === "all" ||
-      guest.status === filterStatus ||
-      (filterStatus === "checked_in" && guest.status === "checked_in"); // ← Fixed
-  
+      guest.status === filterStatus;
+
     const matchesSearch =
       searchQuery === "" ||
       getGuestDisplayName(guest.guest).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      guest.guest.user.email.toLowerCase().includes(searchQuery.toLowerCase());
-  
+      (guest.guest?.user?.email || "").toLowerCase().includes(searchQuery.toLowerCase());
+
     return matchesStatus && matchesSearch;
   });
 
@@ -263,11 +285,11 @@ export default function GuestManagementPage() {
           onFilterChange={setFilterStatus}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          pendingCount={pendingGuests.length}
+          pendingCount={guests.filter((g) => g.status === GuestTicketStatus.PENDING_APPROVAL).length}
           approvedCount={guests.filter((g) => g.status === GuestTicketStatus.ACTIVE).length}
           waitlistedCount={guests.filter((g) => g.status === GuestTicketStatus.WAITLISTED).length}
-          rejectedCount={guests.filter((g) => g.status === GuestTicketStatus.CANCELLED).length}
-          checkedInCount={guests.filter((g) => g.status === GuestTicketStatus.CHECKED_IN).length} // ← Fixed
+          cancelledCount={guests.filter((g) => g.status === GuestTicketStatus.CANCELLED).length}
+          checkedInCount={guests.filter((g) => g.status === GuestTicketStatus.CHECKED_IN).length}
         />
 
         {selectedGuests.size > 0 && (
@@ -288,6 +310,7 @@ export default function GuestManagementPage() {
           onReject={handleReject}
           onCheckIn={handleCheckIn}
           onPromote={handlePromoteFromWaitlist}
+          onReview={handleOpenReview}
         />
 
         {/* Invite Modal */}
@@ -381,6 +404,15 @@ export default function GuestManagementPage() {
             </div>
           </div>
         )}
+
+        <ReviewGuestModal
+          isOpen={showReviewModal}
+          guest={reviewGuest}
+          onClose={handleCloseReview}
+          onApprove={handleApprove}
+          onReject={handleReject}
+          isLoading={isReviewLoading}
+        />
       </div>
     </div>
   );

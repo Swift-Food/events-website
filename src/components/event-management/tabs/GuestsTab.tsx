@@ -12,14 +12,14 @@ import {
 import { EventTicketResponseDto } from "@/types/event-ticket/response/ticket.dto";
 import { GuestManagementHeader } from "@/components/guest-tickets/GuestManagementHeader";
 import { GuestStatsCards } from "@/components/guest-tickets/GuestTicketStatsCard";
-import { GuestFilters, GuestTable, BulkActionBar } from "@/components/guest-tickets";
+import { GuestFilters, GuestTable, BulkActionBar, ReviewGuestModal } from "@/components/guest-tickets";
 import { Loader, Link as LinkIcon, Copy, Check, X, ArrowLeft } from "lucide-react";
 import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
 import { InviteGuestsModal } from "@/components/event-management/InviteGuestsModal";
 import { InvitationsSection } from "@/components/event-management/InvitationsSection";
 import { toast } from "sonner";
 
-type FilterStatus = "all" | "approved" | "pending" | "waitlisted" | "rejected" | "checked_in";
+type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in";
 
 /**
  * Extract guest display name with proper fallbacks (for search filtering)
@@ -74,6 +74,11 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
   // Invite guests modal state
   const [showInviteGuestsModal, setShowInviteGuestsModal] = useState(false);
 
+  // Review modal state
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewGuest, setReviewGuest] = useState<GuestTicketResponseDto | AdminTicketResponseDto | null>(null);
+  const [isReviewLoading, setIsReviewLoading] = useState(false);
+
   useEffect(() => {
     fetchGuestData();
   }, [eventId]);
@@ -100,22 +105,42 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
 
   const handleApprove = async (ticketId: string) => {
     try {
+      setIsReviewLoading(true);
       await guestTicketService.approveTicket(ticketId);
       toast.success("Guest approved successfully");
+      setShowReviewModal(false);
+      setReviewGuest(null);
       await fetchGuestData();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to approve guest");
+    } finally {
+      setIsReviewLoading(false);
     }
   };
 
   const handleReject = async (ticketId: string, reason?: string) => {
     try {
+      setIsReviewLoading(true);
       await guestTicketService.rejectTicket(ticketId, reason);
       toast.success("Guest rejected");
+      setShowReviewModal(false);
+      setReviewGuest(null);
       await fetchGuestData();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to reject guest");
+    } finally {
+      setIsReviewLoading(false);
     }
+  };
+
+  const handleOpenReview = (guest: GuestTicketResponseDto | AdminTicketResponseDto) => {
+    setReviewGuest(guest);
+    setShowReviewModal(true);
+  };
+
+  const handleCloseReview = () => {
+    setShowReviewModal(false);
+    setReviewGuest(null);
   };
 
   const handleCheckIn = async (qrCode: string) => {
@@ -229,8 +254,7 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
   const filteredGuests = guests.filter((guest) => {
     const matchesStatus =
       filterStatus === "all" ||
-      guest.status === filterStatus ||
-      (filterStatus === "checked_in" && guest.status === "checked_in");
+      guest.status === filterStatus;
 
     const matchesSearch =
       searchQuery === "" ||
@@ -294,10 +318,10 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
           onFilterChange={setFilterStatus}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          pendingCount={pendingGuests.length}
+          pendingCount={guests.filter((g) => g.status === GuestTicketStatus.PENDING_APPROVAL).length}
           approvedCount={guests.filter((g) => g.status === GuestTicketStatus.ACTIVE).length}
           waitlistedCount={guests.filter((g) => g.status === GuestTicketStatus.WAITLISTED).length}
-          rejectedCount={guests.filter((g) => g.status === GuestTicketStatus.CANCELLED).length}
+          cancelledCount={guests.filter((g) => g.status === GuestTicketStatus.CANCELLED).length}
           checkedInCount={guests.filter((g) => g.status === GuestTicketStatus.CHECKED_IN).length}
         />
 
@@ -319,6 +343,7 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
           onReject={handleReject}
           onCheckIn={handleCheckIn}
           onPromote={handlePromoteFromWaitlist}
+          onReview={handleOpenReview}
         />
       </div>
 
@@ -428,6 +453,14 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
         onClose={() => setShowCsvUploadModal(false)}
         onBack={handleBackFromCsv}
         tickets={availableTickets}
+      />
+      <ReviewGuestModal
+        isOpen={showReviewModal}
+        guest={reviewGuest}
+        onClose={handleCloseReview}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        isLoading={isReviewLoading}
       />
     </>
   );

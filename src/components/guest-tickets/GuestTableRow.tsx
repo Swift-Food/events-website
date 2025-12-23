@@ -8,6 +8,7 @@ import {
   UserCheck,
   ArrowUpCircle,
   Mail,
+  Eye,
 } from "lucide-react";
 import { useState } from "react";
 import { GuestActionMenu } from "./GuestActionMenu";
@@ -69,6 +70,7 @@ interface GuestTableRowProps {
   onReject: (ticketId: string, reason?: string) => void;
   onCheckIn: (qrCode: string) => void;
   onPromote: (ticketId: string) => void;
+  onReview?: (guest: GuestTicketResponseDto) => void;
 }
 
 export const GuestTableRow = ({
@@ -79,6 +81,7 @@ export const GuestTableRow = ({
   onReject,
   onCheckIn,
   onPromote,
+  onReview,
 }: GuestTableRowProps) => {
   const [showMenu, setShowMenu] = useState(false);
   const getStatusBadge = () => {
@@ -168,21 +171,14 @@ export const GuestTableRow = ({
       </td>
       <td className="p-4">
         <div className="flex items-center justify-end gap-2">
-          {guest.status === GuestTicketStatus.PENDING_APPROVAL && (
-            <>
-              <button
-                onClick={() => onApprove(guest.id)}
-                className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-700"
-              >
-                Approve
-              </button>
-              <button
-                onClick={() => onReject(guest.id)}
-                className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700"
-              >
-                Reject
-              </button>
-            </>
+          {guest.status === GuestTicketStatus.PENDING_APPROVAL && onReview && (
+            <button
+              onClick={() => onReview(guest)}
+              className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              Review
+            </button>
           )}
           {guest.status === "waitlisted" && (
             <button
