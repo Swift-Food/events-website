@@ -428,7 +428,7 @@ export default function CheckInPage() {
 
         {/* Stats */}
         {stats && (
-          <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             <div className="rounded-xl bg-card-background border border-white/5 p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Checked In</p>
@@ -447,14 +447,20 @@ export default function CheckInPage() {
                 <Users className="h-5 w-5 text-amber-400" />
               </div>
             </div>
-            <div className="rounded-xl bg-card-background border border-white/5 p-4 flex items-center justify-between">
-              <div>
+            <div className="col-span-2 rounded-xl bg-card-background border border-white/5 p-4">
+              <div className="flex items-center justify-between mb-2">
                 <p className="text-xs text-muted-foreground">Progress</p>
-                <p className="text-2xl font-bold text-primary">{stats.percentageCheckedIn.toFixed(0)}%</p>
+                <p className="text-lg font-bold text-primary">{stats.percentageCheckedIn.toFixed(0)}%</p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
-                <RotateCcw className="h-5 w-5 text-primary" />
+              <div className="h-3 w-full rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min(100, stats.percentageCheckedIn)}%` }}
+                />
               </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {stats.checkedIn} of {stats.totalTickets} guests checked in
+              </p>
             </div>
           </div>
         )}
