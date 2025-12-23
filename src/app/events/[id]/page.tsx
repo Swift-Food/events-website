@@ -950,7 +950,7 @@ export default function EventDetailsPage() {
                     setShowQuestionForm(false);
                     setQuestionAnswers({});
                   }}
-                  className="flex-1 px-6 py-3 rounded-full border border-white/10 text-foreground font-medium hover:bg-white/5 transition-all"
+                  className="flex-1 px-6 py-3 rounded-xl border border-white/10 text-sm sm:text-md text-foreground font-medium hover:bg-white/5 transition-all"
                 >
                   Cancel
                 </button>
@@ -959,7 +959,7 @@ export default function EventDetailsPage() {
                     selectedTicketId && handleRegister(selectedTicketId)
                   }
                   disabled={isRegistering}
-                  className="flex-1 px-6 py-3 rounded-full bg-primary text-white font-semibold shadow-lg shadow-primary/25 hover:bg-primary/90 hover:shadow-primary/40 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                  className="flex-1 px-6 py-3 rounded-xl bg-primary text-white text-sm sm:text-md font-semibold shadow-lg shadow-primary/25 hover:bg-primary/90 hover:shadow-primary/40 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
                 >
                   {isRegistering ? (
                     <>
