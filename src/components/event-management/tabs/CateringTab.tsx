@@ -731,7 +731,7 @@ function ExistingOrderView({ order }: ExistingOrderViewProps) {
               Order Total
             </p>
             <p className="text-3xl sm:text-4xl font-bold text-primary">
-              ${(order.finalTotal || order.estimatedTotal || 0).toFixed(2)}
+              ${Number(order.finalTotal || order.estimatedTotal || 0).toFixed(2)}
             </p>
           </div>
         </div>
