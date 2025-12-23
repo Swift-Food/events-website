@@ -940,7 +940,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
             )}
           </div>
 
-          <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 md:p-6 space-y-5">
+          <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 md:p-5 space-y-5">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-base font-semibold text-foreground">
@@ -957,7 +957,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
               <button
                 type="button"
                 onClick={handleAddTicketClick}
-                className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:scale-105"
+                className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/80"
               >
                 <Plus className="h-4 w-4" />
                 Add Ticket

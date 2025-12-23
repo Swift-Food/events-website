@@ -186,7 +186,7 @@ export default function StripeConnectCard({ onStatusChange }: StripeConnectCardP
         <button
           onClick={handleRefreshOnboarding}
           disabled={isOnboarding}
-          className="w-full flex items-center justify-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-sm font-semibold text-black shadow-lg shadow-amber-500/30 transition-all hover:bg-amber-400 hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
+          className="w-full flex items-center justify-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-sm font-semibold text-black transition-all hover:bg-amber-400 disabled:opacity-50"
         >
           {isOnboarding ? (
             <>
@@ -286,7 +286,7 @@ function StripeConnectCardLayout({
   subtitle,
 }: StripeConnectCardLayoutProps) {
   return (
-    <div className="rounded-2xl bg-card-background backdrop-blur-xl p-6 shadow-lg">
+    <div className="rounded-2xl bg-card-background backdrop-blur-xl p-6">
       <div className="flex items-center gap-3 mb-4">
         <div className={`rounded-full p-2.5 ${iconBgClass} ${iconColorClass}`}>
           {icon}

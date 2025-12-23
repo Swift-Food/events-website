@@ -395,8 +395,7 @@ export default function ProfilePage() {
 
         {/* Tabs */}
         <div className="rounded-3xl bg-card-background backdrop-blur-xl overflow-hidden">
-          {/* Tab Navigation */}
-          <div className="border-b border-foreground/10">
+          {/* <div className="border-b border-foreground/10">
             <div className="flex overflow-x-auto scrollbar-hide">
               {tabs.map((tab) => (
                 <button
@@ -422,10 +421,10 @@ export default function ProfilePage() {
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Tab Content */}
-          <div className="p-3 sm:p-6">
+          {/* <div className="p-3 sm:p-6">
             {isLoadingCurrentTab ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -434,7 +433,6 @@ export default function ProfilePage() {
               <EmptyState activeTab={activeTab} />
             ) : (
               <>
-                {/* Mobile: Horizontal cards */}
                 <div className="flex flex-col gap-3 md:hidden">
                   {currentEvents.map((event) => (
                     <HorizontalEventCard
@@ -446,7 +444,6 @@ export default function ProfilePage() {
                     />
                   ))}
                 </div>
-                {/* Desktop: Grid of regular cards */}
                 <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {currentEvents.map((event) => (
                     <EventCard
@@ -460,7 +457,8 @@ export default function ProfilePage() {
                 </div>
               </>
             )}
-          </div>
+          </div> */}
+
         </div>
       </div>
     </div>
