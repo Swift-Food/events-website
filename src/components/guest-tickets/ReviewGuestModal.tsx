@@ -133,14 +133,14 @@ export function ReviewGuestModal({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-2 text-sm">
-                <Ticket className="h-4 w-4 text-muted-foreground" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex items-center gap-2 text-sm rounded-lg bg-white/5 p-2.5">
+                <Ticket className="h-4 w-4 text-muted-foreground shrink-0" />
                 <span className="text-muted-foreground">Ticket:</span>
                 <span className="text-foreground">{getTicketName(guest)}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-2 text-sm rounded-lg bg-white/5 p-2.5">
+                <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
                 <span className="text-muted-foreground">Registered:</span>
                 <span className="text-foreground">
                   {format(getRegistrationDate(guest), "MMM d, yyyy")}
