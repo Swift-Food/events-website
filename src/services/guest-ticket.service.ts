@@ -174,6 +174,18 @@ class GuestTicketService {
   }
 
   /**
+   * Check in a ticket using short 8-character code
+   * Accepts codes with or without hyphen (e.g., "ABCD1234" or "ABCD-1234")
+   */
+  async checkInByCode(code: string): Promise<GuestTicketResponseDto> {
+    const response: AxiosResponse<GuestTicketResponseDto> = await apiClient.post(
+      `${this.baseUrl}/check-in/code`,
+      { code }
+    );
+    return response.data;
+  }
+
+  /**
    * Bulk check in tickets by QR codes
    */
   async bulkCheckInTickets(qrCodes: string[]): Promise<BulkActionResponseDto> {

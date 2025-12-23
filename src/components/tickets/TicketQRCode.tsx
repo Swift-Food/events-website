@@ -28,31 +28,25 @@ export default function TicketQRCode({
     const svg = qrRef.current.querySelector("svg");
     if (!svg) return;
 
-    // Create canvas
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Set canvas size with padding
     const padding = 32;
     canvas.width = size + padding * 2;
-    canvas.height = size + padding * 2 + 60; // Extra space for text
+    canvas.height = size + padding * 2 + 60;
 
-    // Fill white background
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Convert SVG to image
     const svgData = new XMLSerializer().serializeToString(svg);
     const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
     const url = URL.createObjectURL(svgBlob);
 
     const img = new Image();
     img.onload = () => {
-      // Draw QR code centered
       ctx.drawImage(img, padding, padding, size, size);
 
-      // Add text below QR code
       ctx.fillStyle = "#000000";
       ctx.font = "bold 14px Arial";
       ctx.textAlign = "center";
@@ -62,7 +56,6 @@ export default function TicketQRCode({
       ctx.fillStyle = "#666666";
       ctx.fillText(ticketName, canvas.width / 2, size + padding + 44);
 
-      // Download
       const link = document.createElement("a");
       link.download = `ticket-${eventName.replace(/\s+/g, "-").toLowerCase()}.png`;
       link.href = canvas.toDataURL("image/png");
@@ -87,10 +80,10 @@ export default function TicketQRCode({
   }
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="relative">
       <div
         ref={qrRef}
-        className="bg-white p-4 rounded-xl shadow-lg"
+        className="bg-white p-4 rounded-2xl"
       >
         <QRCodeSVG
           value={qrCode}
@@ -103,10 +96,10 @@ export default function TicketQRCode({
       {showDownload && (
         <button
           onClick={handleDownload}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
+          className="absolute -bottom-3 -right-3 flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-colors"
+          title="Download QR Code"
         >
           <Download className="h-4 w-4" />
-          Download QR Code
         </button>
       )}
     </div>
