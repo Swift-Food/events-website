@@ -68,7 +68,7 @@ export function CsvUploadModal({ isOpen, onClose, onBack, tickets }: CsvUploadMo
         csvFile,
         replaceEmails
       );
-      toast.success(result.message || "Emails uploaded successfully");
+      toast.success(`Successfully added ${result.added} of ${result.total} emails`);
       handleClose();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to upload CSV");
