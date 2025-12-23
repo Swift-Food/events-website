@@ -315,18 +315,33 @@ export default function CheckInPage() {
 
         {/* Stats */}
         {stats && (
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="rounded-xl bg-card-background border border-white/5 p-4 text-center">
-              <p className="text-2xl font-bold text-foreground">{stats.checkedIn}</p>
-              <p className="text-sm text-muted-foreground">Checked In</p>
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            <div className="rounded-xl bg-card-background border border-white/5 p-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Checked In</p>
+                <p className="text-2xl font-bold text-foreground">{stats.checkedIn}</p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/20">
+                <CheckCircle2 className="h-5 w-5 text-green-400" />
+              </div>
             </div>
-            <div className="rounded-xl bg-card-background border border-white/5 p-4 text-center">
-              <p className="text-2xl font-bold text-foreground">{stats.pending}</p>
-              <p className="text-sm text-muted-foreground">Pending</p>
+            <div className="rounded-xl bg-card-background border border-white/5 p-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Pending</p>
+                <p className="text-2xl font-bold text-foreground">{stats.pending}</p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/20">
+                <Users className="h-5 w-5 text-amber-400" />
+              </div>
             </div>
-            <div className="rounded-xl bg-card-background border border-white/5 p-4 text-center">
-              <p className="text-2xl font-bold text-primary">{stats.percentageCheckedIn.toFixed(0)}%</p>
-              <p className="text-sm text-muted-foreground">Rate</p>
+            <div className="rounded-xl bg-card-background border border-white/5 p-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Progress</p>
+                <p className="text-2xl font-bold text-primary">{stats.percentageCheckedIn.toFixed(0)}%</p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
+                <RotateCcw className="h-5 w-5 text-primary" />
+              </div>
             </div>
           </div>
         )}

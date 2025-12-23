@@ -229,6 +229,36 @@ class GuestTicketService {
   }
 
   /**
+   * Refund all paid tickets for an event
+   * POST /guest-tickets/events/:eventId/refund-all
+   */
+  async refundAllEventTickets(eventId: string): Promise<{
+    success: boolean;
+    totalRefunded: number;
+    totalAmount: number;
+    failed: number;
+  }> {
+    const response = await apiClient.post(
+      `${this.baseUrl}/events/${eventId}/refund-all`
+    );
+    return response.data;
+  }
+
+  /**
+   * Get count of refundable paid tickets for an event
+   * GET /guest-tickets/events/:eventId/refundable-count
+   */
+  async getRefundableTicketCount(eventId: string): Promise<{
+    count: number;
+    totalAmount: number;
+  }> {
+    const response = await apiClient.get(
+      `${this.baseUrl}/events/${eventId}/refundable-count`
+    );
+    return response.data;
+  }
+
+  /**
    * Generate a shareable ticket invite link
    * POST /guest-tickets/events/:eventId/invite-link
    */
