@@ -374,12 +374,12 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
       {/* QR Code Modal */}
       {showQRModal && ticket.qrCode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-card-background rounded-xl p-6 max-w-sm w-full shadow-2xl border border-white/5">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-foreground">Your Ticket</h3>
+          <div className="bg-card-background rounded-2xl p-6 max-w-xs w-full shadow-2xl border border-white/5">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-lg font-bold text-foreground">Your Ticket</h3>
               <button
                 onClick={() => setShowQRModal(false)}
-                className="p-2 rounded-full hover:bg-foreground/10 transition-colors"
+                className="p-1.5 rounded-full hover:bg-foreground/10 transition-colors"
               >
                 <X className="h-5 w-5 text-muted-foreground" />
               </button>
@@ -390,17 +390,24 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
                 qrCode={ticket.qrCode}
                 ticketName={ticket.ticketName}
                 eventName={ticket.eventName}
-                checkInCodeFormatted={ticket.checkInCodeFormatted}
-                size={220}
+                size={200}
               />
 
-              <div className="mt-6 text-center">
-                <p className="text-foreground font-semibold">{ticket.eventName}</p>
-                <p className="text-muted-foreground text-sm mt-1">{ticket.ticketName}</p>
-                <p className="text-muted-foreground text-sm mt-1">
-                  {format(eventDate, "EEE, MMM d, yyyy 'at' h:mm a")}
+              <div className="mt-5 text-center">
+                <p className="text-foreground font-semibold text-sm">{ticket.eventName}</p>
+                <p className="text-muted-foreground text-xs mt-1">{ticket.ticketName}</p>
+                <p className="text-muted-foreground text-xs mt-1">
+                  {format(eventDate, "EEE, MMM d 'at' h:mm a")}
                 </p>
               </div>
+
+              {/* Manual entry code - subtle fallback */}
+              {ticket.checkInCodeFormatted && (
+                <div className="mt-4 pt-4 border-t border-white/5 w-full text-center">
+                  <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wide">Manual Entry Code</p>
+                  <p className="font-mono text-sm text-muted-foreground mt-0.5">{ticket.checkInCodeFormatted}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
