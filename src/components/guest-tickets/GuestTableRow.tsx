@@ -141,9 +141,9 @@ export const GuestTableRow = ({
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
             {getGuestInitials(guest.guest)}
           </div>
-          <div>
-            <p className="font-medium text-foreground">{getGuestDisplayName(guest.guest)}</p>
-            <p className="text-sm text-muted-foreground">{guest.guest?.user?.email || "No email"}</p>
+          <div className="min-w-0">
+            <p className="font-medium text-foreground break-words">{getGuestDisplayName(guest.guest)}</p>
+            <p className="text-sm text-muted-foreground break-all">{guest.guest?.user?.email || "No email"}</p>
           </div>
         </div>
       </td>

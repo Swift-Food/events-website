@@ -30,32 +30,11 @@ interface CheckInStats {
 }
 
 /**
- * Extract guest display name with proper fallbacks
+ * Extract guest display name from EventUser
  */
 function getGuestDisplayName(guest: GuestTicketResponseDto['guest'] | undefined): string {
   if (!guest) return "Guest";
-
-  // Try EventUser firstName/lastName first
-  const eventUserName = `${guest.firstName || ""} ${guest.lastName || ""}`.trim();
-  if (eventUserName) return eventUserName;
-
-  // Try nested User firstName/lastName
-  if (guest.user) {
-    const userName = `${guest.user.firstName || ""} ${guest.user.lastName || ""}`.trim();
-    if (userName) return userName;
-
-    // Try username
-    if (guest.user.username) return guest.user.username;
-
-    // Use email prefix as last resort before "Guest"
-    if (guest.user.email) {
-      const emailPrefix = guest.user.email.split("@")[0];
-      // Capitalize first letter
-      return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
-    }
-  }
-
-  return "Guest";
+  return `${guest.firstName} ${guest.lastName}`.trim();
 }
 
 interface ScanResult {
@@ -127,6 +106,22 @@ export default function CheckInPage() {
       if (scanner?.isScanning) {
         scanner.stop().catch(console.error);
       }
+    };
+  }, [scanner]);
+
+  // Stop scanner when page loses visibility (tab switch, minimize, etc.)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && scanner?.isScanning) {
+        scanner.stop().then(() => {
+          setIsScanning(false);
+        }).catch(console.error);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [scanner]);
 
@@ -421,10 +416,10 @@ export default function CheckInPage() {
             <div className="divide-y divide-white/5">
               {recentCheckIns.filter(r => r.success).map((checkIn, index) => (
                 <div key={index} className="p-4 flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-400" />
-                  <div>
-                    <p className="font-medium text-foreground">{checkIn.guestName}</p>
-                    <p className="text-sm text-muted-foreground">
+                  <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-medium text-foreground break-words">{checkIn.guestName}</p>
+                    <p className="text-sm text-muted-foreground break-words">
                       {checkIn.ticket?.ticketName}
                     </p>
                   </div>

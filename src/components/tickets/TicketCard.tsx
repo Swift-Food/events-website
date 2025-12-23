@@ -148,13 +148,13 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
     }
   };
 
-  const status = statusConfig[ticket.status] || statusConfig[GuestTicketStatus.ACTIVE];
+  const status = statusConfig[ticket.status];
   const eventDate = new Date(ticket.eventStartDateTime);
   const isUpcoming = eventDate > new Date();
   const canShowQR = ticket.status === GuestTicketStatus.ACTIVE && ticket.qrCode;
   const isPendingPayment = ticket.status === GuestTicketStatus.PENDING_PAYMENT;
   const isActive = ticket.status === GuestTicketStatus.ACTIVE;
-  const isPaidTicket = (ticket.ticketPrice ?? 0) > 0;
+  const isPaidTicket = ticket.ticketPrice > 0;
   const canCancel = (ticket.status === GuestTicketStatus.PENDING_PAYMENT ||
     ticket.status === GuestTicketStatus.PENDING_APPROVAL) && isUpcoming && onCancel;
   // For active tickets: paid tickets can refund, free tickets can cancel

@@ -1,16 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { EventResponseDto } from "@/types";
-import { MapPin, Edit, Users, ImageIcon, ScanLine } from "lucide-react";
+import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2 } from "lucide-react";
 import Image from "next/image";
 
 interface OverviewTabProps {
   eventData: EventResponseDto;
   onEditClick: () => void;
   onScanClick: () => void;
+  onDeleteClick: () => Promise<void>;
+  isDeleting?: boolean;
 }
 
-export function OverviewTab({ eventData, onEditClick, onScanClick }: OverviewTabProps) {
+export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick, isDeleting }: OverviewTabProps) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleDateString("en-US", {
       weekday: "long",
@@ -104,6 +108,13 @@ export function OverviewTab({ eventData, onEditClick, onScanClick }: OverviewTab
           >
             <Edit className="h-4 w-4" />
             Edit Event
+          </button>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="flex items-center gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20"
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete
           </button>
         </div>
       </div>
@@ -226,7 +237,58 @@ export function OverviewTab({ eventData, onEditClick, onScanClick }: OverviewTab
           <Edit className="h-4 w-4" />
           Edit
         </button>
+        <button
+          onClick={() => setShowDeleteConfirm(true)}
+          className="flex items-center gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowDeleteConfirm(false)}
+          />
+          <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl bg-card-background border border-neutral-700 p-6 shadow-2xl">
+            <h3 className="text-lg font-semibold text-foreground mb-2">Delete Event</h3>
+            <p className="text-muted-foreground mb-6">
+              Are you sure you want to delete <span className="font-medium text-foreground">{eventData.name}</span>? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="rounded-md border border-neutral-700 bg-card-secondary-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  await onDeleteClick();
+                  setShowDeleteConfirm(false);
+                }}
+                disabled={isDeleting}
+                className="flex items-center gap-2 rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-600 disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4" />
+                    Delete Event
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -35,6 +35,7 @@ export default function EventManagementPage() {
   const [error, setError] = useState<string | null>(null);
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const setTab = (tab: TabType) => {
     router.push(`/event-management/${eventId}?tab=${tab}`);
@@ -60,6 +61,22 @@ export default function EventManagementPage() {
       toast.error(errorMessage);
     } finally {
       if (showLoading) setIsLoading(false);
+    }
+  };
+
+  // Delete event handler
+  const handleDeleteEvent = async () => {
+    try {
+      setIsDeleting(true);
+      await eventService.deleteEvent(eventId);
+      toast.success("Event deleted successfully");
+      router.push("/events");
+    } catch (err: any) {
+      console.error("Error deleting event:", err);
+      const errorMessage = err.response?.data?.message || "Failed to delete event";
+      toast.error(errorMessage);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -234,6 +251,8 @@ export default function EventManagementPage() {
             eventData={eventData}
             onEditClick={() => setShowEditModal(true)}
             onScanClick={() => router.push(`/event-management/${eventId}/scanner`)}
+            onDeleteClick={handleDeleteEvent}
+            isDeleting={isDeleting}
           />
         )}
 
