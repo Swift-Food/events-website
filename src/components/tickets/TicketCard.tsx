@@ -4,7 +4,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { GuestTicketWithEventResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
-import { Calendar, Ticket, QrCode, X, Clock, CheckCircle2, XCircle, AlertCircle, Loader2, ExternalLink, AlertTriangle, RotateCcw } from "lucide-react";
+import { Calendar, Ticket, QrCode, X, Clock, CheckCircle2, XCircle, AlertCircle, Loader2, ExternalLink, AlertTriangle, RotateCcw, Copy, Check, Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 import TicketQRCode from "./TicketQRCode";
 import { format } from "date-fns";
 
@@ -135,6 +136,17 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
   const [showQRModal, setShowQRModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
+  const [showCodeText, setShowCodeText] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
+
+  const handleCopyCode = async () => {
+    if (ticket.qrCode) {
+      await navigator.clipboard.writeText(ticket.qrCode);
+      setCodeCopied(true);
+      toast.success("Code copied to clipboard");
+      setTimeout(() => setCodeCopied(false), 2000);
+    }
+  };
 
   const status = statusConfig[ticket.status] || statusConfig[GuestTicketStatus.ACTIVE];
   const eventDate = new Date(ticket.eventStartDateTime);
@@ -360,7 +372,10 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-foreground">Your Ticket</h3>
               <button
-                onClick={() => setShowQRModal(false)}
+                onClick={() => {
+                  setShowQRModal(false);
+                  setShowCodeText(false);
+                }}
                 className="p-2 rounded-full hover:bg-foreground/10 transition-colors"
               >
                 <X className="h-5 w-5 text-muted-foreground" />
@@ -381,6 +396,50 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
                 <p className="text-muted-foreground text-sm mt-1">
                   {format(eventDate, "EEE, MMM d, yyyy 'at' h:mm a")}
                 </p>
+              </div>
+
+              {/* Manual Code View */}
+              <div className="mt-4 w-full">
+                <button
+                  onClick={() => setShowCodeText(!showCodeText)}
+                  className="flex items-center justify-center gap-2 w-full text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
+                >
+                  {showCodeText ? (
+                    <>
+                      <EyeOff className="h-4 w-4" />
+                      Hide Manual Code
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="h-4 w-4" />
+                      Show Manual Code
+                    </>
+                  )}
+                </button>
+
+                {showCodeText && (
+                  <div className="mt-2 p-3 bg-card-secondary-background rounded-xl border border-white/10">
+                    <p className="text-xs text-muted-foreground mb-2 text-center">
+                      If scanning doesn&apos;t work, read this code to the organizer:
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 text-xs text-foreground bg-black/20 px-3 py-2 rounded-lg font-mono break-all">
+                        {ticket.qrCode}
+                      </code>
+                      <button
+                        onClick={handleCopyCode}
+                        className="p-2 rounded-lg bg-primary/20 text-primary hover:bg-primary/30 transition-colors shrink-0"
+                        title="Copy code"
+                      >
+                        {codeCopied ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

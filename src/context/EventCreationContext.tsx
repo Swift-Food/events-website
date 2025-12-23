@@ -107,26 +107,37 @@ type EventDraft = {
   coverName: string;
 };
 
-// Helper to get default start/end times
+// Helper to format a Date to datetime-local input format
+const formatDateTime = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
+// Helper to get default start/end times (tomorrow at noon, for 2 hours)
 const getDefaultTimes = () => {
   const now = new Date();
+  // Default to tomorrow at 12:00 PM
   const start = new Date(now.getTime());
-  start.setMinutes(0, 0, 0);
-  const end = new Date(start.getTime() + 60 * 60 * 1000); // 1 hour later
-
-  const formatDateTime = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  };
+  start.setDate(start.getDate() + 1); // Tomorrow
+  start.setHours(12, 0, 0, 0); // Noon
+  const end = new Date(start.getTime() + 2 * 60 * 60 * 1000); // 2 hours later
 
   return {
     start: formatDateTime(start),
     end: formatDateTime(end),
   };
+};
+
+// Check if a date string is valid and in the future
+const isValidFutureDate = (dateStr: string | undefined): boolean => {
+  if (!dateStr) return false;
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return false;
+  return date > new Date();
 };
 
 export function EventCreationProvider({
@@ -156,8 +167,13 @@ export function EventCreationProvider({
 
   // Event details
   const [eventName, setEventName] = useState(storedDraft.eventName ?? "");
-  const [start, setStart] = useState(storedDraft.start ?? defaultTimes.start);
-  const [end, setEnd] = useState(storedDraft.end ?? defaultTimes.end);
+  // Only use stored dates if they're valid and in the future, otherwise use defaults
+  const [start, setStart] = useState(
+    isValidFutureDate(storedDraft.start) ? storedDraft.start! : defaultTimes.start
+  );
+  const [end, setEnd] = useState(
+    isValidFutureDate(storedDraft.end) ? storedDraft.end! : defaultTimes.end
+  );
   const [location, setLocation] = useState(storedDraft.location ?? "");
   const [description, setDescription] = useState(storedDraft.description ?? "");
 
