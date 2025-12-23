@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npx tsc:*)",
-      "Bash(timeout 20 npm run build:*)"
+      "Bash(timeout 20 npm run build:*)",
+      "Bash(git add:*)"
     ]
   }
 }

@@ -19,6 +19,7 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronUp,
+  UserSquare2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -52,7 +53,7 @@ const formatDeadline = (deadline: string | null): string | null => {
   }
 };
 
-// Get verification message - only show deadline when it exists
+// Get verification message based on urgency level
 const getVerificationMessage = (status: StripeConnectStatus | null): { isUrgent: boolean; message: string } => {
   if (!status) return { isUrgent: false, message: '' };
 
@@ -64,18 +65,34 @@ const getVerificationMessage = (status: StripeConnectStatus | null): { isUrgent:
     };
   }
 
-  // Has deadline - show it
-  if (status.currentDeadline) {
+  // Currently due with deadline - working but deadline approaching
+  if (status.currentlyDue.length > 0 && status.currentDeadline) {
     return {
       isUrgent: false,
-      message: `Complete by ${formatDeadline(status.currentDeadline)} to avoid payout interruption.`,
+      message: `Payments active. Complete by ${formatDeadline(status.currentDeadline)} to avoid payout interruption.`,
     };
   }
 
-  // No deadline - informative message
+  // Currently due without deadline
+  if (status.currentlyDue.length > 0) {
+    return {
+      isUrgent: false,
+      message: 'Payments active. Complete verification soon to avoid payout interruption.',
+    };
+  }
+
+  // Grace period - eventuallyDue but no currentlyDue/pastDue
+  if (status.eventuallyDue.length > 0) {
+    return {
+      isUrgent: false,
+      message: 'Identity verification is required by financial regulations (KYC/AML) for all payment platforms. This is a one-time process to ensure secure transactions.',
+    };
+  }
+
+  // Fallback - general verification needed
   return {
     isUrgent: false,
-    message: 'Identity verification is required by financial regulations (KYC/AML) for all payment platforms. This is a one-time process to ensure secure transactions.',
+    message: 'Payments active. Verification required by financial regulations (KYC/AML).',
   };
 };
 
@@ -292,16 +309,28 @@ export default function StripeConnectCard({ onStatusChange }: StripeConnectCardP
 
   // Verification required
   if (hasVerificationIssues && !status.verificationPending) {
+    // Get banner description based on urgency
+    const getBannerDescription = (): string => {
+      if (status.pastDue.length > 0) {
+        return "Payouts paused — complete verification to resume";
+      }
+      if (status.currentlyDue.length > 0 && status.currentDeadline) {
+        return `Payments active • Verify by ${formatDeadline(status.currentDeadline)}`;
+      }
+      if (status.currentlyDue.length > 0) {
+        return "Payments active • Verification needed soon";
+      }
+      // Grace period
+      return "Payments active • Verify to avoid future interruption";
+    };
+
     return (
       <Banner
         icon={<ShieldAlert className="h-5 w-5" />}
         iconBg={hasUrgentIssues ? "bg-red-500/20" : "bg-amber-500/20"}
         iconColor={hasUrgentIssues ? "text-red-400" : "text-amber-400"}
         title="Verification required"
-        description={hasUrgentIssues
-          ? "Payouts paused — complete verification to resume"
-          : "Verify your identity to continue receiving payments"
-        }
+        description={getBannerDescription()}
         action={
           <ActionButton
             onClick={handleRefreshOnboarding}
@@ -338,20 +367,38 @@ export default function StripeConnectCard({ onStatusChange }: StripeConnectCardP
               />
             </div>
 
-            {/* What's needed */}
-            <div className="bg-white/5 rounded-lg p-3 text-xs text-muted-foreground space-y-1">
-              <p><span className="font-medium text-foreground">Required:</span> Government ID (passport, driver's license, or national ID) — takes ~2 mins</p>
-              <p className="text-muted-foreground/70 italic">Student IDs not accepted — government ID required by law</p>
-            </div>
-
-            {/* Verification status info */}
+            {/* Verification info - single unified section */}
             {(() => {
-              const { isUrgent, message } = getVerificationMessage(status);
+              const { isUrgent } = getVerificationMessage(status);
+              const borderColor = isUrgent ? 'border-red-500/30' : 'border-amber-500/30';
+              const iconBg = isUrgent ? 'bg-red-500/20' : 'bg-amber-500/20';
+              const iconColor = isUrgent ? 'text-red-400' : 'text-amber-400';
+              const accentColor = isUrgent ? 'text-red-300' : 'text-amber-300';
+
               return (
-                <div className={`${isUrgent ? 'bg-red-500/10 border-red-500/20' : 'bg-amber-500/10 border-amber-500/20'} border rounded-lg p-3`}>
-                  <p className={`text-xs ${isUrgent ? 'text-red-300' : 'text-amber-300'}`}>
-                    {message}
-                  </p>
+                <div className={`border ${borderColor} rounded-xl p-4`}>
+                  <div className="flex gap-3">
+                    <div className={`${iconBg} rounded-lg p-2 h-fit`}>
+                      <UserSquare2 className={`h-5 w-5 ${iconColor}`} />
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <p className="text-foreground font-medium">Government ID required</p>
+                        <p className="text-muted-foreground text-xs mt-0.5">
+                          Passport, driver's license, or national ID — takes ~2 mins
+                        </p>
+                      </div>
+                      <p className={`text-xs ${accentColor}`}>
+                        {isUrgent
+                          ? 'Complete verification now to resume payouts.'
+                          : 'Required by financial regulations (KYC/AML) for all payment platforms.'
+                        }
+                      </p>
+                      <p className="text-muted-foreground/60 text-xs italic">
+                        Student IDs not accepted
+                      </p>
+                    </div>
+                  </div>
                 </div>
               );
             })()}
