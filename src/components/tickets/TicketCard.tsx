@@ -154,9 +154,12 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
   const canShowQR = ticket.status === GuestTicketStatus.ACTIVE && ticket.qrCode;
   const isPendingPayment = ticket.status === GuestTicketStatus.PENDING_PAYMENT;
   const isActive = ticket.status === GuestTicketStatus.ACTIVE;
+  const isPaidTicket = (ticket.ticketPrice ?? 0) > 0;
   const canCancel = (ticket.status === GuestTicketStatus.PENDING_PAYMENT ||
     ticket.status === GuestTicketStatus.PENDING_APPROVAL) && isUpcoming && onCancel;
-  const canRefund = isActive && isUpcoming && onRefund;
+  // For active tickets: paid tickets can refund, free tickets can cancel
+  const canRefund = isActive && isUpcoming && isPaidTicket && onRefund;
+  const canCancelActive = isActive && isUpcoming && !isPaidTicket && onCancel;
 
   const handleCancelClick = () => {
     setShowCancelModal(true);
@@ -256,6 +259,20 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
                         <RotateCcw className="h-3.5 w-3.5" />
                       )}
                       {isRefunding ? "Processing..." : "Request Refund"}
+                    </button>
+                  )}
+                  {canCancelActive && (
+                    <button
+                      onClick={handleCancelClick}
+                      disabled={isCancelling}
+                      className="flex items-center gap-1.5 text-sm text-red-400/80 hover:text-red-400 transition-colors disabled:opacity-50"
+                    >
+                      {isCancelling ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <XCircle className="h-3.5 w-3.5" />
+                      )}
+                      {isCancelling ? "Cancelling..." : "Cancel Ticket"}
                     </button>
                   )}
                 </div>

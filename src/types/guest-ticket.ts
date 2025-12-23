@@ -77,6 +77,7 @@ export interface GuestTicketWithEventResponseDto extends GuestTicketResponseDto 
   eventEndDateTime: Date;
   eventImage: string | null;
   eventStatus: string;
+  ticketPrice: number; // Price of the ticket (0 for free tickets)
 }
 
 /**
