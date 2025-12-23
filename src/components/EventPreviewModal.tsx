@@ -19,7 +19,6 @@ import {
   Ticket,
   Loader2,
   X,
-  QrCode,
   ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
@@ -364,26 +363,17 @@ export default function EventPreviewModal({
             <div className="p-4 sm:p-6">
               {/* Management Banner */}
               {canManageEvent && (
-                <div className="mb-4 flex flex-col gap-3 rounded-lg border border-pink-500/30 bg-pink-500/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+                <div className="mb-4 flex items-center justify-between gap-4 rounded-lg border border-pink-500/30 bg-pink-500/10 px-4 py-3">
                   <span className="text-sm text-neutral-300">
                     You have manage access for this event.
                   </span>
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href={`/event-management/${eventId}/scanner`}
-                      className="flex items-center gap-1.5 rounded-full bg-green-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-green-600"
-                    >
-                      <QrCode className="h-4 w-4" />
-                      Check-In
-                    </Link>
-                    <Link
-                      href={`/event-management/${eventId}`}
-                      className="flex items-center gap-1 rounded-full bg-pink-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-pink-600"
-                    >
-                      Manage
-                      <span className="text-xs">↗</span>
-                    </Link>
-                  </div>
+                  <Link
+                    href={`/event-management/${eventId}`}
+                    className="flex items-center gap-1 rounded-full bg-pink-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-pink-600"
+                  >
+                    Manage
+                    <span className="text-xs">↗</span>
+                  </Link>
                 </div>
               )}
 
