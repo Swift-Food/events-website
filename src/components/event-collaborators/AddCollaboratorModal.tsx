@@ -153,14 +153,14 @@ export const AddCollaboratorModal = ({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h4 className="text-sm font-semibold text-foreground">
-                      Editor
+                      Scanner
                     </h4>
                     {role === CollaboratorRole.COLLABORATOR && (
                       <Check className="h-4 w-4 text-blue-500" />
                     )}
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Can view and edit event details
+                  Can scan QR codes and check in attendees at event entry.
                   </p>
                 </div>
               </button>
@@ -186,7 +186,7 @@ export const AddCollaboratorModal = ({
                     )}
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Can manage collaborators too
+                  Can manage collaborators, view and edit event details.
                   </p>
                 </div>
               </button>

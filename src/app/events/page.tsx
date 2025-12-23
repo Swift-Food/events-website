@@ -5,6 +5,7 @@ import { eventsApi } from "@/services/events";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
 import { Search, Calendar, ChevronLeft, ChevronRight, X } from "lucide-react";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
+import EventPreviewModal from "@/components/EventPreviewModal";
 
 export default function EventCataloguePage() {
   const [events, setEvents] = useState<EventResponseDto[]>([]);
@@ -19,6 +20,9 @@ export default function EventCataloguePage() {
   // Track which date headers are stuck
   const [stuckHeaders, setStuckHeaders] = useState<Set<string>>(new Set());
   const sentinelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  // Modal state
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
   const eventsPerPage = 12;
 
@@ -96,6 +100,14 @@ export default function EventCataloguePage() {
   };
 
   const hasActiveSearch = !!searchTerm;
+
+  const handleEventClick = (e: React.MouseEvent, event: EventResponseDto) => {
+    setSelectedEventId(event.id);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedEventId(null);
+  };
 
   // Intersection observer to detect when headers become stuck
   useEffect(() => {
@@ -298,7 +310,11 @@ export default function EventCataloguePage() {
                     {/* Events for this date */}
                     <div className="min-w-0 space-y-3">
                       {dateEvents.map((event) => (
-                        <HorizontalEventCard key={event.id} event={event} />
+                        <HorizontalEventCard
+                          key={event.id}
+                          event={event}
+                          onClick={handleEventClick}
+                        />
                       ))}
                     </div>
                   </div>
@@ -360,6 +376,13 @@ export default function EventCataloguePage() {
           </div>
         )}
       </div>
+
+      {/* Event Preview Modal */}
+      <EventPreviewModal
+        eventId={selectedEventId}
+        isOpen={!!selectedEventId}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }
