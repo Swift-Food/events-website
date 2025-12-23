@@ -127,9 +127,9 @@ export const GuestTableRow = ({
 
     return (
       <span
-        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${config.className}`}
+        className={`inline-flex items-center gap-1 md:gap-1.5 rounded-full px-2 md:px-3 py-0.5 md:py-1 text-[10px] md:text-xs font-medium ${config.className}`}
       >
-        <Icon className="h-3.5 w-3.5" />
+        <Icon className="h-3 w-3 md:h-3.5 md:w-3.5" />
         {config.label}
       </span>
     );
@@ -162,18 +162,18 @@ export const GuestTableRow = ({
           className="h-4 w-4 rounded border-neutral-700 bg-input-background text-primary focus:ring-2 focus:ring-primary"
         />
       </td>
-      <td className="p-4">
+      <td className="p-3 md:p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+          <div className="hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
             {getGuestInitials(guest.guest)}
           </div>
           <div className="min-w-0">
-            <p className="font-medium text-foreground break-words">{getGuestDisplayName(guest.guest)}</p>
-            <p className="text-sm text-muted-foreground break-all">{guest.guest?.user?.email || "No email"}</p>
+            <p className="text-sm md:text-base font-medium text-foreground break-words">{getGuestDisplayName(guest.guest)}</p>
+            <p className="text-xs md:text-sm text-muted-foreground break-all">{guest.guest?.user?.email || "No email"}</p>
           </div>
         </div>
       </td>
-      <td className="p-4">
+      <td className="p-3 md:p-4">
         <div className="flex items-center">
           {getStatusBadge()}
         </div>

@@ -57,10 +57,10 @@ export const GuestTable = ({
                   className="h-4 w-4 rounded border-neutral-700 bg-input-background text-primary focus:ring-2 focus:ring-primary"
                 />
               </th>
-              <th className="p-4 text-left text-sm font-semibold text-muted-foreground">
+              <th className="p-3 md:p-4 text-left text-xs md:text-sm font-semibold text-muted-foreground">
                 Guest
               </th>
-              <th className="p-4 text-left text-sm font-semibold text-muted-foreground">
+              <th className="p-3 md:p-4 text-left text-xs md:text-sm font-semibold text-muted-foreground">
                 Status
               </th>
               <th className="hidden md:table-cell p-4 text-left text-sm font-semibold text-muted-foreground">
