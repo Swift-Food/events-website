@@ -572,7 +572,7 @@ export default function CheckInPage() {
                 onKeyDown={(e) => e.key === "Enter" && handleManualCheckIn()}
                 placeholder="XXXX-XXXX"
                 maxLength={9}
-                className="flex-1 rounded-lg bg-card-secondary-background border border-white/10 px-3 py-2 text-center font-mono text-sm sm:text-base tracking-wider uppercase text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="flex-1 rounded-lg bg-card-secondary-background border border-white/10 px-3 py-2 text-center font-mono text-base tracking-wider uppercase text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
               <button
                 onClick={handleManualCheckIn}
