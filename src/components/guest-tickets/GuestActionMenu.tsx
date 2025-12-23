@@ -28,7 +28,7 @@ export const GuestActionMenu = ({
   onPromote,
 }: GuestActionMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
-  console.log("guest in action menu,", JSON.stringify(guest))
+  console.log("guest in action menu,", guest)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {

@@ -93,7 +93,7 @@ export const GuestTableRow = ({
         icon: CheckCircle2,
         className: "bg-green-100 text-green-700",
       },
-      pending: {
+      pending_approval: {
         label: "Pending",
         icon: Clock,
         className: "bg-amber-100 text-amber-700",
@@ -103,10 +103,15 @@ export const GuestTableRow = ({
         icon: Clock,
         className: "bg-orange-100 text-orange-700",
       },
-      rejected: {
-        label: "Rejected",
+      // rejected: {
+      //   label: "Rejected",
+      //   icon: XCircle,
+      //   className: "bg-red-100 text-red-700",
+      // },
+      cancelled: {
+        label: "Cancelled",
         icon: XCircle,
-        className: "bg-red-100 text-red-700",
+        className: "bg-neutral-100 text-neutral-700",
       },
     };
     console.log("guest status", guest.status)
