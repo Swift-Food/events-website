@@ -340,10 +340,10 @@ export default function CheckInPage() {
             </div>
           </div>
 
-          {/* Scanner Container - uses detected camera ratio, square-ish on desktop */}
+          {/* Scanner Container - uses detected camera ratio or 4:3 default */}
           <div
             className={`relative bg-black overflow-hidden ${
-              !cameraAspectRatio ? "aspect-[4/3] sm:aspect-[4/3] sm:max-h-[400px]" : "sm:max-h-[400px]"
+              !cameraAspectRatio ? "aspect-[4/3]" : ""
             }`}
             style={cameraAspectRatio ? { aspectRatio: `${cameraAspectRatio}` } : undefined}
           >
