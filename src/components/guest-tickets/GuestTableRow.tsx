@@ -9,6 +9,7 @@ import {
   ArrowUpCircle,
   Mail,
   Eye,
+  ChevronRight,
 } from "lucide-react";
 import { useState } from "react";
 import { GuestActionMenu } from "./GuestActionMenu";
@@ -174,8 +175,9 @@ export const GuestTableRow = ({
         </div>
       </td>
       <td className="p-3 md:p-4">
-        <div className="flex items-center">
+        <div className="flex items-center justify-between">
           {getStatusBadge()}
+          <ChevronRight className="h-4 w-4 text-muted-foreground md:hidden ml-2" />
         </div>
       </td>
       <td className="hidden md:table-cell p-4">
