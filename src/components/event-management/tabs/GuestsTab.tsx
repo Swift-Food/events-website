@@ -13,8 +13,9 @@ import { EventTicketResponseDto } from "@/types/event-ticket/response/ticket.dto
 import { GuestManagementHeader } from "@/components/guest-tickets/GuestManagementHeader";
 import { GuestStatsCards } from "@/components/guest-tickets/GuestTicketStatsCard";
 import { GuestFilters, GuestTable, BulkActionBar } from "@/components/guest-tickets";
-import { Loader, Link as LinkIcon, Copy, Check, X, Upload } from "lucide-react";
+import { Loader, Link as LinkIcon, Copy, Check, X } from "lucide-react";
 import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
+import { InviteGuestsModal } from "@/components/event-management/InviteGuestsModal";
 import { InvitationsSection } from "@/components/event-management/InvitationsSection";
 import { toast } from "sonner";
 
@@ -69,6 +70,9 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
 
   // CSV upload modal state
   const [showCsvUploadModal, setShowCsvUploadModal] = useState(false);
+
+  // Invite guests modal state
+  const [showInviteGuestsModal, setShowInviteGuestsModal] = useState(false);
 
   useEffect(() => {
     fetchGuestData();
@@ -255,28 +259,12 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
   return (
     <>
       <div>
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6">
           <GuestManagementHeader
             eventId={eventId}
             totalGuests={guests.length}
             pendingCount={pendingGuests.length}
           />
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleOpenCsvUploadModal}
-              className="flex items-center gap-2 rounded-lg border border-white/10 bg-card-background px-4 py-2 text-sm font-medium text-foreground transition-all hover:border-white/20"
-            >
-              <Upload className="h-4 w-4" />
-              Upload CSV
-            </button>
-            <button
-              onClick={handleOpenInviteModal}
-              className="flex items-center gap-2 rounded-lg border border-white/10 bg-card-background px-4 py-2 text-sm font-medium text-foreground transition-all hover:border-white/20"
-            >
-              <LinkIcon className="h-4 w-4" />
-              Invite Guests
-            </button>
-          </div>
         </div>
 
         <GuestStatsCards
@@ -287,7 +275,7 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
           rejectedCount={guests.filter((g) => g.status === GuestTicketStatus.CANCELLED).length}
         />
 
-        <InvitationsSection onInviteClick={handleOpenCsvUploadModal} />
+        <InvitationsSection onInviteClick={() => setShowInviteGuestsModal(true)} />
 
         <GuestFilters
           filterStatus={filterStatus}
@@ -408,6 +396,13 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
           </div>
         </div>
       )}
+
+      <InviteGuestsModal
+        isOpen={showInviteGuestsModal}
+        onClose={() => setShowInviteGuestsModal(false)}
+        onSelectCsv={handleOpenCsvUploadModal}
+        onSelectLink={handleOpenInviteModal}
+      />
 
       <CsvUploadModal
         isOpen={showCsvUploadModal}
