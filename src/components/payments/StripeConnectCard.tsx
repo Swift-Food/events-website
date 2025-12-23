@@ -39,6 +39,18 @@ const DEFAULT_STATUS: StripeConnectStatus = {
   pastDue: [],
   disabledReason: null,
   pendingVerification: [],
+  currentDeadline: null,
+};
+
+// Format deadline for display
+const formatDeadline = (deadline: string | null): string | null => {
+  if (!deadline) return null;
+  try {
+    const date = new Date(deadline);
+    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch {
+    return null;
+  }
 };
 
 export default function StripeConnectCard({ onStatusChange }: StripeConnectCardProps) {
@@ -290,7 +302,9 @@ export default function StripeConnectCard({ onStatusChange }: StripeConnectCardP
         </button>
 
         <p className="text-xs text-muted-foreground text-center mt-3">
-          Verification is required by law for all payment platforms
+          {status.currentDeadline
+            ? `Complete by ${formatDeadline(status.currentDeadline)} to avoid payment interruption`
+            : 'Required by financial regulations (KYC/AML)'}
         </p>
       </StripeConnectCardLayout>
     );

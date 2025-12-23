@@ -29,6 +29,7 @@ export interface StripeConnectStatus {
   pastDue: string[];
   disabledReason: string | null;
   pendingVerification: string[];
+  currentDeadline: string | null; // ISO date string when verification is due
 }
 
 /**
