@@ -306,7 +306,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
 
   if (isLoadingBundles || isLoadingOrder) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-12 sm:p-16 shadow-xl">
+      <div className="rounded-2xl border border-white/10 bg-card-background p-12 sm:p-16 shadow-xl">
         <div className="flex items-center justify-center">
           <div className="text-center max-w-md">
             <div className="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10">
@@ -327,8 +327,8 @@ export function CateringTab({ eventData }: CateringTabProps) {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Header with gradient */}
-      <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-6 sm:p-8 shadow-xl">
+      {/* Header */}
+      <div className="rounded-2xl border border-white/10 bg-card-background p-6 sm:p-8 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
@@ -356,7 +356,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
         {/* Event Info Summary - Enhanced cards */}
         <div className="mt-6 space-y-4">
           <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="group rounded-xl bg-gradient-to-br from-card-secondary-background to-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
+            <div className="group rounded-xl bg-card-secondary-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
               <div className="flex items-start gap-3">
                 <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                   <MapPin className="h-5 w-5 text-primary" />
@@ -372,7 +372,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
               </div>
             </div>
 
-            <div className="group rounded-xl bg-gradient-to-br from-card-secondary-background to-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
+            <div className="group rounded-xl bg-card-secondary-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
               <div className="flex items-start gap-3">
                 <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                   <Mail className="h-5 w-5 text-primary" />
@@ -388,7 +388,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
               </div>
             </div>
 
-            <div className="group rounded-xl bg-gradient-to-br from-card-secondary-background to-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
+            <div className="group rounded-xl bg-card-secondary-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
               <div className="flex items-start gap-3">
                 <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                   <Phone className="h-5 w-5 text-primary" />
@@ -406,7 +406,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
               </div>
             </div>
 
-            <div className="group rounded-xl bg-gradient-to-br from-card-secondary-background to-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
+            <div className="group rounded-xl bg-card-secondary-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
               <div className="flex items-start gap-3">
                 <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                   <Package className="h-5 w-5 text-primary" />
@@ -424,7 +424,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
           </div>
 
           {/* Contact Phone Input - Enhanced */}
-          <div className="rounded-xl bg-gradient-to-br from-card-secondary-background to-card-background border border-white/5 p-5 hover:border-primary/20 transition-all">
+          <div className="rounded-xl bg-card-secondary-background border border-white/5 p-5 hover:border-primary/20 transition-all">
             <label className="flex items-center gap-2 text-sm font-semibold text-foreground mb-3">
               <div className="rounded-lg bg-primary/10 p-1.5">
                 <Phone className="h-4 w-4 text-primary" />
@@ -446,7 +446,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
 
       {/* Meal Sessions */}
       {sessions.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-12 sm:p-16 shadow-lg">
+        <div className="rounded-2xl border border-white/10 bg-card-background p-12 sm:p-16 shadow-lg">
           <div className="text-center max-w-md mx-auto">
             <div className="mb-6 inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary/10 text-4xl sm:text-5xl">
               🍽️
@@ -485,7 +485,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
 
       {/* Order Summary & Submit - Enhanced */}
       {sessions.length > 0 && (
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-6 sm:p-8 shadow-xl">
+        <div className="rounded-2xl border border-white/10 bg-card-background p-6 sm:p-8 shadow-xl">
           <div className="flex items-center gap-3 mb-6">
             <div className="rounded-xl bg-primary/10 p-2">
               <ShoppingCart className="h-5 w-5 text-primary" />
@@ -710,7 +710,7 @@ function ExistingOrderView({ order }: ExistingOrderViewProps) {
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Header - Enhanced */}
-      <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-6 sm:p-8 shadow-xl">
+      <div className="rounded-2xl border border-white/10 bg-card-background p-6 sm:p-8 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
@@ -737,7 +737,7 @@ function ExistingOrderView({ order }: ExistingOrderViewProps) {
         </div>
 
         {/* Order Status Timeline */}
-        <div className="rounded-xl bg-gradient-to-br from-card-secondary-background to-card-background border border-white/5 p-6 sm:p-8">
+        <div className="rounded-xl bg-card-secondary-background border border-white/5 p-6 sm:p-8">
           <div className="flex items-center gap-3 mb-8">
             <div className="rounded-lg bg-primary/10 p-2">
               <Truck className="h-5 w-5 text-primary" />
@@ -750,7 +750,7 @@ function ExistingOrderView({ order }: ExistingOrderViewProps) {
 
       {/* Customer & Delivery Information - Enhanced */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-6 sm:p-8 shadow-lg hover:shadow-xl transition-shadow">
+        <div className="rounded-2xl border border-white/10 bg-card-background p-6 sm:p-8 shadow-lg hover:shadow-xl transition-shadow">
           <div className="flex items-center gap-3 mb-6">
             <div className="rounded-xl bg-primary/10 p-2.5">
               <Phone className="h-5 w-5 text-primary" />
@@ -775,7 +775,7 @@ function ExistingOrderView({ order }: ExistingOrderViewProps) {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-6 sm:p-8 shadow-lg hover:shadow-xl transition-shadow">
+        <div className="rounded-2xl border border-white/10 bg-card-background p-6 sm:p-8 shadow-lg hover:shadow-xl transition-shadow">
           <div className="flex items-center gap-3 mb-6">
             <div className="rounded-xl bg-primary/10 p-2.5">
               <MapPin className="h-5 w-5 text-primary" />
@@ -818,10 +818,10 @@ function ExistingOrderView({ order }: ExistingOrderViewProps) {
           {order.mealSessions.map((session, index) => (
             <div
               key={index}
-              className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background overflow-hidden shadow-lg hover:shadow-xl transition-all"
+              className="rounded-2xl border border-white/10 bg-card-background overflow-hidden shadow-lg hover:shadow-xl transition-all"
             >
               {/* Session Header - Enhanced */}
-              <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-b border-white/10 p-5 sm:p-8">
+              <div className="bg-primary/5 border-b border-white/10 p-5 sm:p-8">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
@@ -991,7 +991,7 @@ function ExistingOrderView({ order }: ExistingOrderViewProps) {
 
       {/* Payment Status - Enhanced */}
       {order.paymentStatus && (
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-6 sm:p-8 shadow-lg">
+        <div className="rounded-2xl border border-white/10 bg-card-background p-6 sm:p-8 shadow-lg">
           <div className="flex items-center gap-3 mb-6">
             <div className="rounded-xl bg-primary/10 p-2.5">
               <CheckCircle2 className="h-5 w-5 text-primary" />
@@ -1041,9 +1041,9 @@ function MealSessionCard({
   sessionTotal,
 }: MealSessionCardProps) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background overflow-hidden shadow-lg hover:shadow-xl transition-all">
+    <div className="rounded-2xl border border-white/10 bg-card-background overflow-hidden shadow-lg hover:shadow-xl transition-all">
       {/* Session Header - Enhanced */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 sm:p-5 border-b border-white/10 bg-gradient-to-r from-primary/5 to-transparent">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 sm:p-5 border-b border-white/10 bg-primary/5">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <button
             onClick={() => onToggleExpanded(session.id)}
