@@ -170,6 +170,11 @@ export const GuestTableRow = ({
         </p>
       </td>
       <td className="p-4">
+        <p className="text-sm text-foreground">
+          {guest.ticketName || "—"}
+        </p>
+      </td>
+      <td className="p-4">
         <div className="flex items-center justify-end gap-2">
           {guest.status === GuestTicketStatus.PENDING_APPROVAL && onReview && (
             <button
