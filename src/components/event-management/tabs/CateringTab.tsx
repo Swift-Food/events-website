@@ -328,7 +328,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="rounded-2xl border border-white/10 bg-card-background p-6 sm:p-8 shadow-xl">
+      <div>
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
@@ -356,7 +356,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
         {/* Event Info Summary - Enhanced cards */}
         <div className="mt-6 space-y-4">
           <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="group rounded-xl bg-card-secondary-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
+            <div className="group rounded-xl bg-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
               <div className="flex items-start gap-3">
                 <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                   <MapPin className="h-5 w-5 text-primary" />
@@ -372,7 +372,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
               </div>
             </div>
 
-            <div className="group rounded-xl bg-card-secondary-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
+            <div className="group rounded-xl bg-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
               <div className="flex items-start gap-3">
                 <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                   <Mail className="h-5 w-5 text-primary" />
@@ -388,7 +388,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
               </div>
             </div>
 
-            <div className="group rounded-xl bg-card-secondary-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
+            <div className="group rounded-xl bg-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
               <div className="flex items-start gap-3">
                 <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                   <Phone className="h-5 w-5 text-primary" />
@@ -406,7 +406,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
               </div>
             </div>
 
-            <div className="group rounded-xl bg-card-secondary-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
+            <div className="group rounded-xl bg-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
               <div className="flex items-start gap-3">
                 <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                   <Package className="h-5 w-5 text-primary" />
@@ -424,7 +424,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
           </div>
 
           {/* Contact Phone Input - Enhanced */}
-          <div className="rounded-xl bg-card-secondary-background border border-white/5 p-5 hover:border-primary/20 transition-all">
+          <div className="rounded-xl bg-card-background border border-white/5 p-5 hover:border-primary/20 transition-all">
             <label className="flex items-center gap-2 text-sm font-semibold text-foreground mb-3">
               <div className="rounded-lg bg-primary/10 p-1.5">
                 <Phone className="h-4 w-4 text-primary" />
