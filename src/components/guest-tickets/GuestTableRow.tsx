@@ -120,7 +120,6 @@ export const GuestTableRow = ({
         className: "bg-neutral-100 text-neutral-700",
       },
     };
-    console.log("guest status", guest.status)
     const config = statusConfig[guest.status as keyof typeof statusConfig];
     if (!config) return null;
 

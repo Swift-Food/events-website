@@ -68,7 +68,7 @@ export function CsvUploadModal({ isOpen, onClose, onBack, tickets }: CsvUploadMo
         csvFile,
         replaceEmails
       );
-      toast.success(`Added ${result.added} approved emails (${result.total} total)`);
+      toast.success(result.message || "Emails uploaded successfully");
       handleClose();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to upload CSV");
@@ -119,11 +119,11 @@ export function CsvUploadModal({ isOpen, onClose, onBack, tickets }: CsvUploadMo
             <select
               value={selectedTicketId}
               onChange={(e) => setSelectedTicketId(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none"
+              className="w-full rounded-xl border border-white/10 bg-neutral-800 px-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none"
             >
-              <option value="">Choose a ticket type...</option>
+              <option value="" className="bg-neutral-800 text-neutral-400">Choose a ticket type...</option>
               {tickets.map((ticket) => (
-                <option key={ticket.id} value={ticket.id}>
+                <option key={ticket.id} value={ticket.id} className="bg-neutral-800 text-white">
                   {ticket.name} ({ticket.quantityLeft} available)
                 </option>
               ))}
