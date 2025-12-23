@@ -2,8 +2,7 @@
 
 /**
  * StripeConnectCard Component
- * Displays Stripe Connect onboarding status and controls
- * Allows organizers to set up payment receiving capabilities
+ * Horizontal banner with expandable details for Stripe Connect status
  */
 import { useState, useEffect, useCallback } from 'react';
 import { paymentService } from '@/services/payment.service';
@@ -15,14 +14,14 @@ import {
   AlertCircle,
   Loader2,
   RefreshCw,
-  Banknote,
   ShieldAlert,
-  FileCheck,
   Clock,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Default status for users who haven't started onboarding
 const DEFAULT_STATUS: StripeConnectStatus = {
   hasAccount: false,
   accountId: null,
@@ -53,11 +52,38 @@ const formatDeadline = (deadline: string | null): string | null => {
   }
 };
 
+// Get verification message - only show deadline when it exists
+const getVerificationMessage = (status: StripeConnectStatus | null): { isUrgent: boolean; message: string } => {
+  if (!status) return { isUrgent: false, message: '' };
+
+  // URGENT: Past due - payouts already paused
+  if (status.pastDue.length > 0) {
+    return {
+      isUrgent: true,
+      message: 'Payouts paused — complete verification to resume receiving payments.',
+    };
+  }
+
+  // Has deadline - show it
+  if (status.currentDeadline) {
+    return {
+      isUrgent: false,
+      message: `Complete by ${formatDeadline(status.currentDeadline)} to avoid payout interruption.`,
+    };
+  }
+
+  // No deadline - informative message
+  return {
+    isUrgent: false,
+    message: 'Identity verification is required by financial regulations (KYC/AML) for all payment platforms. This is a one-time process to ensure secure transactions.',
+  };
+};
+
 export default function StripeConnectCard({ onStatusChange }: StripeConnectCardProps) {
   const [status, setStatus] = useState<StripeConnectStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isOnboarding, setIsOnboarding] = useState(false);
-  const [isOpeningDashboard, setIsOpeningDashboard] = useState(false);
+  const [isActionLoading, setIsActionLoading] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -79,339 +105,376 @@ export default function StripeConnectCard({ onStatusChange }: StripeConnectCardP
 
   const handleStartOnboarding = async () => {
     try {
-      setIsOnboarding(true);
+      setIsActionLoading(true);
       const response = await paymentService.startStripeConnectOnboarding();
-
       if (response.success && response.onboardingUrl) {
         window.open(response.onboardingUrl, '_blank');
-        toast.success('Opening Stripe onboarding... Complete the setup to receive payments.');
+        toast.success('Complete the setup in the new tab');
       } else {
         throw new Error('Failed to get onboarding URL');
       }
     } catch (error: unknown) {
-      console.error('[StripeConnectCard] Onboarding failed:', error);
       const message = error instanceof Error ? error.message : 'Failed to start onboarding';
       toast.error(message);
     } finally {
-      setIsOnboarding(false);
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleRefreshOnboarding = async () => {
+    try {
+      setIsActionLoading(true);
+      const response = await paymentService.refreshStripeConnectOnboarding();
+      console.log('[StripeConnectCard] Refresh response:', response);
+      if (response.success && response.onboardingUrl) {
+        window.open(response.onboardingUrl, '_blank');
+        toast.success('Complete the setup in the new tab');
+      } else if (response.success && !response.onboardingUrl) {
+        // Account is already fully configured - no onboarding needed
+        toast.success('Stripe Connect is already fully configured!');
+        fetchStatus(); // Refresh status to update UI
+      } else {
+        throw new Error('Failed to refresh onboarding');
+      }
+    } catch (error: unknown) {
+      console.error('[StripeConnectCard] Refresh error:', error);
+      // Try to extract backend error message
+      let message = 'Failed to refresh onboarding';
+      if (error instanceof Error) {
+        message = error.message;
+      }
+      // Check for axios error with response data
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string; error?: string } } };
+        message = axiosError.response?.data?.message || axiosError.response?.data?.error || message;
+      }
+      toast.error(message);
+    } finally {
+      setIsActionLoading(false);
     }
   };
 
   const handleOpenDashboard = async () => {
     try {
-      setIsOpeningDashboard(true);
+      setIsActionLoading(true);
       const response = await paymentService.getStripeDashboardLink();
-
       if (response.success && response.url) {
         window.open(response.url, '_blank');
       } else {
         throw new Error('Failed to get dashboard URL');
       }
     } catch (error: unknown) {
-      console.error('[StripeConnectCard] Dashboard open failed:', error);
       const message = error instanceof Error ? error.message : 'Failed to open dashboard';
       toast.error(message);
     } finally {
-      setIsOpeningDashboard(false);
-    }
-  };
-
-  const handleRefreshOnboarding = async () => {
-    try {
-      setIsOnboarding(true);
-      const response = await paymentService.refreshStripeConnectOnboarding();
-
-      if (response.success && response.onboardingUrl) {
-        window.open(response.onboardingUrl, '_blank');
-        toast.success('Opening Stripe onboarding...');
-      } else {
-        throw new Error('Failed to refresh onboarding');
-      }
-    } catch (error: unknown) {
-      console.error('[StripeConnectCard] Refresh failed:', error);
-      const message = error instanceof Error ? error.message : 'Failed to refresh onboarding';
-      toast.error(message);
-    } finally {
-      setIsOnboarding(false);
+      setIsActionLoading(false);
     }
   };
 
   // Loading state
   if (isLoading) {
     return (
-      <div className="rounded-2xl bg-card-background backdrop-blur-xl p-6 shadow-lg">
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+      <div className="rounded-2xl bg-card-background p-4 flex items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
-  // Not onboarded - show setup prompt
+  // Determine state
+  const hasVerificationIssues = status?.requiresVerification ||
+    (status?.currentlyDue?.length ?? 0) > 0 ||
+    (status?.eventuallyDue?.length ?? 0) > 0 ||
+    (status?.pastDue?.length ?? 0) > 0;
+
+  const hasUrgentIssues = (status?.pastDue?.length ?? 0) > 0 || (status?.currentlyDue?.length ?? 0) > 0;
+
+  // Not onboarded
   if (!status?.hasAccount) {
     return (
-      <StripeConnectCardLayout
+      <Banner
         icon={<CreditCard className="h-5 w-5" />}
-        iconBgClass="bg-primary/20"
-        iconColorClass="text-primary"
-        title="Payment Setup"
-        subtitle="Accept payments for your events"
-      >
-        <AlertBox variant="warning">
-          <p className="text-sm text-amber-300 font-medium">Setup Required</p>
-          <p className="text-sm text-amber-300/80 mt-1">
-            To create paid tickets and receive payments, you need to connect your Stripe account.
-          </p>
-        </AlertBox>
-
-        <PrimaryButton
-          onClick={handleStartOnboarding}
-          isLoading={isOnboarding}
-          loadingText="Setting up..."
-        >
-          <CreditCard className="h-4 w-4" />
-          Set Up Payments
-          <ExternalLink className="h-4 w-4" />
-        </PrimaryButton>
-
-        <p className="text-xs text-muted-foreground text-center mt-3">
-          Powered by Stripe. 5% platform fee on paid tickets.
-        </p>
-      </StripeConnectCardLayout>
+        iconBg="bg-primary/20"
+        iconColor="text-primary"
+        title="Set up payments"
+        description="Connect Stripe to create paid tickets and receive payments"
+        action={
+          <ActionButton onClick={handleStartOnboarding} isLoading={isActionLoading}>
+            Get Started
+          </ActionButton>
+        }
+        isExpanded={isExpanded}
+        onToggleExpand={() => setIsExpanded(!isExpanded)}
+        expandedContent={
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <StatusItem
+                label="Stripe Account"
+                description="Create a connected Stripe account to receive payments"
+                completed={false}
+              />
+              <StatusItem
+                label="Business Details"
+                description="Provide basic information about yourself or your business"
+                completed={false}
+              />
+              <StatusItem
+                label="Bank Account"
+                description="Add a bank account to receive payouts"
+                completed={false}
+              />
+              <StatusItem
+                label="Identity Verification"
+                description="Government ID required (passport, driver's license, or national ID)"
+                completed={false}
+              />
+            </div>
+            <div className="bg-white/5 rounded-lg p-3 text-xs text-muted-foreground space-y-1">
+              <p><span className="font-medium text-foreground">Fees:</span> 5% platform fee + Stripe processing (~2.9% + 30p)</p>
+              <p><span className="font-medium text-foreground">Grace period:</span> Start accepting payments immediately, verify later</p>
+              <p className="text-muted-foreground/70 italic">Student IDs not accepted — government ID required by law</p>
+            </div>
+          </div>
+        }
+      />
     );
   }
 
-  // Onboarding in progress
+  // Onboarding incomplete
   if (!status.onboardingComplete) {
     return (
-      <StripeConnectCardLayout
-        icon={<CreditCard className="h-5 w-5" />}
-        iconBgClass="bg-amber-500/20"
-        iconColorClass="text-amber-400"
-        title="Payment Setup"
-        subtitle="Complete your account setup"
-      >
-        <AlertBox variant="warning">
-          <p className="text-sm text-amber-300 font-medium">Onboarding Incomplete</p>
-          <p className="text-sm text-amber-300/80 mt-1">
-            Your Stripe account needs more information before you can receive payments.
-          </p>
-        </AlertBox>
-
-        <div className="space-y-2 mb-4">
-          <StatusItem label="Account Created" completed />
-          <StatusItem label="Details Submitted" completed={status.detailsSubmitted} />
-          <StatusItem label="Charges Enabled" completed={status.chargesEnabled} />
-          <StatusItem label="Payouts Enabled" completed={status.payoutsEnabled} />
-        </div>
-
-        <button
-          onClick={handleRefreshOnboarding}
-          disabled={isOnboarding}
-          className="w-full flex items-center justify-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-sm font-semibold text-black transition-all hover:bg-amber-400 disabled:opacity-50"
-        >
-          {isOnboarding ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Loading...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="h-4 w-4" />
-              Continue Setup
-              <ExternalLink className="h-4 w-4" />
-            </>
-          )}
-        </button>
-      </StripeConnectCardLayout>
-    );
-  }
-
-  // Check if verification is needed (even if "onboarded")
-  const hasVerificationIssues = status.requiresVerification ||
-    status.currentlyDue.length > 0 ||
-    status.eventuallyDue.length > 0 ||
-    status.pastDue.length > 0;
-
-  const hasUrgentIssues = status.pastDue.length > 0 || status.currentlyDue.length > 0;
-
-  // Show verification required state
-  if (hasVerificationIssues && !status.verificationPending) {
-    return (
-      <StripeConnectCardLayout
-        icon={<ShieldAlert className="h-5 w-5" />}
-        iconBgClass={hasUrgentIssues ? "bg-red-500/20" : "bg-amber-500/20"}
-        iconColorClass={hasUrgentIssues ? "text-red-400" : "text-amber-400"}
-        title="Verification Required"
-        subtitle="Complete identity verification to continue"
-      >
-        <AlertBox variant="warning">
-          <p className="text-sm text-amber-300 font-medium">
-            {hasUrgentIssues ? 'Action Required' : 'Verification Needed'}
-          </p>
-          <p className="text-sm text-amber-300/80 mt-1">
-            {status.pastDue.length > 0
-              ? 'Your account requires immediate attention. Payouts may be paused until verification is complete.'
-              : 'To continue receiving payments, please verify your identity. This is a quick one-time process required by financial regulations.'}
-          </p>
-        </AlertBox>
-
-        <div className="space-y-2 mb-4">
-          <StatusItem label="Account Created" completed />
-          <StatusItem label="Details Submitted" completed={status.detailsSubmitted} />
-          <StatusItem
-            label="Identity Verified"
-            completed={!status.requiresVerification && status.currentlyDue.length === 0}
-          />
-          <StatusItem label="Payouts Enabled" completed={status.payoutsEnabled} />
-        </div>
-
-        {/* Show what's needed */}
-        <div className="bg-white/5 rounded-lg p-3 mb-4">
-          <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1.5">
-            <FileCheck className="h-3.5 w-3.5" />
-            What you'll need:
-          </p>
-          <ul className="text-xs text-foreground/80 space-y-1 ml-5 list-disc">
-            <li>A valid government-issued ID (passport, driver's license, or national ID)</li>
-            <li>Takes about 2 minutes to complete</li>
-          </ul>
-        </div>
-
-        <button
-          onClick={handleRefreshOnboarding}
-          disabled={isOnboarding}
-          className={`w-full flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-black transition-all disabled:opacity-50 ${
-            hasUrgentIssues
-              ? 'bg-red-500 hover:bg-red-400'
-              : 'bg-amber-500 hover:bg-amber-400'
-          }`}
-        >
-          {isOnboarding ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Loading...
-            </>
-          ) : (
-            <>
-              <ShieldAlert className="h-4 w-4" />
-              Complete Verification
-              <ExternalLink className="h-4 w-4" />
-            </>
-          )}
-        </button>
-
-        <p className="text-xs text-muted-foreground text-center mt-3">
-          {status.currentDeadline
-            ? `Complete by ${formatDeadline(status.currentDeadline)} to avoid payment interruption`
-            : 'Required by financial regulations (KYC/AML)'}
-        </p>
-      </StripeConnectCardLayout>
-    );
-  }
-
-  // Verification is pending (submitted, waiting for Stripe to verify)
-  if (status.verificationPending) {
-    return (
-      <StripeConnectCardLayout
-        icon={<Clock className="h-5 w-5" />}
-        iconBgClass="bg-blue-500/20"
-        iconColorClass="text-blue-400"
-        title="Verification Pending"
-        subtitle="Your documents are being reviewed"
-      >
-        <AlertBox variant="success">
-          <div className="flex gap-3">
-            <Clock className="h-5 w-5 text-blue-400 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm text-blue-300 font-medium">Under Review</p>
-              <p className="text-sm text-blue-300/80 mt-1">
-                Your identity documents have been submitted and are being verified. This usually takes just a few minutes.
+      <Banner
+        icon={<AlertCircle className="h-5 w-5" />}
+        iconBg="bg-amber-500/20"
+        iconColor="text-amber-400"
+        title="Complete payment setup"
+        description="Finish your Stripe account setup to start accepting payments"
+        action={
+          <ActionButton onClick={handleRefreshOnboarding} isLoading={isActionLoading} variant="warning">
+            Continue Setup
+          </ActionButton>
+        }
+        isExpanded={isExpanded}
+        onToggleExpand={() => setIsExpanded(!isExpanded)}
+        expandedContent={
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <StatusItem
+                label="Account Created"
+                description="Your Stripe Connect account has been created"
+                completed={true}
+              />
+              <StatusItem
+                label="Details Submitted"
+                description="Business and personal information provided"
+                completed={status.detailsSubmitted}
+              />
+              <StatusItem
+                label="Charges Enabled"
+                description="Ability to accept payments from customers"
+                completed={status.chargesEnabled}
+              />
+              <StatusItem
+                label="Payouts Enabled"
+                description="Ability to receive money to your bank account"
+                completed={status.payoutsEnabled}
+              />
+            </div>
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+              <p className="text-xs text-amber-300">
+                Complete the remaining steps in Stripe to start accepting payments. This usually takes just a few minutes.
               </p>
             </div>
           </div>
-        </AlertBox>
-
-        <div className="space-y-2 mb-4">
-          <StatusItem label="Account Created" completed />
-          <StatusItem label="Details Submitted" completed />
-          <StatusItem label="Documents Submitted" completed />
-          <StatusItem label="Verification Complete" completed={false} />
-        </div>
-
-        <div className="flex gap-3">
-          <button
-            onClick={fetchStatus}
-            className="flex-1 flex items-center justify-center gap-2 rounded-full bg-blue-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-400"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Check Status
-          </button>
-        </div>
-
-        <p className="text-xs text-muted-foreground text-center mt-3">
-          We'll notify you once verification is complete
-        </p>
-      </StripeConnectCardLayout>
+        }
+      />
     );
   }
 
-  // Fully onboarded - show success state
-  return (
-    <StripeConnectCardLayout
-      icon={<Check className="h-5 w-5" />}
-      iconBgClass="bg-green-500/20"
-      iconColorClass="text-green-400"
-      title="Payments Active"
-      subtitle="Your account is ready to receive payments"
-    >
-      <AlertBox variant="success">
-        <div className="flex gap-3">
-          <Banknote className="h-5 w-5 text-green-400 shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm text-green-300 font-medium">Ready to Accept Payments</p>
-            <p className="text-sm text-green-300/80 mt-1">
-              You can now create paid tickets. Payments will be deposited directly to your connected account.
-            </p>
+  // Verification required
+  if (hasVerificationIssues && !status.verificationPending) {
+    return (
+      <Banner
+        icon={<ShieldAlert className="h-5 w-5" />}
+        iconBg={hasUrgentIssues ? "bg-red-500/20" : "bg-amber-500/20"}
+        iconColor={hasUrgentIssues ? "text-red-400" : "text-amber-400"}
+        title="Verification required"
+        description={hasUrgentIssues
+          ? "Payouts paused — complete verification to resume"
+          : "Verify your identity to continue receiving payments"
+        }
+        action={
+          <ActionButton
+            onClick={handleRefreshOnboarding}
+            isLoading={isActionLoading}
+            variant={hasUrgentIssues ? "danger" : "warning"}
+          >
+            Verify Now
+          </ActionButton>
+        }
+        isExpanded={isExpanded}
+        onToggleExpand={() => setIsExpanded(!isExpanded)}
+        expandedContent={
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <StatusItem
+                label="Account Active"
+                description="Your Stripe Connect account is set up"
+                completed={true}
+              />
+              <StatusItem
+                label="Details Submitted"
+                description="Business and personal information provided"
+                completed={status.detailsSubmitted}
+              />
+              <StatusItem
+                label="Identity Verified"
+                description="Government ID verification for compliance"
+                completed={!status.requiresVerification && status.currentlyDue.length === 0}
+              />
+              <StatusItem
+                label="Payouts Enabled"
+                description="Ability to receive money to your bank account"
+                completed={status.payoutsEnabled}
+              />
+            </div>
+
+            {/* What's needed */}
+            <div className="bg-white/5 rounded-lg p-3 text-xs text-muted-foreground space-y-1">
+              <p><span className="font-medium text-foreground">Required:</span> Government ID (passport, driver's license, or national ID) — takes ~2 mins</p>
+              <p className="text-muted-foreground/70 italic">Student IDs not accepted — government ID required by law</p>
+            </div>
+
+            {/* Verification status info */}
+            {(() => {
+              const { isUrgent, message } = getVerificationMessage(status);
+              return (
+                <div className={`${isUrgent ? 'bg-red-500/10 border-red-500/20' : 'bg-amber-500/10 border-amber-500/20'} border rounded-lg p-3`}>
+                  <p className={`text-xs ${isUrgent ? 'text-red-300' : 'text-amber-300'}`}>
+                    {message}
+                  </p>
+                </div>
+              );
+            })()}
           </div>
-        </div>
-      </AlertBox>
+        }
+      />
+    );
+  }
 
-      <div className="space-y-2 mb-4">
-        <StatusItem label="Account Verified" completed />
-        <StatusItem label="Charges Enabled" completed={status.chargesEnabled} />
-        <StatusItem label="Payouts Enabled" completed={status.payoutsEnabled} />
-      </div>
+  // Verification pending
+  if (status.verificationPending) {
+    return (
+      <Banner
+        icon={<Clock className="h-5 w-5" />}
+        iconBg="bg-blue-500/20"
+        iconColor="text-blue-400"
+        title="Verification in progress"
+        description="Your documents are being reviewed — usually takes a few minutes"
+        action={
+          <button
+            onClick={fetchStatus}
+            className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </button>
+        }
+        isExpanded={isExpanded}
+        onToggleExpand={() => setIsExpanded(!isExpanded)}
+        expandedContent={
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <StatusItem
+                label="Account Created"
+                description="Your Stripe Connect account is active"
+                completed={true}
+              />
+              <StatusItem
+                label="Details Submitted"
+                description="Business and personal information provided"
+                completed={true}
+              />
+              <StatusItem
+                label="Documents Submitted"
+                description="Identity documents uploaded for review"
+                completed={true}
+              />
+              <StatusItem
+                label="Verification Complete"
+                description="Waiting for Stripe to verify your documents"
+                completed={false}
+                pending={true}
+              />
+            </div>
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+              <p className="text-xs text-blue-300">
+                Stripe is reviewing your documents. This usually takes a few minutes, but can take up to 24 hours in some cases.
+              </p>
+            </div>
+          </div>
+        }
+      />
+    );
+  }
 
-      <div className="flex gap-3">
+  // Fully active
+  return (
+    <Banner
+      icon={<Check className="h-5 w-5" />}
+      iconBg="bg-green-500/20"
+      iconColor="text-green-400"
+      title="Payments active"
+      description="You're ready to accept payments for your events"
+      action={
         <button
           onClick={handleOpenDashboard}
-          disabled={isOpeningDashboard}
-          className="flex-1 flex items-center justify-center gap-2 rounded-full bg-card-secondary-background px-6 py-3 text-sm font-medium text-foreground transition-all hover:bg-white/15 disabled:opacity-50"
+          disabled={isActionLoading}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
         >
-          {isOpeningDashboard ? (
+          {isActionLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <>
-              <ExternalLink className="h-4 w-4" />
               Stripe Dashboard
+              <ExternalLink className="h-3.5 w-3.5" />
             </>
           )}
         </button>
-
-        <button
-          onClick={fetchStatus}
-          className="flex items-center justify-center gap-2 rounded-full bg-card-secondary-background px-4 py-3 text-sm font-medium text-foreground transition-all hover:bg-white/15"
-          aria-label="Refresh status"
-        >
-          <RefreshCw className="h-4 w-4" />
-        </button>
-      </div>
-
-      <p className="text-xs text-muted-foreground text-center mt-3">
-        5% platform fee on paid tickets
-      </p>
-    </StripeConnectCardLayout>
+      }
+      isExpanded={isExpanded}
+      onToggleExpand={() => setIsExpanded(!isExpanded)}
+      expandedContent={
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <StatusItem
+              label="Account Verified"
+              description="Your identity has been verified by Stripe"
+              completed={true}
+            />
+            <StatusItem
+              label="Charges Enabled"
+              description="You can accept payments from customers"
+              completed={status.chargesEnabled}
+            />
+            <StatusItem
+              label="Payouts Enabled"
+              description="Payments are deposited to your bank account"
+              completed={status.payoutsEnabled}
+            />
+            <StatusItem
+              label="Account Type"
+              description={`Stripe ${status.accountType || 'Express'} account`}
+              completed={true}
+            />
+          </div>
+          <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+            <p className="text-xs text-green-300">
+              Your account is fully set up. Payments will be deposited to your bank (minus 5% platform fee + Stripe processing fees).
+            </p>
+          </div>
+        </div>
+      }
+    />
   );
 }
 
@@ -419,108 +482,150 @@ export default function StripeConnectCard({ onStatusChange }: StripeConnectCardP
 // SUB-COMPONENTS
 // ==========================================
 
-interface StripeConnectCardLayoutProps {
-  children: React.ReactNode;
+interface BannerProps {
   icon: React.ReactNode;
-  iconBgClass: string;
-  iconColorClass: string;
+  iconBg: string;
+  iconColor: string;
   title: string;
-  subtitle: string;
+  description: string;
+  action: React.ReactNode;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  expandedContent: React.ReactNode;
 }
 
-function StripeConnectCardLayout({
-  children,
+function Banner({
   icon,
-  iconBgClass,
-  iconColorClass,
+  iconBg,
+  iconColor,
   title,
-  subtitle,
-}: StripeConnectCardLayoutProps) {
+  description,
+  action,
+  isExpanded,
+  onToggleExpand,
+  expandedContent
+}: BannerProps) {
   return (
-    <div className="rounded-2xl bg-card-background backdrop-blur-xl p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className={`rounded-full p-2.5 ${iconBgClass} ${iconColorClass}`}>
-          {icon}
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
+    <div className="rounded-2xl bg-card-background overflow-hidden">
+      {/* Main banner row */}
+      <div className="p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          {/* Icon + Text */}
+          <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+            <div className={`rounded-xl p-2.5 ${iconBg} ${iconColor} shrink-0`}>
+              {icon}
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-base font-semibold text-foreground">{title}</h3>
+              <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{description}</p>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={onToggleExpand}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isExpanded ? (
+                <>
+                  Hide details
+                  <ChevronUp className="h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  View details
+                  <ChevronDown className="h-4 w-4" />
+                </>
+              )}
+            </button>
+            {action}
+          </div>
         </div>
       </div>
-      {children}
-    </div>
-  );
-}
 
-interface AlertBoxProps {
-  children: React.ReactNode;
-  variant: 'warning' | 'success';
-}
-
-function AlertBox({ children, variant }: AlertBoxProps) {
-  const styles = {
-    warning: 'bg-amber-500/10 border-amber-500/20',
-    success: 'bg-green-500/10 border-green-500/20',
-  };
-
-  return (
-    <div className={`rounded-xl border p-4 mb-4 ${styles[variant]}`}>
-      {variant === 'warning' && (
-        <div className="flex gap-3">
-          <AlertCircle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
-          <div>{children}</div>
+      {/* Expandable details section */}
+      {isExpanded && (
+        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0 border-t border-white/5">
+          <div className="pt-4">
+            {expandedContent}
+          </div>
         </div>
       )}
-      {variant === 'success' && children}
     </div>
   );
 }
 
 interface StatusItemProps {
   label: string;
+  description: string;
   completed: boolean;
+  pending?: boolean;
 }
 
-function StatusItem({ label, completed }: StatusItemProps) {
+function StatusItem({ label, description, completed, pending }: StatusItemProps) {
   return (
-    <div className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-white/5">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      {completed ? (
-        <div className="flex items-center gap-1.5 text-green-400">
+    <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5">
+      <div className={`shrink-0 mt-0.5 ${
+        completed
+          ? 'text-green-400'
+          : pending
+            ? 'text-blue-400'
+            : 'text-muted-foreground'
+      }`}>
+        {completed ? (
           <Check className="h-4 w-4" />
-          <span className="text-xs font-medium">Done</span>
-        </div>
-      ) : (
-        <div className="flex items-center gap-1.5 text-amber-400">
+        ) : pending ? (
+          <Clock className="h-4 w-4" />
+        ) : (
           <AlertCircle className="h-4 w-4" />
-          <span className="text-xs font-medium">Pending</span>
-        </div>
-      )}
+        )}
+      </div>
+      <div className="min-w-0">
+        <p className={`text-sm font-medium ${
+          completed
+            ? 'text-foreground'
+            : pending
+              ? 'text-blue-300'
+              : 'text-muted-foreground'
+        }`}>
+          {label}
+        </p>
+        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+          {description}
+        </p>
+      </div>
     </div>
   );
 }
 
-interface PrimaryButtonProps {
+interface ActionButtonProps {
   children: React.ReactNode;
   onClick: () => void;
   isLoading: boolean;
-  loadingText: string;
+  variant?: 'primary' | 'warning' | 'danger';
 }
 
-function PrimaryButton({ children, onClick, isLoading, loadingText }: PrimaryButtonProps) {
+function ActionButton({ children, onClick, isLoading, variant = 'primary' }: ActionButtonProps) {
+  const styles = {
+    primary: 'bg-primary hover:bg-primary/90 text-primary-foreground',
+    warning: 'bg-amber-500 hover:bg-amber-400 text-black',
+    danger: 'bg-red-500 hover:bg-red-400 text-white',
+  };
+
   return (
     <button
       onClick={onClick}
       disabled={isLoading}
-      className="w-full flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
+      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all disabled:opacity-50 ${styles[variant]}`}
     >
       {isLoading ? (
-        <>
-          <Loader2 className="h-4 w-4 animate-spin" />
-          {loadingText}
-        </>
+        <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
-        children
+        <>
+          {children}
+          <ChevronRight className="h-4 w-4" />
+        </>
       )}
     </button>
   );

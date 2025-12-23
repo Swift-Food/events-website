@@ -33,14 +33,17 @@ export interface StripeConnectStatus {
 }
 
 /**
- * Response when starting Stripe Connect onboarding
+ * Response when starting or refreshing Stripe Connect onboarding
  * Returned from POST /event-users/stripe-connect/onboard
+ * Returned from GET /event-users/stripe-connect/refresh
+ *
+ * Note: onboardingUrl is optional - if account is fully configured with no
+ * outstanding requirements, success=true but no URL is returned
  */
 export interface StripeConnectOnboardingResponse {
   success: boolean;
-  accountId: string;
-  onboardingUrl: string;
-  expiresAt: string;
+  onboardingUrl?: string;
+  message: string;
 }
 
 /**
@@ -49,7 +52,8 @@ export interface StripeConnectOnboardingResponse {
  */
 export interface StripeConnectDashboardResponse {
   success: boolean;
-  url: string;
+  url?: string;
+  error?: string;
 }
 
 // ==========================================
