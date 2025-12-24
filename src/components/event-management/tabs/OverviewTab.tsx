@@ -319,18 +319,16 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
         </div>
       </div>
 
-      {canViewStats && (
-        <>
-          <GuestOverviewCard
-            isLoading={isLoadingStats}
-            checkInStats={checkInStats}
-            approvedCount={approvedCount}
-            pendingApprovalCount={pendingApprovalCount}
-            waitlistedCount={waitlistedCount}
-          />
+      <GuestOverviewCard
+        isLoading={isLoadingStats}
+        checkInStats={checkInStats}
+        approvedCount={approvedCount}
+        pendingApprovalCount={pendingApprovalCount}
+        waitlistedCount={waitlistedCount}
+      />
 
-          <InvitationsSection onInviteClick={() => setShowInviteGuestsModal(true)} />
-        </>
+      {canViewStats && (
+        <InvitationsSection onInviteClick={() => setShowInviteGuestsModal(true)} />
       )}
 
       {/* Delete Confirmation Modal */}
