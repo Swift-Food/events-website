@@ -70,6 +70,10 @@ export interface GuestTicketResponseDto {
   checkInDateTime: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  /** Deadline for claiming a promoted ticket (for paid tickets from waitlist) */
+  claimDeadline?: Date | null;
+  /** Whether this ticket was originally on the waitlist */
+  wasWaitlisted?: boolean;
 }
 
 /**
@@ -104,6 +108,12 @@ export interface RegisterTicketResponseDto {
     eventName: string;
     price: number;
   };
+  /** Whether the user was added to the waitlist (ticket sold out) */
+  isWaitlisted?: boolean;
+  /** User's position in the waitlist (1-indexed) */
+  waitlistPosition?: number;
+  /** Total number of people on the waitlist */
+  waitlistTotal?: number;
 }
 
 /**
@@ -307,4 +317,51 @@ export interface InviteLinksListResponseDto {
   success: boolean;
   inviteLinks: TicketInviteLinkDto[];
   total: number;
+}
+
+// Waitlist Types
+
+/**
+ * Response for getting waitlist position
+ */
+export interface WaitlistPositionResponseDto {
+  position: number; // 0 if not in waitlist, 1-indexed otherwise
+  total: number;
+}
+
+/**
+ * Response for leaving waitlist
+ */
+export interface LeaveWaitlistResponseDto {
+  success: boolean;
+  message: string;
+}
+
+/**
+ * Individual entry in the waitlist (admin view)
+ */
+export interface WaitlistEntryDto {
+  id: string;
+  guestName: string;
+  guestEmail: string;
+  position: number;
+  joinedAt: Date;
+  questionAnswers?: Record<string, any>;
+}
+
+/**
+ * Full waitlist response (admin view)
+ */
+export interface WaitlistResponseDto {
+  eventTicketId: string;
+  ticketName: string;
+  entries: WaitlistEntryDto[];
+  total: number;
+}
+
+/**
+ * Response for waitlist count (public)
+ */
+export interface WaitlistCountResponseDto {
+  count: number;
 }

@@ -18,6 +18,10 @@ import {
   AcceptTicketInviteResponseDto,
   TicketInvitationPreviewDto,
   InviteLinksListResponseDto,
+  WaitlistPositionResponseDto,
+  LeaveWaitlistResponseDto,
+  WaitlistResponseDto,
+  WaitlistCountResponseDto,
 } from "@/types/guest-ticket";
 
 class GuestTicketService {
@@ -320,6 +324,48 @@ class GuestTicketService {
   async revokeInviteLink(id: string): Promise<TicketActionResponseDto> {
     const response: AxiosResponse<TicketActionResponseDto> =
       await apiClient.delete(`${this.baseUrl}/invite-link/${id}`);
+    return response.data;
+  }
+
+  // ==================== WAITLIST METHODS ====================
+
+  /**
+   * Get waitlist position for a guest ticket
+   * GET /guest-tickets/:id/waitlist-position
+   */
+  async getWaitlistPosition(ticketId: string): Promise<WaitlistPositionResponseDto> {
+    const response: AxiosResponse<WaitlistPositionResponseDto> =
+      await apiClient.get(`${this.baseUrl}/${ticketId}/waitlist-position`);
+    return response.data;
+  }
+
+  /**
+   * Leave the waitlist (cancel a waitlisted ticket)
+   * DELETE /guest-tickets/:id/waitlist
+   */
+  async leaveWaitlist(ticketId: string): Promise<LeaveWaitlistResponseDto> {
+    const response: AxiosResponse<LeaveWaitlistResponseDto> =
+      await apiClient.delete(`${this.baseUrl}/${ticketId}/waitlist`);
+    return response.data;
+  }
+
+  /**
+   * Get full waitlist for an event ticket (admin only)
+   * GET /guest-tickets/event-ticket/:eventTicketId/waitlist
+   */
+  async getEventTicketWaitlist(eventTicketId: string): Promise<WaitlistResponseDto> {
+    const response: AxiosResponse<WaitlistResponseDto> =
+      await apiClient.get(`${this.baseUrl}/event-ticket/${eventTicketId}/waitlist`);
+    return response.data;
+  }
+
+  /**
+   * Get waitlist count for an event ticket (public)
+   * GET /guest-tickets/event-ticket/:eventTicketId/waitlist-count
+   */
+  async getWaitlistCount(eventTicketId: string): Promise<WaitlistCountResponseDto> {
+    const response: AxiosResponse<WaitlistCountResponseDto> =
+      await apiClient.get(`${this.baseUrl}/event-ticket/${eventTicketId}/waitlist-count`);
     return response.data;
   }
 }

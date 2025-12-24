@@ -17,6 +17,10 @@ interface TicketCardProps {
   isProcessingPayment?: boolean;
   onCancel?: (ticketId: string) => void;
   isCancelling?: boolean;
+  onLeaveWaitlist?: (ticketId: string) => void;
+  isLeavingWaitlist?: boolean;
+  waitlistPosition?: number;
+  waitlistTotal?: number;
 }
 
 // Confirmation Modal Component
@@ -132,10 +136,23 @@ const statusConfig: Record<GuestTicketStatus, { label: string; color: string; ic
   },
 };
 
-export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePayment, isProcessingPayment, onCancel, isCancelling }: TicketCardProps) {
+export default function TicketCard({
+  ticket,
+  onRefund,
+  isRefunding,
+  onCompletePayment,
+  isProcessingPayment,
+  onCancel,
+  isCancelling,
+  onLeaveWaitlist,
+  isLeavingWaitlist,
+  waitlistPosition,
+  waitlistTotal,
+}: TicketCardProps) {
   const [showQRModal, setShowQRModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
+  const [showLeaveWaitlistModal, setShowLeaveWaitlistModal] = useState(false);
 
   const status = statusConfig[ticket.status];
   const eventDate = new Date(ticket.eventStartDateTime);
@@ -143,12 +160,19 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
   const canShowQR = ticket.status === GuestTicketStatus.ACTIVE && ticket.qrCode;
   const isPendingPayment = ticket.status === GuestTicketStatus.PENDING_PAYMENT;
   const isActive = ticket.status === GuestTicketStatus.ACTIVE;
+  const isWaitlisted = ticket.status === GuestTicketStatus.WAITLISTED;
   const isPaidTicket = ticket.ticketPrice > 0;
   const canCancel = (ticket.status === GuestTicketStatus.PENDING_PAYMENT ||
     ticket.status === GuestTicketStatus.PENDING_APPROVAL) && isUpcoming && onCancel;
   // For active tickets: paid tickets can refund, free tickets can cancel
   const canRefund = isActive && isUpcoming && isPaidTicket && onRefund;
   const canCancelActive = isActive && isUpcoming && !isPaidTicket && onCancel;
+  const canLeaveWaitlist = isWaitlisted && isUpcoming && onLeaveWaitlist;
+
+  // Check if there's a claim deadline (for promoted paid tickets)
+  const hasClaimDeadline = isPendingPayment && ticket.claimDeadline && ticket.wasWaitlisted;
+  const claimDeadline = ticket.claimDeadline ? new Date(ticket.claimDeadline) : null;
+  const isClaimExpiringSoon = claimDeadline && (claimDeadline.getTime() - Date.now()) < 3600000; // Less than 1 hour
 
   const handleCancelClick = () => {
     setShowCancelModal(true);
@@ -170,6 +194,13 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
       onRefund(ticket.id);
     }
     setShowRefundModal(false);
+  };
+
+  const handleConfirmLeaveWaitlist = () => {
+    if (onLeaveWaitlist) {
+      onLeaveWaitlist(ticket.id);
+    }
+    setShowLeaveWaitlistModal(false);
   };
 
   return (
@@ -271,6 +302,20 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
             {/* Pending payment layout */}
             {isPendingPayment && (
               <div className="space-y-3">
+                {/* Claim deadline warning for promoted waitlist tickets */}
+                {hasClaimDeadline && claimDeadline && (
+                  <div className={`flex items-center gap-2 p-3 rounded-lg text-sm ${
+                    isClaimExpiringSoon
+                      ? "bg-red-500/20 text-red-400"
+                      : "bg-amber-500/20 text-amber-400"
+                  }`}>
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>
+                      {isClaimExpiringSoon ? "Expires soon! " : ""}
+                      Complete payment by {format(claimDeadline, "MMM d 'at' h:mm a")}
+                    </span>
+                  </div>
+                )}
                 {onCompletePayment && (
                   <button
                     onClick={() => onCompletePayment(ticket.id)}
@@ -313,8 +358,47 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
               </div>
             )}
 
-            {/* Other status layout (not active, not pending payment) */}
-            {!isActive && !isPendingPayment && (
+            {/* Waitlisted layout */}
+            {isWaitlisted && (
+              <div className="space-y-3">
+                {/* Waitlist position info */}
+                {waitlistPosition !== undefined && waitlistPosition > 0 && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-purple-500/20 text-purple-400 text-sm">
+                    <Clock className="h-4 w-4 shrink-0" />
+                    <span>
+                      Position #{waitlistPosition}
+                      {waitlistTotal ? ` of ${waitlistTotal}` : ""} on waitlist
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between pt-1">
+                  <Link
+                    href={`/events/${ticket.eventId}`}
+                    className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Event Details
+                  </Link>
+                  {canLeaveWaitlist && (
+                    <button
+                      onClick={() => setShowLeaveWaitlistModal(true)}
+                      disabled={isLeavingWaitlist}
+                      className="flex items-center gap-1.5 text-sm text-red-400/80 hover:text-red-400 transition-colors disabled:opacity-50"
+                    >
+                      {isLeavingWaitlist ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <XCircle className="h-3.5 w-3.5" />
+                      )}
+                      {isLeavingWaitlist ? "Leaving..." : "Leave Waitlist"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Other status layout (not active, not pending payment, not waitlisted) */}
+            {!isActive && !isPendingPayment && !isWaitlisted && (
               <div className="space-y-3">
                 <Link
                   href={`/events/${ticket.eventId}`}
@@ -369,6 +453,19 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
         loadingText="Processing..."
         isLoading={isRefunding}
         variant="warning"
+      />
+
+      {/* Leave Waitlist Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showLeaveWaitlistModal}
+        onClose={() => setShowLeaveWaitlistModal(false)}
+        onConfirm={handleConfirmLeaveWaitlist}
+        title="Leave Waitlist"
+        message="Are you sure you want to leave the waitlist? You will lose your position and will need to join again if you change your mind."
+        confirmText="Yes, Leave"
+        loadingText="Leaving..."
+        isLoading={isLeavingWaitlist}
+        variant="danger"
       />
 
       {/* QR Code Modal */}
