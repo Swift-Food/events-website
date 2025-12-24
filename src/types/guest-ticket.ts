@@ -260,10 +260,23 @@ export interface AcceptTicketInviteDto {
 export interface AcceptTicketInviteResponseDto {
   success: boolean;
   message: string;
-  guestTicket?: GuestTicketResponseDto;
+  event?: {
+    id: string;
+    name: string;
+    description: string;
+    startDateTime: string;
+    endDateTime: string;
+    eventImage?: string;
+  };
+  ticket?: {
+    id: string;
+    name: string;
+    isPaid: boolean;
+    bypassPayment: boolean;
+  };
+  requiresLogin?: boolean;
   requiresPayment?: boolean;
   paymentUrl?: string;
-  requiresLogin?: boolean;
 }
 
 /**
