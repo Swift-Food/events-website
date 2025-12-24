@@ -244,9 +244,11 @@ export default function CheckInPage() {
         setScanner(null);
       }
 
+      // Small delay to ensure DOM is ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       // Create a fresh scanner instance
       const qrScanner = new Html5Qrcode("qr-scanner-container");
-      setScanner(qrScanner);
 
       // Get container dimensions to calculate safe qrbox size
       const container = document.getElementById("qr-scanner-container");
@@ -278,6 +280,7 @@ export default function CheckInPage() {
           // Ignore scan errors (no QR in view)
         }
       );
+      setScanner(qrScanner);
       setIsScanning(true);
 
       // Detect camera aspect ratio from video element
@@ -486,7 +489,7 @@ export default function CheckInPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             <div className="rounded-xl bg-card-background border border-white/5 p-4 flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Checked In</p>
+                <p className="text-xs text-muted-foreground">Checked In fix plx</p>
                 <p className="text-2xl font-bold text-foreground">{stats.checkedIn}</p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/20">
