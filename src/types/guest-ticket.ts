@@ -149,10 +149,6 @@ export interface PendingTicketsResponseDto {
 export interface RegisterForTicketDto {
   eventTicketId: string;
   questionAnswers?: Record<string, any>;
-  /** Optional first name for guest profile */
-  firstName?: string;
-  /** Optional last name for guest profile */
-  lastName?: string;
 }
 
 export interface UpdateTicketStatusDto {
