@@ -24,7 +24,7 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 
-type FilterType = "all" | "upcoming" | "checked_in" | "active" | "pending" | "cancelled";
+type FilterType = "all" | "upcoming" | "checked_in" | "active" | "pending" | "cancelled" | "waitlisted";
 
 export default function MyTicketsPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -37,6 +37,9 @@ export default function MyTicketsPage() {
     null
   );
   const [cancellingTicketId, setCancellingTicketId] = useState<string | null>(
+    null
+  );
+  const [leavingWaitlistTicketId, setLeavingWaitlistTicketId] = useState<string | null>(
     null
   );
 
@@ -141,6 +144,26 @@ export default function MyTicketsPage() {
       toast.error(error.response?.data?.message || "Failed to cancel ticket");
     } finally {
       setCancellingTicketId(null);
+    }
+  };
+
+  const handleLeaveWaitlist = async (ticketId: string) => {
+    try {
+      setLeavingWaitlistTicketId(ticketId);
+      const result = await guestTicketService.leaveWaitlist(ticketId);
+
+      if (result.success) {
+        toast.success(result.message || "You have left the waitlist");
+        // Remove ticket from list
+        setTickets((prev) => prev.filter((t) => t.id !== ticketId));
+      } else {
+        toast.error(result.message || "Failed to leave waitlist");
+      }
+    } catch (error: any) {
+      console.error("Leave waitlist failed:", error);
+      toast.error(error.response?.data?.message || "Failed to leave waitlist");
+    } finally {
+      setLeavingWaitlistTicketId(null);
     }
   };
 
@@ -258,6 +281,8 @@ export default function MyTicketsPage() {
             ticket.status === GuestTicketStatus.CANCELLED ||
             ticket.status === GuestTicketStatus.REFUNDED
           );
+        case "waitlisted":
+          return ticket.status === GuestTicketStatus.WAITLISTED;
         default:
           return true;
       }
@@ -265,8 +290,8 @@ export default function MyTicketsPage() {
     .sort((a, b) => {
       const dateA = new Date(a.eventStartDateTime).getTime();
       const dateB = new Date(b.eventStartDateTime).getTime();
-      // Ascending for active/pending, descending for past/all
-      if (filter === "active" || filter === "pending" || filter === "upcoming") {
+      // Ascending for active/pending/waitlisted, descending for past/all
+      if (filter === "active" || filter === "pending" || filter === "upcoming" || filter === "waitlisted") {
         return dateA - dateB;
       }
       return dateB - dateA;
@@ -279,6 +304,7 @@ export default function MyTicketsPage() {
       icon: <CheckCircle2 className="h-4 w-4" />,
     },
     { id: "pending", label: "Pending", icon: <Clock className="h-4 w-4" /> },
+    { id: "waitlisted", label: "Waitlisted", icon: <Clock className="h-4 w-4" /> },
     { id: "cancelled", label: "Cancelled", icon: <Ticket className="h-4 w-4" /> },
     { id: "checked_in", label: "Checked In", icon: <CheckCircle2 className="h-4 w-4" /> },
     { id: "all", label: "All", icon: <Ticket className="h-4 w-4" /> },
@@ -369,6 +395,8 @@ export default function MyTicketsPage() {
                 isProcessingPayment={processingPaymentTicketId === ticket.id}
                 onCancel={handleCancel}
                 isCancelling={cancellingTicketId === ticket.id}
+                onLeaveWaitlist={handleLeaveWaitlist}
+                isLeavingWaitlist={leavingWaitlistTicketId === ticket.id}
               />
             ))}
           </div>
