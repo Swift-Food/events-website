@@ -326,9 +326,10 @@ export default function JoinEventPage() {
             {/* Description */}
             {event.description && (
               <div className="mb-4 rounded-xl border border-neutral-700 bg-card-secondary-background p-4">
-                <p className="text-sm text-muted-foreground line-clamp-3">
-                  {event.description}
-                </p>
+                <div
+                  className="tiptap-editor tiptap-view-mode text-sm text-muted-foreground line-clamp-3"
+                  dangerouslySetInnerHTML={{ __html: event.description }}
+                />
               </div>
             )}
           </div>
