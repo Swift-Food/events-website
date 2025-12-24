@@ -244,8 +244,8 @@ export default function CheckInPage() {
       await qrScanner.start(
         { facingMode: "environment" },
         {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
+          fps: 15,
+          qrbox: { width: viewfinderSize, height: viewfinderSize },
         },
         (qrCodeMessage) => {
           handleCheckIn(qrCodeMessage);
@@ -319,10 +319,27 @@ export default function CheckInPage() {
     setViewfinderSize(newSize);
   }, [isResizing]);
 
-  const handleResizeEnd = useCallback(() => {
+  const handleResizeEnd = useCallback(async () => {
     resizeStartRef.current = null;
     setIsResizing(false);
-  }, []);
+
+    // Restart scanner with new viewfinder size if currently scanning
+    if (scanner && isScanning) {
+      try {
+        if (scanner.isScanning) {
+          await scanner.stop();
+        }
+        await scanner.clear();
+      } catch {
+        // Ignore cleanup errors
+      }
+      setScanner(null);
+      // Small delay to ensure cleanup, then restart
+      setTimeout(() => {
+        startScanning();
+      }, 100);
+    }
+  }, [scanner, isScanning]);
 
   // Add resize event listeners
   useEffect(() => {

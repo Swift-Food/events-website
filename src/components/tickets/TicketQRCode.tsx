@@ -96,7 +96,7 @@ export default function TicketQRCode({
       {showDownload && (
         <button
           onClick={handleDownload}
-          className="absolute -bottom-3 -right-3 flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-colors"
+          className="absolute -bottom-5 -right-5 flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-colors"
           title="Download QR Code"
         >
           <Download className="h-4 w-4" />
