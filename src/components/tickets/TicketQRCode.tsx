@@ -80,7 +80,7 @@ export default function TicketQRCode({
   }
 
   return (
-    <div className="relative">
+    <div className="flex flex-col items-center">
       <div
         ref={qrRef}
         className="bg-white p-4 rounded-2xl"
@@ -93,15 +93,16 @@ export default function TicketQRCode({
         />
       </div>
 
-      {/* {showDownload && (
+      {showDownload && (
         <button
           onClick={handleDownload}
-          className="absolute -bottom-5 -right-5 flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-colors"
+          className="mt-3 flex items-center justify-center gap-2 px-4 py-2 bg-white/10 text-foreground rounded-xl text-sm font-medium hover:bg-white/20 transition-colors"
           title="Download QR Code"
         >
           <Download className="h-4 w-4" />
+          Save QR Code
         </button>
-      )} */}
+      )}
     </div>
   );
 }
