@@ -248,22 +248,28 @@ export default function CheckInPage() {
       const qrScanner = new Html5Qrcode("qr-scanner-container");
       setScanner(qrScanner);
 
+      // Get container dimensions to calculate safe qrbox size
+      const container = document.getElementById("qr-scanner-container");
+      const containerWidth = container?.clientWidth || 300;
+      const containerHeight = container?.clientHeight || 300;
+      const minDimension = Math.min(containerWidth, containerHeight);
+      const maxAllowedSize = Math.floor(minDimension * 0.7);
+
+      // Use viewfinderSize but cap it to safe maximum
+      let qrboxSize = Math.min(viewfinderSizeRef.current, maxAllowedSize);
+      qrboxSize = Math.max(qrboxSize, 100); // Minimum 100px
+
+      // Sync the visual viewfinder with actual qrbox
+      if (viewfinderSizeRef.current !== qrboxSize) {
+        setViewfinderSize(qrboxSize);
+        viewfinderSizeRef.current = qrboxSize;
+      }
+
       await qrScanner.start(
         { facingMode: "environment" },
         {
           fps: 15,
-          // Dynamic qrbox based on video dimensions
-          qrbox: (viewfinderWidth, viewfinderHeight) => {
-            const minDimension = Math.min(viewfinderWidth, viewfinderHeight);
-            // Use viewfinderSizeRef but cap it to 80% of smallest dimension
-            const maxAllowedSize = Math.floor(minDimension * 0.8);
-            const size = Math.min(viewfinderSizeRef.current, maxAllowedSize);
-            // Update state if we had to cap it
-            if (viewfinderSizeRef.current > maxAllowedSize) {
-              setViewfinderSize(maxAllowedSize);
-            }
-            return { width: size, height: size };
-          },
+          qrbox: { width: qrboxSize, height: qrboxSize },
         },
         (qrCodeMessage) => {
           handleCheckIn(qrCodeMessage);

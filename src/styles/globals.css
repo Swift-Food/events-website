@@ -262,5 +262,5 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Hide the library's default viewfinder - we use a custom one */
 #qr-shaded-region {
-  display: none !important;
+  /* display: none !important; */
 }
