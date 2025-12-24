@@ -595,16 +595,13 @@ export default function EventPreviewModal({
                 event.eventTickets.length > 0 &&
                 (() => {
                   const isEventEnded = new Date(event.endDateTime) < new Date();
-                  const hasAvailableTickets = event.eventTickets.some(
-                    (t) => (t.quantityLeft ?? 0) > 0 && t.isAvailable
-                  );
                   const hasUserTicket = !!event.userTicket;
+                  // Allow registration even when sold out (for waitlist), but not if user already has ticket
                   const canRegister =
                     event.status === EventStatus.PUBLISHED &&
                     !isEventEnded &&
-                    hasAvailableTickets &&
                     !hasUserTicket;
-                  const showClosedMessage = (isEventEnded || !hasAvailableTickets) && !hasUserTicket;
+                  const showClosedMessage = isEventEnded && !hasUserTicket;
 
                   return (
                     <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 border border-neutral-700 mb-4">
@@ -622,9 +619,11 @@ export default function EventPreviewModal({
                         {event.eventTickets.map((ticket) => {
                           const remaining = ticket.quantityLeft ?? 0;
                           const isSelected = selectedTicketId === ticket.id;
-                          const isSoldOut = remaining <= 0 || !ticket.isAvailable;
+                          const isSoldOut = remaining <= 0;
+                          const isManuallyUnavailable = !ticket.isAvailable; // Organizer disabled this ticket
                           const isOwnedTicket = event.userTicket?.ticketName === ticket.name;
-                          const isDisabled = isSoldOut || !canRegister || hasUserTicket;
+                          // Can select sold out tickets for waitlist, but not if organizer disabled or user has ticket
+                          const isDisabled = !canRegister || isManuallyUnavailable || hasUserTicket;
 
                           return (
                             <div
@@ -645,7 +644,7 @@ export default function EventPreviewModal({
                               <div className="flex items-center gap-2 flex-1 min-w-0">
                                 {isOwnedTicket ? (
                                   <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0" />
-                                ) : canRegister && !isSoldOut && (
+                                ) : canRegister && !isManuallyUnavailable && (
                                   <div
                                     className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                                       isSelected
@@ -665,8 +664,10 @@ export default function EventPreviewModal({
                                   <p className="text-xs text-muted-foreground">
                                     {isOwnedTicket ? (
                                       <span className="text-green-400">You own this ticket</span>
+                                    ) : isManuallyUnavailable ? (
+                                      <span className="text-gray-400">Unavailable</span>
                                     ) : isSoldOut ? (
-                                      "Sold out"
+                                      <span className="text-amber-400">Sold out - Join waitlist</span>
                                     ) : (
                                       `${remaining} left`
                                     )}
@@ -709,30 +710,35 @@ export default function EventPreviewModal({
                         </div>
                       )}
 
-                      {/* Register Button - only show if user doesn't have a ticket */}
-                      {canRegister &&
-                        event.eventTickets.some(
-                          (t) => (t.quantityLeft ?? 0) > 0 && t.isAvailable
-                        ) && (
-                          <button
-                            onClick={() =>
-                              selectedTicketId && handleRegister(selectedTicketId)
-                            }
-                            disabled={!selectedTicketId || isRegistering}
-                            className="w-full mt-3 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                          >
-                            {isRegistering ? (
-                              <>
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                Registering...
-                              </>
-                            ) : selectedTicketId ? (
-                              "Register"
-                            ) : (
-                              "Select a ticket to register"
-                            )}
-                          </button>
-                        )}
+                      {/* Register/Join Waitlist Button */}
+                      {canRegister && event.eventTickets.some(t => t.isAvailable) && (
+                        <button
+                          onClick={() =>
+                            selectedTicketId && handleRegister(selectedTicketId)
+                          }
+                          disabled={!selectedTicketId || isRegistering}
+                          className="w-full mt-3 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                          {isRegistering ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              {(() => {
+                                const ticket = event.eventTickets.find(t => t.id === selectedTicketId);
+                                const isSoldOut = (ticket?.quantityLeft ?? 0) <= 0;
+                                return isSoldOut ? "Joining waitlist..." : "Registering...";
+                              })()}
+                            </>
+                          ) : selectedTicketId ? (
+                            (() => {
+                              const ticket = event.eventTickets.find(t => t.id === selectedTicketId);
+                              const isSoldOut = (ticket?.quantityLeft ?? 0) <= 0;
+                              return isSoldOut ? "Join Waitlist" : "Register";
+                            })()
+                          ) : (
+                            "Select a ticket"
+                          )}
+                        </button>
+                      )}
                     </div>
                   );
                 })()}
