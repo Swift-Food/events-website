@@ -51,6 +51,7 @@
   --color-border: #334155;
   --color-toggle-inactive: #404040;
   --color-button-inactive: #3a3a3a;
+  --color-warning: #f59e0b;
   --font-sans: 'Inter', sans-serif;
   --font-heading: 'Satoshi', sans-serif;
   --font-mono: var(--font-geist-mono);

@@ -320,7 +320,7 @@ export default function TicketCard({
                   <button
                     onClick={() => onCompletePayment(ticket.id)}
                     disabled={isProcessingPayment}
-                    className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-amber-600 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+                    className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-warning text-white rounded-xl text-sm font-semibold hover:bg-warning/90 transition-all disabled:opacity-50"
                   >
                     {isProcessingPayment ? (
                       <>
