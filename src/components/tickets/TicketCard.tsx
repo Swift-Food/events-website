@@ -1,13 +1,14 @@
 // components/tickets/TicketCard.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { GuestTicketWithEventResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
-import { Calendar, Ticket, QrCode, X, Clock, CheckCircle2, XCircle, AlertCircle, Loader2, ExternalLink, AlertTriangle, RotateCcw } from "lucide-react";
+import { Calendar, Ticket, QrCode, X, Clock, CheckCircle2, XCircle, AlertCircle, Loader2, ExternalLink, AlertTriangle, RotateCcw, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import TicketQRCode from "./TicketQRCode";
 import { format } from "date-fns";
+import { guestTicketService } from "@/services/guest-ticket.service";
 
 interface TicketCardProps {
   ticket: GuestTicketWithEventResponseDto;
@@ -153,6 +154,40 @@ export default function TicketCard({
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [showLeaveWaitlistModal, setShowLeaveWaitlistModal] = useState(false);
+  const [isAddingToWallet, setIsAddingToWallet] = useState(false);
+  const [walletAvailable, setWalletAvailable] = useState<boolean | null>(null);
+
+  // Check if Apple Wallet is available for active tickets
+  useEffect(() => {
+    if (ticket.status === GuestTicketStatus.ACTIVE || ticket.status === GuestTicketStatus.CHECKED_IN) {
+      guestTicketService.checkWalletAvailable(ticket.id)
+        .then((result) => setWalletAvailable(result.canAddToWallet))
+        .catch(() => setWalletAvailable(false));
+    }
+  }, [ticket.id, ticket.status]);
+
+  const handleAddToWallet = async () => {
+    setIsAddingToWallet(true);
+    try {
+      const blob = await guestTicketService.downloadWalletPass(ticket.id);
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ticket-${ticket.id}.pkpass`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Pass downloaded! Open it to add to Apple Wallet.");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to download wallet pass");
+    } finally {
+      setIsAddingToWallet(false);
+    }
+  };
 
   const status = statusConfig[ticket.status];
   const eventDate = new Date(ticket.eventStartDateTime);
@@ -257,6 +292,21 @@ export default function TicketCard({
                   >
                     <QrCode className="h-5 w-5" />
                     Show Ticket QR
+                  </button>
+                )}
+                {walletAvailable && (
+                  <button
+                    onClick={handleAddToWallet}
+                    disabled={isAddingToWallet}
+                    className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 bg-black text-white rounded-xl text-sm font-medium hover:bg-black/80 transition-all disabled:opacity-50"
+                    aria-label="Add to Apple Wallet"
+                  >
+                    {isAddingToWallet ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Wallet className="h-4 w-4" />
+                    )}
+                    {isAddingToWallet ? "Downloading..." : "Add to Apple Wallet"}
                   </button>
                 )}
                 <div className="flex items-center justify-between pt-1">
