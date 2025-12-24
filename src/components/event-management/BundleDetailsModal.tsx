@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, Check } from "lucide-react";
+import { X, Check, Settings } from "lucide-react";
 import Image from "next/image";
 import { CateringBundle } from "@/types/catering";
 
@@ -11,6 +11,7 @@ interface BundleDetailsModalProps {
   onClose: () => void;
   onAdd: (bundleId: string) => void;
   isSelected: boolean;
+  eventId: string;
 }
 
 export function BundleDetailsModal({
@@ -19,6 +20,7 @@ export function BundleDetailsModal({
   onClose,
   onAdd,
   isSelected,
+  eventId,
 }: BundleDetailsModalProps) {
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -229,7 +231,7 @@ export function BundleDetailsModal({
         </div>
 
         {/* Footer - Add Button */}
-        <div className="flex-shrink-0 border-t border-white/10 p-6 bg-card-background">
+        <div className="flex-shrink-0 border-t border-white/10 p-6 bg-card-background space-y-3">
           <button
             onClick={() => {
               onAdd(bundle.id);
@@ -256,6 +258,16 @@ export function BundleDetailsModal({
                 Add to Session
               </>
             )}
+          </button>
+
+          <button
+            onClick={() => {
+              window.location.href = `https://swiftfood.uk/event-order?eventId=${eventId}&bundleId=${bundle.id}`;
+            }}
+            className="w-full rounded-lg px-6 py-3 font-semibold text-sm transition-all flex items-center justify-center gap-2 bg-card-secondary-background text-foreground border border-white/10 hover:bg-white/5 hover:border-primary/30"
+          >
+            <Settings className="h-5 w-5" />
+            Customize Bundle
           </button>
         </div>
       </div>
