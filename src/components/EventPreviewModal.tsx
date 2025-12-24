@@ -23,6 +23,8 @@ import {
   ExternalLink,
   CheckCircle2,
   ScanLine,
+  Crown,
+  Shield,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -380,12 +382,28 @@ export default function EventPreviewModal({
             <div className="p-4 sm:p-6">
               {/* Management/Scanner Banner */}
               {userRole && (
-                <div className={`mb-4 flex items-center justify-between gap-4 rounded-lg border px-4 py-3 ${userRole === "scanner" ? "border-blue-500/30 bg-blue-500/10" : "border-pink-500/30 bg-pink-500/10"}`}>
-                  <span className="text-sm text-neutral-300">
-                    {userRole === "scanner"
-                      ? "You can scan tickets for this event."
-                      : "You have manage access for this event."}
-                  </span>
+                <div className={`mb-4 flex items-center justify-between gap-4 rounded-lg border px-4 py-3 ${userRole === "scanner" ? "border-blue-500/30 bg-blue-500/10" : userRole === "admin" ? "border-purple-500/30 bg-purple-500/10" : "border-amber-500/30 bg-amber-500/10"}`}>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                        userRole === "owner"
+                          ? "bg-amber-500/30 text-amber-400"
+                          : userRole === "admin"
+                          ? "bg-purple-500/30 text-purple-400"
+                          : "bg-blue-500/30 text-blue-400"
+                      }`}
+                    >
+                      {userRole === "owner" && <Crown className="h-3 w-3" />}
+                      {userRole === "admin" && <Shield className="h-3 w-3" />}
+                      {userRole === "scanner" && <ScanLine className="h-3 w-3" />}
+                      {userRole === "owner" ? "Owner" : userRole === "admin" ? "Admin" : "Scanner"}
+                    </span>
+                    <span className="text-sm text-neutral-300">
+                      {userRole === "scanner"
+                        ? "You can scan tickets for this event."
+                        : "You have manage access for this event."}
+                    </span>
+                  </div>
                   {userRole === "scanner" ? (
                     <Link
                       href={`/event-management/${eventId}/scanner`}
@@ -397,7 +415,11 @@ export default function EventPreviewModal({
                   ) : (
                     <Link
                       href={`/event-management/${eventId}`}
-                      className="flex items-center gap-1 rounded-full bg-pink-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-pink-600"
+                      className={`flex items-center gap-1 rounded-full px-4 py-1.5 text-sm font-semibold text-white transition-colors ${
+                        userRole === "owner"
+                          ? "bg-amber-500 hover:bg-amber-600"
+                          : "bg-purple-500 hover:bg-purple-600"
+                      }`}
                     >
                       Manage
                       <span className="text-xs">↗</span>

@@ -273,7 +273,7 @@ export default function EventManagementPage() {
                   {userRole === "owner" && <Crown className="h-3 w-3" />}
                   {userRole === "admin" && <Shield className="h-3 w-3" />}
                   {userRole === "scanner" && <Scan className="h-3 w-3" />}
-                  {userRole === "owner" ? "Host" : userRole === "admin" ? "Admin" : "Scanner"}
+                  {userRole === "owner" ? "Owner" : userRole === "admin" ? "Admin" : "Scanner"}
                 </span>
               )}
             </div>
