@@ -24,7 +24,7 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 
-type FilterType = "all" | "upcoming" | "checked_in" | "active" | "pending" | "cancelled" | "waitlisted";
+type FilterType = "all" | "upcoming" | "checked_in" | "active" | "pending" | "cancelled";
 
 export default function MyTicketsPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -274,15 +274,14 @@ export default function MyTicketsPage() {
         case "pending":
           return (
             ticket.status === GuestTicketStatus.PENDING_APPROVAL ||
-            ticket.status === GuestTicketStatus.PENDING_PAYMENT
+            ticket.status === GuestTicketStatus.PENDING_PAYMENT ||
+            ticket.status === GuestTicketStatus.WAITLISTED
           );
         case "cancelled":
           return (
             ticket.status === GuestTicketStatus.CANCELLED ||
             ticket.status === GuestTicketStatus.REFUNDED
           );
-        case "waitlisted":
-          return ticket.status === GuestTicketStatus.WAITLISTED;
         default:
           return true;
       }
@@ -290,8 +289,8 @@ export default function MyTicketsPage() {
     .sort((a, b) => {
       const dateA = new Date(a.eventStartDateTime).getTime();
       const dateB = new Date(b.eventStartDateTime).getTime();
-      // Ascending for active/pending/waitlisted, descending for past/all
-      if (filter === "active" || filter === "pending" || filter === "upcoming" || filter === "waitlisted") {
+      // Ascending for active/pending/upcoming, descending for past/all
+      if (filter === "active" || filter === "pending" || filter === "upcoming") {
         return dateA - dateB;
       }
       return dateB - dateA;
@@ -304,7 +303,6 @@ export default function MyTicketsPage() {
       icon: <CheckCircle2 className="h-4 w-4" />,
     },
     { id: "pending", label: "Pending", icon: <Clock className="h-4 w-4" /> },
-    { id: "waitlisted", label: "Waitlisted", icon: <Clock className="h-4 w-4" /> },
     { id: "cancelled", label: "Cancelled", icon: <Ticket className="h-4 w-4" /> },
     { id: "checked_in", label: "Checked In", icon: <CheckCircle2 className="h-4 w-4" /> },
     { id: "all", label: "All", icon: <Ticket className="h-4 w-4" /> },
