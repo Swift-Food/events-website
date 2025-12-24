@@ -536,7 +536,7 @@ export default function CheckInPage() {
           <div className="p-4 border-b border-white/5">
             <div className="flex items-center gap-2">
               <Camera className="h-5 w-5 text-primary" />
-              <span className="font-medium text-foreground">QR Scanner</span>
+              <span className="font-medium text-foreground">QR Scanner (new lib)</span>
             </div>
           </div>
 
