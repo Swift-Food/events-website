@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Html5Qrcode } from "html5-qrcode";
+import { useZxing } from "react-zxing";
+// import { Html5Qrcode } from "html5-qrcode"; // Old implementation
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { useAuth } from "@/lib/auth/authContext";
@@ -69,14 +70,17 @@ export default function CheckInPage() {
 
   // Scanner state
   const [isScanning, setIsScanning] = useState(false);
-  const [scanner, setScanner] = useState<Html5Qrcode | null>(null);
   const [lastScanResult, setLastScanResult] = useState<ScanResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const lastScannedRef = useRef<string>("");
+
+  /* Old html5-qrcode state - commented out
+  const [scanner, setScanner] = useState<Html5Qrcode | null>(null);
   const [cameraAspectRatio, setCameraAspectRatio] = useState<number | null>(null);
   const [viewfinderSize, setViewfinderSize] = useState(200);
   const [isResizing, setIsResizing] = useState(false);
   const resizeStartRef = useRef<{ startY: number; startSize: number } | null>(null);
+  */
 
   // Recent check-ins
   const [recentCheckIns, setRecentCheckIns] = useState<ScanResult[]>([]);
@@ -117,6 +121,7 @@ export default function CheckInPage() {
     }
   }, [authLoading, isAuthenticated, router]);
 
+  /* Old html5-qrcode cleanup effects - commented out
   // Cleanup scanner on unmount
   useEffect(() => {
     return () => {
@@ -158,6 +163,7 @@ export default function CheckInPage() {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [scanner]);
+  */
 
   const handleCheckIn = useCallback(async (qrCode: string) => {
     // Prevent duplicate scans
@@ -222,6 +228,35 @@ export default function CheckInPage() {
     }
   }, [isProcessing]);
 
+  // react-zxing scanner hook
+  const { ref: videoRef } = useZxing({
+    onDecodeResult(result) {
+      handleCheckIn(result.getText());
+    },
+    onError(error) {
+      // Only log actual errors, not "no QR found" messages
+      const errorMessage = (error as Error)?.message;
+      if (errorMessage && !errorMessage.includes("No MultiFormat Readers")) {
+        console.error("Scanner error:", error);
+      }
+    },
+    paused: !isScanning,
+    constraints: {
+      video: {
+        facingMode: "environment",
+      },
+    },
+  });
+
+  const startScanning = () => {
+    setIsScanning(true);
+  };
+
+  const stopScanning = () => {
+    setIsScanning(false);
+  };
+
+  /* Old html5-qrcode functions - commented out
   const startScanning = async () => {
     try {
       // Clean up existing scanner if it exists
@@ -357,6 +392,7 @@ export default function CheckInPage() {
       };
     }
   }, [isResizing, handleResizeMove, handleResizeEnd]);
+  */
 
   const refreshStats = async () => {
     try {
@@ -504,41 +540,29 @@ export default function CheckInPage() {
             </div>
           </div>
 
-          {/* Scanner Container - uses detected camera ratio or 4:3 default */}
-          <div
-            className={`relative bg-black overflow-hidden ${
-              !cameraAspectRatio ? "aspect-[4/3]" : ""
-            }`}
-            style={cameraAspectRatio ? { aspectRatio: `${cameraAspectRatio}` } : undefined}
-          >
-            <div id="qr-scanner-container" className="w-full h-full" />
+          {/* Scanner Container - react-zxing */}
+          <div className="relative bg-black overflow-hidden aspect-[4/3]">
+            {/* Video element for react-zxing */}
+            <video
+              ref={videoRef}
+              className={`w-full h-full object-cover ${!isScanning ? 'hidden' : ''}`}
+            />
 
-            {/* Custom viewfinder overlay - only show when scanning */}
+            {/* Viewfinder overlay - only show when scanning */}
             {isScanning && (
-              <div className="absolute inset-0">
-                {/* Darkened edges */}
-                <div className="absolute inset-0 bg-black/40 pointer-events-none" />
-                {/* Clear center square - resizable */}
+              <div className="absolute inset-0 pointer-events-none">
+                {/* Darkened edges with clear center */}
+                <div className="absolute inset-0 bg-black/40" />
                 <div
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                  style={{ width: viewfinderSize, height: viewfinderSize }}
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px]"
                 >
                   {/* Cut out the center */}
-                  <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.4)' }} />
+                  <div className="absolute inset-0" style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.4)' }} />
                   {/* Corner brackets */}
-                  <div className="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-white rounded-tl-lg pointer-events-none" />
-                  <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-white rounded-tr-lg pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-white rounded-bl-lg pointer-events-none" />
-                  <div className="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-white rounded-br-lg pointer-events-none" />
-                  {/* Resize handle - bottom center */}
-                  <div
-                    className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 cursor-ns-resize touch-none"
-                    onMouseDown={handleResizeStart}
-                    onTouchStart={handleResizeStart}
-                  >
-                    <div className="w-10 h-1 bg-white/60 rounded-full" />
-                    <span className="text-[10px] text-white/60 select-none">Drag to resize</span>
-                  </div>
+                  <div className="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-white rounded-tl-lg" />
+                  <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-white rounded-tr-lg" />
+                  <div className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-white rounded-bl-lg" />
+                  <div className="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-white rounded-br-lg" />
                 </div>
               </div>
             )}
