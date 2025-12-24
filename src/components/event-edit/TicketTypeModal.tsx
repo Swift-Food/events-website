@@ -80,12 +80,18 @@ export default function TicketTypeModal({
       return;
     }
 
+    const price = parseFloat(localPrice) || 0;
+    if (!localIsFree && price < 0.30) {
+      alert("Minimum price for paid tickets is £0.30");
+      return;
+    }
+
     const ticket: TicketType = {
       id: ticketToEdit?.id || Date.now().toString(),
       name: localName.trim(),
       description: localDescription.trim(),
       isFree: localIsFree,
-      price: localIsFree ? 0 : parseFloat(localPrice) || 0,
+      price: localIsFree ? 0 : price,
       quantity: quantity,
       isSingleUse: localIsSingleUse,
     };
@@ -205,19 +211,24 @@ export default function TicketTypeModal({
                     </p>
                   </div>
                 ) : (
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground text-base md:text-sm font-medium">
-                      £
-                    </span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={localPrice}
-                      onChange={(e) => setLocalPrice(e.target.value)}
-                      className="w-full h-11 rounded-xl bg-card-background pl-8 pr-4 text-foreground text-base md:text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                      placeholder="0.00"
-                    />
+                  <div>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground text-base md:text-sm font-medium">
+                        £
+                      </span>
+                      <input
+                        type="number"
+                        min="0.30"
+                        step="0.01"
+                        value={localPrice}
+                        onChange={(e) => setLocalPrice(e.target.value)}
+                        className="w-full h-11 rounded-xl bg-card-background pl-8 pr-4 text-foreground text-base md:text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                        placeholder="0.30"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1.5">
+                      Minimum £0.30
+                    </p>
                   </div>
                 )}
               </div>
