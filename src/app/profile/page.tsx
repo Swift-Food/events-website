@@ -49,6 +49,7 @@ export default function ProfilePage() {
     logout,
   } = useAuth();
   const router = useRouter();
+  console.log(user, eventUser)
 
   // Data states
   const [stats, setStats] = useState<ProfileStats | null>(null);
