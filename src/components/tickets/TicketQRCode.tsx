@@ -88,7 +88,7 @@ export default function TicketQRCode({
         <QRCodeSVG
           value={qrCode}
           size={size}
-          level="H"
+          level="M"
           includeMargin={false}
         />
       </div>
