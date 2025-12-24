@@ -687,10 +687,11 @@ export default function EventDetailsPage() {
                     {event.eventTickets.map((ticket) => {
                       const remaining = ticket.quantityLeft ?? 0;
                       const isSelected = selectedTicketId === ticket.id;
-                      const isSoldOut = remaining <= 0 || !ticket.isAvailable;
+                      const isSoldOut = remaining <= 0;
+                      const isManuallyUnavailable = !ticket.isAvailable; // Organizer disabled this ticket
                       const isOwnedTicket = event.userTicket?.ticketName === ticket.name;
-                      // Can still select sold out tickets for waitlist, but not if user has ticket
-                      const isDisabled = !canRegister || !ticket.isAvailable || hasUserTicket;
+                      // Can select sold out tickets for waitlist, but not if organizer disabled or user has ticket
+                      const isDisabled = !canRegister || isManuallyUnavailable || hasUserTicket;
 
                       return (
                         <div
@@ -709,7 +710,7 @@ export default function EventDetailsPage() {
                           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                             {isOwnedTicket ? (
                               <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-400 shrink-0" />
-                            ) : canRegister && ticket.isAvailable && (
+                            ) : canRegister && !isManuallyUnavailable && (
                               <div
                                 className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                                   isSelected ? "border-primary" : "border-white/30"
@@ -727,6 +728,8 @@ export default function EventDetailsPage() {
                               <p className="text-xs sm:text-sm text-muted-foreground">
                                 {isOwnedTicket ? (
                                   <span className="text-green-400">You own this ticket</span>
+                                ) : isManuallyUnavailable ? (
+                                  <span className="text-gray-400">Unavailable</span>
                                 ) : isSoldOut ? (
                                   <span className="text-amber-400">Sold out - Join waitlist</span>
                                 ) : (
