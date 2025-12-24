@@ -7,16 +7,20 @@ import {
   AdminTicketResponseDto,
   GuestTicketResponseDto,
   GuestTicketStatus,
-  ReservationMode,
 } from "@/types/guest-ticket";
 import { EventTicketResponseDto } from "@/types/event-ticket/response/ticket.dto";
 import { GuestManagementHeader } from "@/components/guest-tickets/GuestManagementHeader";
-import { GuestStatsCards } from "@/components/guest-tickets/GuestTicketStatsCard";
-import { GuestFilters, GuestTable, BulkActionBar } from "@/components/guest-tickets";
-import { Loader, Link as LinkIcon, Copy, Check, X } from "lucide-react";
+// import { GuestStatsCards } from "@/components/guest-tickets/GuestTicketStatsCard";
+import { GuestOverviewCard } from "@/components/event-management/GuestOverviewCard";
+import { GuestFilters, GuestTable, BulkActionBar, ReviewGuestModal, GuestDetailsModal } from "@/components/guest-tickets";
+import { Loader } from "lucide-react";
+import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
+import { InviteGuestsModal } from "@/components/event-management/InviteGuestsModal";
+import { InviteLinkModal } from "@/components/event-management/InviteLinkModal";
+import { InvitationsSection } from "@/components/event-management/InvitationsSection";
 import { toast } from "sonner";
 
-type FilterStatus = "all" | "approved" | "pending" | "waitlisted" | "rejected" | "checked_in";
+type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in";
 
 /**
  * Extract guest display name with proper fallbacks (for search filtering)
@@ -28,13 +32,12 @@ function getGuestDisplayName(guest: GuestTicketResponseDto['guest'] | undefined)
   const eventUserName = `${guest.firstName || ""} ${guest.lastName || ""}`.trim();
   if (eventUserName) return eventUserName;
 
-  // Try nested User firstName/lastName
-  if (guest.user) {
-    const userName = `${guest.user.firstName || ""} ${guest.user.lastName || ""}`.trim();
-    if (userName) return userName;
+  // Fallback to User username
+  if (guest.user?.username) return guest.user.username;
 
-    // Try username
-    if (guest.user.username) return guest.user.username;
+  // Last resort: email (before @)
+  if (guest.user?.email) {
+    return guest.user.email.split("@")[0];
   }
 
   return "";
@@ -61,9 +64,21 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
   // Invite modal state
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [availableTickets, setAvailableTickets] = useState<EventTicketResponseDto[]>([]);
-  const [generatedLink, setGeneratedLink] = useState<string>("");
-  const [isCopied, setIsCopied] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
+
+  // CSV upload modal state
+  const [showCsvUploadModal, setShowCsvUploadModal] = useState(false);
+
+  // Invite guests modal state
+  const [showInviteGuestsModal, setShowInviteGuestsModal] = useState(false);
+
+  // Review modal state
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewGuest, setReviewGuest] = useState<GuestTicketResponseDto | AdminTicketResponseDto | null>(null);
+  const [isReviewLoading, setIsReviewLoading] = useState(false);
+
+  // Guest details modal state
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [detailsGuest, setDetailsGuest] = useState<GuestTicketResponseDto | null>(null);
 
   useEffect(() => {
     fetchGuestData();
@@ -89,24 +104,54 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
     }
   };
 
-  const handleApprove = async (ticketId: string) => {
+  const handleApprove = async (ticketId: string, reason?: string) => {
     try {
-      await guestTicketService.approveTicket(ticketId);
+      setIsReviewLoading(true);
+      await guestTicketService.approveTicket(ticketId, reason);
       toast.success("Guest approved successfully");
+      setShowReviewModal(false);
+      setReviewGuest(null);
       await fetchGuestData();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to approve guest");
+    } finally {
+      setIsReviewLoading(false);
     }
   };
 
   const handleReject = async (ticketId: string, reason?: string) => {
     try {
+      setIsReviewLoading(true);
       await guestTicketService.rejectTicket(ticketId, reason);
       toast.success("Guest rejected");
+      setShowReviewModal(false);
+      setReviewGuest(null);
       await fetchGuestData();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to reject guest");
+    } finally {
+      setIsReviewLoading(false);
     }
+  };
+
+  const handleOpenReview = (guest: GuestTicketResponseDto | AdminTicketResponseDto) => {
+    setReviewGuest(guest);
+    setShowReviewModal(true);
+  };
+
+  const handleCloseReview = () => {
+    setShowReviewModal(false);
+    setReviewGuest(null);
+  };
+
+  const handleOpenDetails = (guest: GuestTicketResponseDto) => {
+    setDetailsGuest(guest);
+    setShowDetailsModal(true);
+  };
+
+  const handleCloseDetails = () => {
+    setShowDetailsModal(false);
+    setDetailsGuest(null);
   };
 
   const handleCheckIn = async (qrCode: string) => {
@@ -158,48 +203,35 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
       const tickets = await eventTicketService.getEventTickets(eventId);
       setAvailableTickets(tickets);
       setShowInviteModal(true);
-      setGeneratedLink("");
-      setIsCopied(false);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to load ticket types");
     }
   };
 
-  const handleGenerateLink = async (ticketId: string) => {
+  const handleOpenCsvUploadModal = async () => {
     try {
-      setIsGenerating(true);
-      const response = await guestTicketService.generateTicketInviteLink(eventId, {
-        eventTicketId: ticketId,
-        bypassPayment: false,
-        bypassApproval: true,
-        reservationMode: ReservationMode.ON_ACCEPTANCE,
-        maxUses: 100,
-      });
-      setGeneratedLink(response.inviteLink);
-      toast.success("Invite link generated!");
+      const tickets = await eventTicketService.getEventTickets(eventId);
+      setAvailableTickets(tickets);
+      setShowCsvUploadModal(true);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to generate invite link");
-    } finally {
-      setIsGenerating(false);
+      toast.error(error.response?.data?.message || "Failed to load ticket types");
     }
   };
 
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(generatedLink);
-      setIsCopied(true);
-      toast.success("Link copied to clipboard!");
-      setTimeout(() => setIsCopied(false), 2000);
-    } catch (error) {
-      toast.error("Failed to copy link");
-    }
+  const handleBackFromCsv = () => {
+    setShowCsvUploadModal(false);
+    setShowInviteGuestsModal(true);
+  };
+
+  const handleBackFromLink = () => {
+    setShowInviteModal(false);
+    setShowInviteGuestsModal(true);
   };
 
   const filteredGuests = guests.filter((guest) => {
     const matchesStatus =
       filterStatus === "all" ||
-      guest.status === filterStatus ||
-      (filterStatus === "checked_in" && guest.status === "checked_in");
+      guest.status === filterStatus;
 
     const matchesSearch =
       searchQuery === "" ||
@@ -239,39 +271,41 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
 
   return (
     <>
-      <div>
-        <div className="mb-6 flex items-center justify-between">
+      <div className="space-y-4">
+        <div className="mb-6">
           <GuestManagementHeader
             eventId={eventId}
             totalGuests={guests.length}
             pendingCount={pendingGuests.length}
           />
-          <button
-            onClick={handleOpenInviteModal}
-            className="flex items-center gap-2 rounded-lg border border-white/10 bg-card-background px-4 py-2 text-sm font-medium text-foreground transition-all hover:border-white/20"
-          >
-            <LinkIcon className="h-4 w-4" />
-            Invite Guests
-          </button>
         </div>
 
-        <GuestStatsCards
+        {/* <GuestStatsCards
           stats={checkInStats}
           totalGuests={guests.length}
           approvedCount={guests.filter((g) => g.status === GuestTicketStatus.ACTIVE).length}
           waitlistedCount={guests.filter((g) => g.status === GuestTicketStatus.WAITLISTED).length}
           rejectedCount={guests.filter((g) => g.status === GuestTicketStatus.CANCELLED).length}
+        /> */}
+        <GuestOverviewCard
+          isLoading={false}
+          checkInStats={checkInStats}
+          approvedCount={guests.filter((g) => g.status === GuestTicketStatus.ACTIVE).length}
+          pendingApprovalCount={guests.filter((g) => g.status === GuestTicketStatus.PENDING_APPROVAL).length}
+          waitlistedCount={guests.filter((g) => g.status === GuestTicketStatus.WAITLISTED).length}
         />
+
+        <InvitationsSection onInviteClick={() => setShowInviteGuestsModal(true)} />
 
         <GuestFilters
           filterStatus={filterStatus}
           onFilterChange={setFilterStatus}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          pendingCount={pendingGuests.length}
+          pendingCount={guests.filter((g) => g.status === GuestTicketStatus.PENDING_APPROVAL).length}
           approvedCount={guests.filter((g) => g.status === GuestTicketStatus.ACTIVE).length}
           waitlistedCount={guests.filter((g) => g.status === GuestTicketStatus.WAITLISTED).length}
-          rejectedCount={guests.filter((g) => g.status === GuestTicketStatus.CANCELLED).length}
+          cancelledCount={guests.filter((g) => g.status === GuestTicketStatus.CANCELLED).length}
           checkedInCount={guests.filter((g) => g.status === GuestTicketStatus.CHECKED_IN).length}
         />
 
@@ -293,95 +327,49 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
           onReject={handleReject}
           onCheckIn={handleCheckIn}
           onPromote={handlePromoteFromWaitlist}
+          onReview={handleOpenReview}
+          onRowClick={handleOpenDetails}
         />
       </div>
 
-      {/* Invite Modal */}
-      {showInviteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-card-background border border-white/10 p-6 shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground">Generate Invite Link</h3>
-              <button
-                onClick={() => setShowInviteModal(false)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+      <InviteLinkModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        onBack={handleBackFromLink}
+        eventId={eventId}
+        tickets={availableTickets}
+      />
 
-            {!generatedLink ? (
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Select a ticket type to generate an invite link
-                </p>
-                <div className="space-y-2">
-                  {availableTickets.map((ticket) => (
-                    <button
-                      key={ticket.id}
-                      onClick={() => handleGenerateLink(ticket.id)}
-                      disabled={isGenerating}
-                      className="w-full rounded-xl border border-white/10 bg-card-secondary-background p-4 text-left transition-all hover:border-white/20 disabled:opacity-50"
-                    >
-                      <div className="font-medium text-foreground">{ticket.name}</div>
-                      <div className="mt-1 text-sm text-muted-foreground">
-                        {parseFloat(ticket.price) > 0 ? `£${ticket.price}` : "Free"} •{" "}
-                        {ticket.quantityLeft} of {ticket.quantityTotal} available
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                {isGenerating && (
-                  <div className="flex items-center justify-center py-4">
-                    <Loader className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="rounded-xl bg-card-secondary-background p-4">
-                  <p className="mb-2 text-xs font-medium text-muted-foreground">
-                    Share this link with guests
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={generatedLink}
-                      readOnly
-                      className="flex-1 rounded-lg border border-white/10 bg-background px-3 py-2 text-sm text-foreground"
-                    />
-                    <button
-                      onClick={handleCopyLink}
-                      className="flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
-                    >
-                      {isCopied ? (
-                        <>
-                          <Check className="h-4 w-4" />
-                          Copied
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-4 w-4" />
-                          Copy
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-                <button
-                  onClick={() => {
-                    setGeneratedLink("");
-                    setIsCopied(false);
-                  }}
-                  className="text-sm text-primary hover:underline"
-                >
-                  Generate another link
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <InviteGuestsModal
+        isOpen={showInviteGuestsModal}
+        onClose={() => setShowInviteGuestsModal(false)}
+        onSelectCsv={handleOpenCsvUploadModal}
+        onSelectLink={handleOpenInviteModal}
+      />
+      <CsvUploadModal
+        isOpen={showCsvUploadModal}
+        onClose={() => setShowCsvUploadModal(false)}
+        onBack={handleBackFromCsv}
+        tickets={availableTickets}
+      />
+      <ReviewGuestModal
+        isOpen={showReviewModal}
+        guest={reviewGuest}
+        onClose={handleCloseReview}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        isLoading={isReviewLoading}
+      />
+      <GuestDetailsModal
+        isOpen={showDetailsModal}
+        guest={detailsGuest}
+        onClose={handleCloseDetails}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        onCheckIn={handleCheckIn}
+        onPromote={handlePromoteFromWaitlist}
+        onReview={handleOpenReview}
+      />
     </>
   );
 }

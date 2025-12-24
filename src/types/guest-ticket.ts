@@ -62,10 +62,18 @@ export interface GuestTicketResponseDto {
   questionAnswers: Record<string, any> | null;
   qrCode: string | null;
   qrCodeImageUrl: string | null;
+  /** Short 8-character check-in code for manual entry (raw, no hyphen) */
+  checkInCode: string | null;
+  /** Formatted check-in code with hyphen for display (e.g., "ABCD-1234") */
+  checkInCodeFormatted: string | null;
   purchaseDateTime: Date | null;
   checkInDateTime: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  /** Deadline for claiming a promoted ticket (for paid tickets from waitlist) */
+  claimDeadline?: Date | null;
+  /** Whether this ticket was originally on the waitlist */
+  wasWaitlisted?: boolean;
 }
 
 /**
@@ -100,6 +108,12 @@ export interface RegisterTicketResponseDto {
     eventName: string;
     price: number;
   };
+  /** Whether the user was added to the waitlist (ticket sold out) */
+  isWaitlisted?: boolean;
+  /** User's position in the waitlist (1-indexed) */
+  waitlistPosition?: number;
+  /** Total number of people on the waitlist */
+  waitlistTotal?: number;
 }
 
 /**
@@ -121,6 +135,7 @@ export interface AdminTicketResponseDto {
   eventName: string;
   guestEmail: string;
   guestName: string;
+  guest: EventUser;
   ticketName: string;
   status: GuestTicketStatus;
   questionAnswers: Record<string, any> | null;
@@ -245,10 +260,23 @@ export interface AcceptTicketInviteDto {
 export interface AcceptTicketInviteResponseDto {
   success: boolean;
   message: string;
-  guestTicket?: GuestTicketResponseDto;
+  event?: {
+    id: string;
+    name: string;
+    description: string;
+    startDateTime: string;
+    endDateTime: string;
+    eventImage?: string;
+  };
+  ticket?: {
+    id: string;
+    name: string;
+    isPaid: boolean;
+    bypassPayment: boolean;
+  };
+  requiresLogin?: boolean;
   requiresPayment?: boolean;
   paymentUrl?: string;
-  requiresLogin?: boolean;
 }
 
 /**
@@ -302,4 +330,51 @@ export interface InviteLinksListResponseDto {
   success: boolean;
   inviteLinks: TicketInviteLinkDto[];
   total: number;
+}
+
+// Waitlist Types
+
+/**
+ * Response for getting waitlist position
+ */
+export interface WaitlistPositionResponseDto {
+  position: number; // 0 if not in waitlist, 1-indexed otherwise
+  total: number;
+}
+
+/**
+ * Response for leaving waitlist
+ */
+export interface LeaveWaitlistResponseDto {
+  success: boolean;
+  message: string;
+}
+
+/**
+ * Individual entry in the waitlist (admin view)
+ */
+export interface WaitlistEntryDto {
+  id: string;
+  guestName: string;
+  guestEmail: string;
+  position: number;
+  joinedAt: Date;
+  questionAnswers?: Record<string, any>;
+}
+
+/**
+ * Full waitlist response (admin view)
+ */
+export interface WaitlistResponseDto {
+  eventTicketId: string;
+  ticketName: string;
+  entries: WaitlistEntryDto[];
+  total: number;
+}
+
+/**
+ * Response for waitlist count (public)
+ */
+export interface WaitlistCountResponseDto {
+  count: number;
 }

@@ -279,11 +279,11 @@ export function CateringTab({ eventData }: CateringTabProps) {
 
   if (isLoadingBundles || isLoadingOrder) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-12 sm:p-16 shadow-xl">
+      <div className="rounded-xl border border-white/10 bg-card-background p-8 sm:p-12">
         <div className="flex items-center justify-center">
           <div className="text-center max-w-md">
-            <div className="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10">
-              <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+            <div className="mb-4 inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
             </div>
             <h3 className="mb-2 text-xl font-bold text-foreground">Loading Catering</h3>
             <p className="text-sm text-muted-foreground">
@@ -301,27 +301,27 @@ export function CateringTab({ eventData }: CateringTabProps) {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Header with gradient */}
-      <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-6 sm:p-8 shadow-xl">
+      {/* Header */}
+      <div>
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="rounded-xl bg-primary/10 p-2.5">
-                <ShoppingCart className="h-6 w-6 text-primary" />
+            <div className="flex items-center gap-2 mb-2">
+              <div className="rounded-lg bg-primary/10 p-2">
+                <ShoppingCart className="h-5 w-5 text-primary" />
               </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              <h2 className="text-lg font-semibold text-foreground">
                 Catering Management
               </h2>
             </div>
-            <p className="text-sm sm:text-base text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Create meal sessions and select catering bundles for your event
             </p>
           </div>
           <button
             onClick={addMealSession}
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg hover:scale-105 active:scale-95 w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 w-full sm:w-auto"
           >
-            <Plus className="h-5 w-5" />
+            <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Add Meal Session</span>
             <span className="sm:hidden">Add Session</span>
           </button>
@@ -330,7 +330,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
         {/* Event Info Summary */}
         <div className="mt-6 space-y-4">
           <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="group rounded-xl bg-gradient-to-br from-card-secondary-background to-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
+            <div className="group rounded-xl bg-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
               <div className="flex items-start gap-3">
                 <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                   <MapPin className="h-5 w-5 text-primary" />
@@ -346,7 +346,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
               </div>
             </div>
 
-            <div className="group rounded-xl bg-gradient-to-br from-card-secondary-background to-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
+            <div className="group rounded-xl bg-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
               <div className="flex items-start gap-3">
                 <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                   <Mail className="h-5 w-5 text-primary" />
@@ -362,7 +362,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
               </div>
             </div>
 
-            <div className="group rounded-xl bg-gradient-to-br from-card-secondary-background to-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
+            <div className="group rounded-xl bg-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
               <div className="flex items-start gap-3">
                 <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                   <Phone className="h-5 w-5 text-primary" />
@@ -382,7 +382,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
               </div>
             </div>
 
-            <div className="group rounded-xl bg-gradient-to-br from-card-secondary-background to-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
+            <div className="group rounded-xl bg-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
               <div className="flex items-start gap-3">
                 <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
                   <Package className="h-5 w-5 text-primary" />
@@ -422,12 +422,12 @@ export function CateringTab({ eventData }: CateringTabProps) {
 
       {/* Meal Sessions */}
       {sessions.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-12 sm:p-16 shadow-lg">
+        <div className="rounded-xl border border-white/10 bg-card-background p-8 sm:p-12">
           <div className="text-center max-w-md mx-auto">
-            <div className="mb-6 inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary/10 text-4xl sm:text-5xl">
+            <div className="mb-4 inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 text-2xl">
               🍽️
             </div>
-            <h3 className="mb-3 text-xl sm:text-2xl font-bold text-foreground">
+            <h3 className="mb-2 text-base font-semibold text-foreground">
               No meal sessions yet
             </h3>
             <p className="mb-8 text-sm sm:text-base text-muted-foreground leading-relaxed">
@@ -436,10 +436,10 @@ export function CateringTab({ eventData }: CateringTabProps) {
             </p>
             <button
               onClick={addMealSession}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-xl hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
             >
-              <Plus className="h-5 w-5" />
-              Add First Meal Session
+              <Plus className="h-4 w-4" />
+              Add Meal Session
             </button>
           </div>
         </div>
@@ -463,15 +463,15 @@ export function CateringTab({ eventData }: CateringTabProps) {
 
       {/* Order Summary & Submit */}
       {sessions.length > 0 && (
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-6 sm:p-8 shadow-xl">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="rounded-xl bg-primary/10 p-2">
-              <ShoppingCart className="h-5 w-5 text-primary" />
+        <div className="rounded-xl border border-white/10 bg-card-background p-4 sm:p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="rounded-lg bg-primary/10 p-1.5">
+              <ShoppingCart className="h-4 w-4 text-primary" />
             </div>
             <h3 className="text-xl sm:text-2xl font-bold text-foreground">Order Summary</h3>
           </div>
 
-          <div className="space-y-3 mb-6">
+          <div className="space-y-2 mb-4">
             {sessions.map((session) => {
               const total = calculateSessionTotal(session);
               const selectedBundles = bundles.filter((b) =>
@@ -481,9 +481,9 @@ export function CateringTab({ eventData }: CateringTabProps) {
               return (
                 <div
                   key={session.id}
-                  className="group rounded-xl border border-white/10 bg-card-secondary-background p-4 sm:p-5 hover:border-primary/30 hover:shadow-lg transition-all"
+                  className="rounded-lg border border-white/10 bg-card-secondary-background p-3 sm:p-4"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="h-2 w-2 rounded-full bg-primary group-hover:animate-pulse"></div>
@@ -496,29 +496,26 @@ export function CateringTab({ eventData }: CateringTabProps) {
                           <Calendar className="h-3.5 w-3.5 text-primary" />
                           {session.sessionDate}
                         </span>
-                        <span className="flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5 text-primary" />
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
                           {session.eventTime}
                         </span>
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-1">
                         {selectedBundles.map((b) => (
                           <span
                             key={b.id}
-                            className="inline-flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
+                            className="inline-flex items-center gap-1 rounded bg-primary/10 px-1.5 py-0.5 text-xs text-primary"
                           >
-                            <Package className="h-3 w-3" />
                             {b.name} ({b.baseGuestCount} ppl)
                           </span>
                         ))}
                       </div>
                     </div>
-                    <div className="flex-shrink-0 self-end sm:self-auto">
-                      <div className="rounded-xl bg-primary/10 px-4 py-2 border border-primary/20">
-                        <p className="text-xl sm:text-2xl font-bold text-primary">
-                          ${total.toFixed(2)}
-                        </p>
-                      </div>
+                    <div className="flex-shrink-0">
+                      <p className="text-base font-semibold text-primary">
+                        ${total.toFixed(2)}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -526,28 +523,26 @@ export function CateringTab({ eventData }: CateringTabProps) {
             })}
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 border-t border-white/10 pt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-white/10 pt-4">
             <div>
-              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                Total Amount
-              </p>
-              <p className="text-3xl sm:text-4xl font-bold text-foreground">
+              <p className="text-xs text-muted-foreground mb-1">Total Amount</p>
+              <p className="text-xl font-semibold text-foreground">
                 ${calculateGrandTotal().toFixed(2)}
               </p>
             </div>
             <button
               onClick={handleSubmitOrder}
               disabled={isSubmitting}
-              className="rounded-xl bg-primary px-8 py-4 text-base font-bold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 w-full sm:w-auto"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent"></div>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent"></div>
                   Processing...
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">
-                  <CheckCircle2 className="h-5 w-5" />
+                  <CheckCircle2 className="h-4 w-4" />
                   Place Order
                 </span>
               )}

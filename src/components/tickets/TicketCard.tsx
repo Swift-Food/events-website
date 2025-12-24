@@ -1,13 +1,14 @@
 // components/tickets/TicketCard.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { GuestTicketWithEventResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
-import { Calendar, Ticket, QrCode, X, Clock, CheckCircle2, XCircle, AlertCircle, Loader2, ExternalLink, AlertTriangle, RotateCcw, Copy, Check, Eye, EyeOff } from "lucide-react";
+import { Calendar, Ticket, QrCode, X, Clock, CheckCircle2, XCircle, AlertCircle, Loader2, ExternalLink, AlertTriangle, RotateCcw, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import TicketQRCode from "./TicketQRCode";
 import { format } from "date-fns";
+import { guestTicketService } from "@/services/guest-ticket.service";
 
 interface TicketCardProps {
   ticket: GuestTicketWithEventResponseDto;
@@ -17,6 +18,10 @@ interface TicketCardProps {
   isProcessingPayment?: boolean;
   onCancel?: (ticketId: string) => void;
   isCancelling?: boolean;
+  onLeaveWaitlist?: (ticketId: string) => void;
+  isLeavingWaitlist?: boolean;
+  waitlistPosition?: number;
+  waitlistTotal?: number;
 }
 
 // Confirmation Modal Component
@@ -132,19 +137,72 @@ const statusConfig: Record<GuestTicketStatus, { label: string; color: string; ic
   },
 };
 
-export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePayment, isProcessingPayment, onCancel, isCancelling }: TicketCardProps) {
+export default function TicketCard({
+  ticket,
+  onRefund,
+  isRefunding,
+  onCompletePayment,
+  isProcessingPayment,
+  onCancel,
+  isCancelling,
+  onLeaveWaitlist,
+  isLeavingWaitlist,
+  waitlistPosition,
+  waitlistTotal,
+}: TicketCardProps) {
   const [showQRModal, setShowQRModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
-  const [showCodeText, setShowCodeText] = useState(false);
-  const [codeCopied, setCodeCopied] = useState(false);
+  const [showLeaveWaitlistModal, setShowLeaveWaitlistModal] = useState(false);
+  const [isAddingToWallet, setIsAddingToWallet] = useState(false);
+  const [walletAvailable, setWalletAvailable] = useState<boolean | null>(null);
+  const [isIOS, setIsIOS] = useState(false);
 
-  const handleCopyCode = async () => {
-    if (ticket.qrCode) {
-      await navigator.clipboard.writeText(ticket.qrCode);
-      setCodeCopied(true);
-      toast.success("Code copied to clipboard");
-      setTimeout(() => setCodeCopied(false), 2000);
+  // Detect iOS device (iPhone, iPad, iPod)
+  useEffect(() => {
+    const checkIsIOS = () => {
+      if (typeof window === 'undefined') return false;
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      // Check for iOS devices including iPad on iOS 13+ (which reports as MacIntel)
+      return /iphone|ipad|ipod/.test(userAgent) ||
+        (userAgent.includes('mac') && 'ontouchend' in document);
+    };
+    setIsIOS(checkIsIOS());
+  }, []);
+
+  // Check if Apple Wallet is available for active tickets (only on iOS)
+  useEffect(() => {
+    if (!isIOS) {
+      setWalletAvailable(false);
+      return;
+    }
+    if (ticket.status === GuestTicketStatus.ACTIVE || ticket.status === GuestTicketStatus.CHECKED_IN) {
+      guestTicketService.checkWalletAvailable(ticket.id)
+        .then((result) => setWalletAvailable(result.canAddToWallet))
+        .catch(() => setWalletAvailable(false));
+    }
+  }, [ticket.id, ticket.status, isIOS]);
+
+  const handleAddToWallet = async () => {
+    setIsAddingToWallet(true);
+    try {
+      const blob = await guestTicketService.downloadWalletPass(ticket.id);
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ticket-${ticket.id}.pkpass`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Pass downloaded! Open it to add to Apple Wallet.");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to download wallet pass");
+    } finally {
+      setIsAddingToWallet(false);
     }
   };
 
@@ -154,12 +212,19 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
   const canShowQR = ticket.status === GuestTicketStatus.ACTIVE && ticket.qrCode;
   const isPendingPayment = ticket.status === GuestTicketStatus.PENDING_PAYMENT;
   const isActive = ticket.status === GuestTicketStatus.ACTIVE;
+  const isWaitlisted = ticket.status === GuestTicketStatus.WAITLISTED;
   const isPaidTicket = ticket.ticketPrice > 0;
   const canCancel = (ticket.status === GuestTicketStatus.PENDING_PAYMENT ||
     ticket.status === GuestTicketStatus.PENDING_APPROVAL) && isUpcoming && onCancel;
   // For active tickets: paid tickets can refund, free tickets can cancel
   const canRefund = isActive && isUpcoming && isPaidTicket && onRefund;
   const canCancelActive = isActive && isUpcoming && !isPaidTicket && onCancel;
+  const canLeaveWaitlist = isWaitlisted && isUpcoming && onLeaveWaitlist;
+
+  // Check if there's a claim deadline (for promoted paid tickets)
+  const hasClaimDeadline = isPendingPayment && ticket.claimDeadline && ticket.wasWaitlisted;
+  const claimDeadline = ticket.claimDeadline ? new Date(ticket.claimDeadline) : null;
+  const isClaimExpiringSoon = claimDeadline && (claimDeadline.getTime() - Date.now()) < 3600000; // Less than 1 hour
 
   const handleCancelClick = () => {
     setShowCancelModal(true);
@@ -181,6 +246,13 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
       onRefund(ticket.id);
     }
     setShowRefundModal(false);
+  };
+
+  const handleConfirmLeaveWaitlist = () => {
+    if (onLeaveWaitlist) {
+      onLeaveWaitlist(ticket.id);
+    }
+    setShowLeaveWaitlistModal(false);
   };
 
   return (
@@ -239,6 +311,21 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
                     Show Ticket QR
                   </button>
                 )}
+                {walletAvailable && (
+                  <button
+                    onClick={handleAddToWallet}
+                    disabled={isAddingToWallet}
+                    className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 bg-black text-white rounded-xl text-sm font-medium hover:bg-black/80 transition-all disabled:opacity-50"
+                    aria-label="Add to Apple Wallet"
+                  >
+                    {isAddingToWallet ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Wallet className="h-4 w-4" />
+                    )}
+                    {isAddingToWallet ? "Downloading..." : "Add to Apple Wallet"}
+                  </button>
+                )}
                 <div className="flex items-center justify-between pt-1">
                   <Link
                     href={`/events/${ticket.eventId}`}
@@ -282,11 +369,25 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
             {/* Pending payment layout */}
             {isPendingPayment && (
               <div className="space-y-3">
+                {/* Claim deadline warning for promoted waitlist tickets */}
+                {hasClaimDeadline && claimDeadline && (
+                  <div className={`flex items-center gap-2 p-3 rounded-lg text-sm ${
+                    isClaimExpiringSoon
+                      ? "bg-red-500/20 text-red-400"
+                      : "bg-amber-500/20 text-amber-400"
+                  }`}>
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>
+                      {isClaimExpiringSoon ? "Expires soon! " : ""}
+                      Complete payment by {format(claimDeadline, "MMM d 'at' h:mm a")}
+                    </span>
+                  </div>
+                )}
                 {onCompletePayment && (
                   <button
                     onClick={() => onCompletePayment(ticket.id)}
                     disabled={isProcessingPayment}
-                    className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-amber-600 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+                    className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-warning text-white rounded-xl text-sm font-semibold hover:bg-warning/90 transition-all disabled:opacity-50"
                   >
                     {isProcessingPayment ? (
                       <>
@@ -324,8 +425,47 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
               </div>
             )}
 
-            {/* Other status layout (not active, not pending payment) */}
-            {!isActive && !isPendingPayment && (
+            {/* Waitlisted layout */}
+            {isWaitlisted && (
+              <div className="space-y-3">
+                {/* Waitlist position info */}
+                {waitlistPosition !== undefined && waitlistPosition > 0 && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-purple-500/20 text-purple-400 text-sm">
+                    <Clock className="h-4 w-4 shrink-0" />
+                    <span>
+                      Position #{waitlistPosition}
+                      {waitlistTotal ? ` of ${waitlistTotal}` : ""} on waitlist
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between pt-1">
+                  <Link
+                    href={`/events/${ticket.eventId}`}
+                    className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Event Details
+                  </Link>
+                  {canLeaveWaitlist && (
+                    <button
+                      onClick={() => setShowLeaveWaitlistModal(true)}
+                      disabled={isLeavingWaitlist}
+                      className="flex items-center gap-1.5 text-sm text-red-400/80 hover:text-red-400 transition-colors disabled:opacity-50"
+                    >
+                      {isLeavingWaitlist ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <XCircle className="h-3.5 w-3.5" />
+                      )}
+                      {isLeavingWaitlist ? "Leaving..." : "Leave Waitlist"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Other status layout (not active, not pending payment, not waitlisted) */}
+            {!isActive && !isPendingPayment && !isWaitlisted && (
               <div className="space-y-3">
                 <Link
                   href={`/events/${ticket.eventId}`}
@@ -382,18 +522,28 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
         variant="warning"
       />
 
+      {/* Leave Waitlist Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showLeaveWaitlistModal}
+        onClose={() => setShowLeaveWaitlistModal(false)}
+        onConfirm={handleConfirmLeaveWaitlist}
+        title="Leave Waitlist"
+        message="Are you sure you want to leave the waitlist? You will lose your position and will need to join again if you change your mind."
+        confirmText="Yes, Leave"
+        loadingText="Leaving..."
+        isLoading={isLeavingWaitlist}
+        variant="danger"
+      />
+
       {/* QR Code Modal */}
       {showQRModal && ticket.qrCode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-card-background rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-white/5">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-foreground">Your Ticket</h3>
+          <div className="bg-card-background rounded-2xl p-6 max-w-xs w-full shadow-2xl border border-white/5">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-lg font-bold text-foreground">Your Ticket</h3>
               <button
-                onClick={() => {
-                  setShowQRModal(false);
-                  setShowCodeText(false);
-                }}
-                className="p-2 rounded-full hover:bg-foreground/10 transition-colors"
+                onClick={() => setShowQRModal(false)}
+                className="p-1.5 rounded-full hover:bg-foreground/10 transition-colors"
               >
                 <X className="h-5 w-5 text-muted-foreground" />
               </button>
@@ -404,60 +554,24 @@ export default function TicketCard({ ticket, onRefund, isRefunding, onCompletePa
                 qrCode={ticket.qrCode}
                 ticketName={ticket.ticketName}
                 eventName={ticket.eventName}
-                size={220}
+                size={200}
               />
 
-              <div className="mt-6 text-center">
-                <p className="text-foreground font-semibold">{ticket.eventName}</p>
-                <p className="text-muted-foreground text-sm mt-1">{ticket.ticketName}</p>
-                <p className="text-muted-foreground text-sm mt-1">
-                  {format(eventDate, "EEE, MMM d, yyyy 'at' h:mm a")}
+              <div className="mt-5 text-center">
+                <p className="text-foreground font-semibold text-sm">{ticket.eventName}</p>
+                <p className="text-muted-foreground text-xs mt-1">{ticket.ticketName}</p>
+                <p className="text-muted-foreground text-xs mt-1">
+                  {format(eventDate, "EEE, MMM d 'at' h:mm a")}
                 </p>
               </div>
 
-              {/* Manual Code View */}
-              <div className="mt-4 w-full">
-                <button
-                  onClick={() => setShowCodeText(!showCodeText)}
-                  className="flex items-center justify-center gap-2 w-full text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
-                >
-                  {showCodeText ? (
-                    <>
-                      <EyeOff className="h-4 w-4" />
-                      Hide Manual Code
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="h-4 w-4" />
-                      Show Manual Code
-                    </>
-                  )}
-                </button>
-
-                {showCodeText && (
-                  <div className="mt-2 p-3 bg-card-secondary-background rounded-xl border border-white/10">
-                    <p className="text-xs text-muted-foreground mb-2 text-center">
-                      If scanning doesn&apos;t work, read this code to the organizer:
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 text-xs text-foreground bg-black/20 px-3 py-2 rounded-lg font-mono break-all">
-                        {ticket.qrCode}
-                      </code>
-                      <button
-                        onClick={handleCopyCode}
-                        className="p-2 rounded-lg bg-primary/20 text-primary hover:bg-primary/30 transition-colors shrink-0"
-                        title="Copy code"
-                      >
-                        {codeCopied ? (
-                          <Check className="h-4 w-4" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              {/* Manual entry code - subtle fallback */}
+              {ticket.checkInCodeFormatted && (
+                <div className="mt-4 pt-4 border-t border-white/5 w-full text-center">
+                  <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wide">Manual Entry Code</p>
+                  <p className="font-mono text-sm text-muted-foreground mt-0.5">{ticket.checkInCodeFormatted}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -60,7 +60,7 @@ export const GuestStatsCards = ({
   ];
 
   return (
-    <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="mb-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon;
         return (
@@ -84,8 +84,8 @@ export const GuestStatsCards = ({
                   )}
                 </div>
               </div>
-              <div className={`rounded-xl ${card.bgColor} p-3`}>
-                <Icon className={`h-6 w-6 ${card.color}`} />
+              <div className={`rounded-lg sm:rounded-xl ${card.bgColor} p-2 sm:p-3`}>
+                <Icon className={`h-4 w-4 sm:h-6 sm:w-6 ${card.color}`} />
               </div>
             </div>
           </div>

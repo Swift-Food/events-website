@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { eventCollaboratorService } from "@/services/event-collaborator.service";
+import { CollaboratorRole } from "@/types/event-collaborator";
 import { paymentService } from "@/services/payment.service";
 import { useAuth } from "@/lib/auth/authContext";
 import { EventResponseDto, EventStatus } from "@/types/event";
-import { GuestTicketStatus } from "@/types/guest-ticket";
+import { GuestTicketStatus, TicketInvitationPreviewDto } from "@/types/guest-ticket";
 import type { PaymentFlowState } from "@/types/payment";
 import {
   Calendar,
@@ -19,21 +20,28 @@ import {
   User,
   Ticket,
   Loader2,
-  Check,
   X,
-  QrCode,
+  CheckCircle2,
+  ScanLine,
+  Crown,
+  Shield,
+  Gift,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
 import PaymentModal, { PaymentSuccessModal } from "@/components/payments/PaymentModal";
+import RegistrationQuestionsModal from "@/components/RegistrationQuestionsModal";
+import { getTicketStatusText, getTicketStatusBadgeClasses, isTicketUsable } from "@/utils/ticket-status";
 
 export default function EventDetailsPage() {
   const params = useParams();
   const router = useRouter();
-  const { isAuthenticated, user } = useAuth();
+  const searchParams = useSearchParams();
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const eventId = params.id as string;
+  const inviteToken = searchParams.get("inviteToken");
 
   const [event, setEvent] = useState<EventResponseDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,14 +54,20 @@ export default function EventDetailsPage() {
     {}
   );
 
+  // Invitation preview state
+  const [invitationPreview, setInvitationPreview] = useState<TicketInvitationPreviewDto | null>(null);
+  const [invitationLoading, setInvitationLoading] = useState(false);
+  const [invitationError, setInvitationError] = useState<string | null>(null);
+
   // Payment modal state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [paymentData, setPaymentData] = useState<PaymentFlowState | null>(null);
   const [successTicketDetails, setSuccessTicketDetails] = useState<Pick<PaymentFlowState['ticketDetails'], 'ticketName' | 'eventName'> | null>(null);
 
-  // Check if user can manage this event
-  const [canManageEvent, setCanManageEvent] = useState(false);
+  // Check if user can manage this event and their role
+  type UserRole = "owner" | "admin" | "scanner" | null;
+  const [userRole, setUserRole] = useState<UserRole>(null);
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -76,47 +90,92 @@ export default function EventDetailsPage() {
     }
   }, [eventId]);
 
-  // Check if user is owner or collaborator
+  // Fetch invitation preview when inviteToken is present
   useEffect(() => {
-    const checkCanManageEvent = async () => {
-      if (!event || !isAuthenticated || !user) {
-        setCanManageEvent(false);
+    const fetchInvitationPreview = async () => {
+      if (!inviteToken) return;
+
+      try {
+        setInvitationLoading(true);
+        setInvitationError(null);
+        const preview = await guestTicketService.previewTicketInvitation(inviteToken);
+
+        if (preview.success) {
+          setInvitationPreview(preview);
+          // Auto-select the invited ticket
+          if (preview.ticket?.id) {
+            setSelectedTicketId(preview.ticket.id);
+          }
+        } else {
+          setInvitationError(preview.message || "Invalid or expired invitation");
+        }
+      } catch (err: any) {
+        console.error("Failed to fetch invitation preview:", err);
+        setInvitationError(err.response?.data?.message || "Invalid or expired invitation");
+      } finally {
+        setInvitationLoading(false);
+      }
+    };
+
+    fetchInvitationPreview();
+  }, [inviteToken]);
+
+  // Check if user is owner or collaborator and determine role
+  useEffect(() => {
+    const checkUserRole = async () => {
+      if (!event) return;
+
+      if (!user && !authLoading) {
+        setUserRole(null);
         return;
       }
+
+      if (!user) return;
 
       // Check if user is the event owner
       const isOwner = event.owner?.user?.id === user.id;
       if (isOwner) {
-        setCanManageEvent(true);
+        setUserRole("owner");
         return;
       }
 
       // Check if user is a collaborator
       try {
         const collaboratorsData = await eventCollaboratorService.getCollaborators(eventId);
-        const isCollaborator = collaboratorsData.collaborators.some(
+        const collaborator = collaboratorsData.collaborators.find(
           (collab) =>
             collab.inviteAccepted &&
             collab.eventUser?.id === user.eventUser?.id
         );
-        setCanManageEvent(isCollaborator);
+        if (collaborator) {
+          if (collaborator.role === CollaboratorRole.COLLABORATOR_ADMIN) {
+            setUserRole("admin");
+          } else {
+            setUserRole("scanner");
+          }
+        } else {
+          setUserRole(null);
+        }
       } catch (err) {
         // User might not have permission to view collaborators
-        setCanManageEvent(false);
+        setUserRole(null);
       }
     };
 
-    checkCanManageEvent();
-  }, [event, isAuthenticated, user, eventId]);
+    checkUserRole();
+  }, [event, user, authLoading, eventId]);
 
   const selectedTicket = event?.eventTickets?.find(
     (t) => t.id === selectedTicketId
   );
 
   const handleRegister = async (ticketId: string) => {
+    // Build the redirect URL with inviteToken if present
+    const currentUrl = `/events/${eventId}${inviteToken ? `?inviteToken=${inviteToken}` : ''}`;
+
     if (!isAuthenticated) {
       toast.error("Please log in to register for this event");
-      router.push("/auth");
+      router.push(`/auth?redirect=${encodeURIComponent(currentUrl)}`);
       return;
     }
 
@@ -129,8 +188,10 @@ export default function EventDetailsPage() {
     // Set the selected ticket for the question form
     setSelectedTicketId(ticketId);
 
-    // Check if ticket has questions that need answering
+    // For invitation flow, skip question form (invitation already has ticket selected)
+    // Check if ticket has questions that need answering (only for non-invite flow)
     if (
+      !inviteToken &&
       ticket.questionForm &&
       ticket.questionForm.length > 0 &&
       !showQuestionForm
@@ -141,52 +202,117 @@ export default function EventDetailsPage() {
 
     try {
       setIsRegistering(true);
-      const result = await guestTicketService.registerForTicket({
-        eventTicketId: ticketId,
-        questionAnswers:
-          Object.keys(questionAnswers).length > 0 ? questionAnswers : undefined,
-      });
 
-      if (result.success) {
-        setShowQuestionForm(false);
-        setQuestionAnswers({});
+      // If we have an invite token, use the accept invitation API
+      if (inviteToken && invitationPreview?.success) {
+        const result = await guestTicketService.acceptTicketInvite(inviteToken);
 
-        // Check if payment is required
-        if (result.requiresPayment && result.guestTicket.status === GuestTicketStatus.PENDING_PAYMENT) {
-          // Get payment intent for this guest ticket
-          try {
-            const paymentResponse = await paymentService.createTicketPaymentIntent(result.guestTicket.id);
+        if (result.success) {
+          // Check if payment is required
+          if (result.requiresPayment && result.paymentUrl) {
+            // Extract guestTicketId from paymentUrl (format: /payments/ticket/:guestTicketId)
+            const guestTicketId = result.paymentUrl.split('/').pop();
 
-            if (paymentResponse.success && paymentResponse.clientSecret) {
-              setPaymentData({
-                clientSecret: paymentResponse.clientSecret,
-                amount: paymentResponse.amount || 0,
-                currency: paymentResponse.currency || 'gbp',
-                ticketDetails: paymentResponse.ticketDetails || {
-                  ticketName: ticket?.name || 'Ticket',
-                  eventName: event?.name || 'Event',
-                  price: Number(ticket?.price) || 0,
-                },
-                guestTicketId: result.guestTicket.id,
-              });
-              setShowPaymentModal(true);
-              setShowTicketSelector(false);
-              setSelectedTicketId(null);
-            } else {
-              throw new Error(paymentResponse.error || 'Failed to create payment');
+            if (!guestTicketId) {
+              toast.error("Failed to process payment. Please try again from My Tickets.");
+              router.push("/my-tickets");
+              return;
             }
-          } catch (paymentError: any) {
-            console.error("Payment setup failed:", paymentError);
-            toast.error(
-              paymentError.response?.data?.message || "Failed to setup payment. Please try again from My Tickets."
-            );
+
+            try {
+              const paymentResponse = await paymentService.createTicketPaymentIntent(guestTicketId);
+
+              if (paymentResponse.success && paymentResponse.clientSecret) {
+                setPaymentData({
+                  clientSecret: paymentResponse.clientSecret,
+                  amount: paymentResponse.amount || 0,
+                  currency: paymentResponse.currency || 'gbp',
+                  ticketDetails: paymentResponse.ticketDetails || {
+                    ticketName: result.ticket?.name || invitationPreview.ticket?.name || 'Ticket',
+                    eventName: result.event?.name || event?.name || 'Event',
+                    price: Number(ticket?.price) || 0,
+                  },
+                  guestTicketId: guestTicketId,
+                });
+                setShowPaymentModal(true);
+              } else {
+                throw new Error(paymentResponse.error || 'Failed to create payment');
+              }
+            } catch (paymentError: any) {
+              console.error("Payment setup failed:", paymentError);
+              toast.error(
+                paymentError.response?.data?.message || "Failed to setup payment. Please try again from My Tickets."
+              );
+              router.push("/my-tickets");
+            }
+          } else {
+            toast.success(result.message || "Invitation accepted successfully!");
             router.push("/my-tickets");
           }
         } else {
-          toast.success(result.message || "Successfully registered for event!");
-          setShowTicketSelector(false);
-          setSelectedTicketId(null);
-          router.push("/my-tickets");
+          toast.error(result.message || "Failed to accept invitation");
+        }
+      } else {
+        // Normal registration flow
+        const result = await guestTicketService.registerForTicket({
+          eventTicketId: ticketId,
+          questionAnswers:
+            Object.keys(questionAnswers).length > 0 ? questionAnswers : undefined,
+        });
+
+        if (result.success) {
+          setShowQuestionForm(false);
+          setQuestionAnswers({});
+
+          // Check if user was added to waitlist
+          if (result.isWaitlisted) {
+            toast.success(
+              result.message || `Added to waitlist at position #${result.waitlistPosition}!`,
+              { duration: 5000 }
+            );
+            setShowTicketSelector(false);
+            setSelectedTicketId(null);
+            router.push("/my-tickets");
+            return;
+          }
+
+          // Check if payment is required
+          if (result.requiresPayment && result.guestTicket.status === GuestTicketStatus.PENDING_PAYMENT) {
+            // Get payment intent for this guest ticket
+            try {
+              const paymentResponse = await paymentService.createTicketPaymentIntent(result.guestTicket.id);
+
+              if (paymentResponse.success && paymentResponse.clientSecret) {
+                setPaymentData({
+                  clientSecret: paymentResponse.clientSecret,
+                  amount: paymentResponse.amount || 0,
+                  currency: paymentResponse.currency || 'gbp',
+                  ticketDetails: paymentResponse.ticketDetails || {
+                    ticketName: ticket?.name || 'Ticket',
+                    eventName: event?.name || 'Event',
+                    price: Number(ticket?.price) || 0,
+                  },
+                  guestTicketId: result.guestTicket.id,
+                });
+                setShowPaymentModal(true);
+                setShowTicketSelector(false);
+                setSelectedTicketId(null);
+              } else {
+                throw new Error(paymentResponse.error || 'Failed to create payment');
+              }
+            } catch (paymentError: any) {
+              console.error("Payment setup failed:", paymentError);
+              toast.error(
+                paymentError.response?.data?.message || "Failed to setup payment. Please try again from My Tickets."
+              );
+              router.push("/my-tickets");
+            }
+          } else {
+            toast.success(result.message || "Successfully registered for event!");
+            setShowTicketSelector(false);
+            setSelectedTicketId(null);
+            router.push("/my-tickets");
+          }
         }
       }
     } catch (error: any) {
@@ -307,58 +433,94 @@ export default function EventDetailsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Management Banner - Mobile (full width) */}
-      {canManageEvent && (
-        <div className="sm:hidden border-y border-pink-500/30 bg-pink-500/10">
-          <div className="px-6 py-3 flex flex-col gap-3">
+      {/* Management/Scanner Banner - Mobile (full width) */}
+      {userRole && (
+        <div className={`sm:hidden border-y ${userRole === "scanner" ? "border-blue-500/30 bg-blue-500/10" : userRole === "admin" ? "border-purple-500/30 bg-purple-500/10" : "border-amber-500/30 bg-amber-500/10"}`}>
+          <div className="px-6 py-3 flex items-center justify-between gap-4">
             <span className="text-sm text-neutral-300">
-              You have manage access for this event.
+              {userRole === "scanner"
+                ? "You can scan tickets for this event."
+                : userRole === "owner"
+                ? "You have full access to this event."
+                : "You have manage access for this event."}
             </span>
-            <div className="flex items-center gap-2">
+            {userRole === "scanner" ? (
               <Link
                 href={`/event-management/${eventId}/scanner`}
-                className="flex items-center gap-1.5 rounded-full bg-green-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-green-600"
+                className="shrink-0 flex items-center gap-1.5 rounded-full bg-blue-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-blue-600"
               >
-                <QrCode className="h-4 w-4" />
-                Check-In
+                <ScanLine className="h-4 w-4" />
+                Scan
               </Link>
+            ) : (
               <Link
                 href={`/event-management/${eventId}`}
-                className="flex items-center gap-1 rounded-full bg-pink-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-pink-600"
+                className={`shrink-0 flex items-center gap-1 rounded-full px-4 py-1.5 text-sm font-semibold text-white transition-colors ${
+                  userRole === "owner"
+                    ? "bg-amber-500 hover:bg-amber-600"
+                    : "bg-purple-500 hover:bg-purple-600"
+                }`}
               >
                 Manage
                 <span className="text-xs">↗</span>
               </Link>
-            </div>
+            )}
           </div>
         </div>
       )}
 
+
       <div className="mx-auto max-w-6xl px-6 py-8">
-        {/* Management Banner - Desktop */}
-        {canManageEvent && (
-          <div className="hidden sm:flex mb-6 items-center justify-between rounded-lg border border-pink-500/30 bg-pink-500/10 px-4 py-3">
-            <span className="text-sm text-neutral-300">
-              You have manage access for this event.
-            </span>
-            <div className="flex items-center gap-2">
+        {/* Management/Scanner Banner - Desktop */}
+        {userRole && (
+          <div className={`hidden sm:flex mb-6 items-center justify-between gap-4 rounded-lg border px-4 py-3 ${userRole === "scanner" ? "border-blue-500/30 bg-blue-500/10" : userRole === "admin" ? "border-purple-500/30 bg-purple-500/10" : "border-amber-500/30 bg-amber-500/10"}`}>
+            <div className="flex items-center gap-3">
+              <span
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                  userRole === "owner"
+                    ? "bg-amber-500/30 text-amber-400"
+                    : userRole === "admin"
+                    ? "bg-purple-500/30 text-purple-400"
+                    : "bg-blue-500/30 text-blue-400"
+                }`}
+              >
+                {userRole === "owner" && <Crown className="h-3 w-3" />}
+                {userRole === "admin" && <Shield className="h-3 w-3" />}
+                {userRole === "scanner" && <ScanLine className="h-3 w-3" />}
+                {userRole === "owner" ? "Owner" : userRole === "admin" ? "Admin" : "Scanner"}
+              </span>
+              <span className="text-sm text-neutral-300">
+                {userRole === "scanner"
+                  ? "You can scan tickets for this event."
+                  : userRole === "owner"
+                  ? "You have full access to this event."
+                  : "You have manage access for this event."}
+              </span>
+            </div>
+            {userRole === "scanner" ? (
               <Link
                 href={`/event-management/${eventId}/scanner`}
-                className="flex items-center gap-1.5 rounded-full bg-green-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-green-600"
+                className="flex items-center gap-1.5 rounded-full bg-blue-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-blue-600"
               >
-                <QrCode className="h-4 w-4" />
-                Check-In
+                <ScanLine className="h-4 w-4" />
+                Scan Tickets
               </Link>
+            ) : (
               <Link
                 href={`/event-management/${eventId}`}
-                className="flex items-center gap-1 rounded-full bg-pink-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-pink-600"
+                className={`flex items-center gap-1 rounded-full px-4 py-1.5 text-sm font-semibold text-white transition-colors ${
+                  userRole === "owner"
+                    ? "bg-amber-500 hover:bg-amber-600"
+                    : "bg-purple-500 hover:bg-purple-600"
+                }`}
               >
                 Manage
                 <span className="text-xs">↗</span>
               </Link>
-            </div>
+            )}
           </div>
         )}
+
 
         {/* Back Button */}
         <button
@@ -665,12 +827,61 @@ export default function EventDetailsPage() {
               )}
             </div>
 
+            {/* Invitation Banner */}
+            {inviteToken && invitationPreview?.success && (
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20">
+                    <Gift className="h-5 w-5 text-emerald-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-emerald-400">
+                      You&apos;ve been invited!
+                    </h3>
+                    <p className="text-sm text-emerald-300/80">
+                      You have an invitation for the <span className="font-medium">{invitationPreview.ticket?.name}</span> ticket
+                      {invitationPreview.ticket?.bypassPayment && invitationPreview.ticket?.isPaid && (
+                        <span className="ml-1">(payment waived)</span>
+                      )}
+                      {invitationPreview.bypassApproval && (
+                        <span className="ml-1">(no approval required)</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Invitation Error Banner */}
+            {inviteToken && invitationError && (
+              <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20">
+                    <X className="h-5 w-5 text-red-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-red-400">
+                      Invalid Invitation
+                    </h3>
+                    <p className="text-sm text-red-300/80">
+                      {invitationError}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Tickets */}
             {event.eventTickets && event.eventTickets.length > 0 && (() => {
               const isEventEnded = new Date(event.endDateTime) < new Date();
               const hasAvailableTickets = event.eventTickets.some(t => (t.quantityLeft ?? 0) > 0 && t.isAvailable);
-              const canRegister = event.status === EventStatus.PUBLISHED && !isEventEnded && hasAvailableTickets;
-              const showClosedMessage = isEventEnded || !hasAvailableTickets;
+              const hasUserTicket = !!event.userTicket;
+              // Allow registration even when sold out (for waitlist), but not if user already has ticket
+              const canRegister = event.status === EventStatus.PUBLISHED && !isEventEnded && !hasUserTicket;
+              const showClosedMessage = isEventEnded && !hasUserTicket;
+              // Check if we have a valid invitation
+              const hasValidInvitation = inviteToken && invitationPreview?.success;
+              const invitedTicketId = invitationPreview?.ticket?.id;
 
               return (
                 <div className="rounded-xl bg-card-background backdrop-blur-xl p-6 border border-neutral-700">
@@ -688,23 +899,43 @@ export default function EventDetailsPage() {
                     {event.eventTickets.map((ticket) => {
                       const remaining = ticket.quantityLeft ?? 0;
                       const isSelected = selectedTicketId === ticket.id;
-                      const isSoldOut = remaining <= 0 || !ticket.isAvailable;
-                      const isDisabled = isSoldOut || !canRegister;
+                      const isSoldOut = remaining <= 0;
+                      const isManuallyUnavailable = !ticket.isAvailable; // Organizer disabled this ticket
+                      const isOwnedTicket = event.userTicket?.ticketName === ticket.name;
+                      const isActiveTicket = isOwnedTicket && isTicketUsable(event.userTicket!.status as GuestTicketStatus);
+                      // Check if this is the invited ticket
+                      const isInvitedTicket = hasValidInvitation && ticket.id === invitedTicketId;
+                      // In invitation mode, only the invited ticket is selectable
+                      const isDisabledByInvitation = hasValidInvitation && !isInvitedTicket;
+                      // Can select sold out tickets for waitlist, but not if organizer disabled or user has ticket
+                      const isDisabled = !canRegister || isManuallyUnavailable || hasUserTicket || isDisabledByInvitation;
 
                       return (
                         <div
                           key={ticket.id}
-                          onClick={() => !isDisabled && setSelectedTicketId(ticket.id)}
+                          onClick={() => !isDisabled && !isDisabledByInvitation && setSelectedTicketId(ticket.id)}
                           className={`flex items-center justify-between gap-2 sm:gap-4 rounded-xl border p-3 sm:p-4 transition-all ${
-                            isDisabled
-                              ? "border-white/10 bg-card-secondary-background opacity-50 cursor-not-allowed"
-                              : isSelected
-                                ? "border-primary bg-primary/10 cursor-pointer"
-                                : "border-white/10 bg-card-secondary-background cursor-pointer hover:border-white/20"
+                            isOwnedTicket
+                              ? isActiveTicket
+                                ? "border-green-500/30 bg-green-500/10 cursor-default"
+                                : "border-yellow-500/30 bg-yellow-500/10 cursor-default"
+                              : isInvitedTicket
+                                ? "border-emerald-500/50 bg-emerald-500/10 cursor-pointer ring-2 ring-emerald-500/30"
+                                : isDisabledByInvitation
+                                  ? "border-white/5 bg-card-secondary-background opacity-40 cursor-not-allowed"
+                                  : isDisabled
+                                    ? "border-white/10 bg-card-secondary-background opacity-50 cursor-not-allowed"
+                                    : isSelected
+                                      ? "border-primary bg-primary/10 cursor-pointer"
+                                      : "border-white/10 bg-card-secondary-background cursor-pointer hover:border-white/20"
                           }`}
                         >
                           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                            {canRegister && !isSoldOut && (
+                            {isOwnedTicket ? (
+                              <CheckCircle2 className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 ${isActiveTicket ? "text-green-400" : "text-yellow-400"}`} />
+                            ) : isInvitedTicket ? (
+                              <Gift className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-emerald-400" />
+                            ) : canRegister && !isManuallyUnavailable && !isDisabledByInvitation && (
                               <div
                                 className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                                   isSelected ? "border-primary" : "border-white/30"
@@ -716,28 +947,95 @@ export default function EventDetailsPage() {
                               </div>
                             )}
                             <div className="min-w-0">
-                              <h3 className="text-sm sm:text-base font-semibold text-foreground break-words">
+                              <h3 className={`text-sm sm:text-base font-semibold break-words ${isInvitedTicket ? "text-emerald-400" : "text-foreground"}`}>
                                 {ticket.name}
+                                {isInvitedTicket && (
+                                  <span className="ml-2 text-xs font-normal text-emerald-300/80">(Invited)</span>
+                                )}
                               </h3>
                               <p className="text-xs sm:text-sm text-muted-foreground">
-                                {isSoldOut ? "Sold out" : `${remaining} left`}
+                                {isOwnedTicket ? (
+                                  isTicketUsable(event.userTicket!.status as GuestTicketStatus) ? (
+                                    <span className="text-green-400">You own this ticket</span>
+                                  ) : (
+                                    <span className="text-yellow-400">{getTicketStatusText(event.userTicket!.status as GuestTicketStatus)}</span>
+                                  )
+                                ) : isInvitedTicket ? (
+                                  <span className="text-emerald-300/80">
+                                    {invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid ? "Free with invitation" : `${remaining} left`}
+                                  </span>
+                                ) : isManuallyUnavailable ? (
+                                  <span className="text-gray-400">Unavailable</span>
+                                ) : isSoldOut ? (
+                                  <span className="text-amber-400">Sold out - Join waitlist</span>
+                                ) : (
+                                  `${remaining} left`
+                                )}
                               </p>
                             </div>
                           </div>
                           <div className="text-right shrink-0">
-                            <p className="text-base sm:text-xl font-bold text-foreground">
+                            <p className={`text-base sm:text-xl font-bold ${isInvitedTicket && invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid ? "text-emerald-400 line-through decoration-emerald-400/50" : "text-foreground"}`}>
                               {Number(ticket.price) === 0
                                 ? "Free"
                                 : `£${Number(ticket.price).toFixed(2)}`}
                             </p>
+                            {isInvitedTicket && invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid && (
+                              <p className="text-sm font-semibold text-emerald-400">Free</p>
+                            )}
                           </div>
                         </div>
                       );
                     })}
                   </div>
 
-                  {/* Single Register Button */}
-                  {canRegister && event.eventTickets.some(t => (t.quantityLeft ?? 0) > 0 && t.isAvailable) && (
+                  {/* User ticket info */}
+                  {hasUserTicket && event.userTicket && (
+                    <div className="mt-4 pt-4 border-t border-white/10">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className={getTicketStatusBadgeClasses(event.userTicket.status as GuestTicketStatus)}>
+                            {getTicketStatusText(event.userTicket.status as GuestTicketStatus)}
+                          </span>
+                          {event.userTicket.checkInCode && isTicketUsable(event.userTicket.status as GuestTicketStatus) && (
+                            <span className="text-xs text-muted-foreground">
+                              Code: <span className="font-mono font-semibold text-foreground">{event.userTicket.checkInCode}</span>
+                            </span>
+                          )}
+                        </div>
+                        <Link
+                          href="/my-tickets"
+                          className="text-sm text-green-400 hover:text-green-300 transition-colors"
+                        >
+                          View in My Tickets →
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Accept Invitation Button (for invitation mode) */}
+                  {hasValidInvitation && canRegister && (
+                    <button
+                      onClick={() => invitedTicketId && handleRegister(invitedTicketId)}
+                      disabled={isRegistering}
+                      className="w-full mt-4 rounded-xl bg-emerald-500 px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {isRegistering ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Accepting invitation...
+                        </>
+                      ) : (
+                        <>
+                          <Gift className="h-4 w-4" />
+                          Accept Invitation
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Register/Join Waitlist Button (for normal mode) */}
+                  {!hasValidInvitation && canRegister && event.eventTickets.some(t => t.isAvailable) && (
                     <button
                       onClick={() => selectedTicketId && handleRegister(selectedTicketId)}
                       disabled={!selectedTicketId || isRegistering}
@@ -746,12 +1044,20 @@ export default function EventDetailsPage() {
                       {isRegistering ? (
                         <>
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          Registering...
+                          {(() => {
+                            const ticket = event.eventTickets.find(t => t.id === selectedTicketId);
+                            const isSoldOut = (ticket?.quantityLeft ?? 0) <= 0;
+                            return isSoldOut ? "Joining waitlist..." : "Registering...";
+                          })()}
                         </>
                       ) : selectedTicketId ? (
-                        "Register"
+                        (() => {
+                          const ticket = event.eventTickets.find(t => t.id === selectedTicketId);
+                          const isSoldOut = (ticket?.quantityLeft ?? 0) <= 0;
+                          return isSoldOut ? "Join Waitlist" : "Register";
+                        })()
                       ) : (
-                        "Select a ticket to register"
+                        "Select a ticket"
                       )}
                     </button>
                   )}
@@ -760,7 +1066,7 @@ export default function EventDetailsPage() {
             })()}
 
             {/* Description */}
-            <div className=" p-6">
+            <div className="py-6">
               <h2 className="mb-4 text-lg font-semibold text-muted-foreground ">
                 About this event
               </h2>
@@ -800,180 +1106,19 @@ export default function EventDetailsPage() {
       )}
 
       {/* Question Form Modal */}
-      {showQuestionForm && selectedTicket?.questionForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-          <div className="bg-gradient-to-b from-card-background to-card-secondary-background rounded-3xl border border-white/10 w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl shadow-black/50">
-            {/* Header */}
-            <div className="relative p-6 pb-4">
-              <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent" />
-              <div className="relative flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-foreground">
-                    Almost there!
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Please answer a few questions to complete your registration
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowQuestionForm(false);
-                    setQuestionAnswers({});
-                  }}
-                  className="p-2 rounded-full bg-white/5 text-muted-foreground hover:text-foreground hover:bg-white/10 transition-all"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Form Content */}
-            <div className="px-6 pb-6 space-y-5 max-h-[50vh] overflow-y-auto">
-              {selectedTicket.questionForm.map((q, index) => (
-                <div key={index} className="space-y-2">
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    {q.question}
-                    {q.required && (
-                      <span className="text-red-400 ml-0.5">*</span>
-                    )}
-                  </label>
-
-                  {q.type === "shortText" && (
-                    <input
-                      type="text"
-                      value={questionAnswers[q.question] || ""}
-                      onChange={(e) =>
-                        handleQuestionChange(q.question, e.target.value)
-                      }
-                      placeholder="Your answer..."
-                      className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
-                    />
-                  )}
-
-                  {q.type === "longText" && (
-                    <textarea
-                      value={questionAnswers[q.question] || ""}
-                      onChange={(e) =>
-                        handleQuestionChange(q.question, e.target.value)
-                      }
-                      rows={4}
-                      placeholder="Your answer..."
-                      className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none"
-                    />
-                  )}
-
-                  {q.type === "singleSelect" && q.options && (
-                    <div className="space-y-2">
-                      {q.options.map((option, optIndex) => (
-                        <label
-                          key={optIndex}
-                          onClick={() =>
-                            handleQuestionChange(q.question, option)
-                          }
-                          className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                            questionAnswers[q.question] === option
-                              ? "border-primary bg-primary/10"
-                              : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
-                          }`}
-                        >
-                          <div
-                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                              questionAnswers[q.question] === option
-                                ? "border-primary"
-                                : "border-white/30"
-                            }`}
-                          >
-                            {questionAnswers[q.question] === option && (
-                              <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                            )}
-                          </div>
-                          <span className="text-foreground">{option}</span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
-
-                  {q.type === "multiSelect" && q.options && (
-                    <div className="space-y-2">
-                      {q.options.map((option, optIndex) => {
-                        const isChecked = (
-                          questionAnswers[q.question] || []
-                        ).includes(option);
-                        return (
-                          <label
-                            key={optIndex}
-                            className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                              isChecked
-                                ? "border-primary bg-primary/10"
-                                : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
-                            }`}
-                          >
-                            <div
-                              className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
-                                isChecked
-                                  ? "border-primary bg-primary"
-                                  : "border-white/30"
-                              }`}
-                            >
-                              {isChecked && (
-                                <Check className="w-3 h-3 text-white" />
-                              )}
-                            </div>
-                            <span className="text-foreground">{option}</span>
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={(e) => {
-                                const current =
-                                  questionAnswers[q.question] || [];
-                                const updated = e.target.checked
-                                  ? [...current, option]
-                                  : current.filter((o: string) => o !== option);
-                                handleQuestionChange(q.question, updated);
-                              }}
-                              className="sr-only"
-                            />
-                          </label>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Footer */}
-            <div className="p-6 pt-4 border-t border-white/10 bg-card-secondary-background/50">
-              <div className="flex gap-3">
-                <button
-                  onClick={() => {
-                    setShowQuestionForm(false);
-                    setQuestionAnswers({});
-                  }}
-                  className="flex-1 px-6 py-3 rounded-full border border-white/10 text-foreground font-medium hover:bg-white/5 transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() =>
-                    selectedTicketId && handleRegister(selectedTicketId)
-                  }
-                  disabled={isRegistering}
-                  className="flex-1 px-6 py-3 rounded-full bg-primary text-white font-semibold shadow-lg shadow-primary/25 hover:bg-primary/90 hover:shadow-primary/40 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
-                >
-                  {isRegistering ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    "Complete Registration"
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      {selectedTicket?.questionForm && (
+        <RegistrationQuestionsModal
+          isOpen={showQuestionForm}
+          questionForm={selectedTicket.questionForm}
+          questionAnswers={questionAnswers}
+          onQuestionChange={handleQuestionChange}
+          onCancel={() => {
+            setShowQuestionForm(false);
+            setQuestionAnswers({});
+          }}
+          onSubmit={() => selectedTicketId && handleRegister(selectedTicketId)}
+          isSubmitting={isRegistering}
+        />
       )}
 
     </div>

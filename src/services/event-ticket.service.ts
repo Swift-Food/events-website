@@ -63,6 +63,34 @@ class EventTicketService {
       await apiClient.delete(`${this.baseUrl}/${id}`);
     return response.data;
   }
+
+  /**
+   * Upload CSV file with approved invitee emails for a ticket
+   * POST /tickets/:ticketId/approved-emails/upload
+   * @param ticketId - The ticket ID to add approved emails to
+   * @param file - CSV file containing emails
+   * @param replace - If true, replaces all existing emails; if false, appends to existing list
+   */
+  async uploadApprovedEmailsCsv(
+    ticketId: string,
+    file: File,
+    replace: boolean = false
+  ): Promise<{ success: boolean; message: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response: AxiosResponse<{ success: boolean; message: string }> =
+      await apiClient.post(
+        `${this.baseUrl}/${ticketId}/approved-emails/upload${replace ? "?replace=true" : ""}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+    return response.data;
+  }
 }
 
 export const eventTicketService = new EventTicketService();

@@ -6,3 +6,5 @@ export { GuestTable } from "./GuestTable";
 export { GuestTableRow } from "./GuestTableRow";
 export { GuestActionMenu } from "./GuestActionMenu";
 export { BulkActionBar } from "./BulkActionBar";
+export { ReviewGuestModal } from "./ReviewGuestModal";
+export { GuestDetailsModal } from "./GuestDetailsModal";

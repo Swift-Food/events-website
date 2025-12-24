@@ -18,6 +18,10 @@ import {
   AcceptTicketInviteResponseDto,
   TicketInvitationPreviewDto,
   InviteLinksListResponseDto,
+  WaitlistPositionResponseDto,
+  LeaveWaitlistResponseDto,
+  WaitlistResponseDto,
+  WaitlistCountResponseDto,
 } from "@/types/guest-ticket";
 
 class GuestTicketService {
@@ -174,6 +178,18 @@ class GuestTicketService {
   }
 
   /**
+   * Check in a ticket using short 8-character code
+   * Accepts codes with or without hyphen (e.g., "ABCD1234" or "ABCD-1234")
+   */
+  async checkInByCode(code: string): Promise<GuestTicketResponseDto> {
+    const response: AxiosResponse<GuestTicketResponseDto> = await apiClient.post(
+      `${this.baseUrl}/check-in/code`,
+      { code }
+    );
+    return response.data;
+  }
+
+  /**
    * Bulk check in tickets by QR codes
    */
   async bulkCheckInTickets(qrCodes: string[]): Promise<BulkActionResponseDto> {
@@ -308,6 +324,75 @@ class GuestTicketService {
   async revokeInviteLink(id: string): Promise<TicketActionResponseDto> {
     const response: AxiosResponse<TicketActionResponseDto> =
       await apiClient.delete(`${this.baseUrl}/invite-link/${id}`);
+    return response.data;
+  }
+
+  // ==================== WAITLIST METHODS ====================
+
+  /**
+   * Get waitlist position for a guest ticket
+   * GET /guest-tickets/:id/waitlist-position
+   */
+  async getWaitlistPosition(ticketId: string): Promise<WaitlistPositionResponseDto> {
+    const response: AxiosResponse<WaitlistPositionResponseDto> =
+      await apiClient.get(`${this.baseUrl}/${ticketId}/waitlist-position`);
+    return response.data;
+  }
+
+  /**
+   * Leave the waitlist (cancel a waitlisted ticket)
+   * DELETE /guest-tickets/:id/waitlist
+   */
+  async leaveWaitlist(ticketId: string): Promise<LeaveWaitlistResponseDto> {
+    const response: AxiosResponse<LeaveWaitlistResponseDto> =
+      await apiClient.delete(`${this.baseUrl}/${ticketId}/waitlist`);
+    return response.data;
+  }
+
+  /**
+   * Get full waitlist for an event ticket (admin only)
+   * GET /guest-tickets/event-ticket/:eventTicketId/waitlist
+   */
+  async getEventTicketWaitlist(eventTicketId: string): Promise<WaitlistResponseDto> {
+    const response: AxiosResponse<WaitlistResponseDto> =
+      await apiClient.get(`${this.baseUrl}/event-ticket/${eventTicketId}/waitlist`);
+    return response.data;
+  }
+
+  /**
+   * Get waitlist count for an event ticket (public)
+   * GET /guest-tickets/event-ticket/:eventTicketId/waitlist-count
+   */
+  async getWaitlistCount(eventTicketId: string): Promise<WaitlistCountResponseDto> {
+    const response: AxiosResponse<WaitlistCountResponseDto> =
+      await apiClient.get(`${this.baseUrl}/event-ticket/${eventTicketId}/waitlist-count`);
+    return response.data;
+  }
+
+  // ==================== APPLE WALLET METHODS ====================
+
+  /**
+   * Check if Apple Wallet is available for a ticket
+   * GET /guest-tickets/:id/wallet/available
+   */
+  async checkWalletAvailable(ticketId: string): Promise<{
+    available: boolean;
+    ticketStatus: string;
+    canAddToWallet: boolean;
+  }> {
+    const response = await apiClient.get(`${this.baseUrl}/${ticketId}/wallet/available`);
+    return response.data;
+  }
+
+  /**
+   * Download Apple Wallet pass for a ticket
+   * GET /guest-tickets/:id/wallet
+   * Returns the .pkpass file as a blob
+   */
+  async downloadWalletPass(ticketId: string): Promise<Blob> {
+    const response = await apiClient.get(`${this.baseUrl}/${ticketId}/wallet`, {
+      responseType: 'blob',
+    });
     return response.data;
   }
 }

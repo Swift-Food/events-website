@@ -136,6 +136,9 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
       setStart(formatDateTimeForInput(initialData.startDateTime));
       setEnd(formatDateTimeForInput(initialData.endDateTime));
 
+      // Require approval (isPrivate)
+      setRequireApproval(initialData.isPrivate || false);
+
       // Address data
       if (initialData.address) {
         setVenueName(initialData.address.name || "");
@@ -383,7 +386,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
         ownerEventUserId: eventUser.id,
         startDateTime: start,
         endDateTime: end,
-        isPrivate: false,
+        isPrivate: requireApproval,
         addressData: {
           name: venueName || undefined,
           addressLine1: addressLine1,
@@ -409,7 +412,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
           createdOrUpdatedEventId = response.event.id;
           toast.success("Event created successfully!");
           clearForm();
-          router.push(`/events/${createdOrUpdatedEventId}`);
+          router.push(`/event-management/${createdOrUpdatedEventId}`);
         }
       } else {
         // Edit mode - update event with tickets
@@ -420,7 +423,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
         const response = await eventService.updateEvent(eventId, eventData);
         if (response.success) {
           toast.success("Event updated successfully!");
-          router.push(`/events/${eventId}`);
+          router.push(`/event-management/${eventId}`);
         }
       }
     } catch (error: any) {
@@ -801,10 +804,14 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
               <input
                 type="text"
                 value={eventName}
-                onChange={(e) => setEventName(e.target.value)}
+                onChange={(e) => setEventName(e.target.value.slice(0, 80))}
                 placeholder="Event Name"
+                maxLength={80}
                 className="w-full bg-transparent text-3xl md:text-5xl font-bold text-foreground outline-none placeholder:text-muted-foreground/40"
               />
+              <div className={`text-xs ${eventName.length >= 80 ? "text-amber-400" : "text-muted-foreground"}`}>
+                {eventName.length}/80 characters
+              </div>
             </div>
             {mode === "create" && (
               <button

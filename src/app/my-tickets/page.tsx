@@ -39,6 +39,9 @@ export default function MyTicketsPage() {
   const [cancellingTicketId, setCancellingTicketId] = useState<string | null>(
     null
   );
+  const [leavingWaitlistTicketId, setLeavingWaitlistTicketId] = useState<string | null>(
+    null
+  );
 
   // Payment state
   const [processingPaymentTicketId, setProcessingPaymentTicketId] = useState<
@@ -141,6 +144,26 @@ export default function MyTicketsPage() {
       toast.error(error.response?.data?.message || "Failed to cancel ticket");
     } finally {
       setCancellingTicketId(null);
+    }
+  };
+
+  const handleLeaveWaitlist = async (ticketId: string) => {
+    try {
+      setLeavingWaitlistTicketId(ticketId);
+      const result = await guestTicketService.leaveWaitlist(ticketId);
+
+      if (result.success) {
+        toast.success(result.message || "You have left the waitlist");
+        // Remove ticket from list
+        setTickets((prev) => prev.filter((t) => t.id !== ticketId));
+      } else {
+        toast.error(result.message || "Failed to leave waitlist");
+      }
+    } catch (error: any) {
+      console.error("Leave waitlist failed:", error);
+      toast.error(error.response?.data?.message || "Failed to leave waitlist");
+    } finally {
+      setLeavingWaitlistTicketId(null);
     }
   };
 
@@ -251,7 +274,8 @@ export default function MyTicketsPage() {
         case "pending":
           return (
             ticket.status === GuestTicketStatus.PENDING_APPROVAL ||
-            ticket.status === GuestTicketStatus.PENDING_PAYMENT
+            ticket.status === GuestTicketStatus.PENDING_PAYMENT ||
+            ticket.status === GuestTicketStatus.WAITLISTED
           );
         case "cancelled":
           return (
@@ -265,7 +289,7 @@ export default function MyTicketsPage() {
     .sort((a, b) => {
       const dateA = new Date(a.eventStartDateTime).getTime();
       const dateB = new Date(b.eventStartDateTime).getTime();
-      // Ascending for active/pending, descending for past/all
+      // Ascending for active/pending/upcoming, descending for past/all
       if (filter === "active" || filter === "pending" || filter === "upcoming") {
         return dateA - dateB;
       }
@@ -369,6 +393,8 @@ export default function MyTicketsPage() {
                 isProcessingPayment={processingPaymentTicketId === ticket.id}
                 onCancel={handleCancel}
                 isCancelling={cancellingTicketId === ticket.id}
+                onLeaveWaitlist={handleLeaveWaitlist}
+                isLeavingWaitlist={leavingWaitlistTicketId === ticket.id}
               />
             ))}
           </div>

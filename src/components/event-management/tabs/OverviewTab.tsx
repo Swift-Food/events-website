@@ -3,9 +3,17 @@
 import { useState, useEffect } from "react";
 import { EventResponseDto } from "@/types";
 import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, AlertTriangle, Loader2, CreditCard } from "lucide-react";
+import { GuestTicketResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
+import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
+import { InviteGuestsModal } from "@/components/event-management/InviteGuestsModal";
+import { InviteLinkModal } from "@/components/event-management/InviteLinkModal";
+import { InvitationsSection } from "@/components/event-management/InvitationsSection";
+import { GuestOverviewCard } from "@/components/event-management/GuestOverviewCard";
 import Image from "next/image";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { toast } from "sonner";
+
+type UserRole = "owner" | "admin" | "scanner" | null;
 
 interface OverviewTabProps {
   eventData: EventResponseDto;
@@ -13,14 +21,61 @@ interface OverviewTabProps {
   onScanClick: () => void;
   onDeleteClick: () => Promise<void>;
   isDeleting?: boolean;
+  userRole?: UserRole;
 }
 
-export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick, isDeleting }: OverviewTabProps) {
+export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick, isDeleting, userRole }: OverviewTabProps) {
+  // Scanner can only scan, not edit or delete
+  const canEdit = userRole === "owner" || userRole === "admin";
+  const canDelete = userRole === "owner" || userRole === "admin";
+  const canViewStats = userRole === "owner" || userRole === "admin";
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [refundableInfo, setRefundableInfo] = useState<{ count: number; totalAmount: number } | null>(null);
   const [isLoadingRefundInfo, setIsLoadingRefundInfo] = useState(false);
   const [isRefunding, setIsRefunding] = useState(false);
   const [refundComplete, setRefundComplete] = useState(false);
+
+  // CSV upload modal state
+  const [showCsvUploadModal, setShowCsvUploadModal] = useState(false);
+
+  // Invite guests modal state
+  const [showInviteGuestsModal, setShowInviteGuestsModal] = useState(false);
+  const [showInviteLinkModal, setShowInviteLinkModal] = useState(false);
+
+  // Guest stats state
+  const [guests, setGuests] = useState<GuestTicketResponseDto[]>([]);
+  const [checkInStats, setCheckInStats] = useState({
+    totalTickets: 0,
+    checkedIn: 0,
+    pending: 0,
+    percentageCheckedIn: 0,
+  });
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  // Fetch guest stats
+  useEffect(() => {
+    const fetchGuestStats = async () => {
+      try {
+        setIsLoadingStats(true);
+        const [attendees, stats] = await Promise.all([
+          guestTicketService.getEventAttendees(eventData.id),
+          guestTicketService.getCheckInStats(eventData.id),
+        ]);
+        setGuests(attendees);
+        setCheckInStats(stats);
+      } catch (error) {
+        console.error("Error fetching guest stats:", error);
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+    fetchGuestStats();
+  }, [eventData.id]);
+
+  // Computed stats
+  const pendingApprovalCount = guests.filter((g) => g.status === GuestTicketStatus.PENDING_APPROVAL).length;
+  const approvedCount = guests.filter((g) => g.status === GuestTicketStatus.ACTIVE).length;
+  const waitlistedCount = guests.filter((g) => g.status === GuestTicketStatus.WAITLISTED).length;
 
   // Fetch refundable ticket info when modal opens
   useEffect(() => {
@@ -102,6 +157,16 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
   };
 
   const ticketStats = getTicketStats();
+
+  const handleBackFromCsv = () => {
+    setShowCsvUploadModal(false);
+    setShowInviteGuestsModal(true);
+  };
+
+  const handleBackFromLink = () => {
+    setShowInviteLinkModal(false);
+    setShowInviteGuestsModal(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -231,24 +296,40 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
             Scan Tickets
           </button>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onEditClick}
-              className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
-            >
-              <Edit className="h-4 w-4" />
-              <span className="hidden sm:inline">Edit</span>
-            </button>
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center justify-center rounded-xl bg-red-500/10 px-3 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20"
-              title="Delete event"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
+          {canEdit && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onEditClick}
+                className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
+              >
+                <Edit className="h-4 w-4" />
+                <span className="hidden sm:inline">Edit</span>
+              </button>
+              {canDelete && (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="flex items-center justify-center rounded-xl bg-red-500/10 px-3 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20"
+                  title="Delete event"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
+
+      <GuestOverviewCard
+        isLoading={isLoadingStats}
+        checkInStats={checkInStats}
+        approvedCount={approvedCount}
+        pendingApprovalCount={pendingApprovalCount}
+        waitlistedCount={waitlistedCount}
+      />
+
+      {canViewStats && (
+        <InvitationsSection onInviteClick={() => setShowInviteGuestsModal(true)} />
+      )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
@@ -257,7 +338,7 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
             className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm"
             onClick={() => setShowDeleteConfirm(false)}
           />
-          <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-card-background border border-white/5 p-6 shadow-2xl">
+          <div className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-card-background border border-white/5 p-6 shadow-2xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20">
                 <Trash2 className="h-5 w-5 text-red-400" />
@@ -365,6 +446,28 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
           </div>
         </>
       )}
+
+      <InviteGuestsModal
+        isOpen={showInviteGuestsModal}
+        onClose={() => setShowInviteGuestsModal(false)}
+        onSelectCsv={() => setShowCsvUploadModal(true)}
+        onSelectLink={() => setShowInviteLinkModal(true)}
+      />
+
+      <CsvUploadModal
+        isOpen={showCsvUploadModal}
+        onClose={() => setShowCsvUploadModal(false)}
+        onBack={handleBackFromCsv}
+        tickets={eventData.eventTickets || []}
+      />
+
+      <InviteLinkModal
+        isOpen={showInviteLinkModal}
+        onClose={() => setShowInviteLinkModal(false)}
+        onBack={handleBackFromLink}
+        eventId={eventData.id}
+        tickets={eventData.eventTickets || []}
+      />
     </div>
   );
 }

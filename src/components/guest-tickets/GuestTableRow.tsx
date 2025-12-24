@@ -8,6 +8,8 @@ import {
   UserCheck,
   ArrowUpCircle,
   Mail,
+  Eye,
+  ChevronRight,
 } from "lucide-react";
 import { useState } from "react";
 import { GuestActionMenu } from "./GuestActionMenu";
@@ -22,19 +24,12 @@ function getGuestDisplayName(guest: GuestTicketResponseDto['guest'] | undefined)
   const eventUserName = `${guest.firstName || ""} ${guest.lastName || ""}`.trim();
   if (eventUserName) return eventUserName;
 
-  // Try nested User firstName/lastName
-  if (guest.user) {
-    const userName = `${guest.user.firstName || ""} ${guest.user.lastName || ""}`.trim();
-    if (userName) return userName;
+  // Fallback to User username
+  if (guest.user?.username) return guest.user.username;
 
-    // Try username
-    if (guest.user.username) return guest.user.username;
-
-    // Use email prefix as last resort before "Guest"
-    if (guest.user.email) {
-      const emailPrefix = guest.user.email.split("@")[0];
-      return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
-    }
+  // Last resort: email (before @)
+  if (guest.user?.email) {
+    return guest.user.email.split("@")[0];
   }
 
   return "Guest";
@@ -69,6 +64,8 @@ interface GuestTableRowProps {
   onReject: (ticketId: string, reason?: string) => void;
   onCheckIn: (qrCode: string) => void;
   onPromote: (ticketId: string) => void;
+  onReview?: (guest: GuestTicketResponseDto) => void;
+  onRowClick?: (guest: GuestTicketResponseDto) => void;
 }
 
 export const GuestTableRow = ({
@@ -79,6 +76,8 @@ export const GuestTableRow = ({
   onReject,
   onCheckIn,
   onPromote,
+  onReview,
+  onRowClick,
 }: GuestTableRowProps) => {
   const [showMenu, setShowMenu] = useState(false);
   const getStatusBadge = () => {
@@ -93,7 +92,7 @@ export const GuestTableRow = ({
         icon: CheckCircle2,
         className: "bg-green-100 text-green-700",
       },
-      pending: {
+      pending_approval: {
         label: "Pending",
         icon: Clock,
         className: "bg-amber-100 text-amber-700",
@@ -103,13 +102,17 @@ export const GuestTableRow = ({
         icon: Clock,
         className: "bg-orange-100 text-orange-700",
       },
-      rejected: {
-        label: "Rejected",
+      // rejected: {
+      //   label: "Rejected",
+      //   icon: XCircle,
+      //   className: "bg-red-100 text-red-700",
+      // },
+      cancelled: {
+        label: "Cancelled",
         icon: XCircle,
-        className: "bg-red-100 text-red-700",
+        className: "bg-neutral-100 text-neutral-700",
       },
     };
-    console.log("guest status", guest.status)
     const config = statusConfig[guest.status as keyof typeof statusConfig];
     if (!config) return null;
 
@@ -117,18 +120,34 @@ export const GuestTableRow = ({
 
     return (
       <span
-        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${config.className}`}
+        className={`inline-flex items-center gap-1 md:gap-1.5 rounded-full px-2 md:px-3 py-0.5 md:py-1 text-[10px] md:text-xs font-medium ${config.className}`}
       >
-        <Icon className="h-3.5 w-3.5" />
+        <Icon className="h-3 w-3 md:h-3.5 md:w-3.5" />
         {config.label}
       </span>
     );
   };
 
  
+  const handleRowClick = (e: React.MouseEvent) => {
+    // Don't trigger row click if clicking on interactive elements
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('input') ||
+      target.closest('button') ||
+      target.closest('[role="menu"]')
+    ) {
+      return;
+    }
+    onRowClick?.(guest);
+  };
+
   return (
-    <tr className="border-b border-neutral-700 last:border-b-0 transition-colors hover:bg-white/5">
-      <td className="p-4">
+    <tr
+      className="border-b border-neutral-700 last:border-b-0 transition-colors hover:bg-white/5 cursor-pointer"
+      onClick={handleRowClick}
+    >
+      <td className="p-3 md:p-4">
         <input
           type="checkbox"
           checked={isSelected}
@@ -136,24 +155,24 @@ export const GuestTableRow = ({
           className="h-4 w-4 rounded border-neutral-700 bg-input-background text-primary focus:ring-2 focus:ring-primary"
         />
       </td>
-      <td className="p-4">
+      <td className="p-3 md:p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+          <div className="hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
             {getGuestInitials(guest.guest)}
           </div>
           <div className="min-w-0">
-            <p className="font-medium text-foreground break-words">{getGuestDisplayName(guest.guest)}</p>
-            <p className="text-sm text-muted-foreground break-all">{guest.guest?.user?.email || "No email"}</p>
+            <p className="text-sm md:text-base font-medium text-foreground break-words">{getGuestDisplayName(guest.guest)}</p>
+            <p className="text-xs md:text-sm text-muted-foreground break-all">{guest.guest?.user?.email || "No email"}</p>
           </div>
         </div>
       </td>
-      <td className="p-4">
-        <div className="flex items-center">
+      <td className="p-3 md:p-4">
+        <div className="flex items-center justify-between">
           {getStatusBadge()}
-    
+          <ChevronRight className="h-4 w-4 text-muted-foreground md:hidden ml-2" />
         </div>
       </td>
-      <td className="p-4">
+      <td className="hidden md:table-cell p-4">
         <p className="text-sm text-foreground">
           {format(new Date(guest.createdAt), "MMM d, yyyy")}
         </p>
@@ -161,23 +180,21 @@ export const GuestTableRow = ({
           {format(new Date(guest.createdAt), "h:mm a")}
         </p>
       </td>
-      <td className="p-4">
+      <td className="hidden md:table-cell p-4">
+        <p className="text-sm text-foreground">
+          {guest.ticketName || "—"}
+        </p>
+      </td>
+      <td className="hidden md:table-cell p-4">
         <div className="flex items-center justify-end gap-2">
-          {guest.status === GuestTicketStatus.PENDING_APPROVAL && (
-            <>
-              <button
-                onClick={() => onApprove(guest.id)}
-                className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-700"
-              >
-                Approve
-              </button>
-              <button
-                onClick={() => onReject(guest.id)}
-                className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700"
-              >
-                Reject
-              </button>
-            </>
+          {guest.status === GuestTicketStatus.PENDING_APPROVAL && onReview && (
+            <button
+              onClick={() => onReview(guest)}
+              className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              Review
+            </button>
           )}
           {guest.status === "waitlisted" && (
             <button

@@ -9,15 +9,32 @@ import { loadStripe, type Stripe, type StripeElementsOptions } from '@stripe/str
 import { type ReactNode, useMemo } from 'react';
 
 // Stripe appearance configuration for dark theme
+// Uses project colors: background (#121212), card-background (#2a2a2a)
 const STRIPE_APPEARANCE: StripeElementsOptions['appearance'] = {
   theme: 'night',
   variables: {
-    colorPrimary: '#3b82f6',
-    colorBackground: '#1a1a1a',
+    colorPrimary: '#22c55e',
+    colorBackground: '#121212',
     colorText: '#ffffff',
+    colorTextSecondary: '#a1a1aa',
     colorDanger: '#ef4444',
     fontFamily: 'Inter, system-ui, sans-serif',
     borderRadius: '12px',
+    spacingUnit: '4px',
+  },
+  rules: {
+    '.Input': {
+      backgroundColor: '#2a2a2a',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      boxShadow: 'none',
+    },
+    '.Input:focus': {
+      border: '1px solid rgba(34, 197, 94, 0.5)',
+      boxShadow: 'none',
+    },
+    '.Label': {
+      color: '#a1a1aa',
+    },
   },
 };
 

@@ -9,6 +9,17 @@ import { EventAddressResponseDto } from '../../address/response.dto';
 import { EventCategoryResponseDto } from '../../category/response.dto';
 import { EventTicketResponseDto } from '../../event-ticket/response/ticket.dto';
 
+export interface UserTicketDto {
+  id: string;
+  status: 'pending_approval' | 'pending_payment' | 'active' | 'checked_in' | 'cancelled' | 'refunded' | 'waitlisted' | 'expired';
+  ticketName: string;
+  ticketId: string;
+  checkInCode: string | null;
+  qrCodeImageUrl: string | null;
+  purchaseDateTime: string | null;
+  checkInDateTime: string | null;
+}
+
 export interface EventResponseDto {
   id: string;
   name: string;
@@ -29,6 +40,7 @@ export interface EventResponseDto {
   eventTickets?: EventTicketResponseDto[];
   ticketsSoldCount?: number;
   attendeesCount?: number;
+  userTicket?: UserTicketDto | null;
 }
 
 export interface EventListResponseDto {

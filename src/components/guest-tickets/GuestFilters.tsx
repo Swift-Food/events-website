@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 
-type FilterStatus = "all" | "approved" | "pending" | "waitlisted" | "rejected" | "checked_in";
+type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in";
 
 interface GuestFiltersProps {
   filterStatus: FilterStatus;
@@ -10,7 +10,7 @@ interface GuestFiltersProps {
   pendingCount: number;
   approvedCount: number;
   waitlistedCount: number;
-  rejectedCount: number;
+  cancelledCount: number;
   checkedInCount: number;
 }
 
@@ -22,16 +22,16 @@ export const GuestFilters = ({
   pendingCount,
   approvedCount,
   waitlistedCount,
-  rejectedCount,
+  cancelledCount,
   checkedInCount,
 }: GuestFiltersProps) => {
   const filters = [
     { value: "all" as FilterStatus, label: "All" },
-    { value: "pending" as FilterStatus, label: "Pending", count: pendingCount },
+    { value: "pending_approval" as FilterStatus, label: "Pending", count: pendingCount },
     { value: "active" as FilterStatus, label: "Approved", count: approvedCount },
     { value: "checked_in" as FilterStatus, label: "Checked In", count: checkedInCount },
     { value: "waitlisted" as FilterStatus, label: "Waitlisted", count: waitlistedCount },
-    { value: "rejected" as FilterStatus, label: "Rejected", count: rejectedCount },
+    { value: "cancelled" as FilterStatus, label: "Cancelled", count: cancelledCount },
   ];
 
   return (

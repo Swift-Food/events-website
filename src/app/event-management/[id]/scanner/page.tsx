@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Html5Qrcode } from "html5-qrcode";
+// import { useZxing } from "react-zxing"; // Alternative library
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { useAuth } from "@/lib/auth/authContext";
@@ -10,13 +11,14 @@ import { EventResponseDto } from "@/types/event";
 import { GuestTicketResponseDto } from "@/types/guest-ticket";
 import {
   Camera,
-  CameraOff,
   ArrowLeft,
   CheckCircle2,
   XCircle,
   Users,
   Loader2,
   RotateCcw,
+  Keyboard,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -29,11 +31,24 @@ interface CheckInStats {
 }
 
 /**
- * Extract guest display name from EventUser
+ * Extract guest display name from EventUser with proper fallbacks
  */
 function getGuestDisplayName(guest: GuestTicketResponseDto['guest'] | undefined): string {
   if (!guest) return "Guest";
-  return `${guest.firstName} ${guest.lastName}`.trim();
+
+  // Try EventUser firstName/lastName first
+  const eventUserName = `${guest.firstName || ""} ${guest.lastName || ""}`.trim();
+  if (eventUserName) return eventUserName;
+
+  // Fallback to User username
+  if (guest.user?.username) return guest.user.username;
+
+  // Last resort: email (before @)
+  if (guest.user?.email) {
+    return guest.user.email.split("@")[0];
+  }
+
+  return "Guest";
 }
 
 interface ScanResult {
@@ -59,13 +74,25 @@ export default function CheckInPage() {
   const [lastScanResult, setLastScanResult] = useState<ScanResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const lastScannedRef = useRef<string>("");
-  const [cameraAspectRatio, setCameraAspectRatio] = useState<number | null>(null);
   const [viewfinderSize, setViewfinderSize] = useState(200);
+  const viewfinderSizeRef = useRef(viewfinderSize); // Ref to avoid stale closures
   const [isResizing, setIsResizing] = useState(false);
   const resizeStartRef = useRef<{ startY: number; startSize: number } | null>(null);
 
+  // Keep ref in sync with state
+  useEffect(() => {
+    viewfinderSizeRef.current = viewfinderSize;
+  }, [viewfinderSize]);
+
   // Recent check-ins
   const [recentCheckIns, setRecentCheckIns] = useState<ScanResult[]>([]);
+
+  // Manual code entry
+  const [manualCode, setManualCode] = useState("");
+  const [isManualProcessing, setIsManualProcessing] = useState(false);
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Load event and stats
   useEffect(() => {
@@ -102,19 +129,35 @@ export default function CheckInPage() {
   // Cleanup scanner on unmount
   useEffect(() => {
     return () => {
-      if (scanner?.isScanning) {
-        scanner.stop().catch(console.error);
+      if (scanner) {
+        (async () => {
+          try {
+            if (scanner.isScanning) {
+              await scanner.stop();
+            }
+            await scanner.clear();
+          } catch {
+            // Ignore cleanup errors
+          }
+        })();
       }
     };
   }, [scanner]);
 
   // Stop scanner when page loses visibility (tab switch, minimize, etc.)
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden && scanner?.isScanning) {
-        scanner.stop().then(() => {
-          setIsScanning(false);
-        }).catch(console.error);
+    const handleVisibilityChange = async () => {
+      if (document.hidden && scanner) {
+        try {
+          if (scanner.isScanning) {
+            await scanner.stop();
+          }
+          await scanner.clear();
+        } catch {
+          // Ignore cleanup errors
+        }
+        setScanner(null);
+        setIsScanning(false);
       }
     };
 
@@ -189,18 +232,47 @@ export default function CheckInPage() {
 
   const startScanning = async () => {
     try {
-      // Initialize scanner lazily on first use
-      let qrScanner = scanner;
-      if (!qrScanner) {
-        qrScanner = new Html5Qrcode("qr-scanner-container");
-        setScanner(qrScanner);
+      // Clean up existing scanner if it exists
+      if (scanner) {
+        try {
+          if (scanner.isScanning) {
+            await scanner.stop();
+          }
+          await scanner.clear();
+        } catch {
+          // Ignore cleanup errors
+        }
+        setScanner(null);
+      }
+
+      // Small delay to ensure DOM is ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Create a fresh scanner instance
+      const qrScanner = new Html5Qrcode("qr-scanner-container");
+
+      // Get container dimensions to calculate safe qrbox size
+      const container = document.getElementById("qr-scanner-container");
+      const containerWidth = container?.clientWidth || 300;
+      const containerHeight = container?.clientHeight || 300;
+      const minDimension = Math.min(containerWidth, containerHeight);
+      const maxAllowedSize = Math.floor(minDimension * 0.95);
+
+      // Use viewfinderSize but cap it to safe maximum
+      let qrboxSize = Math.min(viewfinderSizeRef.current, maxAllowedSize);
+      qrboxSize = Math.max(qrboxSize, 100); // Minimum 100px
+
+      // Sync the visual viewfinder with actual qrbox
+      if (viewfinderSizeRef.current !== qrboxSize) {
+        setViewfinderSize(qrboxSize);
+        viewfinderSizeRef.current = qrboxSize;
       }
 
       await qrScanner.start(
         { facingMode: "environment" },
         {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
+          fps: 15,
+          qrbox: { width: qrboxSize, height: qrboxSize },
         },
         (qrCodeMessage) => {
           handleCheckIn(qrCodeMessage);
@@ -209,27 +281,42 @@ export default function CheckInPage() {
           // Ignore scan errors (no QR in view)
         }
       );
+      setScanner(qrScanner);
       setIsScanning(true);
-
-      // Detect camera aspect ratio from video element
-      setTimeout(() => {
-        const videoElement = document.querySelector("#qr-scanner-container video") as HTMLVideoElement;
-        if (videoElement && videoElement.videoWidth && videoElement.videoHeight) {
-          const ratio = videoElement.videoWidth / videoElement.videoHeight;
-          setCameraAspectRatio(ratio);
-        }
-      }, 500);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to start scanner:", err);
-      toast.error("Failed to access camera. Please allow camera permissions.");
+      // Clean up the scanner on failure
+      if (scanner) {
+        try {
+          await scanner.clear();
+        } catch {
+          // Ignore
+        }
+        setScanner(null);
+      }
+
+      if (err?.name === "NotReadableError") {
+        toast.error("Camera is in use by another app. Please close other apps using the camera and try again.");
+      } else if (err?.name === "NotAllowedError") {
+        toast.error("Camera permission denied. Please allow camera access in your browser settings.");
+      } else {
+        toast.error("Failed to access camera. Please check permissions and try again.");
+      }
     }
   };
 
   const stopScanning = async () => {
-    if (scanner && scanner.isScanning) {
-      await scanner.stop();
+    if (scanner) {
+      try {
+        if (scanner.isScanning) {
+          await scanner.stop();
+        }
+        await scanner.clear();
+      } catch {
+        // Ignore cleanup errors
+      }
+      setScanner(null);
       setIsScanning(false);
-      setCameraAspectRatio(null);
     }
   };
 
@@ -245,15 +332,34 @@ export default function CheckInPage() {
     if (!resizeStartRef.current || !isResizing) return;
 
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    const deltaY = resizeStartRef.current.startY - clientY;
-    const newSize = Math.max(120, Math.min(300, resizeStartRef.current.startSize + deltaY * 2));
+    // Drag down = expand, drag up = shrink (handle is at bottom)
+    const deltaY = clientY - resizeStartRef.current.startY;
+    // Min 100px, max 500px (startScanning will cap to 95% of container)
+    const newSize = Math.max(100, Math.min(500, resizeStartRef.current.startSize + deltaY * 2));
     setViewfinderSize(newSize);
   }, [isResizing]);
 
-  const handleResizeEnd = useCallback(() => {
+  const handleResizeEnd = useCallback(async () => {
     resizeStartRef.current = null;
     setIsResizing(false);
-  }, []);
+
+    // Restart scanner with new viewfinder size if currently scanning
+    if (scanner && isScanning) {
+      try {
+        if (scanner.isScanning) {
+          await scanner.stop();
+        }
+        await scanner.clear();
+      } catch {
+        // Ignore cleanup errors
+      }
+      setScanner(null);
+      // Small delay to ensure cleanup, then restart
+      setTimeout(() => {
+        startScanning();
+      }, 100);
+    }
+  }, [scanner, isScanning]);
 
   // Add resize event listeners
   useEffect(() => {
@@ -278,6 +384,76 @@ export default function CheckInPage() {
       setStats(statsData);
     } catch (err) {
       console.error("Failed to refresh stats:", err);
+    }
+  };
+
+  const openModal = useCallback(() => {
+    setIsModalOpen(true);
+    // Start scanning after modal opens and DOM is ready
+    setTimeout(() => {
+      startScanning();
+    }, 150);
+  }, []);
+
+  const closeModal = useCallback(async () => {
+    await stopScanning();
+    setIsModalOpen(false);
+  }, []);
+
+  const handleManualCheckIn = async () => {
+    const code = manualCode.trim();
+    if (!code || isManualProcessing) return;
+
+    setIsManualProcessing(true);
+    setLastScanResult(null);
+
+    try {
+      const result = await guestTicketService.checkInByCode(code);
+      const guestName = getGuestDisplayName(result.guest);
+
+      const scanResult: ScanResult = {
+        success: true,
+        ticket: result,
+        message: "Check-in successful!",
+        guestName,
+      };
+
+      setLastScanResult(scanResult);
+      setRecentCheckIns(prev => [scanResult, ...prev].slice(0, 5));
+      setManualCode("");
+
+      // Update stats
+      setStats(prev => prev ? {
+        ...prev,
+        checkedIn: prev.checkedIn + 1,
+        pending: prev.pending - 1,
+        percentageCheckedIn: ((prev.checkedIn + 1) / prev.totalTickets) * 100,
+      } : null);
+
+      // Vibrate on success
+      if (navigator.vibrate) {
+        navigator.vibrate(200);
+      }
+
+      toast.success(`${guestName} checked in!`);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Failed to check in";
+
+      const scanResult: ScanResult = {
+        success: false,
+        message: errorMessage,
+      };
+
+      setLastScanResult(scanResult);
+
+      // Vibrate pattern for error
+      if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]);
+      }
+
+      toast.error(errorMessage);
+    } finally {
+      setIsManualProcessing(false);
     }
   };
 
@@ -315,7 +491,7 @@ export default function CheckInPage() {
 
         {/* Stats */}
         {stats && (
-          <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             <div className="rounded-xl bg-card-background border border-white/5 p-4 flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Checked In</p>
@@ -334,102 +510,187 @@ export default function CheckInPage() {
                 <Users className="h-5 w-5 text-amber-400" />
               </div>
             </div>
-            <div className="rounded-xl bg-card-background border border-white/5 p-4 flex items-center justify-between">
-              <div>
+            <div className="col-span-2 rounded-xl bg-card-background border border-white/5 p-4">
+              <div className="flex items-center justify-between mb-2">
                 <p className="text-xs text-muted-foreground">Progress</p>
-                <p className="text-2xl font-bold text-primary">{stats.percentageCheckedIn.toFixed(0)}%</p>
+                <p className="text-lg font-bold text-primary">{stats.percentageCheckedIn.toFixed(0)}%</p>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
-                <RotateCcw className="h-5 w-5 text-primary" />
+              <div className="h-3 w-full rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min(100, stats.percentageCheckedIn)}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {stats.checkedIn} of {stats.totalTickets} guests checked in
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Open Scanner Button */}
+        <button
+          onClick={openModal}
+          className="w-full mb-6 px-6 py-4 bg-primary text-primary-foreground rounded-2xl font-semibold hover:bg-primary/90 transition-all flex items-center justify-center gap-3"
+        >
+          <Camera className="h-6 w-6" />
+          Open QR Scanner
+        </button>
+
+        {/* Scanner Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              onClick={closeModal}
+            />
+
+            {/* Modal Content */}
+            <div className="relative w-full max-w-lg mx-4 bg-card-background rounded-2xl border border-white/10 overflow-hidden">
+              {/* Modal Header */}
+              <div className="p-4 border-b border-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Camera className="h-5 w-5 text-primary" />
+                  <span className="font-medium text-foreground">QR Scanner</span>
+                </div>
+                <button
+                  onClick={closeModal}
+                  className="p-2 text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Scanner Container */}
+              <div className="relative bg-black overflow-hidden aspect-square">
+                <div id="qr-scanner-container" className="w-full h-full" />
+
+                {/* Custom viewfinder overlay */}
+                {isScanning && (
+                  <div className="absolute inset-0">
+                    <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+                    <div
+                      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                      style={{ width: viewfinderSize, height: viewfinderSize }}
+                    >
+                      <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.4)' }} />
+                      <div className="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-white rounded-tl-lg pointer-events-none" />
+                      <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-white rounded-tr-lg pointer-events-none" />
+                      <div className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-white rounded-bl-lg pointer-events-none" />
+                      <div className="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-white rounded-br-lg pointer-events-none" />
+                      <div
+                        className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 cursor-ns-resize touch-none"
+                        onMouseDown={handleResizeStart}
+                        onTouchStart={handleResizeStart}
+                      >
+                        <div className="w-10 h-1 bg-white/60 rounded-full" />
+                        <span className="text-[10px] text-white/60 select-none">Drag to resize</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!isScanning && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-card-secondary-background">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+                    <p className="text-sm text-muted-foreground">Starting camera...</p>
+                  </div>
+                )}
+
+                {isProcessing && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+                    <Loader2 className="h-12 w-12 animate-spin text-white" />
+                  </div>
+                )}
+              </div>
+
+              {/* Manual Entry in Modal */}
+              <div className="p-4 border-t border-white/5">
+                <p className="text-xs text-muted-foreground mb-2">
+                  Or enter the 8-character code manually
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={manualCode}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+                      const formatted = raw.length > 4
+                        ? `${raw.slice(0, 4)}-${raw.slice(4, 8)}`
+                        : raw;
+                      setManualCode(formatted);
+                    }}
+                    onFocus={(e) => {
+                      setTimeout(() => {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 200);
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && handleManualCheckIn()}
+                    placeholder="XXXX-XXXX"
+                    maxLength={9}
+                    className="flex-1 rounded-lg bg-card-secondary-background border border-white/10 px-3 py-2 text-center font-mono text-base tracking-wider uppercase text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                  <button
+                    onClick={handleManualCheckIn}
+                    disabled={!manualCode.trim() || isManualProcessing}
+                    className="px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                  >
+                    {isManualProcessing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Scanner Area */}
-        <div className="rounded-2xl bg-card-background border border-white/5 overflow-hidden mb-6">
-          <div className="p-4 border-b border-white/5">
-            <div className="flex items-center gap-2">
-              <Camera className="h-5 w-5 text-primary" />
-              <span className="font-medium text-foreground">QR Scanner</span>
+        {/* Manual Code Entry */}
+        <div className="rounded-xl bg-card-background border border-white/5 overflow-hidden mb-6">
+          <div className="px-3 py-2.5 border-b border-white/5">
+            <div className="flex items-center gap-1.5">
+              <Keyboard className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-foreground">Manual Entry</span>
             </div>
           </div>
-
-          {/* Scanner Container - uses detected camera ratio or 4:3 default */}
-          <div
-            className={`relative bg-black overflow-hidden ${
-              !cameraAspectRatio ? "aspect-[4/3]" : ""
-            }`}
-            style={cameraAspectRatio ? { aspectRatio: `${cameraAspectRatio}` } : undefined}
-          >
-            <div id="qr-scanner-container" className="w-full h-full" />
-
-            {/* Custom viewfinder overlay - only show when scanning */}
-            {isScanning && (
-              <div className="absolute inset-0">
-                {/* Darkened edges */}
-                <div className="absolute inset-0 bg-black/40 pointer-events-none" />
-                {/* Clear center square - resizable */}
-                <div
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                  style={{ width: viewfinderSize, height: viewfinderSize }}
-                >
-                  {/* Cut out the center */}
-                  <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.4)' }} />
-                  {/* Corner brackets */}
-                  <div className="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-white rounded-tl-lg pointer-events-none" />
-                  <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-white rounded-tr-lg pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-white rounded-bl-lg pointer-events-none" />
-                  <div className="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-white rounded-br-lg pointer-events-none" />
-                  {/* Resize handle - bottom center */}
-                  <div
-                    className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 cursor-ns-resize touch-none"
-                    onMouseDown={handleResizeStart}
-                    onTouchStart={handleResizeStart}
-                  >
-                    <div className="w-10 h-1 bg-white/60 rounded-full" />
-                    <span className="text-[10px] text-white/60 select-none">Drag to resize</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {!isScanning && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-card-secondary-background">
-                <Camera className="h-16 w-16 text-muted-foreground/30 mb-4" />
-                <button
-                  onClick={startScanning}
-                  className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all flex items-center gap-2"
-                >
-                  <Camera className="h-5 w-5" />
-                  Start Scanning
-                </button>
-                <p className="text-sm text-muted-foreground mt-4">
-                  Position QR code within the frame
-                </p>
-              </div>
-            )}
-
-            {/* Processing Overlay */}
-            {isProcessing && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
-                <Loader2 className="h-12 w-12 animate-spin text-white" />
-              </div>
-            )}
-          </div>
-
-          {/* Scanner Controls */}
-          {isScanning && (
-            <div className="p-4 flex justify-center">
+          <div className="p-3">
+            <p className="text-xs text-muted-foreground mb-2">
+              Enter the 8-character code from the ticket
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={manualCode}
+                onChange={(e) => {
+                  // Strip non-alphanumeric, uppercase, auto-insert hyphen after 4 chars
+                  const raw = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+                  const formatted = raw.length > 4
+                    ? `${raw.slice(0, 4)}-${raw.slice(4, 8)}`
+                    : raw;
+                  setManualCode(formatted);
+                }}
+                onKeyDown={(e) => e.key === "Enter" && handleManualCheckIn()}
+                placeholder="XXXX-XXXX"
+                maxLength={9}
+                className="flex-1 rounded-lg bg-card-secondary-background border border-white/10 px-3 py-2 text-center font-mono text-base tracking-wider uppercase text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
               <button
-                onClick={stopScanning}
-                className="px-6 py-2.5 bg-red-500/20 text-red-400 rounded-xl font-medium hover:bg-red-500/30 transition-all flex items-center gap-2"
+                onClick={handleManualCheckIn}
+                disabled={!manualCode.trim() || isManualProcessing}
+                className="px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
               >
-                <CameraOff className="h-4 w-4" />
-                Stop Scanning
+                {isManualProcessing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="h-4 w-4" />
+                )}
+                <span className="hidden sm:inline">Check In</span>
               </button>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Last Scan Result */}
