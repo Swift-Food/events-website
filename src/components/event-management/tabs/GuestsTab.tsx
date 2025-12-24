@@ -10,7 +10,8 @@ import {
 } from "@/types/guest-ticket";
 import { EventTicketResponseDto } from "@/types/event-ticket/response/ticket.dto";
 import { GuestManagementHeader } from "@/components/guest-tickets/GuestManagementHeader";
-import { GuestStatsCards } from "@/components/guest-tickets/GuestTicketStatsCard";
+// import { GuestStatsCards } from "@/components/guest-tickets/GuestTicketStatsCard";
+import { GuestOverviewCard } from "@/components/event-management/GuestOverviewCard";
 import { GuestFilters, GuestTable, BulkActionBar, ReviewGuestModal, GuestDetailsModal } from "@/components/guest-tickets";
 import { Loader } from "lucide-react";
 import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
@@ -279,12 +280,19 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
           />
         </div>
 
-        <GuestStatsCards
+        {/* <GuestStatsCards
           stats={checkInStats}
           totalGuests={guests.length}
           approvedCount={guests.filter((g) => g.status === GuestTicketStatus.ACTIVE).length}
           waitlistedCount={guests.filter((g) => g.status === GuestTicketStatus.WAITLISTED).length}
           rejectedCount={guests.filter((g) => g.status === GuestTicketStatus.CANCELLED).length}
+        /> */}
+        <GuestOverviewCard
+          isLoading={false}
+          checkInStats={checkInStats}
+          approvedCount={guests.filter((g) => g.status === GuestTicketStatus.ACTIVE).length}
+          pendingApprovalCount={guests.filter((g) => g.status === GuestTicketStatus.PENDING_APPROVAL).length}
+          waitlistedCount={guests.filter((g) => g.status === GuestTicketStatus.WAITLISTED).length}
         />
 
         <InvitationsSection onInviteClick={() => setShowInviteGuestsModal(true)} />
