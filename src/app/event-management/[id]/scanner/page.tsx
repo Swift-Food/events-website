@@ -315,7 +315,8 @@ export default function CheckInPage() {
     if (!resizeStartRef.current || !isResizing) return;
 
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    const deltaY = resizeStartRef.current.startY - clientY;
+    // Drag down = expand, drag up = shrink (handle is at bottom)
+    const deltaY = clientY - resizeStartRef.current.startY;
     const newSize = Math.max(120, Math.min(300, resizeStartRef.current.startSize + deltaY * 2));
     setViewfinderSize(newSize);
   }, [isResizing]);
