@@ -79,14 +79,10 @@ export default function EditProfilePage() {
         }
       });
 
-      console.log("Sending update:", updateData);
-
       const result = await eventUserService.updateMyProfile(updateData);
-      console.log("Update result:", result);
 
       // Refresh user data in context
       await refreshProfile();
-      console.log("Profile refreshed - eventUser:", eventUser);
 
       toast.success("Profile updated successfully");
       router.push("/profile");
