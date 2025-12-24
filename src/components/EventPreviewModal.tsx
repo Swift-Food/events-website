@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { eventCollaboratorService } from "@/services/event-collaborator.service";
+import { CollaboratorRole } from "@/types/event-collaborator";
 import { paymentService } from "@/services/payment.service";
 import { useAuth } from "@/lib/auth/authContext";
 import { EventResponseDto, EventStatus } from "@/types/event";
@@ -21,6 +22,7 @@ import {
   X,
   ExternalLink,
   CheckCircle2,
+  ScanLine,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -42,7 +44,7 @@ export default function EventPreviewModal({
   onClose,
 }: EventPreviewModalProps) {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
 
   const [event, setEvent] = useState<EventResponseDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,8 +63,9 @@ export default function EventPreviewModal({
     "ticketName" | "eventName"
   > | null>(null);
 
-  // Check if user can manage this event
-  const [canManageEvent, setCanManageEvent] = useState(false);
+  // Check if user can manage this event and their role
+  type UserRole = "owner" | "admin" | "scanner" | null;
+  const [userRole, setUserRole] = useState<UserRole>(null);
 
   // Animation state
   const [isAnimating, setIsAnimating] = useState(false);
@@ -101,35 +104,47 @@ export default function EventPreviewModal({
     }
   }, [eventId, isOpen]);
 
-  // Check if user is owner or collaborator
+  // Check if user is owner or collaborator and determine role
   useEffect(() => {
-    const checkCanManageEvent = async () => {
-      if (!event || !isAuthenticated || !user || !eventId) {
-        setCanManageEvent(false);
+    const checkUserRole = async () => {
+      if (!event || !eventId) return;
+
+      if (!user && !authLoading) {
+        setUserRole(null);
         return;
       }
 
+      if (!user) return;
+
       const isOwner = event.owner?.user?.id === user.id;
       if (isOwner) {
-        setCanManageEvent(true);
+        setUserRole("owner");
         return;
       }
 
       try {
         const collaboratorsData =
           await eventCollaboratorService.getCollaborators(eventId);
-        const isCollaborator = collaboratorsData.collaborators.some(
+        const collaborator = collaboratorsData.collaborators.find(
           (collab) =>
             collab.inviteAccepted && collab.eventUser?.id === user.eventUser?.id
         );
-        setCanManageEvent(isCollaborator);
+        if (collaborator) {
+          if (collaborator.role === CollaboratorRole.COLLABORATOR_ADMIN) {
+            setUserRole("admin");
+          } else {
+            setUserRole("scanner");
+          }
+        } else {
+          setUserRole(null);
+        }
       } catch (err) {
-        setCanManageEvent(false);
+        setUserRole(null);
       }
     };
 
-    checkCanManageEvent();
-  }, [event, isAuthenticated, user, eventId]);
+    checkUserRole();
+  }, [event, user, authLoading, eventId]);
 
   const selectedTicket = event?.eventTickets?.find(
     (t) => t.id === selectedTicketId
@@ -363,19 +378,31 @@ export default function EventPreviewModal({
 
           {!loading && !error && event && (
             <div className="p-4 sm:p-6">
-              {/* Management Banner */}
-              {canManageEvent && (
-                <div className="mb-4 flex items-center justify-between gap-4 rounded-lg border border-pink-500/30 bg-pink-500/10 px-4 py-3">
+              {/* Management/Scanner Banner */}
+              {userRole && (
+                <div className={`mb-4 flex items-center justify-between gap-4 rounded-lg border px-4 py-3 ${userRole === "scanner" ? "border-blue-500/30 bg-blue-500/10" : "border-pink-500/30 bg-pink-500/10"}`}>
                   <span className="text-sm text-neutral-300">
-                    You have manage access for this event.
+                    {userRole === "scanner"
+                      ? "You can scan tickets for this event."
+                      : "You have manage access for this event."}
                   </span>
-                  <Link
-                    href={`/event-management/${eventId}`}
-                    className="flex items-center gap-1 rounded-full bg-pink-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-pink-600"
-                  >
-                    Manage
-                    <span className="text-xs">↗</span>
-                  </Link>
+                  {userRole === "scanner" ? (
+                    <Link
+                      href={`/event-management/${eventId}/scanner`}
+                      className="flex items-center gap-1.5 rounded-full bg-blue-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-blue-600"
+                    >
+                      <ScanLine className="h-4 w-4" />
+                      Scan
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/event-management/${eventId}`}
+                      className="flex items-center gap-1 rounded-full bg-pink-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-pink-600"
+                    >
+                      Manage
+                      <span className="text-xs">↗</span>
+                    </Link>
+                  )}
                 </div>
               )}
 
