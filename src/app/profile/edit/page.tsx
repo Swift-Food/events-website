@@ -60,44 +60,33 @@ export default function EditProfilePage() {
     setIsSaving(true);
 
     try {
-      const updateData: UpdateEventUserDto = {};
+      // Build update payload - send all editable fields
+      const updateData: UpdateEventUserDto = {
+        firstName: formData.firstName.trim() || undefined,
+        lastName: formData.lastName.trim() || undefined,
+        username: formData.username.trim() || undefined,
+        organizationName: formData.organizationName.trim() || undefined,
+        bio: formData.bio.trim() || undefined,
+        website: formData.website.trim() || undefined,
+        twitterHandle: formData.twitterHandle.trim() || undefined,
+        linkedinUrl: formData.linkedinUrl.trim() || undefined,
+      };
 
-      // Only include fields that have changed
-      if (formData.firstName !== (eventUser?.firstName || "")) {
-        updateData.firstName = formData.firstName || undefined;
-      }
-      if (formData.lastName !== (eventUser?.lastName || "")) {
-        updateData.lastName = formData.lastName || undefined;
-      }
-      if (formData.username !== (user?.username || "")) {
-        updateData.username = formData.username || undefined;
-      }
-      if (formData.organizationName !== (eventUser?.organizationName || "")) {
-        updateData.organizationName = formData.organizationName || undefined;
-      }
-      if (formData.bio !== (eventUser?.bio || "")) {
-        updateData.bio = formData.bio || undefined;
-      }
-      if (formData.website !== (eventUser?.website || "")) {
-        updateData.website = formData.website || undefined;
-      }
-      if (formData.twitterHandle !== (eventUser?.twitterHandle || "")) {
-        updateData.twitterHandle = formData.twitterHandle || undefined;
-      }
-      if (formData.linkedinUrl !== (eventUser?.linkedinUrl || "")) {
-        updateData.linkedinUrl = formData.linkedinUrl || undefined;
-      }
+      // Remove undefined values for cleaner payload
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key as keyof UpdateEventUserDto] === undefined) {
+          delete updateData[key as keyof UpdateEventUserDto];
+        }
+      });
 
-      // Only make API call if there are changes
-      if (Object.keys(updateData).length === 0) {
-        toast.info("No changes to save");
-        return;
-      }
+      console.log("Sending update:", updateData);
 
-      await eventUserService.updateMyProfile(updateData);
+      const result = await eventUserService.updateMyProfile(updateData);
+      console.log("Update result:", result);
 
       // Refresh user data in context
       await refreshProfile();
+      console.log("Profile refreshed - eventUser:", eventUser);
 
       toast.success("Profile updated successfully");
       router.push("/profile");
