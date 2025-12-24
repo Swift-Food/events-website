@@ -257,7 +257,7 @@ export default function TicketCard({
                     aria-label="View QR Code"
                   >
                     <QrCode className="h-5 w-5" />
-                    Show Ticket QR
+                    Show Ticket
                   </button>
                 )}
                 <div className="flex items-center justify-between pt-1">

@@ -992,8 +992,8 @@ export default function EventDetailsPage() {
                   {/* User ticket info */}
                   {hasUserTicket && event.userTicket && (
                     <div className="mt-4 pt-4 border-t border-white/10">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className={getTicketStatusBadgeClasses(event.userTicket.status as GuestTicketStatus)}>
                             {getTicketStatusText(event.userTicket.status as GuestTicketStatus)}
                           </span>
@@ -1005,9 +1005,9 @@ export default function EventDetailsPage() {
                         </div>
                         <Link
                           href="/my-tickets"
-                          className="text-sm text-green-400 hover:text-green-300 transition-colors"
+                          className="text-sm text-green-400 hover:text-green-300 transition-colors shrink-0 self-end sm:self-auto"
                         >
-                          View in My Tickets →
+                          My Tickets →
                         </Link>
                       </div>
                     </div>
