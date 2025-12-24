@@ -29,7 +29,14 @@ export interface EventUserProfile {
 }
 
 export interface UpdateEventUserDto {
+  firstName?: string;
+  lastName?: string;
+  username?: string;
   organizationName?: string;
+  bio?: string;
+  website?: string;
+  twitterHandle?: string;
+  linkedinUrl?: string;
 }
 
 export interface EventUserResponse {
