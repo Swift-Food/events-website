@@ -253,7 +253,7 @@ export default function CheckInPage() {
       const containerWidth = container?.clientWidth || 300;
       const containerHeight = container?.clientHeight || 300;
       const minDimension = Math.min(containerWidth, containerHeight);
-      const maxAllowedSize = Math.floor(minDimension * 0.7);
+      const maxAllowedSize = Math.floor(minDimension * 0.95);
 
       // Use viewfinderSize but cap it to safe maximum
       let qrboxSize = Math.min(viewfinderSizeRef.current, maxAllowedSize);
@@ -331,7 +331,8 @@ export default function CheckInPage() {
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
     // Drag down = expand, drag up = shrink (handle is at bottom)
     const deltaY = clientY - resizeStartRef.current.startY;
-    const newSize = Math.max(120, Math.min(300, resizeStartRef.current.startSize + deltaY * 2));
+    // Min 100px, max 500px (startScanning will cap to 95% of container)
+    const newSize = Math.max(100, Math.min(500, resizeStartRef.current.startSize + deltaY * 2));
     setViewfinderSize(newSize);
   }, [isResizing]);
 
