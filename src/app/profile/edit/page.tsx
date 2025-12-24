@@ -232,6 +232,20 @@ export default function EditProfilePage() {
                 Email cannot be changed
               </p>
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Bio
+              </label>
+              <textarea
+                name="bio"
+                value={formData.bio}
+                onChange={handleChange}
+                placeholder="Tell us about yourself..."
+                rows={3}
+                className="w-full rounded-xl border border-white/10 bg-input-background px-4 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
+              />
+            </div>
           </div>
 
           {/* Organization Info */}
@@ -251,20 +265,6 @@ export default function EditProfilePage() {
                 onChange={handleChange}
                 placeholder="Your organization or company name"
                 className="w-full rounded-xl border border-white/10 bg-input-background px-4 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Bio
-              </label>
-              <textarea
-                name="bio"
-                value={formData.bio}
-                onChange={handleChange}
-                placeholder="Tell us about yourself..."
-                rows={3}
-                className="w-full rounded-xl border border-white/10 bg-input-background px-4 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
               />
             </div>
           </div>
