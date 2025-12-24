@@ -29,6 +29,7 @@ import {
   Banknote,
 } from "lucide-react";
 import StripeConnectCard from "@/components/payments/StripeConnectCard";
+import EarningsCard from "@/components/payments/EarningsCard";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -400,6 +401,11 @@ export default function ProfilePage() {
         {/* Stripe Connect Payment Setup */}
         <div className="mb-6">
           <StripeConnectCard />
+        </div>
+
+        {/* Earnings */}
+        <div className="mb-6">
+          <EarningsCard />
         </div>
 
         {/* Tabs */}
