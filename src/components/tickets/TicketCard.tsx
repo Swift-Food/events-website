@@ -156,15 +156,32 @@ export default function TicketCard({
   const [showLeaveWaitlistModal, setShowLeaveWaitlistModal] = useState(false);
   const [isAddingToWallet, setIsAddingToWallet] = useState(false);
   const [walletAvailable, setWalletAvailable] = useState<boolean | null>(null);
+  const [isIOS, setIsIOS] = useState(false);
 
-  // Check if Apple Wallet is available for active tickets
+  // Detect iOS device (iPhone, iPad, iPod)
   useEffect(() => {
+    const checkIsIOS = () => {
+      if (typeof window === 'undefined') return false;
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      // Check for iOS devices including iPad on iOS 13+ (which reports as MacIntel)
+      return /iphone|ipad|ipod/.test(userAgent) ||
+        (userAgent.includes('mac') && 'ontouchend' in document);
+    };
+    setIsIOS(checkIsIOS());
+  }, []);
+
+  // Check if Apple Wallet is available for active tickets (only on iOS)
+  useEffect(() => {
+    if (!isIOS) {
+      setWalletAvailable(false);
+      return;
+    }
     if (ticket.status === GuestTicketStatus.ACTIVE || ticket.status === GuestTicketStatus.CHECKED_IN) {
       guestTicketService.checkWalletAvailable(ticket.id)
         .then((result) => setWalletAvailable(result.canAddToWallet))
         .catch(() => setWalletAvailable(false));
     }
-  }, [ticket.id, ticket.status]);
+  }, [ticket.id, ticket.status, isIOS]);
 
   const handleAddToWallet = async () => {
     setIsAddingToWallet(true);
