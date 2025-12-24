@@ -209,9 +209,18 @@ export default function EventDetailsPage() {
 
         if (result.success) {
           // Check if payment is required
-          if (result.requiresPayment && result.guestTicket) {
+          if (result.requiresPayment && result.paymentUrl) {
+            // Extract guestTicketId from paymentUrl (format: /payments/ticket/:guestTicketId)
+            const guestTicketId = result.paymentUrl.split('/').pop();
+
+            if (!guestTicketId) {
+              toast.error("Failed to process payment. Please try again from My Tickets.");
+              router.push("/my-tickets");
+              return;
+            }
+
             try {
-              const paymentResponse = await paymentService.createTicketPaymentIntent(result.guestTicket.id);
+              const paymentResponse = await paymentService.createTicketPaymentIntent(guestTicketId);
 
               if (paymentResponse.success && paymentResponse.clientSecret) {
                 setPaymentData({
@@ -219,11 +228,11 @@ export default function EventDetailsPage() {
                   amount: paymentResponse.amount || 0,
                   currency: paymentResponse.currency || 'gbp',
                   ticketDetails: paymentResponse.ticketDetails || {
-                    ticketName: invitationPreview.ticket?.name || 'Ticket',
-                    eventName: event?.name || 'Event',
+                    ticketName: result.ticket?.name || invitationPreview.ticket?.name || 'Ticket',
+                    eventName: result.event?.name || event?.name || 'Event',
                     price: Number(ticket?.price) || 0,
                   },
-                  guestTicketId: result.guestTicket.id,
+                  guestTicketId: guestTicketId,
                 });
                 setShowPaymentModal(true);
               } else {
