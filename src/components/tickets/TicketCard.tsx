@@ -186,22 +186,15 @@ export default function TicketCard({
   const handleAddToWallet = async () => {
     setIsAddingToWallet(true);
     try {
-      const blob = await guestTicketService.downloadWalletPass(ticket.id);
+      // Get a short-lived download token from the API
+      const { downloadUrl } = await guestTicketService.getWalletDownloadToken(ticket.id);
 
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `ticket-${ticket.id}.pkpass`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Redirect to the download URL - Safari will handle the .pkpass file
+      window.location.href = downloadUrl;
 
-      toast.success("Pass downloaded! Open it to add to Apple Wallet.");
+      // Don't show success toast - Safari will handle the file
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to download wallet pass");
-    } finally {
       setIsAddingToWallet(false);
     }
   };
