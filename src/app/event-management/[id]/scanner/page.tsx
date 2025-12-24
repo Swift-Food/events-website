@@ -11,7 +11,6 @@ import { EventResponseDto } from "@/types/event";
 import { GuestTicketResponseDto } from "@/types/guest-ticket";
 import {
   Camera,
-  CameraOff,
   ArrowLeft,
   CheckCircle2,
   XCircle,
@@ -19,6 +18,7 @@ import {
   Loader2,
   RotateCcw,
   Keyboard,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -90,6 +90,9 @@ export default function CheckInPage() {
   // Manual code entry
   const [manualCode, setManualCode] = useState("");
   const [isManualProcessing, setIsManualProcessing] = useState(false);
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Load event and stats
   useEffect(() => {
@@ -384,6 +387,19 @@ export default function CheckInPage() {
     }
   };
 
+  const openModal = useCallback(() => {
+    setIsModalOpen(true);
+    // Start scanning after modal opens and DOM is ready
+    setTimeout(() => {
+      startScanning();
+    }, 150);
+  }, []);
+
+  const closeModal = useCallback(async () => {
+    await stopScanning();
+    setIsModalOpen(false);
+  }, []);
+
   const handleManualCheckIn = async () => {
     const code = manualCode.trim();
     if (!code || isManualProcessing) return;
@@ -512,86 +528,125 @@ export default function CheckInPage() {
           </div>
         )}
 
-        {/* Scanner Area */}
-        <div className="rounded-2xl bg-card-background border border-white/5 overflow-hidden mb-6">
-          <div className="p-4 border-b border-white/5">
-            <div className="flex items-center gap-2">
-              <Camera className="h-5 w-5 text-primary" />
-              <span className="font-medium text-foreground">QR Scanner</span>
-            </div>
-          </div>
+        {/* Open Scanner Button */}
+        <button
+          onClick={openModal}
+          className="w-full mb-6 px-6 py-4 bg-primary text-primary-foreground rounded-2xl font-semibold hover:bg-primary/90 transition-all flex items-center justify-center gap-3"
+        >
+          <Camera className="h-6 w-6" />
+          Open QR Scanner
+        </button>
 
-          {/* Scanner Container - fixed square aspect ratio */}
-          <div className="relative bg-black overflow-hidden aspect-square">
-            <div id="qr-scanner-container" className="w-full h-full" />
+        {/* Scanner Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              onClick={closeModal}
+            />
 
-            {/* Custom viewfinder overlay - only show when scanning */}
-            {isScanning && (
-              <div className="absolute inset-0">
-                {/* Darkened edges */}
-                <div className="absolute inset-0 bg-black/40 pointer-events-none" />
-                {/* Clear center square - resizable */}
-                <div
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                  style={{ width: viewfinderSize, height: viewfinderSize }}
+            {/* Modal Content */}
+            <div className="relative w-full max-w-lg mx-4 bg-card-background rounded-2xl border border-white/10 overflow-hidden">
+              {/* Modal Header */}
+              <div className="p-4 border-b border-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Camera className="h-5 w-5 text-primary" />
+                  <span className="font-medium text-foreground">QR Scanner</span>
+                </div>
+                <button
+                  onClick={closeModal}
+                  className="p-2 text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-lg transition-colors"
                 >
-                  {/* Cut out the center */}
-                  <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.4)' }} />
-                  {/* Corner brackets */}
-                  <div className="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-white rounded-tl-lg pointer-events-none" />
-                  <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-white rounded-tr-lg pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-white rounded-bl-lg pointer-events-none" />
-                  <div className="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-white rounded-br-lg pointer-events-none" />
-                  {/* Resize handle - bottom center */}
-                  <div
-                    className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 cursor-ns-resize touch-none"
-                    onMouseDown={handleResizeStart}
-                    onTouchStart={handleResizeStart}
-                  >
-                    <div className="w-10 h-1 bg-white/60 rounded-full" />
-                    <span className="text-[10px] text-white/60 select-none">Drag to resize</span>
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Scanner Container */}
+              <div className="relative bg-black overflow-hidden aspect-square">
+                <div id="qr-scanner-container" className="w-full h-full" />
+
+                {/* Custom viewfinder overlay */}
+                {isScanning && (
+                  <div className="absolute inset-0">
+                    <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+                    <div
+                      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                      style={{ width: viewfinderSize, height: viewfinderSize }}
+                    >
+                      <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.4)' }} />
+                      <div className="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-white rounded-tl-lg pointer-events-none" />
+                      <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-white rounded-tr-lg pointer-events-none" />
+                      <div className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-white rounded-bl-lg pointer-events-none" />
+                      <div className="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-white rounded-br-lg pointer-events-none" />
+                      <div
+                        className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 cursor-ns-resize touch-none"
+                        onMouseDown={handleResizeStart}
+                        onTouchStart={handleResizeStart}
+                      >
+                        <div className="w-10 h-1 bg-white/60 rounded-full" />
+                        <span className="text-[10px] text-white/60 select-none">Drag to resize</span>
+                      </div>
+                    </div>
                   </div>
+                )}
+
+                {!isScanning && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-card-secondary-background">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+                    <p className="text-sm text-muted-foreground">Starting camera...</p>
+                  </div>
+                )}
+
+                {isProcessing && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+                    <Loader2 className="h-12 w-12 animate-spin text-white" />
+                  </div>
+                )}
+              </div>
+
+              {/* Manual Entry in Modal */}
+              <div className="p-4 border-t border-white/5">
+                <p className="text-xs text-muted-foreground mb-2">
+                  Or enter the 8-character code manually
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={manualCode}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+                      const formatted = raw.length > 4
+                        ? `${raw.slice(0, 4)}-${raw.slice(4, 8)}`
+                        : raw;
+                      setManualCode(formatted);
+                    }}
+                    onFocus={(e) => {
+                      setTimeout(() => {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 200);
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && handleManualCheckIn()}
+                    placeholder="XXXX-XXXX"
+                    maxLength={9}
+                    className="flex-1 rounded-lg bg-card-secondary-background border border-white/10 px-3 py-2 text-center font-mono text-base tracking-wider uppercase text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                  <button
+                    onClick={handleManualCheckIn}
+                    disabled={!manualCode.trim() || isManualProcessing}
+                    className="px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                  >
+                    {isManualProcessing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
               </div>
-            )}
-
-            {!isScanning && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-card-secondary-background">
-                <Camera className="h-16 w-16 text-muted-foreground/30 mb-4" />
-                <button
-                  onClick={startScanning}
-                  className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all flex items-center gap-2"
-                >
-                  <Camera className="h-5 w-5" />
-                  Start Scanning
-                </button>
-                <p className="text-sm text-muted-foreground mt-4">
-                  Position QR code within the frame
-                </p>
-              </div>
-            )}
-
-            {/* Processing Overlay */}
-            {isProcessing && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
-                <Loader2 className="h-12 w-12 animate-spin text-white" />
-              </div>
-            )}
-          </div>
-
-          {/* Scanner Controls */}
-          {isScanning && (
-            <div className="p-4 flex justify-center">
-              <button
-                onClick={stopScanning}
-                className="px-6 py-2.5 bg-red-500/20 text-red-400 rounded-xl font-medium hover:bg-red-500/30 transition-all flex items-center gap-2"
-              >
-                <CameraOff className="h-4 w-4" />
-                Stop Scanning
-              </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Manual Code Entry */}
         <div className="rounded-xl bg-card-background border border-white/5 overflow-hidden mb-6">
