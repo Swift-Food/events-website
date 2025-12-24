@@ -76,8 +76,14 @@ export default function CheckInPage() {
   const lastScannedRef = useRef<string>("");
   const [cameraAspectRatio, setCameraAspectRatio] = useState<number | null>(null);
   const [viewfinderSize, setViewfinderSize] = useState(200);
+  const viewfinderSizeRef = useRef(viewfinderSize); // Ref to avoid stale closures
   const [isResizing, setIsResizing] = useState(false);
   const resizeStartRef = useRef<{ startY: number; startSize: number } | null>(null);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    viewfinderSizeRef.current = viewfinderSize;
+  }, [viewfinderSize]);
 
   // Recent check-ins
   const [recentCheckIns, setRecentCheckIns] = useState<ScanResult[]>([]);
@@ -242,11 +248,12 @@ export default function CheckInPage() {
       const qrScanner = new Html5Qrcode("qr-scanner-container");
       setScanner(qrScanner);
 
+      const currentSize = viewfinderSizeRef.current;
       await qrScanner.start(
         { facingMode: "environment" },
         {
           fps: 15,
-          qrbox: { width: viewfinderSize, height: viewfinderSize },
+          qrbox: { width: currentSize, height: currentSize },
         },
         (qrCodeMessage) => {
           handleCheckIn(qrCodeMessage);
