@@ -20,6 +20,7 @@ import {
   Ticket,
   Loader2,
   X,
+  CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -27,6 +28,7 @@ import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
 import PaymentModal, { PaymentSuccessModal } from "@/components/payments/PaymentModal";
 import RegistrationQuestionsModal from "@/components/RegistrationQuestionsModal";
+import { getTicketStatusText, getTicketStatusBadgeClasses, isTicketUsable } from "@/utils/ticket-status";
 
 export default function EventDetailsPage() {
   const params = useParams();
@@ -324,6 +326,7 @@ export default function EventDetailsPage() {
         </div>
       )}
 
+
       <div className="mx-auto max-w-6xl px-6 py-8">
         {/* Management Banner - Desktop */}
         {canManageEvent && (
@@ -340,6 +343,7 @@ export default function EventDetailsPage() {
             </Link>
           </div>
         )}
+
 
         {/* Back Button */}
         <button
@@ -650,8 +654,9 @@ export default function EventDetailsPage() {
             {event.eventTickets && event.eventTickets.length > 0 && (() => {
               const isEventEnded = new Date(event.endDateTime) < new Date();
               const hasAvailableTickets = event.eventTickets.some(t => (t.quantityLeft ?? 0) > 0 && t.isAvailable);
-              const canRegister = event.status === EventStatus.PUBLISHED && !isEventEnded && hasAvailableTickets;
-              const showClosedMessage = isEventEnded || !hasAvailableTickets;
+              const hasUserTicket = !!event.userTicket;
+              const canRegister = event.status === EventStatus.PUBLISHED && !isEventEnded && hasAvailableTickets && !hasUserTicket;
+              const showClosedMessage = (isEventEnded || !hasAvailableTickets) && !hasUserTicket;
 
               return (
                 <div className="rounded-xl bg-card-background backdrop-blur-xl p-6 border border-neutral-700">
@@ -670,22 +675,27 @@ export default function EventDetailsPage() {
                       const remaining = ticket.quantityLeft ?? 0;
                       const isSelected = selectedTicketId === ticket.id;
                       const isSoldOut = remaining <= 0 || !ticket.isAvailable;
-                      const isDisabled = isSoldOut || !canRegister;
+                      const isOwnedTicket = event.userTicket?.ticketName === ticket.name;
+                      const isDisabled = isSoldOut || !canRegister || hasUserTicket;
 
                       return (
                         <div
                           key={ticket.id}
                           onClick={() => !isDisabled && setSelectedTicketId(ticket.id)}
                           className={`flex items-center justify-between gap-2 sm:gap-4 rounded-xl border p-3 sm:p-4 transition-all ${
-                            isDisabled
-                              ? "border-white/10 bg-card-secondary-background opacity-50 cursor-not-allowed"
-                              : isSelected
-                                ? "border-primary bg-primary/10 cursor-pointer"
-                                : "border-white/10 bg-card-secondary-background cursor-pointer hover:border-white/20"
+                            isOwnedTicket
+                              ? "border-green-500/30 bg-green-500/10 cursor-default"
+                              : isDisabled
+                                ? "border-white/10 bg-card-secondary-background opacity-50 cursor-not-allowed"
+                                : isSelected
+                                  ? "border-primary bg-primary/10 cursor-pointer"
+                                  : "border-white/10 bg-card-secondary-background cursor-pointer hover:border-white/20"
                           }`}
                         >
                           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                            {canRegister && !isSoldOut && (
+                            {isOwnedTicket ? (
+                              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-400 shrink-0" />
+                            ) : canRegister && !isSoldOut && (
                               <div
                                 className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                                   isSelected ? "border-primary" : "border-white/30"
@@ -701,7 +711,13 @@ export default function EventDetailsPage() {
                                 {ticket.name}
                               </h3>
                               <p className="text-xs sm:text-sm text-muted-foreground">
-                                {isSoldOut ? "Sold out" : `${remaining} left`}
+                                {isOwnedTicket ? (
+                                  <span className="text-green-400">You own this ticket</span>
+                                ) : isSoldOut ? (
+                                  "Sold out"
+                                ) : (
+                                  `${remaining} left`
+                                )}
                               </p>
                             </div>
                           </div>
@@ -717,7 +733,31 @@ export default function EventDetailsPage() {
                     })}
                   </div>
 
-                  {/* Single Register Button */}
+                  {/* User ticket info */}
+                  {hasUserTicket && event.userTicket && (
+                    <div className="mt-4 pt-4 border-t border-white/10">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className={getTicketStatusBadgeClasses(event.userTicket.status as GuestTicketStatus)}>
+                            {getTicketStatusText(event.userTicket.status as GuestTicketStatus)}
+                          </span>
+                          {event.userTicket.checkInCode && isTicketUsable(event.userTicket.status as GuestTicketStatus) && (
+                            <span className="text-xs text-muted-foreground">
+                              Code: <span className="font-mono font-semibold text-foreground">{event.userTicket.checkInCode}</span>
+                            </span>
+                          )}
+                        </div>
+                        <Link
+                          href="/my-tickets"
+                          className="text-sm text-green-400 hover:text-green-300 transition-colors"
+                        >
+                          View in My Tickets →
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Register Button - only show if user doesn't have a ticket */}
                   {canRegister && event.eventTickets.some(t => (t.quantityLeft ?? 0) > 0 && t.isAvailable) && (
                     <button
                       onClick={() => selectedTicketId && handleRegister(selectedTicketId)}
