@@ -9,7 +9,7 @@ import { EventResponseDto } from "@/types";
 import { CollaboratorRole } from "@/types/event-collaborator";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";
-import { Eye, X } from "lucide-react";
+import { Eye, X, Crown, Shield, Scan } from "lucide-react";
 
 // Tab components
 import {
@@ -255,9 +255,28 @@ export default function EventManagementPage() {
       {/* Header */}
       <div className="">
         <div className="mx-auto max-w-6xl px-6 py-6">
-          {/* Event Title & Preview Button */}
+          {/* Event Title & Role Badge */}
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-lg sm:text-2xl font-bold text-foreground">{eventData.name}</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-lg sm:text-2xl font-bold text-foreground">{eventData.name}</h1>
+              {/* Role Badge */}
+              {userRole && (
+                <span
+                  className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                    userRole === "owner"
+                      ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                      : userRole === "admin"
+                      ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
+                      : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                  }`}
+                >
+                  {userRole === "owner" && <Crown className="h-3 w-3" />}
+                  {userRole === "admin" && <Shield className="h-3 w-3" />}
+                  {userRole === "scanner" && <Scan className="h-3 w-3" />}
+                  {userRole === "owner" ? "Host" : userRole === "admin" ? "Admin" : "Scanner"}
+                </span>
+              )}
+            </div>
             {/* Preview Button - Desktop only */}
             <button
               onClick={() => router.push(`/events/${eventId}`)}
