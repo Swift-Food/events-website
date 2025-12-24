@@ -248,12 +248,22 @@ export default function CheckInPage() {
       const qrScanner = new Html5Qrcode("qr-scanner-container");
       setScanner(qrScanner);
 
-      const currentSize = viewfinderSizeRef.current;
       await qrScanner.start(
         { facingMode: "environment" },
         {
           fps: 15,
-          qrbox: { width: currentSize, height: currentSize },
+          // Dynamic qrbox based on video dimensions
+          qrbox: (viewfinderWidth, viewfinderHeight) => {
+            const minDimension = Math.min(viewfinderWidth, viewfinderHeight);
+            // Use viewfinderSizeRef but cap it to 80% of smallest dimension
+            const maxAllowedSize = Math.floor(minDimension * 0.8);
+            const size = Math.min(viewfinderSizeRef.current, maxAllowedSize);
+            // Update state if we had to cap it
+            if (viewfinderSizeRef.current > maxAllowedSize) {
+              setViewfinderSize(maxAllowedSize);
+            }
+            return { width: size, height: size };
+          },
         },
         (qrCodeMessage) => {
           handleCheckIn(qrCodeMessage);
@@ -509,7 +519,7 @@ export default function CheckInPage() {
           <div className="p-4 border-b border-white/5">
             <div className="flex items-center gap-2">
               <Camera className="h-5 w-5 text-primary" />
-              <span className="font-medium text-foreground">QR Scanner (Fix Hopefully)</span>
+              <span className="font-medium text-foreground">QR Scanner</span>
             </div>
           </div>
 
