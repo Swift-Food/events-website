@@ -697,7 +697,6 @@ function ExistingOrderView({ order }: ExistingOrderViewProps) {
     if (!timeString) return 'N/A';
     return timeString;
   };
-  console.log("order data", JSON.stringify(order))
 
   return (
     <div className="space-y-4">

@@ -19,7 +19,6 @@ export const CollaboratorCard = ({
 }: CollaboratorCardProps) => {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  console.log("the collaborator is", JSON.stringify(collaborator))
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {

@@ -28,19 +28,15 @@ export default function EventCataloguePage() {
 
   // Fetch events
   const fetchEvents = async () => {
-    console.log("fetchEvents called");
     setLoading(true);
     setError(null);
     try {
-      console.log("Calling eventsApi.findAll...");
       const result: EventListResponseDto = await eventsApi.findAll({
         search: searchTerm || undefined,
         skip: (currentPage - 1) * eventsPerPage,
         take: eventsPerPage,
       });
 
-      console.log("Received result:", result);
-      console.log("Received events:", result.events);
       setEvents(result.events ?? []);
       setTotal(result.total ?? 0);
     } catch (err) {
