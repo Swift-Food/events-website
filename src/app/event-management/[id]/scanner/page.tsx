@@ -520,8 +520,8 @@ export default function CheckInPage() {
             </div>
           </div>
 
-          {/* Scanner Container - fixed 4:3 aspect ratio */}
-          <div className="relative bg-black overflow-hidden aspect-[4/3]">
+          {/* Scanner Container - fixed square aspect ratio */}
+          <div className="relative bg-black overflow-hidden aspect-square">
             <div id="qr-scanner-container" className="w-full h-full" />
 
             {/* Custom viewfinder overlay - only show when scanning */}
