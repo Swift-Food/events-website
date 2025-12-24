@@ -72,11 +72,10 @@ export interface RegisterDto {
   username: string;
   password: string;
   organizationName?: string;
+  firstName?: string;
+  lastName?: string;
   inviteToken?: string;
   inviteType?: 'collaborator' | 'ticket';
-  //   firstName?: string;
-  //   lastName?: string;
-  //   phoneNumber?: string;
 }
 
 export interface RegisterResponse {
@@ -89,6 +88,8 @@ export interface VerifyEmailDto {
   email: string;
   code: string;
   organizationName?: string;
+  firstName?: string;
+  lastName?: string;
   inviteToken?: string;
   inviteType?: 'collaborator' | 'ticket';
 }

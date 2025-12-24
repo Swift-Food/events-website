@@ -24,6 +24,8 @@ export default function RegisterForm({
     email: "",
     password: "",
     username: "",
+    firstName: "",
+    lastName: "",
     organizationName: "",
   });
   const [verificationCode, setVerificationCode] = useState("");
@@ -65,6 +67,8 @@ export default function RegisterForm({
         email: formData.email,
         password: formData.password,
         username: formData.username,
+        firstName: formData.firstName || undefined,
+        lastName: formData.lastName || undefined,
         organizationName: formData.organizationName || undefined,
       };
 
@@ -91,6 +95,8 @@ export default function RegisterForm({
       await verifyEmail({
         email: formData.email,
         code: verificationCode,
+        firstName: formData.firstName || undefined,
+        lastName: formData.lastName || undefined,
         organizationName: formData.organizationName || undefined,
       });
 
@@ -99,6 +105,8 @@ export default function RegisterForm({
         email: "",
         password: "",
         username: "",
+        firstName: "",
+        lastName: "",
         organizationName: "",
       });
       setVerificationCode("");
@@ -135,6 +143,8 @@ export default function RegisterForm({
         email: formData.email,
         password: formData.password,
         username: formData.username,
+        firstName: formData.firstName || undefined,
+        lastName: formData.lastName || undefined,
         organizationName: formData.organizationName || undefined,
       };
 
@@ -254,6 +264,37 @@ export default function RegisterForm({
               placeholder="johndoe"
               disabled={isLoading}
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                First Name (Optional)
+              </label>
+              <input
+                name="firstName"
+                type="text"
+                value={formData.firstName}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border-2 border-transparent rounded-xl focus:outline-none focus:border-primary bg-input-background text-foreground placeholder:text-muted-foreground/40 shadow-inner transition-colors"
+                placeholder="John"
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Last Name (Optional)
+              </label>
+              <input
+                name="lastName"
+                type="text"
+                value={formData.lastName}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border-2 border-transparent rounded-xl focus:outline-none focus:border-primary bg-input-background text-foreground placeholder:text-muted-foreground/40 shadow-inner transition-colors"
+                placeholder="Doe"
+                disabled={isLoading}
+              />
+            </div>
           </div>
 
           <div>

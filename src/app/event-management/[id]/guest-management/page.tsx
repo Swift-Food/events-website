@@ -16,11 +16,24 @@ import { Loader, Link as LinkIcon, Copy, Check } from "lucide-react";
 type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in";
 
 /**
- * Extract guest display name from EventUser
+ * Extract guest display name with proper fallbacks
  */
 function getGuestDisplayName(guest: GuestTicketResponseDto['guest'] | undefined): string {
   if (!guest) return "";
-  return `${guest.firstName} ${guest.lastName}`.trim();
+
+  // Try EventUser firstName/lastName first
+  const eventUserName = `${guest.firstName || ""} ${guest.lastName || ""}`.trim();
+  if (eventUserName) return eventUserName;
+
+  // Fallback to User username
+  if (guest.user?.username) return guest.user.username;
+
+  // Last resort: email (before @)
+  if (guest.user?.email) {
+    return guest.user.email.split("@")[0];
+  }
+
+  return "";
 }
 
 export default function GuestManagementPage() {
