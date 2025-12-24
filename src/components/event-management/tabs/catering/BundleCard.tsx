@@ -80,7 +80,7 @@ export function BundleCard({ bundle, isSelected, onClick }: BundleCardProps) {
         <div className="space-y-2 pt-3 border-t border-white/5">
           <div className="flex items-center justify-between">
             <p className="text-xl font-bold text-primary">
-              ${bundleFixedPrice.toFixed(2)}
+              ${bundleFixedPrice}
             </p>
             <div className="flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-1">
               <ShoppingCart className="h-3 w-3 text-primary" />

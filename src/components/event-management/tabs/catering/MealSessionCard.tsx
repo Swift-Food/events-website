@@ -76,7 +76,7 @@ export function MealSessionCard({
               Total
             </p>
             <p className="text-xl sm:text-2xl font-bold text-primary">
-              ${sessionTotal.toFixed(2)}
+              ${sessionTotal}
             </p>
           </div>
           <button
