@@ -804,10 +804,14 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
               <input
                 type="text"
                 value={eventName}
-                onChange={(e) => setEventName(e.target.value)}
+                onChange={(e) => setEventName(e.target.value.slice(0, 80))}
                 placeholder="Event Name"
+                maxLength={80}
                 className="w-full bg-transparent text-3xl md:text-5xl font-bold text-foreground outline-none placeholder:text-muted-foreground/40"
               />
+              <div className={`text-xs ${eventName.length >= 80 ? "text-amber-400" : "text-muted-foreground"}`}>
+                {eventName.length}/80 characters
+              </div>
             </div>
             {mode === "create" && (
               <button
