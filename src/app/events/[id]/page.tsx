@@ -598,7 +598,7 @@ export default function EventDetailsPage() {
               </div>
 
               {/* Date & Time Card - Bottom left on tablet, normal on mobile/desktop */}
-              <div className="rounded-xl border border-neutral-700 bg-card-background p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+              <div className="rounded-xl border border-neutral-700 bg-card-background p-4 sm:p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Date & Time
                 </h3>
@@ -691,7 +691,7 @@ export default function EventDetailsPage() {
                     </div>
                   </>
                 ) : (
-                  <div className="p-6">
+                  <div className="p-4 sm:p-6">
                     <div className="h-32 w-full bg-card-secondary-background rounded-lg flex flex-col items-center justify-center gap-2 mb-4">
                       <MapPin className="h-5 w-5 text-muted-foreground" />
                       <span className="text-sm text-muted-foreground">Map</span>
@@ -705,7 +705,7 @@ export default function EventDetailsPage() {
             {/* Organizer & Stats - Side by side on sm-md, separate on lg+ */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
               {/* Organizer Card */}
-              <div className="rounded-xl border border-white/10 bg-card-background p-6">
+              <div className="rounded-xl border border-white/10 bg-card-background p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-foreground">
                     Organized by
@@ -757,7 +757,7 @@ export default function EventDetailsPage() {
               </div>
 
               {/* Event Stats Card */}
-              <div className="rounded-xl border border-neutral-700 bg-card-background p-6">
+              <div className="rounded-xl border border-neutral-700 bg-card-background p-4 sm:p-6">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Event Stats
                 </h3>
@@ -884,7 +884,7 @@ export default function EventDetailsPage() {
               const invitedTicketId = invitationPreview?.ticket?.id;
 
               return (
-                <div className="rounded-xl bg-card-background backdrop-blur-xl p-6 border border-neutral-700">
+                <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 sm:p-6 border border-neutral-700">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-2xl font-semibold text-foreground">
                       Tickets
@@ -992,7 +992,7 @@ export default function EventDetailsPage() {
                   {/* User ticket info */}
                   {hasUserTicket && event.userTicket && (
                     <div className="mt-4 pt-4 border-t border-white/10">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className={getTicketStatusBadgeClasses(event.userTicket.status as GuestTicketStatus)}>
                             {getTicketStatusText(event.userTicket.status as GuestTicketStatus)}
@@ -1005,7 +1005,7 @@ export default function EventDetailsPage() {
                         </div>
                         <Link
                           href="/my-tickets"
-                          className="text-sm text-green-400 hover:text-green-300 transition-colors shrink-0 self-end sm:self-auto"
+                          className="text-sm text-green-400 hover:text-green-300 transition-colors shrink-0"
                         >
                           My Tickets →
                         </Link>
