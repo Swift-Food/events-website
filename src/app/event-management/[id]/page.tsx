@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import EventForm from "@/components/EventForm";
 import { eventService } from "@/services/event.service";
+import { eventCollaboratorService } from "@/services/event-collaborator.service";
 import { EventResponseDto } from "@/types";
+import { CollaboratorRole } from "@/types/event-collaborator";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";
 import { Eye, X } from "lucide-react";
@@ -20,6 +22,9 @@ import {
 
 type TabType = "overview" | "guests" | "registration" | "team" | "catering";
 
+// User role for this event - determines what they can see/do
+type UserRole = "owner" | "admin" | "scanner" | null;
+
 export default function EventManagementPage() {
   const params = useParams();
   const router = useRouter();
@@ -34,6 +39,7 @@ export default function EventManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  const [userRole, setUserRole] = useState<UserRole>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -85,22 +91,60 @@ export default function EventManagementPage() {
     fetchEvent();
   }, [eventId]);
 
-  // Check authorization separately when user or eventData changes
+  // Check authorization - owner or collaborator
   useEffect(() => {
-    if (!eventData) return;
+    const checkAuthorization = async () => {
+      if (!eventData) return;
 
-    if (user && eventData.owner?.user?.id) {
-      const authorized = user.id === eventData.owner.user.id;
-      setIsAuthorized(authorized);
+      if (!user && !authLoading) {
+        setIsAuthorized(false);
+        setUserRole(null);
+        setError("You must be logged in to manage events");
+        return;
+      }
 
-      if (!authorized) {
+      if (!user) return;
+
+      // Check if user is the event owner
+      const isOwner = eventData.owner?.user?.id === user.id;
+      if (isOwner) {
+        setIsAuthorized(true);
+        setUserRole("owner");
+        return;
+      }
+
+      // Check if user is a collaborator
+      try {
+        const collaboratorsData = await eventCollaboratorService.getCollaborators(eventId);
+        const collaborator = collaboratorsData.collaborators.find(
+          (collab) =>
+            collab.inviteAccepted &&
+            collab.eventUser?.id === user.eventUser?.id
+        );
+
+        if (collaborator) {
+          setIsAuthorized(true);
+          // Set role based on collaborator role
+          if (collaborator.role === CollaboratorRole.COLLABORATOR_ADMIN) {
+            setUserRole("admin");
+          } else {
+            setUserRole("scanner");
+          }
+        } else {
+          setIsAuthorized(false);
+          setUserRole(null);
+          setError("You are not authorized to manage this event");
+        }
+      } catch (err) {
+        // User doesn't have permission to view collaborators - not authorized
+        setIsAuthorized(false);
+        setUserRole(null);
         setError("You are not authorized to manage this event");
       }
-    } else if (!user && !authLoading) {
-      setIsAuthorized(false);
-      setError("You must be logged in to manage events");
-    }
-  }, [user, eventData, authLoading]);
+    };
+
+    checkAuthorization();
+  }, [user, eventData, authLoading, eventId]);
 
   // Loading state
   if (isLoading || authLoading) {
@@ -177,13 +221,18 @@ export default function EventManagementPage() {
     );
   }
 
-  const tabs: { id: TabType; label: string }[] = [
+  const allTabs: { id: TabType; label: string }[] = [
     { id: "overview", label: "Overview" },
     { id: "guests", label: "Guests" },
     { id: "registration", label: "Registration" },
     { id: "team", label: "Team" },
     { id: "catering", label: "Catering" },
   ];
+
+  // Scanner role can only see overview tab
+  const tabs = userRole === "scanner"
+    ? allTabs.filter(tab => tab.id === "overview")
+    : allTabs;
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -253,6 +302,7 @@ export default function EventManagementPage() {
             onScanClick={() => router.push(`/event-management/${eventId}/scanner`)}
             onDeleteClick={handleDeleteEvent}
             isDeleting={isDeleting}
+            userRole={userRole}
           />
         )}
 
