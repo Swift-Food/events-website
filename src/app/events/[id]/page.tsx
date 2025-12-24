@@ -45,6 +45,10 @@ export default function EventDetailsPage() {
     {}
   );
 
+  // Optional name fields for registration
+  const [guestFirstName, setGuestFirstName] = useState("");
+  const [guestLastName, setGuestLastName] = useState("");
+
   // Payment modal state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -144,11 +148,15 @@ export default function EventDetailsPage() {
         eventTicketId: ticketId,
         questionAnswers:
           Object.keys(questionAnswers).length > 0 ? questionAnswers : undefined,
+        firstName: guestFirstName.trim() || undefined,
+        lastName: guestLastName.trim() || undefined,
       });
 
       if (result.success) {
         setShowQuestionForm(false);
         setQuestionAnswers({});
+        setGuestFirstName("");
+        setGuestLastName("");
 
         // Check if payment is required
         if (result.requiresPayment && result.guestTicket.status === GuestTicketStatus.PENDING_PAYMENT) {
@@ -716,6 +724,29 @@ export default function EventDetailsPage() {
                       );
                     })}
                   </div>
+
+                  {/* Optional Name Fields (shown when ticket is selected) */}
+                  {canRegister && selectedTicketId && (
+                    <div className="mt-4 space-y-3">
+                      <p className="text-xs text-muted-foreground">Your name (optional)</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <input
+                          type="text"
+                          placeholder="First name"
+                          value={guestFirstName}
+                          onChange={(e) => setGuestFirstName(e.target.value)}
+                          className="rounded-xl border border-white/10 bg-card-secondary-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Last name"
+                          value={guestLastName}
+                          onChange={(e) => setGuestLastName(e.target.value)}
+                          className="rounded-xl border border-white/10 bg-card-secondary-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   {/* Single Register Button */}
                   {canRegister && event.eventTickets.some(t => (t.quantityLeft ?? 0) > 0 && t.isAvailable) && (

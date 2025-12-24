@@ -31,13 +31,12 @@ function getGuestDisplayName(guest: GuestTicketResponseDto['guest'] | undefined)
   const eventUserName = `${guest.firstName || ""} ${guest.lastName || ""}`.trim();
   if (eventUserName) return eventUserName;
 
-  // Try nested User firstName/lastName
-  if (guest.user) {
-    const userName = `${guest.user.firstName || ""} ${guest.user.lastName || ""}`.trim();
-    if (userName) return userName;
+  // Fallback to User username
+  if (guest.user?.username) return guest.user.username;
 
-    // Try username
-    if (guest.user.username) return guest.user.username;
+  // Last resort: email (before @)
+  if (guest.user?.email) {
+    return guest.user.email.split("@")[0];
   }
 
   return "";

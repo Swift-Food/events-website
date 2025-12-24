@@ -30,11 +30,24 @@ interface CheckInStats {
 }
 
 /**
- * Extract guest display name from EventUser
+ * Extract guest display name from EventUser with proper fallbacks
  */
 function getGuestDisplayName(guest: GuestTicketResponseDto['guest'] | undefined): string {
   if (!guest) return "Guest";
-  return `${guest.firstName} ${guest.lastName}`.trim();
+
+  // Try EventUser firstName/lastName first
+  const eventUserName = `${guest.firstName || ""} ${guest.lastName || ""}`.trim();
+  if (eventUserName) return eventUserName;
+
+  // Fallback to User username
+  if (guest.user?.username) return guest.user.username;
+
+  // Last resort: email (before @)
+  if (guest.user?.email) {
+    return guest.user.email.split("@")[0];
+  }
+
+  return "Guest";
 }
 
 interface ScanResult {
