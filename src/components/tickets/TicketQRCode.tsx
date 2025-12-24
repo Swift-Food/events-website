@@ -93,7 +93,7 @@ export default function TicketQRCode({
         />
       </div>
 
-      {showDownload && (
+      {/* {showDownload && (
         <button
           onClick={handleDownload}
           className="absolute -bottom-5 -right-5 flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-colors"
@@ -101,7 +101,7 @@ export default function TicketQRCode({
         >
           <Download className="h-4 w-4" />
         </button>
-      )}
+      )} */}
     </div>
   );
 }
