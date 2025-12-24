@@ -412,7 +412,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
           createdOrUpdatedEventId = response.event.id;
           toast.success("Event created successfully!");
           clearForm();
-          router.push(`/events/${createdOrUpdatedEventId}`);
+          router.push(`/event-management/${createdOrUpdatedEventId}`);
         }
       } else {
         // Edit mode - update event with tickets
@@ -423,7 +423,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
         const response = await eventService.updateEvent(eventId, eventData);
         if (response.success) {
           toast.success("Event updated successfully!");
-          router.push(`/events/${eventId}`);
+          router.push(`/event-management/${eventId}`);
         }
       }
     } catch (error: any) {
