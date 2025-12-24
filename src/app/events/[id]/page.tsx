@@ -759,6 +759,7 @@ export default function EventDetailsPage() {
                       const isSoldOut = remaining <= 0;
                       const isManuallyUnavailable = !ticket.isAvailable; // Organizer disabled this ticket
                       const isOwnedTicket = event.userTicket?.ticketName === ticket.name;
+                      const isActiveTicket = isOwnedTicket && isTicketUsable(event.userTicket!.status as GuestTicketStatus);
                       // Can select sold out tickets for waitlist, but not if organizer disabled or user has ticket
                       const isDisabled = !canRegister || isManuallyUnavailable || hasUserTicket;
 
@@ -768,7 +769,9 @@ export default function EventDetailsPage() {
                           onClick={() => !isDisabled && setSelectedTicketId(ticket.id)}
                           className={`flex items-center justify-between gap-2 sm:gap-4 rounded-xl border p-3 sm:p-4 transition-all ${
                             isOwnedTicket
-                              ? "border-green-500/30 bg-green-500/10 cursor-default"
+                              ? isActiveTicket
+                                ? "border-green-500/30 bg-green-500/10 cursor-default"
+                                : "border-yellow-500/30 bg-yellow-500/10 cursor-default"
                               : isDisabled
                                 ? "border-white/10 bg-card-secondary-background opacity-50 cursor-not-allowed"
                                 : isSelected
@@ -778,7 +781,7 @@ export default function EventDetailsPage() {
                         >
                           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                             {isOwnedTicket ? (
-                              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-400 shrink-0" />
+                              <CheckCircle2 className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 ${isActiveTicket ? "text-green-400" : "text-yellow-400"}`} />
                             ) : canRegister && !isManuallyUnavailable && (
                               <div
                                 className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
@@ -796,7 +799,11 @@ export default function EventDetailsPage() {
                               </h3>
                               <p className="text-xs sm:text-sm text-muted-foreground">
                                 {isOwnedTicket ? (
-                                  <span className="text-green-400">You own this ticket</span>
+                                  isTicketUsable(event.userTicket!.status as GuestTicketStatus) ? (
+                                    <span className="text-green-400">You own this ticket</span>
+                                  ) : (
+                                    <span className="text-yellow-400">{getTicketStatusText(event.userTicket!.status as GuestTicketStatus)}</span>
+                                  )
                                 ) : isManuallyUnavailable ? (
                                   <span className="text-gray-400">Unavailable</span>
                                 ) : isSoldOut ? (
