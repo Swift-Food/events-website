@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { eventCollaboratorService } from "@/services/event-collaborator.service";
@@ -9,7 +9,7 @@ import { CollaboratorRole } from "@/types/event-collaborator";
 import { paymentService } from "@/services/payment.service";
 import { useAuth } from "@/lib/auth/authContext";
 import { EventResponseDto, EventStatus } from "@/types/event";
-import { GuestTicketStatus } from "@/types/guest-ticket";
+import { GuestTicketStatus, TicketInvitationPreviewDto } from "@/types/guest-ticket";
 import type { PaymentFlowState } from "@/types/payment";
 import {
   Calendar,
@@ -25,6 +25,7 @@ import {
   ScanLine,
   Crown,
   Shield,
+  Gift,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -37,8 +38,10 @@ import { getTicketStatusText, getTicketStatusBadgeClasses, isTicketUsable } from
 export default function EventDetailsPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const eventId = params.id as string;
+  const inviteToken = searchParams.get("inviteToken");
 
   const [event, setEvent] = useState<EventResponseDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,6 +53,11 @@ export default function EventDetailsPage() {
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, any>>(
     {}
   );
+
+  // Invitation preview state
+  const [invitationPreview, setInvitationPreview] = useState<TicketInvitationPreviewDto | null>(null);
+  const [invitationLoading, setInvitationLoading] = useState(false);
+  const [invitationError, setInvitationError] = useState<string | null>(null);
 
   // Payment modal state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -81,6 +89,36 @@ export default function EventDetailsPage() {
       fetchEventDetails();
     }
   }, [eventId]);
+
+  // Fetch invitation preview when inviteToken is present
+  useEffect(() => {
+    const fetchInvitationPreview = async () => {
+      if (!inviteToken) return;
+
+      try {
+        setInvitationLoading(true);
+        setInvitationError(null);
+        const preview = await guestTicketService.previewTicketInvitation(inviteToken);
+
+        if (preview.success) {
+          setInvitationPreview(preview);
+          // Auto-select the invited ticket
+          if (preview.ticket?.id) {
+            setSelectedTicketId(preview.ticket.id);
+          }
+        } else {
+          setInvitationError(preview.message || "Invalid or expired invitation");
+        }
+      } catch (err: any) {
+        console.error("Failed to fetch invitation preview:", err);
+        setInvitationError(err.response?.data?.message || "Invalid or expired invitation");
+      } finally {
+        setInvitationLoading(false);
+      }
+    };
+
+    fetchInvitationPreview();
+  }, [inviteToken]);
 
   // Check if user is owner or collaborator and determine role
   useEffect(() => {
@@ -132,9 +170,12 @@ export default function EventDetailsPage() {
   );
 
   const handleRegister = async (ticketId: string) => {
+    // Build the redirect URL with inviteToken if present
+    const currentUrl = `/events/${eventId}${inviteToken ? `?inviteToken=${inviteToken}` : ''}`;
+
     if (!isAuthenticated) {
       toast.error("Please log in to register for this event");
-      router.push("/auth");
+      router.push(`/auth?redirect=${encodeURIComponent(currentUrl)}`);
       return;
     }
 
@@ -147,8 +188,10 @@ export default function EventDetailsPage() {
     // Set the selected ticket for the question form
     setSelectedTicketId(ticketId);
 
-    // Check if ticket has questions that need answering
+    // For invitation flow, skip question form (invitation already has ticket selected)
+    // Check if ticket has questions that need answering (only for non-invite flow)
     if (
+      !inviteToken &&
       ticket.questionForm &&
       ticket.questionForm.length > 0 &&
       !showQuestionForm
@@ -159,64 +202,108 @@ export default function EventDetailsPage() {
 
     try {
       setIsRegistering(true);
-      const result = await guestTicketService.registerForTicket({
-        eventTicketId: ticketId,
-        questionAnswers:
-          Object.keys(questionAnswers).length > 0 ? questionAnswers : undefined,
-      });
 
-      if (result.success) {
-        setShowQuestionForm(false);
-        setQuestionAnswers({});
+      // If we have an invite token, use the accept invitation API
+      if (inviteToken && invitationPreview?.success) {
+        const result = await guestTicketService.acceptTicketInvite(inviteToken);
 
-        // Check if user was added to waitlist
-        if (result.isWaitlisted) {
-          toast.success(
-            result.message || `Added to waitlist at position #${result.waitlistPosition}!`,
-            { duration: 5000 }
-          );
-          setShowTicketSelector(false);
-          setSelectedTicketId(null);
-          router.push("/my-tickets");
-          return;
-        }
+        if (result.success) {
+          // Check if payment is required
+          if (result.requiresPayment && result.guestTicket) {
+            try {
+              const paymentResponse = await paymentService.createTicketPaymentIntent(result.guestTicket.id);
 
-        // Check if payment is required
-        if (result.requiresPayment && result.guestTicket.status === GuestTicketStatus.PENDING_PAYMENT) {
-          // Get payment intent for this guest ticket
-          try {
-            const paymentResponse = await paymentService.createTicketPaymentIntent(result.guestTicket.id);
-
-            if (paymentResponse.success && paymentResponse.clientSecret) {
-              setPaymentData({
-                clientSecret: paymentResponse.clientSecret,
-                amount: paymentResponse.amount || 0,
-                currency: paymentResponse.currency || 'gbp',
-                ticketDetails: paymentResponse.ticketDetails || {
-                  ticketName: ticket?.name || 'Ticket',
-                  eventName: event?.name || 'Event',
-                  price: Number(ticket?.price) || 0,
-                },
-                guestTicketId: result.guestTicket.id,
-              });
-              setShowPaymentModal(true);
-              setShowTicketSelector(false);
-              setSelectedTicketId(null);
-            } else {
-              throw new Error(paymentResponse.error || 'Failed to create payment');
+              if (paymentResponse.success && paymentResponse.clientSecret) {
+                setPaymentData({
+                  clientSecret: paymentResponse.clientSecret,
+                  amount: paymentResponse.amount || 0,
+                  currency: paymentResponse.currency || 'gbp',
+                  ticketDetails: paymentResponse.ticketDetails || {
+                    ticketName: invitationPreview.ticket?.name || 'Ticket',
+                    eventName: event?.name || 'Event',
+                    price: Number(ticket?.price) || 0,
+                  },
+                  guestTicketId: result.guestTicket.id,
+                });
+                setShowPaymentModal(true);
+              } else {
+                throw new Error(paymentResponse.error || 'Failed to create payment');
+              }
+            } catch (paymentError: any) {
+              console.error("Payment setup failed:", paymentError);
+              toast.error(
+                paymentError.response?.data?.message || "Failed to setup payment. Please try again from My Tickets."
+              );
+              router.push("/my-tickets");
             }
-          } catch (paymentError: any) {
-            console.error("Payment setup failed:", paymentError);
-            toast.error(
-              paymentError.response?.data?.message || "Failed to setup payment. Please try again from My Tickets."
-            );
+          } else {
+            toast.success(result.message || "Invitation accepted successfully!");
             router.push("/my-tickets");
           }
         } else {
-          toast.success(result.message || "Successfully registered for event!");
-          setShowTicketSelector(false);
-          setSelectedTicketId(null);
-          router.push("/my-tickets");
+          toast.error(result.message || "Failed to accept invitation");
+        }
+      } else {
+        // Normal registration flow
+        const result = await guestTicketService.registerForTicket({
+          eventTicketId: ticketId,
+          questionAnswers:
+            Object.keys(questionAnswers).length > 0 ? questionAnswers : undefined,
+        });
+
+        if (result.success) {
+          setShowQuestionForm(false);
+          setQuestionAnswers({});
+
+          // Check if user was added to waitlist
+          if (result.isWaitlisted) {
+            toast.success(
+              result.message || `Added to waitlist at position #${result.waitlistPosition}!`,
+              { duration: 5000 }
+            );
+            setShowTicketSelector(false);
+            setSelectedTicketId(null);
+            router.push("/my-tickets");
+            return;
+          }
+
+          // Check if payment is required
+          if (result.requiresPayment && result.guestTicket.status === GuestTicketStatus.PENDING_PAYMENT) {
+            // Get payment intent for this guest ticket
+            try {
+              const paymentResponse = await paymentService.createTicketPaymentIntent(result.guestTicket.id);
+
+              if (paymentResponse.success && paymentResponse.clientSecret) {
+                setPaymentData({
+                  clientSecret: paymentResponse.clientSecret,
+                  amount: paymentResponse.amount || 0,
+                  currency: paymentResponse.currency || 'gbp',
+                  ticketDetails: paymentResponse.ticketDetails || {
+                    ticketName: ticket?.name || 'Ticket',
+                    eventName: event?.name || 'Event',
+                    price: Number(ticket?.price) || 0,
+                  },
+                  guestTicketId: result.guestTicket.id,
+                });
+                setShowPaymentModal(true);
+                setShowTicketSelector(false);
+                setSelectedTicketId(null);
+              } else {
+                throw new Error(paymentResponse.error || 'Failed to create payment');
+              }
+            } catch (paymentError: any) {
+              console.error("Payment setup failed:", paymentError);
+              toast.error(
+                paymentError.response?.data?.message || "Failed to setup payment. Please try again from My Tickets."
+              );
+              router.push("/my-tickets");
+            }
+          } else {
+            toast.success(result.message || "Successfully registered for event!");
+            setShowTicketSelector(false);
+            setSelectedTicketId(null);
+            router.push("/my-tickets");
+          }
         }
       }
     } catch (error: any) {
@@ -731,6 +818,50 @@ export default function EventDetailsPage() {
               )}
             </div>
 
+            {/* Invitation Banner */}
+            {inviteToken && invitationPreview?.success && (
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20">
+                    <Gift className="h-5 w-5 text-emerald-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-emerald-400">
+                      You&apos;ve been invited!
+                    </h3>
+                    <p className="text-sm text-emerald-300/80">
+                      You have an invitation for the <span className="font-medium">{invitationPreview.ticket?.name}</span> ticket
+                      {invitationPreview.ticket?.bypassPayment && invitationPreview.ticket?.isPaid && (
+                        <span className="ml-1">(payment waived)</span>
+                      )}
+                      {invitationPreview.bypassApproval && (
+                        <span className="ml-1">(no approval required)</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Invitation Error Banner */}
+            {inviteToken && invitationError && (
+              <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20">
+                    <X className="h-5 w-5 text-red-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-red-400">
+                      Invalid Invitation
+                    </h3>
+                    <p className="text-sm text-red-300/80">
+                      {invitationError}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Tickets */}
             {event.eventTickets && event.eventTickets.length > 0 && (() => {
               const isEventEnded = new Date(event.endDateTime) < new Date();
@@ -739,6 +870,9 @@ export default function EventDetailsPage() {
               // Allow registration even when sold out (for waitlist), but not if user already has ticket
               const canRegister = event.status === EventStatus.PUBLISHED && !isEventEnded && !hasUserTicket;
               const showClosedMessage = isEventEnded && !hasUserTicket;
+              // Check if we have a valid invitation
+              const hasValidInvitation = inviteToken && invitationPreview?.success;
+              const invitedTicketId = invitationPreview?.ticket?.id;
 
               return (
                 <div className="rounded-xl bg-card-background backdrop-blur-xl p-6 border border-neutral-700">
@@ -760,29 +894,39 @@ export default function EventDetailsPage() {
                       const isManuallyUnavailable = !ticket.isAvailable; // Organizer disabled this ticket
                       const isOwnedTicket = event.userTicket?.ticketName === ticket.name;
                       const isActiveTicket = isOwnedTicket && isTicketUsable(event.userTicket!.status as GuestTicketStatus);
+                      // Check if this is the invited ticket
+                      const isInvitedTicket = hasValidInvitation && ticket.id === invitedTicketId;
+                      // In invitation mode, only the invited ticket is selectable
+                      const isDisabledByInvitation = hasValidInvitation && !isInvitedTicket;
                       // Can select sold out tickets for waitlist, but not if organizer disabled or user has ticket
-                      const isDisabled = !canRegister || isManuallyUnavailable || hasUserTicket;
+                      const isDisabled = !canRegister || isManuallyUnavailable || hasUserTicket || isDisabledByInvitation;
 
                       return (
                         <div
                           key={ticket.id}
-                          onClick={() => !isDisabled && setSelectedTicketId(ticket.id)}
+                          onClick={() => !isDisabled && !isDisabledByInvitation && setSelectedTicketId(ticket.id)}
                           className={`flex items-center justify-between gap-2 sm:gap-4 rounded-xl border p-3 sm:p-4 transition-all ${
                             isOwnedTicket
                               ? isActiveTicket
                                 ? "border-green-500/30 bg-green-500/10 cursor-default"
                                 : "border-yellow-500/30 bg-yellow-500/10 cursor-default"
-                              : isDisabled
-                                ? "border-white/10 bg-card-secondary-background opacity-50 cursor-not-allowed"
-                                : isSelected
-                                  ? "border-primary bg-primary/10 cursor-pointer"
-                                  : "border-white/10 bg-card-secondary-background cursor-pointer hover:border-white/20"
+                              : isInvitedTicket
+                                ? "border-emerald-500/50 bg-emerald-500/10 cursor-pointer ring-2 ring-emerald-500/30"
+                                : isDisabledByInvitation
+                                  ? "border-white/5 bg-card-secondary-background opacity-40 cursor-not-allowed"
+                                  : isDisabled
+                                    ? "border-white/10 bg-card-secondary-background opacity-50 cursor-not-allowed"
+                                    : isSelected
+                                      ? "border-primary bg-primary/10 cursor-pointer"
+                                      : "border-white/10 bg-card-secondary-background cursor-pointer hover:border-white/20"
                           }`}
                         >
                           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                             {isOwnedTicket ? (
                               <CheckCircle2 className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 ${isActiveTicket ? "text-green-400" : "text-yellow-400"}`} />
-                            ) : canRegister && !isManuallyUnavailable && (
+                            ) : isInvitedTicket ? (
+                              <Gift className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-emerald-400" />
+                            ) : canRegister && !isManuallyUnavailable && !isDisabledByInvitation && (
                               <div
                                 className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                                   isSelected ? "border-primary" : "border-white/30"
@@ -794,8 +938,11 @@ export default function EventDetailsPage() {
                               </div>
                             )}
                             <div className="min-w-0">
-                              <h3 className="text-sm sm:text-base font-semibold text-foreground break-words">
+                              <h3 className={`text-sm sm:text-base font-semibold break-words ${isInvitedTicket ? "text-emerald-400" : "text-foreground"}`}>
                                 {ticket.name}
+                                {isInvitedTicket && (
+                                  <span className="ml-2 text-xs font-normal text-emerald-300/80">(Invited)</span>
+                                )}
                               </h3>
                               <p className="text-xs sm:text-sm text-muted-foreground">
                                 {isOwnedTicket ? (
@@ -804,6 +951,10 @@ export default function EventDetailsPage() {
                                   ) : (
                                     <span className="text-yellow-400">{getTicketStatusText(event.userTicket!.status as GuestTicketStatus)}</span>
                                   )
+                                ) : isInvitedTicket ? (
+                                  <span className="text-emerald-300/80">
+                                    {invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid ? "Free with invitation" : `${remaining} left`}
+                                  </span>
                                 ) : isManuallyUnavailable ? (
                                   <span className="text-gray-400">Unavailable</span>
                                 ) : isSoldOut ? (
@@ -815,11 +966,14 @@ export default function EventDetailsPage() {
                             </div>
                           </div>
                           <div className="text-right shrink-0">
-                            <p className="text-base sm:text-xl font-bold text-foreground">
+                            <p className={`text-base sm:text-xl font-bold ${isInvitedTicket && invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid ? "text-emerald-400 line-through decoration-emerald-400/50" : "text-foreground"}`}>
                               {Number(ticket.price) === 0
                                 ? "Free"
                                 : `£${Number(ticket.price).toFixed(2)}`}
                             </p>
+                            {isInvitedTicket && invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid && (
+                              <p className="text-sm font-semibold text-emerald-400">Free</p>
+                            )}
                           </div>
                         </div>
                       );
@@ -850,8 +1004,29 @@ export default function EventDetailsPage() {
                     </div>
                   )}
 
-                  {/* Register/Join Waitlist Button */}
-                  {canRegister && event.eventTickets.some(t => t.isAvailable) && (
+                  {/* Accept Invitation Button (for invitation mode) */}
+                  {hasValidInvitation && canRegister && (
+                    <button
+                      onClick={() => invitedTicketId && handleRegister(invitedTicketId)}
+                      disabled={isRegistering}
+                      className="w-full mt-4 rounded-xl bg-emerald-500 px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {isRegistering ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Accepting invitation...
+                        </>
+                      ) : (
+                        <>
+                          <Gift className="h-4 w-4" />
+                          Accept Invitation
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Register/Join Waitlist Button (for normal mode) */}
+                  {!hasValidInvitation && canRegister && event.eventTickets.some(t => t.isAvailable) && (
                     <button
                       onClick={() => selectedTicketId && handleRegister(selectedTicketId)}
                       disabled={!selectedTicketId || isRegistering}
