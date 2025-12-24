@@ -313,7 +313,7 @@ export default function EventManagementPage() {
       </div>
 
       {/* Tab Content */}
-      <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="mx-auto max-w-6xl px-6 pb-8">
         {currentTab === "overview" && (
           <OverviewTab
             eventData={eventData}
