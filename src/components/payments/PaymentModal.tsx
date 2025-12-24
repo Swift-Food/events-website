@@ -89,7 +89,7 @@ function PaymentForm({ onClose, onSuccess, ticketDetails, amount, currency }: Pa
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto">
-      <div className="bg-gradient-to-b from-card-background to-card-secondary-background rounded-2xl sm:rounded-3xl border border-white/10 w-full max-w-md max-h-[90vh] overflow-hidden shadow-2xl shadow-black/50 my-auto">
+      <div className="bg-background rounded-2xl sm:rounded-3xl border border-white/10 w-full max-w-md max-h-[90vh] overflow-hidden my-auto">
         {/* Header */}
         <div className="relative p-4 sm:p-6 pb-3 sm:pb-4">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent" />
@@ -158,7 +158,7 @@ function PaymentForm({ onClose, onSuccess, ticketDetails, amount, currency }: Pa
               <button
                 type="submit"
                 disabled={isSubmitDisabled}
-                className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 text-sm rounded-xl bg-primary text-white font-semibold shadow-lg shadow-primary/25 hover:bg-primary/90 hover:shadow-primary/40 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 text-sm rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isProcessing ? (
                   <>
@@ -234,7 +234,7 @@ export function PaymentSuccessModal({ isOpen, onClose, ticketDetails }: PaymentS
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto">
-      <div className="bg-gradient-to-b from-card-background to-card-secondary-background rounded-2xl sm:rounded-3xl border border-white/10 w-full max-w-md overflow-hidden shadow-2xl shadow-black/50 text-center p-6 sm:p-8 my-auto">
+      <div className="bg-background rounded-2xl sm:rounded-3xl border border-white/10 w-full max-w-md overflow-hidden text-center p-6 sm:p-8 my-auto">
         <div className="rounded-full bg-green-500/20 p-3 sm:p-4 w-fit mx-auto mb-3 sm:mb-4">
           <Check className="h-6 w-6 sm:h-8 sm:w-8 text-green-400" />
         </div>
@@ -247,7 +247,7 @@ export function PaymentSuccessModal({ isOpen, onClose, ticketDetails }: PaymentS
 
         <button
           onClick={onClose}
-          className="w-full px-6 py-2.5 sm:py-3 rounded-xl bg-primary text-white text-sm sm:text-base font-semibold shadow-lg shadow-primary/25 hover:bg-primary/90 hover:scale-[1.02] transition-all"
+          className="w-full px-6 py-2.5 sm:py-3 rounded-xl bg-primary text-white text-sm sm:text-base font-semibold hover:bg-primary/90 transition-all"
         >
           View My Tickets
         </button>
