@@ -368,6 +368,33 @@ class GuestTicketService {
       await apiClient.get(`${this.baseUrl}/event-ticket/${eventTicketId}/waitlist-count`);
     return response.data;
   }
+
+  // ==================== APPLE WALLET METHODS ====================
+
+  /**
+   * Check if Apple Wallet is available for a ticket
+   * GET /guest-tickets/:id/wallet/available
+   */
+  async checkWalletAvailable(ticketId: string): Promise<{
+    available: boolean;
+    ticketStatus: string;
+    canAddToWallet: boolean;
+  }> {
+    const response = await apiClient.get(`${this.baseUrl}/${ticketId}/wallet/available`);
+    return response.data;
+  }
+
+  /**
+   * Download Apple Wallet pass for a ticket
+   * GET /guest-tickets/:id/wallet
+   * Returns the .pkpass file as a blob
+   */
+  async downloadWalletPass(ticketId: string): Promise<Blob> {
+    const response = await apiClient.get(`${this.baseUrl}/${ticketId}/wallet`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  }
 }
 
 export const guestTicketService = new GuestTicketService();

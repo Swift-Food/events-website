@@ -45,6 +45,25 @@ export interface EventUserResponse {
   eventUser: EventUserProfile;
 }
 
+export interface OrganizerEarnings {
+  availableBalance: number;
+  pendingBalance: number;
+  totalEarnings: number;
+  totalWithdrawn: number;
+  currency: string;
+  payoutTriggered?: boolean;
+  payoutMessage?: string;
+}
+
+export interface PayoutHistoryItem {
+  id: string;
+  amount: number;
+  netAmount: number;
+  status: string;
+  requestedAt: string;
+  notes?: string;
+}
+
 class EventUserService {
   private readonly baseUrl = '/event-users';
 
@@ -122,6 +141,27 @@ class EventUserService {
   async getById(id: string): Promise<EventUserProfile> {
     const response: AxiosResponse<EventUserProfile> = await apiClient.get(
       `${this.baseUrl}/${id}`
+    );
+    return response.data;
+  }
+
+  /**
+   * Get earnings and trigger auto-payout if available.
+   * When organizer views this after event ends, payout is automatically processed.
+   */
+  async getEarnings(): Promise<OrganizerEarnings> {
+    const response: AxiosResponse<OrganizerEarnings> = await apiClient.get(
+      `${this.baseUrl}/me/balance`
+    );
+    return response.data;
+  }
+
+  /**
+   * Get payout history
+   */
+  async getPayoutHistory(): Promise<PayoutHistoryItem[]> {
+    const response: AxiosResponse<PayoutHistoryItem[]> = await apiClient.get(
+      `${this.baseUrl}/me/withdrawals`
     );
     return response.data;
   }
