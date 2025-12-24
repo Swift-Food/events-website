@@ -233,7 +233,8 @@ export default function JoinEventPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-2xl px-6 py-8">
+      <div className="mx-auto max-w-6xl px-6 py-8">
+        {/* Back Button */}
         <Link
           href="/events"
           className="mb-6 flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
@@ -253,129 +254,147 @@ export default function JoinEventPage() {
           </p>
         </div>
 
-        {/* Event Card */}
-        <div className="mb-6 overflow-hidden rounded-2xl border border-neutral-700 bg-card-background">
-          {/* Event Image */}
-          <div className="relative aspect-video w-full overflow-hidden bg-card-secondary-background">
-            {event.eventImage ? (
-              <Image
-                src={event.eventImage}
-                alt={event.name}
-                fill
-                className="object-cover"
-                priority
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center bg-primary/20">
-                <Calendar className="h-24 w-24 text-primary/30" />
-              </div>
-            )}
-          </div>
+        {/* Main Content - Two Column Layout */}
+        <div className="flex flex-col gap-6 lg:flex-row-reverse">
+          {/* Left Column - Image, Date, Role, Accept Button */}
+          <section className="flex flex-col gap-6 lg:w-96 lg:shrink-0">
+            {/* Event Image */}
+            <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-neutral-700 bg-card-secondary-background">
+              {event.eventImage ? (
+                <Image
+                  src={event.eventImage}
+                  alt={event.name}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center bg-primary/20">
+                  <Calendar className="h-24 w-24 text-primary/30" />
+                </div>
+              )}
+            </div>
 
-          {/* Event Details */}
-          <div className="p-6">
-            <h1 className="mb-4 text-2xl font-bold tracking-tight text-foreground">
-              {event.name}
-            </h1>
-
-            {/* Date & Time */}
-            <div className="mb-4 flex gap-4">
-              <div className="flex flex-col items-center py-1">
-                <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
-                {!isSameDay(event.startDateTime, event.endDateTime) && (
-                  <>
-                    <div className="my-2 w-0.5 flex-1 rounded-full bg-primary/30"></div>
-                    <div className="h-3 w-3 rounded-full bg-primary/30 shadow-md"></div>
-                  </>
-                )}
-              </div>
-              <div className="flex-1">
+            {/* Date & Time Card */}
+            <div className="rounded-xl border border-neutral-700 bg-card-background p-6">
+              <h3 className="mb-4 text-lg font-semibold text-foreground">
+                Date & Time
+              </h3>
+              <div className="flex gap-4">
                 {isSameDay(event.startDateTime, event.endDateTime) ? (
                   <>
-                    <p className="font-medium text-foreground">
-                      {formatDate(event.startDateTime)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatTime(event.startDateTime)} -{" "}
-                      {formatTime(event.endDateTime)}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <div className="mb-3">
+                    <div className="flex flex-col items-center py-1">
+                      <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
+                    </div>
+                    <div className="flex-1">
                       <p className="font-medium text-foreground">
                         {formatDate(event.startDateTime)}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {formatTime(event.startDateTime)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">
-                        {formatDate(event.endDateTime)}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
+                        {formatTime(event.startDateTime)} -{" "}
                         {formatTime(event.endDateTime)}
                       </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex flex-col items-center py-1">
+                      <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
+                      <div className="my-2 w-0.5 flex-1 rounded-full bg-primary/30"></div>
+                      <div className="h-3 w-3 rounded-full bg-primary/30 shadow-md"></div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="mb-3">
+                        <p className="font-medium text-foreground">
+                          {formatDate(event.startDateTime)}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatTime(event.startDateTime)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">
+                          {formatDate(event.endDateTime)}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatTime(event.endDateTime)}
+                        </p>
+                      </div>
                     </div>
                   </>
                 )}
               </div>
             </div>
 
+            {/* Role Info Card */}
+            <div
+              className={`rounded-xl border ${roleInfo.borderColor} ${roleInfo.bgColor} p-4`}
+            >
+              <h3 className="mb-3 text-lg font-semibold text-foreground">
+                Your Role
+              </h3>
+              <div className="flex items-center gap-3">
+                <RoleIcon className={`h-6 w-6 ${roleInfo.color}`} />
+                <div>
+                  <p className={`font-semibold ${roleInfo.color}`}>
+                    {roleInfo.label}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {roleInfo.description}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Accept Button */}
+            <button
+              onClick={handleAccept}
+              disabled={accepting}
+              className="w-full rounded-xl bg-primary px-6 py-3 text-base font-semibold text-white transition-all hover:bg-primary/80 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {accepting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Accepting...
+                </span>
+              ) : isAuthenticated ? (
+                "Accept Invitation"
+              ) : (
+                "Sign in to Accept"
+              )}
+            </button>
+
+            {!isAuthenticated && (
+              <p className="text-center text-sm text-muted-foreground">
+                You&apos;ll need to sign in or create an account to accept this
+                invitation
+              </p>
+            )}
+          </section>
+
+          {/* Right Column - Event Name and Description */}
+          <section className="flex flex-1 flex-col gap-6">
+            {/* Event Title */}
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                {event.name}
+              </h1>
+            </div>
+
             {/* Description */}
             {event.description && (
-              <div className="mb-4 rounded-xl border border-neutral-700 bg-card-secondary-background p-4">
+              <div>
+                <h2 className="mb-4 text-lg font-semibold text-muted-foreground">
+                  About this event
+                </h2>
                 <div
-                  className="tiptap-editor tiptap-view-mode text-sm text-muted-foreground line-clamp-3"
+                  className="tiptap-editor tiptap-view-mode"
                   dangerouslySetInnerHTML={{ __html: event.description }}
                 />
               </div>
             )}
-          </div>
+          </section>
         </div>
-
-        {/* Role Info */}
-        <div
-          className={`mb-6 rounded-xl border ${roleInfo.borderColor} ${roleInfo.bgColor} p-4`}
-        >
-          <div className="flex items-center gap-3">
-            <RoleIcon className={`h-6 w-6 ${roleInfo.color}`} />
-            <div>
-              <p className={`font-semibold ${roleInfo.color}`}>
-                {roleInfo.label}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {roleInfo.description}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Accept Button */}
-        <button
-          onClick={handleAccept}
-          disabled={accepting}
-          className="w-full rounded-xl bg-primary px-6 py-3 text-base font-semibold text-white transition-all hover:bg-primary/80 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {accepting ? (
-            <span className="flex items-center justify-center gap-2">
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Accepting...
-            </span>
-          ) : isAuthenticated ? (
-            "Accept Invitation"
-          ) : (
-            "Sign in to Accept"
-          )}
-        </button>
-
-        {!isAuthenticated && (
-          <p className="mt-3 text-center text-sm text-muted-foreground">
-            You&apos;ll need to sign in or create an account to accept this
-            invitation
-          </p>
-        )}
       </div>
     </div>
   );
