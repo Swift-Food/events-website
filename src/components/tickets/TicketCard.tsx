@@ -3,8 +3,25 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { GuestTicketWithEventResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
-import { Calendar, Ticket, QrCode, X, Clock, CheckCircle2, XCircle, AlertCircle, Loader2, ExternalLink, AlertTriangle, RotateCcw, Wallet } from "lucide-react";
+import {
+  GuestTicketWithEventResponseDto,
+  GuestTicketStatus,
+} from "@/types/guest-ticket";
+import {
+  Calendar,
+  Ticket,
+  QrCode,
+  X,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  Loader2,
+  ExternalLink,
+  AlertTriangle,
+  RotateCcw,
+  Wallet,
+} from "lucide-react";
 import { toast } from "sonner";
 import TicketQRCode from "./TicketQRCode";
 import { format } from "date-fns";
@@ -50,7 +67,10 @@ function ConfirmModal({
 
   const iconBg = variant === "danger" ? "bg-red-500/20" : "bg-amber-500/20";
   const iconColor = variant === "danger" ? "text-red-400" : "text-amber-400";
-  const buttonBg = variant === "danger" ? "bg-red-500 hover:bg-red-600" : "bg-amber-500 hover:bg-amber-600";
+  const buttonBg =
+    variant === "danger"
+      ? "bg-red-500 hover:bg-red-600"
+      : "bg-amber-500 hover:bg-amber-600";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
@@ -65,7 +85,9 @@ function ConfirmModal({
           </div>
           <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         </div>
-        <p className="text-muted-foreground text-sm mb-6 leading-relaxed">{message}</p>
+        <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+          {message}
+        </p>
         <div className="flex gap-3">
           <button
             onClick={onClose}
@@ -94,7 +116,10 @@ function ConfirmModal({
   );
 }
 
-const statusConfig: Record<GuestTicketStatus, { label: string; color: string; icon: React.ReactNode }> = {
+const statusConfig: Record<
+  GuestTicketStatus,
+  { label: string; color: string; icon: React.ReactNode }
+> = {
   [GuestTicketStatus.ACTIVE]: {
     label: "Active",
     color: "bg-green-500/20 text-green-400",
@@ -161,11 +186,13 @@ export default function TicketCard({
   // Detect iOS device (iPhone, iPad, iPod)
   useEffect(() => {
     const checkIsIOS = () => {
-      if (typeof window === 'undefined') return false;
+      if (typeof window === "undefined") return false;
       const userAgent = window.navigator.userAgent.toLowerCase();
       // Check for iOS devices including iPad on iOS 13+ (which reports as MacIntel)
-      return /iphone|ipad|ipod/.test(userAgent) ||
-        (userAgent.includes('mac') && 'ontouchend' in document);
+      return (
+        /iphone|ipad|ipod/.test(userAgent) ||
+        (userAgent.includes("mac") && "ontouchend" in document)
+      );
     };
     setIsIOS(checkIsIOS());
   }, []);
@@ -176,8 +203,12 @@ export default function TicketCard({
       setWalletAvailable(false);
       return;
     }
-    if (ticket.status === GuestTicketStatus.ACTIVE || ticket.status === GuestTicketStatus.CHECKED_IN) {
-      guestTicketService.checkWalletAvailable(ticket.id)
+    if (
+      ticket.status === GuestTicketStatus.ACTIVE ||
+      ticket.status === GuestTicketStatus.CHECKED_IN
+    ) {
+      guestTicketService
+        .checkWalletAvailable(ticket.id)
         .then((result) => setWalletAvailable(result.canAddToWallet))
         .catch(() => setWalletAvailable(false));
     }
@@ -190,7 +221,7 @@ export default function TicketCard({
 
       // Create download link
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = `ticket-${ticket.id}.pkpass`;
       document.body.appendChild(link);
@@ -200,7 +231,9 @@ export default function TicketCard({
 
       toast.success("Pass downloaded! Open it to add to Apple Wallet.");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to download wallet pass");
+      toast.error(
+        error.response?.data?.message || "Failed to download wallet pass"
+      );
     } finally {
       setIsAddingToWallet(false);
     }
@@ -214,17 +247,24 @@ export default function TicketCard({
   const isActive = ticket.status === GuestTicketStatus.ACTIVE;
   const isWaitlisted = ticket.status === GuestTicketStatus.WAITLISTED;
   const isPaidTicket = ticket.ticketPrice > 0;
-  const canCancel = (ticket.status === GuestTicketStatus.PENDING_PAYMENT ||
-    ticket.status === GuestTicketStatus.PENDING_APPROVAL) && isUpcoming && onCancel;
+  const canCancel =
+    (ticket.status === GuestTicketStatus.PENDING_PAYMENT ||
+      ticket.status === GuestTicketStatus.PENDING_APPROVAL) &&
+    isUpcoming &&
+    onCancel;
   // For active tickets: paid tickets can refund, free tickets can cancel
   const canRefund = isActive && isUpcoming && isPaidTicket && onRefund;
   const canCancelActive = isActive && isUpcoming && !isPaidTicket && onCancel;
   const canLeaveWaitlist = isWaitlisted && isUpcoming && onLeaveWaitlist;
 
   // Check if there's a claim deadline (for promoted paid tickets)
-  const hasClaimDeadline = isPendingPayment && ticket.claimDeadline && ticket.wasWaitlisted;
-  const claimDeadline = ticket.claimDeadline ? new Date(ticket.claimDeadline) : null;
-  const isClaimExpiringSoon = claimDeadline && (claimDeadline.getTime() - Date.now()) < 3600000; // Less than 1 hour
+  const hasClaimDeadline =
+    isPendingPayment && ticket.claimDeadline && ticket.wasWaitlisted;
+  const claimDeadline = ticket.claimDeadline
+    ? new Date(ticket.claimDeadline)
+    : null;
+  const isClaimExpiringSoon =
+    claimDeadline && claimDeadline.getTime() - Date.now() < 3600000; // Less than 1 hour
 
   const handleCancelClick = () => {
     setShowCancelModal(true);
@@ -273,7 +313,9 @@ export default function TicketCard({
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-card-background/80 to-transparent" />
           <div className="absolute top-3 right-3">
-            <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm ${status.color}`}>
+            <span
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm ${status.color}`}
+            >
               {status.icon}
               {status.label}
             </span>
@@ -323,7 +365,9 @@ export default function TicketCard({
                     ) : (
                       <Wallet className="h-4 w-4" />
                     )}
-                    {isAddingToWallet ? "Downloading..." : "Add to Apple Wallet"}
+                    {isAddingToWallet
+                      ? "Downloading..."
+                      : "Add to Apple Wallet"}
                   </button>
                 )}
                 <div className="flex items-center justify-between pt-1">
@@ -371,15 +415,18 @@ export default function TicketCard({
               <div className="space-y-3">
                 {/* Claim deadline warning for promoted waitlist tickets */}
                 {hasClaimDeadline && claimDeadline && (
-                  <div className={`flex items-center gap-2 p-3 rounded-lg text-sm ${
-                    isClaimExpiringSoon
-                      ? "bg-red-500/20 text-red-400"
-                      : "bg-amber-500/20 text-amber-400"
-                  }`}>
+                  <div
+                    className={`flex items-center gap-2 p-3 rounded-lg text-sm ${
+                      isClaimExpiringSoon
+                        ? "bg-red-500/20 text-red-400"
+                        : "bg-amber-500/20 text-amber-400"
+                    }`}
+                  >
                     <AlertCircle className="h-4 w-4 shrink-0" />
                     <span>
                       {isClaimExpiringSoon ? "Expires soon! " : ""}
-                      Complete payment by {format(claimDeadline, "MMM d 'at' h:mm a")}
+                      Complete payment by{" "}
+                      {format(claimDeadline, "MMM d 'at' h:mm a")}
                     </span>
                   </div>
                 )}
@@ -538,7 +585,7 @@ export default function TicketCard({
       {/* QR Code Modal */}
       {showQRModal && ticket.qrCode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-card-background rounded-2xl p-6 max-w-xs w-full shadow-2xl border border-white/5">
+          <div className="bg-card-background rounded-2xl p-6 max-w-xs w-full shadow-2xl border border-white/5 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-bold text-foreground">Your Ticket</h3>
               <button
@@ -558,18 +605,26 @@ export default function TicketCard({
               />
 
               <div className="mt-5 text-center">
-                <p className="text-foreground font-semibold text-sm">{ticket.eventName}</p>
-                <p className="text-muted-foreground text-xs mt-1">{ticket.ticketName}</p>
+                <p className="text-foreground font-semibold text-sm">
+                  {ticket.eventName}
+                </p>
+                <p className="text-muted-foreground text-xs mt-1">
+                  {ticket.ticketName}
+                </p>
                 <p className="text-muted-foreground text-xs mt-1">
                   {format(eventDate, "EEE, MMM d 'at' h:mm a")}
                 </p>
               </div>
 
-              {/* Manual entry code - subtle fallback */}
+              {/* Manual entry code - subtle fallback with better spacing */}
               {ticket.checkInCodeFormatted && (
-                <div className="mt-4 pt-4 border-t border-white/5 w-full text-center">
-                  <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wide">Manual Entry Code</p>
-                  <p className="font-mono text-sm text-muted-foreground mt-0.5">{ticket.checkInCodeFormatted}</p>
+                <div className="mt-6 pt-4 border-t border-white/5 w-full text-center pb-2">
+                  <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wide mb-1">
+                    Manual Entry Code
+                  </p>
+                  <p className="font-mono text-sm text-muted-foreground select-all">
+                    {ticket.checkInCodeFormatted}
+                  </p>
                 </div>
               )}
             </div>
