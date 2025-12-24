@@ -341,27 +341,11 @@ export default function EventDetailsPage() {
       {userRole && (
         <div className={`sm:hidden border-y ${userRole === "scanner" ? "border-blue-500/30 bg-blue-500/10" : userRole === "admin" ? "border-purple-500/30 bg-purple-500/10" : "border-amber-500/30 bg-amber-500/10"}`}>
           <div className="px-6 py-3 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <span
-                className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
-                  userRole === "owner"
-                    ? "bg-amber-500/30 text-amber-400"
-                    : userRole === "admin"
-                    ? "bg-purple-500/30 text-purple-400"
-                    : "bg-blue-500/30 text-blue-400"
-                }`}
-              >
-                {userRole === "owner" && <Crown className="h-3 w-3" />}
-                {userRole === "admin" && <Shield className="h-3 w-3" />}
-                {userRole === "scanner" && <ScanLine className="h-3 w-3" />}
-                {userRole === "owner" ? "Owner" : userRole === "admin" ? "Admin" : "Scanner"}
-              </span>
-              <span className="text-sm text-neutral-300">
-                {userRole === "scanner"
-                  ? "You can scan tickets for this event."
-                  : "You have manage access for this event."}
-              </span>
-            </div>
+            <span className="text-sm text-neutral-300">
+              {userRole === "scanner"
+                ? "You can scan tickets for this event."
+                : "You have manage access for this event."}
+            </span>
             {userRole === "scanner" ? (
               <Link
                 href={`/event-management/${eventId}/scanner`}
