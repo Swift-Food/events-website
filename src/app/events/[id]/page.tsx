@@ -441,7 +441,7 @@ export default function EventDetailsPage() {
               {userRole === "scanner"
                 ? "You can scan tickets for this event."
                 : userRole === "owner"
-                ? "You have full access to this event."
+                ? "You own this event."
                 : "You have manage access for this event."}
             </span>
             {userRole === "scanner" ? (
@@ -493,7 +493,7 @@ export default function EventDetailsPage() {
                 {userRole === "scanner"
                   ? "You can scan tickets for this event."
                   : userRole === "owner"
-                  ? "You have full access to this event."
+                  ? "You own this event."
                   : "You have manage access for this event."}
               </span>
             </div>
