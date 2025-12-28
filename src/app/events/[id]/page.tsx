@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
@@ -63,6 +63,24 @@ export default function EventDetailsPage() {
 
   // Calendar dropdown state
   const [showCalendarDropdown, setShowCalendarDropdown] = useState(false);
+  const calendarDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close calendar dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (calendarDropdownRef.current && !calendarDropdownRef.current.contains(event.target as Node)) {
+        setShowCalendarDropdown(false);
+      }
+    };
+
+    if (showCalendarDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showCalendarDropdown]);
 
   // Invitation preview state
   const [invitationPreview, setInvitationPreview] = useState<TicketInvitationPreviewDto | null>(null);
@@ -664,7 +682,7 @@ export default function EventDetailsPage() {
                 </div>
 
                 {/* Add to Calendar Button */}
-                <div className="relative mt-4">
+                <div className="relative mt-4" ref={calendarDropdownRef}>
                   <button
                     onClick={() => setShowCalendarDropdown(!showCalendarDropdown)}
                     className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
