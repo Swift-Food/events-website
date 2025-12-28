@@ -680,7 +680,6 @@ export default function EventDetailsPage() {
                           window.open(
                             generateGoogleCalendarUrl({
                               title: event.name,
-                              description: event.description || undefined,
                               startDate: new Date(event.startDateTime),
                               endDate: new Date(event.endDateTime),
                               location: buildLocationString(event.address),
@@ -704,7 +703,6 @@ export default function EventDetailsPage() {
                           window.open(
                             generateOutlookCalendarUrl({
                               title: event.name,
-                              description: event.description || undefined,
                               startDate: new Date(event.startDateTime),
                               endDate: new Date(event.endDateTime),
                               location: buildLocationString(event.address),
@@ -724,7 +722,6 @@ export default function EventDetailsPage() {
                         onClick={() => {
                           downloadICSFile({
                             title: event.name,
-                            description: event.description || undefined,
                             startDate: new Date(event.startDateTime),
                             endDate: new Date(event.endDateTime),
                             location: buildLocationString(event.address),
