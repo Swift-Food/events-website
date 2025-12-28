@@ -726,7 +726,9 @@ export default function EventDetailsPage() {
                     {event.owner.user.profilePicture ? (
                       <Image
                         src={event.owner.user.profilePicture}
-                        alt={event.owner.user.username || "Organizer"}
+                        alt={(event.owner.firstName || event.owner.lastName)
+                          ? [event.owner.firstName, event.owner.lastName].filter(Boolean).join(' ')
+                          : event.owner.user.username || "Organizer"}
                         width={48}
                         height={48}
                         className="rounded-full"
@@ -738,7 +740,9 @@ export default function EventDetailsPage() {
                     )}
                     <div>
                       <p className="font-medium text-foreground">
-                        {event.owner.user.username || "Anonymous"}
+                        {(event.owner.firstName || event.owner.lastName)
+                          ? [event.owner.firstName, event.owner.lastName].filter(Boolean).join(' ')
+                          : event.owner.user.username || "Anonymous"}
                       </p>
                       <p className="text-sm text-muted-foreground">Organizer</p>
                     </div>
