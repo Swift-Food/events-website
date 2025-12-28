@@ -13,6 +13,7 @@ import { GuestTicketStatus } from "@/types/guest-ticket";
 import type { PaymentFlowState } from "@/types/payment";
 import {
   Calendar,
+  CalendarPlus,
   MapPin,
   Users,
   Clock,
@@ -33,6 +34,12 @@ import { toast } from "sonner";
 import PaymentModal, { PaymentSuccessModal } from "@/components/payments/PaymentModal";
 import RegistrationQuestionsModal from "@/components/RegistrationQuestionsModal";
 import { getTicketStatusText, getTicketStatusBadgeClasses, isTicketUsable } from "@/utils/ticket-status";
+import {
+  generateGoogleCalendarUrl,
+  generateOutlookCalendarUrl,
+  downloadICSFile,
+  buildLocationString,
+} from "@/utils/calendar";
 
 interface EventPreviewModalProps {
   eventId: string | null;
@@ -55,6 +62,9 @@ export default function EventPreviewModal({
   const [isRegistering, setIsRegistering] = useState(false);
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, any>>({});
+
+  // Calendar dropdown state
+  const [showCalendarDropdown, setShowCalendarDropdown] = useState(false);
 
   // Payment modal state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -522,6 +532,86 @@ export default function EventPreviewModal({
                         </div>
                       </div>
                     </>
+                  )}
+                </div>
+
+                {/* Add to Calendar Button */}
+                <div className="relative mt-4">
+                  <button
+                    onClick={() => setShowCalendarDropdown(!showCalendarDropdown)}
+                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
+                  >
+                    <CalendarPlus className="h-4 w-4" />
+                    Add to Calendar
+                  </button>
+
+                  {showCalendarDropdown && (
+                    <div className="absolute left-0 right-0 top-full z-10 mt-2 overflow-hidden rounded-lg border border-white/10 bg-card-background shadow-xl">
+                      <button
+                        onClick={() => {
+                          window.open(
+                            generateGoogleCalendarUrl({
+                              title: event.name,
+                              description: event.description || undefined,
+                              startDate: new Date(event.startDateTime),
+                              endDate: new Date(event.endDateTime),
+                              location: buildLocationString(event.address),
+                            }),
+                            '_blank'
+                          );
+                          setShowCalendarDropdown(false);
+                        }}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-sm text-foreground transition-colors hover:bg-white/5"
+                      >
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12.48 10.92v3.28h4.92c-.2 1.08-.72 1.96-1.52 2.56v2.12h2.44c1.44-1.32 2.28-3.28 2.28-5.6 0-.54-.04-1.08-.14-1.58h-7.98v-.78z" fill="#4285F4"/>
+                          <path d="M12 21c2.4 0 4.4-.8 5.86-2.12l-2.44-2.12c-.84.56-1.9.9-3.42.9-2.62 0-4.84-1.78-5.64-4.16H3.82v2.18C5.24 18.82 8.4 21 12 21z" fill="#34A853"/>
+                          <path d="M6.36 13.5c-.2-.6-.32-1.24-.32-1.9s.12-1.3.32-1.9V7.52H3.82C3.12 8.9 2.72 10.4 2.72 12s.4 3.1 1.1 4.48l2.54-2.98z" fill="#FBBC05"/>
+                          <path d="M12 5.38c1.62 0 3.06.56 4.2 1.64l2.58-2.58C17.36 2.74 14.96 1.8 12 1.8 8.4 1.8 5.24 3.98 3.82 7.12l2.54 2.98c.8-2.38 3.02-4.72 5.64-4.72z" fill="#EA4335"/>
+                        </svg>
+                        Google Calendar
+                      </button>
+                      <button
+                        onClick={() => {
+                          window.open(
+                            generateOutlookCalendarUrl({
+                              title: event.name,
+                              description: event.description || undefined,
+                              startDate: new Date(event.startDateTime),
+                              endDate: new Date(event.endDateTime),
+                              location: buildLocationString(event.address),
+                            }),
+                            '_blank'
+                          );
+                          setShowCalendarDropdown(false);
+                        }}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-sm text-foreground transition-colors hover:bg-white/5"
+                      >
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M7.88 12.04q0 .45-.11.87-.1.41-.33.74-.22.33-.58.52-.37.2-.87.2t-.85-.2q-.35-.21-.57-.55-.22-.33-.33-.75-.1-.42-.1-.86t.1-.87q.1-.43.34-.76.22-.34.59-.54.36-.2.87-.2t.86.2q.35.21.57.55.22.34.31.77.1.43.1.88zM24 12v9.38q0 .46-.33.8-.33.32-.8.32H7.13q-.46 0-.8-.33-.32-.33-.32-.8V18H1q-.41 0-.7-.3-.3-.29-.3-.7V7q0-.41.3-.7Q.58 6 1 6h6.5V2.55q0-.44.3-.75.3-.3.75-.3h12.9q.44 0 .75.3.3.3.3.75V12zM7.88 8.88h5.5q-.54-.11-1-.54-.47-.43-.75-.98l-2.7 1.1q-.04.12-.21.18-.19.06-.36.06H7.88v.18zm6.25 3.67q.13-.1.24-.21.12-.1.22-.22l.22-.22.17-.28.1-.32.04-.32q0-.45-.11-.87-.1-.42-.33-.76-.22-.34-.59-.54-.36-.2-.88-.2-.51 0-.88.2-.37.2-.59.54-.22.34-.33.76-.1.42-.1.87t.1.87q.1.43.33.76.22.33.59.54.37.2.88.2.51 0 .88-.2.37-.21.59-.54.22-.33.33-.76.1-.42.1-.87z" fill="#0078D4"/>
+                        </svg>
+                        Outlook Calendar
+                      </button>
+                      <button
+                        onClick={() => {
+                          downloadICSFile({
+                            title: event.name,
+                            description: event.description || undefined,
+                            startDate: new Date(event.startDateTime),
+                            endDate: new Date(event.endDateTime),
+                            location: buildLocationString(event.address),
+                          });
+                          setShowCalendarDropdown(false);
+                        }}
+                        className="flex w-full items-start gap-3 px-4 py-3 text-sm text-foreground transition-colors hover:bg-white/5"
+                      >
+                        <Calendar className="h-4 w-4 mt-0.5 shrink-0" />
+                        <div className="text-left">
+                          <p>Download .ics file</p>
+                          <p className="text-xs text-muted-foreground">Open to add to your calendar app</p>
+                        </div>
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
