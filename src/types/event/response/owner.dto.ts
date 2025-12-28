@@ -8,6 +8,8 @@ import { User } from "@/types/user";
 export interface EventOwnerResponseDto {
   id: string;
   userId: string;
+  firstName?: string;
+  lastName?: string;
   organizationName: string | null;
   user: User;
 }
