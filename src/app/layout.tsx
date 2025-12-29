@@ -111,6 +111,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="google-site-verification" content="adpKD3g-CZhZcqQThLRFwNkpl9_BD9tTxZbTJfkHPXE" />
         <Script
           src="https://accounts.google.com/gsi/client"
           strategy="beforeInteractive"
