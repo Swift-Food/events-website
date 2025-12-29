@@ -4,9 +4,12 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { eventService } from "@/services/event.service";
+import { calendarService } from "@/services/calendar.service";
 import { EventResponseDto } from "@/types/event";
-import { Calendar, Plus, Loader2, Users, History } from "lucide-react";
+import { Calendar as CalendarType } from "@/types/calendar";
+import { Calendar, Plus, Loader2, Users, History, CalendarDays, ChevronRight } from "lucide-react";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
+import HorizontalCalendarCard from "@/components/HorizontalCalendarCard";
 import Link from "next/link";
 
 type TabType = "upcoming" | "past";
@@ -20,6 +23,10 @@ export default function EventManagementPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>("upcoming");
 
+  // Calendars state
+  const [calendars, setCalendars] = useState<CalendarType[]>([]);
+  const [loadingCalendars, setLoadingCalendars] = useState(true);
+
   // Track which date headers are stuck
   const [stuckHeaders, setStuckHeaders] = useState<Set<string>>(new Set());
   const sentinelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -30,6 +37,21 @@ export default function EventManagementPage() {
       router.push("/auth");
     }
   }, [authLoading, isAuthenticated, router]);
+
+  // Fetch calendars
+  const fetchCalendars = async () => {
+    if (!isAuthenticated) return;
+
+    try {
+      setLoadingCalendars(true);
+      const result = await calendarService.getMyCalendars();
+      setCalendars(result ?? []);
+    } catch (err) {
+      console.error("Failed to fetch calendars:", err);
+    } finally {
+      setLoadingCalendars(false);
+    }
+  };
 
   // Fetch events
   const fetchEvents = async () => {
@@ -51,6 +73,7 @@ export default function EventManagementPage() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchEvents();
+      fetchCalendars();
     }
   }, [isAuthenticated]);
 
@@ -175,6 +198,71 @@ export default function EventManagementPage() {
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Create Event</span>
           </Link>
+        </div>
+
+        {/* Calendars Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <CalendarDays className="h-5 w-5" />
+              Your Calendars
+            </h2>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/calendars/create"
+                className="flex items-center gap-1.5 rounded-full border border-white/10 bg-card-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-white/5"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Create
+              </Link>
+              <Link
+                href="/calendars/me"
+                className="flex items-center gap-1 text-sm text-primary hover:underline"
+              >
+                View All
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Calendars Timeline View */}
+          {loadingCalendars ? (
+            <div className="flex min-h-[100px] items-center justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : calendars.length === 0 ? (
+            <div className="rounded-xl border border-white/10 bg-card-background p-6 text-center">
+              <CalendarDays className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
+              <h3 className="mb-2 text-base font-semibold text-foreground">
+                No calendars yet
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Create your first calendar to organize events
+              </p>
+              <Link
+                href="/calendars/create"
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                <Plus className="h-4 w-4" />
+                Create Calendar
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {calendars.slice(0, 3).map((calendar) => (
+                <HorizontalCalendarCard key={calendar.id} calendar={calendar} />
+              ))}
+              {calendars.length > 3 && (
+                <Link
+                  href="/calendars/me"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-card-background p-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                >
+                  View {calendars.length - 3} more calendar{calendars.length - 3 !== 1 ? 's' : ''}
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Tabs */}

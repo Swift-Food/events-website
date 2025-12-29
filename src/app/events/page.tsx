@@ -2,10 +2,14 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { eventsApi } from "@/services/events";
+import { calendarsApi } from "@/services/calendars";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
-import { Search, Calendar, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Calendar as CalendarType } from "@/types/calendar";
+import { Search, Calendar, ChevronLeft, ChevronRight, X, ChevronRight as ArrowRight } from "lucide-react";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
+import HorizontalCalendarCard from "@/components/HorizontalCalendarCard";
 import EventPreviewModal from "@/components/EventPreviewModal";
+import Link from "next/link";
 
 export default function EventCataloguePage() {
   const [events, setEvents] = useState<EventResponseDto[]>([]);
@@ -24,7 +28,27 @@ export default function EventCataloguePage() {
   // Modal state
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
+  // Calendars state
+  const [calendars, setCalendars] = useState<CalendarType[]>([]);
+  const [loadingCalendars, setLoadingCalendars] = useState(true);
+
   const eventsPerPage = 12;
+
+  // Fetch calendars
+  const fetchCalendars = async () => {
+    try {
+      setLoadingCalendars(true);
+      const result = await calendarsApi.findAll({
+        isPublic: true,
+        take: 10, // Show top 10 calendars
+      });
+      setCalendars(result.calendars ?? []);
+    } catch (err) {
+      console.error("Failed to fetch calendars:", err);
+    } finally {
+      setLoadingCalendars(false);
+    }
+  };
 
   // Fetch events
   const fetchEvents = async () => {
@@ -56,6 +80,11 @@ export default function EventCataloguePage() {
     }
     setCurrentPage(1);
   }, [searchTerm]);
+
+  // Fetch calendars on mount
+  useEffect(() => {
+    fetchCalendars();
+  }, []);
 
   // Fetch on mount and when filters change
   useEffect(() => {
@@ -149,6 +178,29 @@ export default function EventCataloguePage() {
             Find and join exciting events happening around you
           </p>
         </div>
+
+        {/* Calendars Section */}
+        {!loadingCalendars && calendars.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">
+                Browse Calendars
+              </h2>
+              <Link
+                href="/calendars"
+                className="flex items-center gap-1 text-sm text-primary hover:underline"
+              >
+                View All
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              {calendars.map((calendar) => (
+                <HorizontalCalendarCard key={calendar.id} calendar={calendar} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Search Bar */}
         <div className="mb-8">
