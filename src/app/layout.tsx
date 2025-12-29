@@ -16,20 +16,54 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-
-
 export const metadata: Metadata = {
   title: "Prismo",
-  description:
-    "",
+  description: "",
+  // Apparently keywords meta tag is ignored by Google
   keywords: [
     "luma",
     "eventbrite",
     "event",
-    "food delivery",
-    "events",
-    "UK",
+    "event discovery",
+    "event tickets",
+    "event registration",
+    "event booking",
+    "event hosting",
+    "event discovery",
+    "local events",
+    "upcoming events",
+    "things to do",
+    "conferences",
+    "workshops",
+    "hosting",
+    "register",
+    "buy tickets",
+    "get tickets",
+    "free tickets",
+    "virtual events",
+    "classes",
+    "webinars",
+    "festivals",
+    "meetups",
+    "society",
+    "society event",
+    "UCL event",
+    "KCL event",
+    "LSE event",
+    "networking",
+    "RSVP",
+    "sell tickets",
+    "event management",
+    "events near me",
+    "London events",
+    "private event",
+    "private event hosting",
+    "event ticketing platform",
+    "online registration",
+    "event organiser tools",
     "event-order",
+    "food delivery",
+    "UK",
     "streetfood",
     "street food",
     "delivery",
@@ -46,11 +80,10 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_GB",
-    url: "https://swiftfood.uk",
-    siteName: "Swift Food",
-    title: "Swift Food - Planning made easy, Catering made better.",
-    description: "We provide event ordering and delivery of the best local eats in London",
-    
+    url: "https://prismo-events.netlify.app/",
+    siteName: "Prismo",
+    title: "Prismo",
+    description: "",
   },
 
   robots: {
@@ -69,7 +102,6 @@ export const metadata: Metadata = {
     google: "bu1_vFJg_q2u8Syf9Cith5Q6G_Zld7hqwqLw8gDdtSM", // Add this from Google Search Console
   },
 };
-
 
 export default function RootLayout({
   children,
