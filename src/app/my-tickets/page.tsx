@@ -1,8 +1,8 @@
 // app/my-tickets/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { paymentService } from "@/services/payment.service";
@@ -26,9 +26,11 @@ import Link from "next/link";
 
 type FilterType = "all" | "upcoming" | "checked_in" | "active" | "pending" | "cancelled";
 
-export default function MyTicketsPage() {
+function MyTicketsContent() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const highlightTicketId = searchParams.get("ticketId");
 
   const [tickets, setTickets] = useState<GuestTicketWithEventResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -395,6 +397,7 @@ export default function MyTicketsPage() {
                 isCancelling={cancellingTicketId === ticket.id}
                 onLeaveWaitlist={handleLeaveWaitlist}
                 isLeavingWaitlist={leavingWaitlistTicketId === ticket.id}
+                autoShowQR={ticket.id === highlightTicketId}
               />
             ))}
           </div>
@@ -423,5 +426,17 @@ export default function MyTicketsPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function MyTicketsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <MyTicketsContent />
+    </Suspense>
   );
 }

@@ -1072,10 +1072,10 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                           )}
                         </div>
                         <Link
-                          href="/my-tickets"
+                          href={`/my-tickets?ticketId=${event.userTicket.id}`}
                           className="text-sm text-green-400 hover:text-green-300 transition-colors shrink-0"
                         >
-                          My Tickets →
+                          View Ticket →
                         </Link>
                       </div>
                     </div>
