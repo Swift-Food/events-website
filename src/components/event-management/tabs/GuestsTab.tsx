@@ -45,13 +45,14 @@ function getGuestDisplayName(guest: GuestTicketResponseDto['guest'] | undefined)
 
 interface GuestsTabProps {
   eventId: string;
+  initialFilter?: FilterStatus;
 }
 
-export function GuestsTab({ eventId }: GuestsTabProps) {
+export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
   const [guests, setGuests] = useState<GuestTicketResponseDto[]>([]);
   const [pendingGuests, setPendingGuests] = useState<AdminTicketResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>(initialFilter);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGuests, setSelectedGuests] = useState<Set<string>>(new Set());
   const [checkInStats, setCheckInStats] = useState({
@@ -83,6 +84,13 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
   useEffect(() => {
     fetchGuestData();
   }, [eventId]);
+
+  // Sync filter status with initialFilter prop
+  useEffect(() => {
+    if (initialFilter) {
+      setFilterStatus(initialFilter);
+    }
+  }, [initialFilter]);
 
   const fetchGuestData = async () => {
     try {
@@ -293,6 +301,10 @@ export function GuestsTab({ eventId }: GuestsTabProps) {
           approvedCount={guests.filter((g) => g.status === GuestTicketStatus.ACTIVE).length}
           pendingApprovalCount={guests.filter((g) => g.status === GuestTicketStatus.PENDING_APPROVAL).length}
           waitlistedCount={guests.filter((g) => g.status === GuestTicketStatus.WAITLISTED).length}
+          onCheckedInClick={() => setFilterStatus("checked_in")}
+          onApprovedClick={() => setFilterStatus("active")}
+          onPendingClick={() => setFilterStatus("pending_approval")}
+          onWaitlistedClick={() => setFilterStatus("waitlisted")}
         />
 
         <InvitationsSection onInviteClick={() => setShowInviteGuestsModal(true)} />
