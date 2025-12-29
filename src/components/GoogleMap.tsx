@@ -8,6 +8,7 @@ interface GoogleMapProps {
   longitude?: number;
   title?: string;
   className?: string;
+  placeId?: string | null;
 }
 
 export default function GoogleMap({
@@ -15,7 +16,15 @@ export default function GoogleMap({
   longitude,
   title = "Event Location",
   className = "",
+  placeId,
 }: GoogleMapProps) {
+  const handleMapClick = () => {
+    if (placeId) {
+      window.open(`https://www.google.com/maps/place/?q=place_id:${placeId}`, '_blank');
+    } else if (latitude && longitude) {
+      window.open(`https://www.google.com/maps?q=${latitude},${longitude}`, '_blank');
+    }
+  };
   const mapRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -201,13 +210,21 @@ export default function GoogleMap({
   }
 
   return (
-    <div className={`relative overflow-hidden rounded-xl ${className}`}>
+    <div
+      className={`relative overflow-hidden rounded-xl cursor-pointer group ${className}`}
+      onClick={handleMapClick}
+      title="Click to open in Google Maps"
+    >
       <div ref={mapRef} className="h-full w-full" />
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center rounded-xl border border-white/10 bg-card-background">
           <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
         </div>
       )}
+      {/* Overlay hint */}
+      <div className="absolute bottom-2 right-2 rounded-md bg-black/60 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+        Open in Maps
+      </div>
     </div>
   );
 }

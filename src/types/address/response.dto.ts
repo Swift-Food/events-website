@@ -15,4 +15,5 @@ export interface EventAddressResponseDto {
     latitude: number;
     longitude: number;
   } | null;
+  placeId: string | null;
 }
