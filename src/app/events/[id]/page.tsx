@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: event.name,
       description,
       images: event.eventImage ? [event.eventImage] : [],
-      type: "website",
+      type: "article",
     },
     twitter: {
       card: "summary_large_image",
@@ -101,6 +101,7 @@ export default async function EventPage({ params }: PageProps) {
               .join(", "),
             addressLocality: event.address.city,
             postalCode: event.address.zipcode,
+            addressCountry: "GB",
           },
           ...(event.address.location?.latitude &&
           event.address.location?.longitude
