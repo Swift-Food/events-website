@@ -7,6 +7,7 @@ import { guestTicketService } from "@/services/guest-ticket.service";
 import { eventCollaboratorService } from "@/services/event-collaborator.service";
 import { CollaboratorRole } from "@/types/event-collaborator";
 import { paymentService } from "@/services/payment.service";
+import { mailService } from "@/services/mail.service";
 import { useAuth } from "@/lib/auth/authContext";
 import { EventResponseDto, EventStatus } from "@/types/event";
 import { GuestTicketStatus, TicketInvitationPreviewDto } from "@/types/guest-ticket";
@@ -27,6 +28,7 @@ import {
   Crown,
   Shield,
   Gift,
+  Flag,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -93,6 +95,11 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [paymentData, setPaymentData] = useState<PaymentFlowState | null>(null);
   const [successTicketDetails, setSuccessTicketDetails] = useState<Pick<PaymentFlowState['ticketDetails'], 'ticketName' | 'eventName'> | null>(null);
+
+  // Report modal state
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportDescription, setReportDescription] = useState("");
+  const [isReporting, setIsReporting] = useState(false);
 
   // Check if user can manage this event and their role
   type UserRole = "owner" | "admin" | "scanner" | null;
@@ -380,6 +387,31 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
     }));
   };
 
+  const handleReportEvent = async () => {
+    if (!reportDescription.trim()) {
+      toast.error("Please provide a reason for reporting this event");
+      return;
+    }
+
+    if (!user?.id) {
+      toast.error("You must be logged in to report an event");
+      return;
+    }
+
+    try {
+      setIsReporting(true);
+      await mailService.reportEvent(reportDescription, eventId, user.id);
+      toast.success("Event reported successfully. Thank you for your feedback.");
+      setShowReportModal(false);
+      setReportDescription("");
+    } catch (error: any) {
+      console.error("Failed to report event:", error);
+      toast.error(error.response?.data?.message || "Failed to report event. Please try again.");
+    } finally {
+      setIsReporting(false);
+    }
+  };
+
   const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleDateString("en-US", {
       weekday: "long",
@@ -508,14 +540,23 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
         )}
 
 
-        {/* Back Button */}
-        <button
-          onClick={() => router.push("/events")}
-          className="mb-6 flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          Back to Events
-        </button>
+        {/* Back Button and Report Button */}
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <button
+            onClick={() => router.push("/events")}
+            className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            Back to Events
+          </button>
+          <button
+            onClick={() => setShowReportModal(true)}
+            className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-sm text-red-400 transition-colors hover:border-red-500/50 hover:bg-red-500/20"
+          >
+            <Flag className="h-4 w-4" />
+            Report Event
+          </button>
+        </div>
 
         {/* Main Content - Responsive Layout */}
         <div className="flex flex-col gap-6 lg:flex-row-reverse">
@@ -1187,6 +1228,68 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
           onSubmit={() => selectedTicketId && handleRegister(selectedTicketId)}
           isSubmitting={isRegistering}
         />
+      )}
+
+      {/* Report Event Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg rounded-xl border border-neutral-700 bg-card-background p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-foreground">Report Event</h2>
+              <button
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportDescription("");
+                }}
+                className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <p className="mb-4 text-sm text-muted-foreground">
+              Please describe why you're reporting this event. Our team will review your report.
+            </p>
+
+            <textarea
+              value={reportDescription}
+              onChange={(e) => setReportDescription(e.target.value)}
+              placeholder="Describe the issue with this event..."
+              className="mb-4 w-full rounded-lg border border-neutral-700 bg-card-secondary-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 min-h-[150px] resize-y"
+              disabled={isReporting}
+            />
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportDescription("");
+                }}
+                disabled={isReporting}
+                className="flex-1 rounded-lg border border-neutral-700 bg-card-secondary-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReportEvent}
+                disabled={isReporting || !reportDescription.trim()}
+                className="flex-1 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isReporting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Reporting...
+                  </>
+                ) : (
+                  <>
+                    <Flag className="h-4 w-4" />
+                    Submit Report
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       </div>
