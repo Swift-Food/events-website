@@ -4,6 +4,7 @@ import {
   CateringBundle,
   CreateCateringOrderDto,
   CateringOrder,
+  UpdatePickupContactDto,
 } from '@/types/catering';
 
 class CateringService {
@@ -58,6 +59,17 @@ class CateringService {
   async getCateringOrderForEvent(eventId: string): Promise<CateringOrder | null> {
     const response: AxiosResponse<CateringOrder | null> = await apiClient.get(
       `/events/${eventId}/catering`
+    );
+    return response.data;
+  }
+
+  /**
+   * Update pickup contact information for a catering order
+   */
+  async updatePickupContact(data: UpdatePickupContactDto): Promise<CateringOrder> {
+    const response: AxiosResponse<CateringOrder> = await apiClient.patch(
+      `${this.ordersBaseUrl}/pickup-contact`,
+      data
     );
     return response.data;
   }

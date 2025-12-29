@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { CateringOrder } from "@/types/catering";
 import {
   Calendar,
@@ -11,14 +12,21 @@ import {
   CheckCircle2,
   Package,
   Truck,
+  Edit,
 } from "lucide-react";
 import { OrderTimeline } from "./OrderTimeline";
+import { EditPickupContactModal } from "./EditPickupContactModal";
+import { cateringService } from "@/services/catering.service";
+import { toast } from "sonner";
 
 interface ExistingOrderViewProps {
   order: CateringOrder;
 }
 
-export function ExistingOrderView({ order }: ExistingOrderViewProps) {
+export function ExistingOrderView({ order: initialOrder }: ExistingOrderViewProps) {
+  const [order, setOrder] = useState<CateringOrder>(initialOrder);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -30,6 +38,27 @@ export function ExistingOrderView({ order }: ExistingOrderViewProps) {
   const formatTime = (timeString: string) => {
     if (!timeString) return "N/A";
     return timeString;
+  };
+
+  const handleSavePickupContact = async (data: {
+    pickupContactName: string;
+    pickupContactPhone: string;
+    pickupContactEmail: string;
+  }) => {
+    try {
+      const updatedOrder = await cateringService.updatePickupContact({
+        orderId: order.id,
+        pickupContactName: data.pickupContactName,
+        pickupContactPhone: data.pickupContactPhone,
+        pickupContactEmail: data.pickupContactEmail,
+      });
+      setOrder(updatedOrder);
+      toast.success("Pickup contact updated successfully!");
+    } catch (error: any) {
+      console.error("Error updating pickup contact:", error);
+      toast.error(error.response?.data?.message || "Failed to update pickup contact");
+      throw error;
+    }
   };
 
   console.log("order data", JSON.stringify(order));
@@ -113,13 +142,22 @@ export function ExistingOrderView({ order }: ExistingOrderViewProps) {
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-6 sm:p-8 shadow-lg hover:shadow-xl transition-shadow">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="rounded-xl bg-primary/10 p-2.5">
-              <MapPin className="h-5 w-5 text-primary" />
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-primary/10 p-2.5">
+                <MapPin className="h-5 w-5 text-primary" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-foreground">
+                Delivery Information
+              </h3>
             </div>
-            <h3 className="text-lg sm:text-xl font-bold text-foreground">
-              Delivery Information
-            </h3>
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="flex items-center gap-2 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/30 px-3 py-2 text-sm font-medium text-primary transition-all"
+            >
+              <Edit className="h-4 w-4" />
+              <span className="hidden sm:inline">Edit Pickup</span>
+            </button>
           </div>
           <div className="space-y-4">
             <div className="rounded-lg bg-card-secondary-background border border-white/5 p-4">
@@ -130,6 +168,47 @@ export function ExistingOrderView({ order }: ExistingOrderViewProps) {
                 {order.deliveryAddress}
               </p>
             </div>
+
+            {/* Pickup Contact Information */}
+            {(order.pickupContactName || order.pickupContactPhone || order.pickupContactEmail) && (
+              <div className="rounded-lg bg-gradient-to-br from-primary/5 to-transparent border border-primary/20 p-4">
+                <div className="flex items-start gap-2 mb-3">
+                  <div className="rounded-lg bg-primary/10 p-1.5">
+                    <Phone className="h-4 w-4 text-primary" />
+                  </div>
+                  <p className="text-xs font-bold text-primary uppercase tracking-wide">
+                    Pickup Contact Information
+                  </p>
+                </div>
+                <div className="space-y-3 ml-8">
+                  {order.pickupContactName && (
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Name</p>
+                      <p className="text-sm text-foreground font-semibold">
+                        {order.pickupContactName}
+                      </p>
+                    </div>
+                  )}
+                  {order.pickupContactPhone && (
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Phone</p>
+                      <p className="text-sm text-foreground font-semibold">
+                        {order.pickupContactPhone}
+                      </p>
+                    </div>
+                  )}
+                  {order.pickupContactEmail && (
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Email</p>
+                      <p className="text-sm text-foreground font-semibold break-all">
+                        {order.pickupContactEmail}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {order.specialRequirements && (
               <div className="rounded-lg bg-yellow-500/5 border border-yellow-500/20 p-4">
                 <div className="flex items-start gap-2">
@@ -373,6 +452,18 @@ export function ExistingOrderView({ order }: ExistingOrderViewProps) {
           </div>
         </div>
       )}
+
+      {/* Edit Pickup Contact Modal */}
+      <EditPickupContactModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSave={handleSavePickupContact}
+        initialData={{
+          pickupContactName: order.pickupContactName,
+          pickupContactPhone: order.pickupContactPhone,
+          pickupContactEmail: order.pickupContactEmail,
+        }}
+      />
     </div>
   );
 }

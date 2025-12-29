@@ -105,6 +105,11 @@ export interface CateringOrder {
   deliveryAddress: string;
   specialRequirements?: string;
 
+  // Pickup contact information
+  pickupContactName?: string;
+  pickupContactPhone?: string;
+  pickupContactEmail?: string;
+
   orderItems?: MinimalRestaurantOrder[];
   mealSessions?: MealSession[];
 
@@ -117,4 +122,16 @@ export interface CateringOrder {
 
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * DTO for updating pickup contact information
+ */
+export interface UpdatePickupContactDto {
+  orderId: string;
+  pickupContactName: string;
+  pickupContactPhone: string;
+  pickupContactEmail: string;
+  userId?: string;
+  accessToken?: string;
 }
