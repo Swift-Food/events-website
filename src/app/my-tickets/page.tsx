@@ -1,8 +1,8 @@
 // app/my-tickets/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { paymentService } from "@/services/payment.service";
@@ -27,8 +27,27 @@ import Link from "next/link";
 type FilterType = "all" | "upcoming" | "checked_in" | "active" | "pending" | "cancelled";
 
 export default function MyTicketsPage() {
+  return (
+    <Suspense fallback={<MyTicketsLoading />}>
+      <MyTicketsContent />
+    </Suspense>
+  );
+}
+
+function MyTicketsLoading() {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  );
+}
+
+function MyTicketsContent() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const highlightedEventId = searchParams.get("eventId");
+  const ticketRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   const [tickets, setTickets] = useState<GuestTicketWithEventResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -79,6 +98,23 @@ export default function MyTicketsPage() {
 
     fetchTickets();
   }, [isAuthenticated]);
+
+  // Scroll to highlighted ticket when coming from event page
+  useEffect(() => {
+    if (!isLoading && highlightedEventId && tickets.length > 0) {
+      setFilter("all");
+      setTimeout(() => {
+        const ticketEl = ticketRefs.current.get(highlightedEventId);
+        if (ticketEl) {
+          ticketEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          ticketEl.classList.add("ring-2", "ring-primary", "ring-offset-2", "ring-offset-background");
+          setTimeout(() => {
+            ticketEl.classList.remove("ring-2", "ring-primary", "ring-offset-2", "ring-offset-background");
+          }, 3000);
+        }
+      }, 100);
+    }
+  }, [isLoading, highlightedEventId, tickets]);
 
   const handleRefund = async (ticketId: string) => {
     try {
@@ -384,18 +420,25 @@ export default function MyTicketsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTickets.map((ticket) => (
-              <TicketCard
+              <div
                 key={ticket.id}
-                ticket={ticket}
-                onRefund={handleRefund}
-                isRefunding={refundingTicketId === ticket.id}
-                onCompletePayment={handleCompletePayment}
-                isProcessingPayment={processingPaymentTicketId === ticket.id}
-                onCancel={handleCancel}
-                isCancelling={cancellingTicketId === ticket.id}
-                onLeaveWaitlist={handleLeaveWaitlist}
-                isLeavingWaitlist={leavingWaitlistTicketId === ticket.id}
-              />
+                ref={(el) => {
+                  if (el) ticketRefs.current.set(ticket.eventId, el);
+                }}
+                className="transition-all duration-300"
+              >
+                <TicketCard
+                  ticket={ticket}
+                  onRefund={handleRefund}
+                  isRefunding={refundingTicketId === ticket.id}
+                  onCompletePayment={handleCompletePayment}
+                  isProcessingPayment={processingPaymentTicketId === ticket.id}
+                  onCancel={handleCancel}
+                  isCancelling={cancellingTicketId === ticket.id}
+                  onLeaveWaitlist={handleLeaveWaitlist}
+                  isLeavingWaitlist={leavingWaitlistTicketId === ticket.id}
+                />
+              </div>
             ))}
           </div>
         )}
