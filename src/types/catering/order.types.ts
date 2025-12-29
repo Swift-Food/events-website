@@ -131,7 +131,6 @@ export interface UpdatePickupContactDto {
   orderId: string;
   pickupContactName: string;
   pickupContactPhone: string;
-  pickupContactEmail: string;
   userId?: string;
   accessToken?: string;
 }

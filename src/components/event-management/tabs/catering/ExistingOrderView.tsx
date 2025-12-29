@@ -43,14 +43,12 @@ export function ExistingOrderView({ order: initialOrder }: ExistingOrderViewProp
   const handleSavePickupContact = async (data: {
     pickupContactName: string;
     pickupContactPhone: string;
-    pickupContactEmail: string;
   }) => {
     try {
       const updatedOrder = await cateringService.updatePickupContact({
         orderId: order.id,
         pickupContactName: data.pickupContactName,
         pickupContactPhone: data.pickupContactPhone,
-        pickupContactEmail: data.pickupContactEmail,
       });
       setOrder(updatedOrder);
       toast.success("Pickup contact updated successfully!");
@@ -461,7 +459,6 @@ export function ExistingOrderView({ order: initialOrder }: ExistingOrderViewProp
         initialData={{
           pickupContactName: order.pickupContactName,
           pickupContactPhone: order.pickupContactPhone,
-          pickupContactEmail: order.pickupContactEmail,
         }}
       />
     </div>
