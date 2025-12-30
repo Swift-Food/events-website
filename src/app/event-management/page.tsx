@@ -7,7 +7,7 @@ import { eventService } from "@/services/event.service";
 import { calendarService } from "@/services/calendar.service";
 import { EventResponseDto } from "@/types/event";
 import { Calendar as CalendarType } from "@/types/calendar";
-import { Calendar, Plus, Loader2, Users, History, CalendarDays, ChevronRight } from "lucide-react";
+import { Calendar, CalendarPlus2, Plus, Loader2, Users, History, CalendarDays, ChevronRight } from "lucide-react";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
 import HorizontalCalendarCard from "@/components/HorizontalCalendarCard";
 import CalendarCard from "@/components/CalendarCard";
@@ -262,7 +262,7 @@ export default function EventManagementPage() {
         {/* Events Section Header */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
+            <CalendarPlus2 className="h-5 w-5" />
             Your Events
           </h2>
           <Link
