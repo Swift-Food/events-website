@@ -34,6 +34,8 @@ export interface CreateEventDto {
   categoryIds?: string[];
   eventUrl?: string;
   tickets?: CreateEventTicketDto[];
+  acceptingNewTickets?: boolean;
+  stopAcceptingOnStart?: boolean;
 }
 
 export interface UpdateEventDto {
@@ -52,6 +54,8 @@ export interface UpdateEventDto {
   categoryIds?: string[];
   eventUrl?: string;
   tickets?: CreateEventTicketDto[];
+  acceptingNewTickets?: boolean;
+  stopAcceptingOnStart?: boolean;
 }
 
 export interface EventQueryDto {

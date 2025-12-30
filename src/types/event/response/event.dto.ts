@@ -32,6 +32,8 @@ export interface EventResponseDto {
   isPrivate: boolean;
   eventUrl: string | null;
   viewCount: number;
+  acceptingNewTickets: boolean;
+  stopAcceptingOnStart: boolean;
   createdAt: string | Date;
   updatedAt: string | Date;
   owner: EventOwnerResponseDto;

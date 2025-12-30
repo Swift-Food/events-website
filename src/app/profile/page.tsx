@@ -160,6 +160,8 @@ export default function ProfilePage() {
           isPrivate: false,
           eventUrl: null,
           viewCount: 0,
+          acceptingNewTickets: true,
+          stopAcceptingOnStart: false,
           createdAt: new Date(),
           updatedAt: new Date(),
           owner: {
@@ -206,6 +208,8 @@ export default function ProfilePage() {
           isPrivate: false,
           eventUrl: null,
           viewCount: 0,
+          acceptingNewTickets: true,
+          stopAcceptingOnStart: false,
           createdAt: new Date(),
           updatedAt: new Date(),
           owner: {
