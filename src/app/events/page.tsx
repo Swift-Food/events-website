@@ -276,81 +276,84 @@ export default function EventCataloguePage() {
           </div>
         )}
 
-        {/* Search Bar */}
-        <div className="mb-4">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search events by name or description..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-full border border-white/10 bg-card-background py-3 pl-12 pr-4 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-            {hasActiveSearch && (
-              <button
-                onClick={clearSearch}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                aria-label="Clear search"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            )}
+        {/* Sticky Search Bar and Filters */}
+        <div className="sticky top-20 z-40 -mx-4 px-4 sm:-mx-6 sm:px-6 bg-background pb-4">
+          {/* Search Bar */}
+          <div className="mb-4">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search events by name or description..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full rounded-full border border-white/10 bg-card-background py-3 pl-12 pr-4 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              {hasActiveSearch && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                  aria-label="Clear search"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Filter Chips and Sort */}
-        <div className="mb-8 -mx-4 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <div className="flex items-center gap-2 w-max">
-            {/* <button
-              onClick={() => handleDateFilterChange('all')}
-              className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                dateFilter === 'all'
-                  ? 'bg-primary text-white'
-                  : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
-              }`}
-            >
-              All
-            </button> */}
-            <button
-              onClick={() => handleDateFilterChange('today')}
-              className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                dateFilter === 'today'
-                  ? 'bg-primary text-white'
-                  : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
-              }`}
-            >
-              Today
-            </button>
-            <button
-              onClick={() => handleDateFilterChange('month')}
-              className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                dateFilter === 'month'
-                  ? 'bg-primary text-white'
-                  : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
-              }`}
-            >
-              This Month
-            </button>
-            <button
-              onClick={() => handleDateFilterChange('custom')}
-              className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                dateFilter === 'custom'
-                  ? 'bg-primary text-white'
-                  : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
-              }`}
-            >
-              Custom Range
-            </button>
-            <button
-              onClick={toggleSortOrder}
-              className="flex-shrink-0 flex items-center gap-2 rounded-full border border-white/10 bg-card-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-white/20"
-              aria-label="Toggle sort order"
-            >
-              <ArrowUpDown className="h-4 w-4" />
-              <span className="hidden sm:inline">Sort:</span>
-              {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}
-            </button>
+          {/* Filter Chips and Sort */}
+          <div className="-mx-4 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="flex items-center gap-2 w-max">
+              {/* <button
+                onClick={() => handleDateFilterChange('all')}
+                className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  dateFilter === 'all'
+                    ? 'bg-primary text-white'
+                    : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
+                }`}
+              >
+                All
+              </button> */}
+              <button
+                onClick={() => handleDateFilterChange('today')}
+                className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  dateFilter === 'today'
+                    ? 'bg-primary text-white'
+                    : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
+                }`}
+              >
+                Today
+              </button>
+              <button
+                onClick={() => handleDateFilterChange('month')}
+                className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  dateFilter === 'month'
+                    ? 'bg-primary text-white'
+                    : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
+                }`}
+              >
+                This Month
+              </button>
+              <button
+                onClick={() => handleDateFilterChange('custom')}
+                className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  dateFilter === 'custom'
+                    ? 'bg-primary text-white'
+                    : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
+                }`}
+              >
+                Custom Range
+              </button>
+              <button
+                onClick={toggleSortOrder}
+                className="flex-shrink-0 flex items-center gap-2 rounded-full border border-white/10 bg-card-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-white/20"
+                aria-label="Toggle sort order"
+              >
+                <ArrowUpDown className="h-4 w-4" />
+                <span className="hidden sm:inline">Sort:</span>
+                {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}
+              </button>
+            </div>
           </div>
         </div>
 
