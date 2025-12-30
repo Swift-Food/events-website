@@ -10,6 +10,7 @@ import { Calendar as CalendarType } from "@/types/calendar";
 import { Calendar, Plus, Loader2, Users, History, CalendarDays, ChevronRight } from "lucide-react";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
 import HorizontalCalendarCard from "@/components/HorizontalCalendarCard";
+import CalendarCard from "@/components/CalendarCard";
 import Link from "next/link";
 
 type TabType = "upcoming" | "past";
@@ -182,22 +183,13 @@ export default function EventManagementPage() {
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-2xl px-4 sm:px-6 py-8">
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              Manage Events
-            </h1>
-            <p className="mt-2 text-md text-muted-foreground">
-              View and manage your hosted events
-            </p>
-          </div>
-          <Link
-            href="/event-creation"
-            className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Create Event</span>
-          </Link>
+        <div className="mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+            Management
+          </h1>
+          <p className="mt-2 text-md text-muted-foreground">
+            Manage your calendars and events
+          </p>
         </div>
 
         {/* Calendars Section */}
@@ -248,21 +240,38 @@ export default function EventManagementPage() {
               </Link>
             </div>
           ) : (
-            <div className="space-y-3">
-              {calendars.slice(0, 3).map((calendar) => (
-                <HorizontalCalendarCard key={calendar.id} calendar={calendar} />
-              ))}
-              {calendars.length > 3 && (
-                <Link
-                  href="/calendars/me"
-                  className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-card-background p-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
-                >
-                  View {calendars.length - 3} more calendar{calendars.length - 3 !== 1 ? 's' : ''}
-                  <ChevronRight className="h-4 w-4" />
-                </Link>
-              )}
-            </div>
+            <>
+              {/* Mobile: Horizontal scroll */}
+              <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                {calendars.slice(0, 5).map((calendar) => (
+                  <div key={calendar.id} className="flex-shrink-0 w-[80vw]">
+                    <HorizontalCalendarCard calendar={calendar} />
+                  </div>
+                ))}
+              </div>
+              {/* Desktop: 3-column grid */}
+              <div className="hidden sm:grid sm:grid-cols-3 gap-3">
+                {calendars.slice(0, 3).map((calendar) => (
+                  <CalendarCard key={calendar.id} calendar={calendar} />
+                ))}
+              </div>
+            </>
           )}
+        </div>
+
+        {/* Events Section Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Your Events
+          </h2>
+          <Link
+            href="/event-creation"
+            className="flex items-center gap-1.5 rounded-full border border-white/10 bg-card-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-white/5"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Create
+          </Link>
         </div>
 
         {/* Tabs */}
