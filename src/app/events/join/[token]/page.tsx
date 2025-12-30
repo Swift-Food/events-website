@@ -20,6 +20,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
+import SmartAppBanner from "@/components/SmartAppBanner";
 
 export default function JoinEventPage() {
   const params = useParams();
@@ -231,10 +232,17 @@ export default function JoinEventPage() {
     );
   }
 
+  // Build current path for SmartAppBanner
+  const currentPath = `/events/join/${token}`;
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        {/* Back Button */}
+    <>
+      {/* Smart App Banner - shown on mobile */}
+      <SmartAppBanner currentPath={currentPath} />
+
+      <div className="min-h-screen bg-background">
+        <div className="mx-auto max-w-6xl px-6 py-8">
+          {/* Back Button */}
         <Link
           href="/events"
           className="mb-6 flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
@@ -396,6 +404,6 @@ export default function JoinEventPage() {
           </section>
         </div>
       </div>
-    </div>
+    </>
   );
 }

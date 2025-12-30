@@ -43,6 +43,8 @@ import {
   downloadICSFile,
   buildLocationString,
 } from "@/utils/calendar";
+import SmartAppBanner from "@/components/SmartAppBanner";
+import { usePathname } from "next/navigation";
 
 interface EventClientProps {
   initialEvent: EventResponseDto;
@@ -52,8 +54,12 @@ interface EventClientProps {
 export default function EventClient({ initialEvent, eventId }: EventClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const inviteToken = searchParams.get("inviteToken");
+
+  // Build current path for SmartAppBanner
+  const currentPath = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
   const [event, setEvent] = useState<EventResponseDto>(initialEvent);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
@@ -450,6 +456,9 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
 
   return (
     <>
+      {/* Smart App Banner - shown on mobile when viewing invite */}
+      <SmartAppBanner currentPath={currentPath} />
+
       <div className="min-h-screen bg-background">
         {/* Management/Scanner Banner - Mobile (full width) */}
       {userRole && (
