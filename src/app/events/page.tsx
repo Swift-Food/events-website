@@ -7,6 +7,7 @@ import { EventListResponseDto, EventResponseDto } from "@/types/event";
 import { Calendar as CalendarType } from "@/types/calendar";
 import { Search, Calendar, ChevronLeft, ChevronRight, X, ChevronRight as ArrowRight } from "lucide-react";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
+import CalendarCard from "@/components/CalendarCard";
 import HorizontalCalendarCard from "@/components/HorizontalCalendarCard";
 import EventPreviewModal from "@/components/EventPreviewModal";
 import Link from "next/link";
@@ -182,22 +183,31 @@ export default function EventCataloguePage() {
         {/* Calendars Section */}
         {!loadingCalendars && calendars.length > 0 && (
           <div className="mb-8">
-            <div className="mb-4">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">
                 Browse Calendars
               </h2>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {calendars.slice(0, 2).map((calendar) => (
-                <HorizontalCalendarCard key={calendar.id} calendar={calendar} />
-              ))}
               <Link
                 href="/calendars"
-                className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-card-background transition-all hover:border-white/20 hover:bg-card-secondary-background min-h-[120px]"
+                className="flex items-center gap-1 text-sm text-primary hover:underline"
               >
-                <ArrowRight className="h-6 w-6 text-muted-foreground mb-2" />
-                <span className="text-sm font-medium text-muted-foreground">View All</span>
+                View All
+                <ArrowRight className="h-4 w-4" />
               </Link>
+            </div>
+            {/* Mobile: Horizontal scroll */}
+            <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              {calendars.slice(0, 5).map((calendar) => (
+                <div key={calendar.id} className="flex-shrink-0 w-[80vw]">
+                  <HorizontalCalendarCard calendar={calendar} />
+                </div>
+              ))}
+            </div>
+            {/* Desktop: 3-column grid */}
+            <div className="hidden sm:grid sm:grid-cols-3 gap-3">
+              {calendars.slice(0, 3).map((calendar) => (
+                <CalendarCard key={calendar.id} calendar={calendar} />
+              ))}
             </div>
           </div>
         )}
