@@ -277,9 +277,9 @@ export default function EventCataloguePage() {
         )}
 
         {/* Sticky Search Bar and Filters */}
-        <div className="sticky top-20 z-40 -mx-4 px-4 sm:-mx-6 sm:px-6 bg-background pb-4">
+        <div className="sticky top-16 z-40 -mx-4 px-4 sm:-mx-6 sm:px-6 pt-4 pb-4 bg-gradient-to-b from-background via-background to-transparent">
           {/* Search Bar */}
-          <div className="mb-4">
+          <div className="mb-2">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -555,6 +555,7 @@ export default function EventCataloguePage() {
             </button>
           </div>
         )}
+
       </div>
 
       {/* Event Preview Modal */}
