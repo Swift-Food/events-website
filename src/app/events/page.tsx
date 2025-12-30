@@ -58,20 +58,17 @@ export default function EventCataloguePage() {
 
   // Calculate date filters based on selected filter
   const getDateFilters = () => {
-    const now = new Date();
     let startDate: string | undefined;
     let endDate: string | undefined;
     let today: boolean | undefined;
+    let currentMonth: boolean | undefined;
 
     switch (dateFilter) {
       case 'today':
         today = true;
         break;
       case 'month':
-        startDate = new Date(now.setHours(0, 0, 0, 0)).toISOString();
-        const monthEnd = new Date(now);
-        monthEnd.setMonth(monthEnd.getMonth() + 1);
-        endDate = monthEnd.toISOString();
+        currentMonth = true;
         break;
       case 'custom':
         startDate = customStartDate ? new Date(customStartDate).toISOString() : undefined;
@@ -83,7 +80,7 @@ export default function EventCataloguePage() {
         endDate = undefined;
     }
 
-    return { startDate, endDate, today };
+    return { startDate, endDate, today, currentMonth };
   };
 
   // Fetch events
@@ -91,13 +88,14 @@ export default function EventCataloguePage() {
     setLoading(true);
     setError(null);
     try {
-      const { startDate, endDate, today } = getDateFilters();
+      const { startDate, endDate, today, currentMonth } = getDateFilters();
 
       const result: EventListResponseDto = await eventsApi.findAll({
         search: searchTerm || undefined,
         startDate,
         endDate,
         today,
+        currentMonth,
         sortBy: 'startDateTime',
         sortOrder,
         skip: (currentPage - 1) * eventsPerPage,

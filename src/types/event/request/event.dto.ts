@@ -62,6 +62,7 @@ export interface EventQueryDto {
   startDate?: string;
   endDate?: string;
   today?: boolean;
+  currentMonth?: boolean;
   isPrivate?: boolean;
   ownerId?: string;
   skip?: number;
