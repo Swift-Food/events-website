@@ -50,7 +50,7 @@ export default function HorizontalCalendarCard({ calendar }: HorizontalCalendarC
       </div>
 
       {/* Calendar Details */}
-      <div className="flex flex-col p-3">
+      <div className="flex flex-col flex-1 p-3">
         <h3 className="mb-1 text-sm font-semibold text-foreground line-clamp-1 group-hover:text-primary">
           {calendar.name}
         </h3>
@@ -62,8 +62,8 @@ export default function HorizontalCalendarCard({ calendar }: HorizontalCalendarC
           </p>
         )}
 
-        {/* Subscriber Count */}
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+        {/* Subscriber Count - pushed to bottom */}
+        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-auto">
           <Users className="h-3 w-3" />
           <span>
             {calendar.subscriberCount || 0} subscriber{calendar.subscriberCount !== 1 ? "s" : ""}
