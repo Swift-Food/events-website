@@ -182,22 +182,22 @@ export default function EventCataloguePage() {
         {/* Calendars Section */}
         {!loadingCalendars && calendars.length > 0 && (
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4">
               <h2 className="text-lg font-semibold text-foreground">
                 Browse Calendars
               </h2>
-              <Link
-                href="/calendars"
-                className="flex items-center gap-1 text-sm text-primary hover:underline"
-              >
-                View All
-                <ArrowRight className="h-4 w-4" />
-              </Link>
             </div>
-            <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              {calendars.map((calendar) => (
+            <div className="grid grid-cols-3 gap-3">
+              {calendars.slice(0, 2).map((calendar) => (
                 <HorizontalCalendarCard key={calendar.id} calendar={calendar} />
               ))}
+              <Link
+                href="/calendars"
+                className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-card-background transition-all hover:border-white/20 hover:bg-card-secondary-background min-h-[120px]"
+              >
+                <ArrowRight className="h-6 w-6 text-muted-foreground mb-2" />
+                <span className="text-sm font-medium text-muted-foreground">View All</span>
+              </Link>
             </div>
           </div>
         )}

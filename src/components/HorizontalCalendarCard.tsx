@@ -11,7 +11,7 @@ export default function HorizontalCalendarCard({ calendar }: HorizontalCalendarC
   return (
     <Link
       href={`/calendars/${calendar.calendarUrl}`}
-      className="group flex-shrink-0 w-full sm:w-[280px] flex flex-col overflow-hidden rounded-xl border border-white/10 bg-card-background transition-all hover:border-white/20 hover:shadow-lg"
+      className="group w-full flex flex-col overflow-hidden rounded-xl border border-white/10 bg-card-background transition-all hover:border-white/20 hover:shadow-lg"
     >
       {/* Calendar Image */}
       <div className="relative aspect-[16/9] w-full flex-shrink-0 overflow-hidden bg-card-secondary-background">
