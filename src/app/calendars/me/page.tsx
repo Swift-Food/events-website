@@ -250,7 +250,6 @@ export default function MyCalendarsPage() {
               <CalendarCard
                 key={calendar.id}
                 calendar={calendar}
-                isOwnedCalendar={activeTab === "owned"}
               />
             ))}
           </div>

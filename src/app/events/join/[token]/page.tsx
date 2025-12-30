@@ -403,6 +403,7 @@ export default function JoinEventPage() {
             )}
           </section>
         </div>
+        </div>
       </div>
     </>
   );
