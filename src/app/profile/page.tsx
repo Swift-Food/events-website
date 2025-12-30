@@ -26,10 +26,8 @@ import {
   History,
   Users,
   Loader2,
-  Banknote,
 } from "lucide-react";
 import StripeConnectCard from "@/components/payments/StripeConnectCard";
-import EarningsCard from "@/components/payments/EarningsCard";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -376,7 +374,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-3 gap-4 mb-6">
           <StatsCard
             label="Events Created"
             value={stats?.eventsCreated ?? 0}
@@ -395,23 +393,11 @@ export default function ProfilePage() {
             icon={<Ticket className="h-5 w-5" />}
             isLoading={isLoadingEvents || isLoadingTickets}
           />
-          <StatsCard
-            label="Tickets"
-            value={eventUser?.totalRevenue ? `£${parseFloat(eventUser.totalRevenue).toFixed(2)}` : '£0.00'}
-            icon={<Banknote className="h-5 w-5" />}
-            isLoading={isLoadingStats}
-            isText
-          />
         </div>
 
         {/* Stripe Connect Payment Setup */}
         <div className="mb-6">
           <StripeConnectCard />
-        </div>
-
-        {/* Earnings */}
-        <div className="mb-6">
-          <EarningsCard />
         </div>
 
         {/* Tabs */}
