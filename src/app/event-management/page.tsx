@@ -201,18 +201,18 @@ export default function EventManagementPage() {
             </h2>
             <div className="flex items-center gap-2">
               <Link
-                href="/calendars/create"
-                className="flex items-center gap-1.5 rounded-full border border-white/10 bg-card-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-white/5"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                Create
-              </Link>
-              <Link
                 href="/calendars/me"
                 className="flex items-center gap-1 text-sm text-primary hover:underline"
               >
                 View All
                 <ChevronRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/calendars/create"
+                className="flex items-center gap-1.5 rounded-full border border-white/10 bg-card-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-white/5"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Create
               </Link>
             </div>
           </div>
