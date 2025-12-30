@@ -5,7 +5,7 @@ import { eventsApi } from "@/services/events";
 import { calendarsApi } from "@/services/calendars";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
 import { Calendar as CalendarType } from "@/types/calendar";
-import { Search, Calendar, ChevronLeft, ChevronRight, X, ChevronRight as ArrowRight } from "lucide-react";
+import { Search, Calendar, ChevronLeft, ChevronRight, X, ChevronRight as ArrowRight, ArrowUpDown } from "lucide-react";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
 import CalendarCard from "@/components/CalendarCard";
 import HorizontalCalendarCard from "@/components/HorizontalCalendarCard";
@@ -21,6 +21,11 @@ export default function EventCataloguePage() {
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'month' | 'custom'>('all');
+  const [customStartDate, setCustomStartDate] = useState("");
+  const [customEndDate, setCustomEndDate] = useState("");
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Track which date headers are stuck
   const [stuckHeaders, setStuckHeaders] = useState<Set<string>>(new Set());
@@ -51,13 +56,49 @@ export default function EventCataloguePage() {
     }
   };
 
+  // Calculate date range based on filter
+  const getDateRange = () => {
+    const now = new Date();
+    let startDate: string | undefined;
+    let endDate: string | undefined;
+
+    switch (dateFilter) {
+      case 'today':
+        startDate = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+        endDate = new Date(now.setHours(23, 59, 59, 999)).toISOString();
+        break;
+      case 'month':
+        startDate = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+        const monthEnd = new Date(now);
+        monthEnd.setMonth(monthEnd.getMonth() + 1);
+        endDate = monthEnd.toISOString();
+        break;
+      case 'custom':
+        startDate = customStartDate ? new Date(customStartDate).toISOString() : undefined;
+        endDate = customEndDate ? new Date(customEndDate).toISOString() : undefined;
+        break;
+      case 'all':
+      default:
+        startDate = undefined;
+        endDate = undefined;
+    }
+
+    return { startDate, endDate };
+  };
+
   // Fetch events
   const fetchEvents = async () => {
     setLoading(true);
     setError(null);
     try {
+      const { startDate, endDate } = getDateRange();
+
       const result: EventListResponseDto = await eventsApi.findAll({
         search: searchTerm || undefined,
+        startDate,
+        endDate,
+        sortBy: 'startDateTime',
+        sortOrder,
         skip: (currentPage - 1) * eventsPerPage,
         take: eventsPerPage,
       });
@@ -72,7 +113,7 @@ export default function EventCataloguePage() {
     }
   };
 
-  // Reset to page 1 when search changes (skip initial render)
+  // Reset to page 1 when search or filters change (skip initial render)
   const isFirstRender = useRef(true);
   useEffect(() => {
     if (isFirstRender.current) {
@@ -80,7 +121,7 @@ export default function EventCataloguePage() {
       return;
     }
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, dateFilter, customStartDate, customEndDate, sortOrder]);
 
   // Fetch calendars on mount
   useEffect(() => {
@@ -90,7 +131,7 @@ export default function EventCataloguePage() {
   // Fetch on mount and when filters change
   useEffect(() => {
     fetchEvents();
-  }, [searchTerm, currentPage]);
+  }, [searchTerm, currentPage, dateFilter, customStartDate, customEndDate, sortOrder]);
 
   const totalPages = Math.ceil(total / eventsPerPage);
 
@@ -125,9 +166,33 @@ export default function EventCataloguePage() {
     setCurrentPage(1);
   };
 
+  const handleDateFilterChange = (filter: 'all' | 'today' | 'month' | 'custom') => {
+    // Toggle off if clicking the same filter (except 'all')
+    if (dateFilter === filter && filter !== 'all') {
+      setDateFilter('all');
+      setShowDatePicker(false);
+      setCustomStartDate("");
+      setCustomEndDate("");
+      return;
+    }
+
+    setDateFilter(filter);
+    if (filter === 'custom') {
+      setShowDatePicker(true);
+    } else {
+      setShowDatePicker(false);
+      setCustomStartDate("");
+      setCustomEndDate("");
+    }
+  };
+
+  const toggleSortOrder = () => {
+    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
+
   const hasActiveSearch = !!searchTerm;
 
-  const handleEventClick = (e: React.MouseEvent, event: EventResponseDto) => {
+  const handleEventClick = (_e: React.MouseEvent, event: EventResponseDto) => {
     setSelectedEventId(event.id);
   };
 
@@ -213,7 +278,7 @@ export default function EventCataloguePage() {
         )}
 
         {/* Search Bar */}
-        <div className="mb-8">
+        <div className="mb-4">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -232,6 +297,61 @@ export default function EventCataloguePage() {
                 <X className="h-5 w-5" />
               </button>
             )}
+          </div>
+        </div>
+
+        {/* Filter Chips and Sort */}
+        <div className="mb-8 -mx-4 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex items-center gap-2 w-max">
+            {/* <button
+              onClick={() => handleDateFilterChange('all')}
+              className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                dateFilter === 'all'
+                  ? 'bg-primary text-white'
+                  : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
+              }`}
+            >
+              All
+            </button> */}
+            <button
+              onClick={() => handleDateFilterChange('today')}
+              className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                dateFilter === 'today'
+                  ? 'bg-primary text-white'
+                  : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
+              }`}
+            >
+              Today
+            </button>
+            <button
+              onClick={() => handleDateFilterChange('month')}
+              className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                dateFilter === 'month'
+                  ? 'bg-primary text-white'
+                  : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
+              }`}
+            >
+              This Month
+            </button>
+            <button
+              onClick={() => handleDateFilterChange('custom')}
+              className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                dateFilter === 'custom'
+                  ? 'bg-primary text-white'
+                  : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
+              }`}
+            >
+              Custom Range
+            </button>
+            <button
+              onClick={toggleSortOrder}
+              className="flex-shrink-0 flex items-center gap-2 rounded-full border border-white/10 bg-card-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-white/20"
+              aria-label="Toggle sort order"
+            >
+              <ArrowUpDown className="h-4 w-4" />
+              <span className="hidden sm:inline">Sort:</span>
+              {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}
+            </button>
           </div>
         </div>
 
@@ -441,6 +561,81 @@ export default function EventCataloguePage() {
         isOpen={!!selectedEventId}
         onClose={handleCloseModal}
       />
+
+      {/* Custom Date Range Picker Modal */}
+      {showDatePicker && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl border border-white/10 bg-card-background p-6 shadow-xl">
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-foreground">
+                Select Date Range
+              </h3>
+              <button
+                onClick={() => {
+                  setShowDatePicker(false);
+                  if (!customStartDate && !customEndDate) {
+                    setDateFilter('all');
+                  }
+                }}
+                className="text-muted-foreground transition-colors hover:text-foreground"
+                aria-label="Close date picker"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-foreground">
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  value={customStartDate}
+                  onChange={(e) => setCustomStartDate(e.target.value)}
+                  className="w-full rounded-lg border border-white/10 bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-foreground">
+                  End Date
+                </label>
+                <input
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => setCustomEndDate(e.target.value)}
+                  min={customStartDate || undefined}
+                  className="w-full rounded-lg border border-white/10 bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => {
+                  setCustomStartDate("");
+                  setCustomEndDate("");
+                  setDateFilter('all');
+                  setShowDatePicker(false);
+                }}
+                className="flex-1 rounded-full border border-white/10 bg-card-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-white/20"
+              >
+                Clear
+              </button>
+              <button
+                onClick={() => {
+                  setShowDatePicker(false);
+                }}
+                disabled={!customStartDate || !customEndDate}
+                className="flex-1 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/80 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
