@@ -5,11 +5,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { eventCollaboratorService } from "@/services/event-collaborator.service";
+import { blacklistService } from "@/services/blacklist.service";
 import { CollaboratorRole } from "@/types/event-collaborator";
 import { paymentService } from "@/services/payment.service";
+import { mailService } from "@/services/mail.service";
 import { useAuth } from "@/lib/auth/authContext";
 import { EventResponseDto, EventStatus } from "@/types/event";
+import { isVirtualEvent, isHybridEvent } from "@/types/event/status";
 import { GuestTicketStatus, TicketInvitationPreviewDto } from "@/types/guest-ticket";
+import { BlacklistStatusDto, BlacklistAppealStatus } from "@/types/blacklist";
 import type { PaymentFlowState } from "@/types/payment";
 import {
   Calendar,
@@ -27,12 +31,17 @@ import {
   Crown,
   Shield,
   Gift,
+  Flag,
+  Lock,
+  Video,
+  Ban,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
 import PaymentModal, { PaymentSuccessModal } from "@/components/payments/PaymentModal";
+import { AppealModal } from "@/components/blacklist";
 import RegistrationQuestionsModal from "@/components/RegistrationQuestionsModal";
 import { getTicketStatusText, getTicketStatusBadgeClasses, isTicketUsable } from "@/utils/ticket-status";
 import {
@@ -41,6 +50,8 @@ import {
   downloadICSFile,
   buildLocationString,
 } from "@/utils/calendar";
+import SmartAppBanner from "@/components/SmartAppBanner";
+import { usePathname } from "next/navigation";
 
 interface EventClientProps {
   initialEvent: EventResponseDto;
@@ -50,8 +61,12 @@ interface EventClientProps {
 export default function EventClient({ initialEvent, eventId }: EventClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const inviteToken = searchParams.get("inviteToken");
+
+  // Build current path for SmartAppBanner
+  const currentPath = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
   const [event, setEvent] = useState<EventResponseDto>(initialEvent);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
@@ -94,6 +109,15 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
   const [paymentData, setPaymentData] = useState<PaymentFlowState | null>(null);
   const [successTicketDetails, setSuccessTicketDetails] = useState<Pick<PaymentFlowState['ticketDetails'], 'ticketName' | 'eventName'> | null>(null);
 
+  // Report modal state
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportDescription, setReportDescription] = useState("");
+  const [isReporting, setIsReporting] = useState(false);
+
+  // Blacklist status state
+  const [blacklistStatus, setBlacklistStatus] = useState<BlacklistStatusDto | null>(null);
+  const [showAppealModal, setShowAppealModal] = useState(false);
+
   // Check if user can manage this event and their role
   type UserRole = "owner" | "admin" | "scanner" | null;
   const [userRole, setUserRole] = useState<UserRole>(null);
@@ -112,6 +136,26 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
     };
 
     fetchAuthenticatedEventData();
+  }, [isAuthenticated, authLoading, eventId]);
+
+  // Check if user is blacklisted from this event
+  useEffect(() => {
+    const checkBlacklistStatus = async () => {
+      if (!isAuthenticated || authLoading) {
+        setBlacklistStatus(null);
+        return;
+      }
+
+      try {
+        const status = await blacklistService.getMyBlacklistStatus(eventId);
+        setBlacklistStatus(status);
+      } catch (err) {
+        // User is not blacklisted or error fetching - either way, don't block
+        setBlacklistStatus(null);
+      }
+    };
+
+    checkBlacklistStatus();
   }, [isAuthenticated, authLoading, eventId]);
 
   // Fetch invitation preview when inviteToken is present
@@ -380,6 +424,55 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
     }));
   };
 
+  const handleReportEvent = async () => {
+    if (!reportDescription.trim()) {
+      toast.error("Please provide a reason for reporting this event");
+      return;
+    }
+
+    if (!user?.id) {
+      toast.error("You must be logged in to report an event");
+      return;
+    }
+
+    try {
+      setIsReporting(true);
+      await mailService.reportEvent(reportDescription, eventId, user.id);
+      toast.success("Event reported successfully. Thank you for your feedback.");
+      setShowReportModal(false);
+      setReportDescription("");
+    } catch (error: any) {
+      console.error("Failed to report event:", error);
+      toast.error(error.response?.data?.message || "Failed to report event. Please try again.");
+    } finally {
+      setIsReporting(false);
+    }
+  };
+
+  const handleSubmitAppeal = async (appealMessage: string) => {
+    if (!blacklistStatus?.blacklistId) {
+      toast.error("Unable to submit appeal");
+      return;
+    }
+
+    try {
+      const result = await blacklistService.submitAppeal(blacklistStatus.blacklistId, {
+        appealMessage,
+      });
+      if (result.success) {
+        toast.success("Appeal submitted successfully. The organizer will review your request.");
+        // Refresh blacklist status
+        const newStatus = await blacklistService.getMyBlacklistStatus(eventId);
+        setBlacklistStatus(newStatus);
+      } else {
+        throw new Error(result.message || "Failed to submit appeal");
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || "Failed to submit appeal");
+      throw error;
+    }
+  };
+
   const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleDateString("en-US", {
       weekday: "long",
@@ -418,6 +511,9 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
 
   return (
     <>
+      {/* Smart App Banner - shown on mobile when viewing invite */}
+      <SmartAppBanner currentPath={currentPath} />
+
       <div className="min-h-screen bg-background">
         {/* Management/Scanner Banner - Mobile (full width) */}
       {userRole && (
@@ -508,14 +604,23 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
         )}
 
 
-        {/* Back Button */}
-        <button
-          onClick={() => router.push("/events")}
-          className="mb-6 flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          Back to Events
-        </button>
+        {/* Back Button and Report Button */}
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <button
+            onClick={() => router.push("/events")}
+            className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            Back to Events
+          </button>
+          <button
+            onClick={() => setShowReportModal(true)}
+            className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-sm text-red-400 transition-colors hover:border-red-500/50 hover:bg-red-500/20"
+          >
+            <Flag className="h-4 w-4" />
+            Report Event
+          </button>
+        </div>
 
         {/* Main Content - Responsive Layout */}
         <div className="flex flex-col gap-6 lg:flex-row-reverse">
@@ -544,7 +649,13 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
 
                 {/* Status Badge - Only on lg+ and only for collaborators */}
                 {userRole && (
-                  <div className="absolute right-4 top-4 hidden lg:block">
+                  <div className="absolute right-4 top-4 hidden lg:flex lg:items-center lg:gap-2">
+                  {event.isPrivate && (
+                    <span className="flex items-center gap-1.5 rounded-full border border-purple-500/30 bg-purple-500/20 px-3 py-2 text-sm font-semibold text-purple-400 backdrop-blur-md">
+                      <Lock className="h-3.5 w-3.5" />
+                      Private
+                    </span>
+                  )}
                     <span
                       className={`rounded-full border px-4 py-2 text-sm font-semibold backdrop-blur-md ${
                         statusColors[event.status] || "bg-gray-500/20 text-gray-400 border-gray-500/30"
@@ -721,7 +832,17 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
 
               {/* Location Card - Bottom right */}
               <div className="rounded-xl border border-neutral-700 bg-card-background overflow-hidden sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
-                {event.address ? (
+                {isVirtualEvent(event.format) ? (
+                  <div className="p-4 sm:p-6">
+                    <div className="h-32 w-full bg-primary/10 rounded-lg flex flex-col items-center justify-center gap-2 mb-4">
+                      <Video className="h-8 w-8 text-primary" />
+                      <span className="text-sm font-medium text-primary">Online Event</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {event.virtualMeetingUrl ? "Virtual meeting link will be available to ticket holders" : "Meeting link will be shared before the event"}
+                    </p>
+                  </div>
+                ) : event.address ? (
                   <>
                     {/* Map Area */}
                     {event.address.location?.latitude && event.address.location?.longitude ? (
@@ -754,8 +875,22 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                           event.address.zipcode
                         ].filter(Boolean).join(', ')}
                       </p>
+                      {isHybridEvent(event.format) && (
+                        <p className="text-sm text-primary mt-2 flex items-center gap-1">
+                          <Video className="h-4 w-4" />
+                          Also available online
+                        </p>
+                      )}
                     </div>
                   </>
+                ) : isHybridEvent(event.format) ? (
+                  <div className="p-4 sm:p-6">
+                    <div className="h-32 w-full bg-primary/10 rounded-lg flex flex-col items-center justify-center gap-2 mb-4">
+                      <Video className="h-8 w-8 text-primary" />
+                      <span className="text-sm font-medium text-primary">Hybrid Event</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Online + Physical location TBD</p>
+                  </div>
                 ) : (
                   <div className="p-4 sm:p-6">
                     <div className="h-32 w-full bg-card-secondary-background rounded-lg flex flex-col items-center justify-center gap-2 mb-4">
@@ -778,7 +913,13 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   </h3>
                   {/* Status Badge - Show on mobile/tablet, hide on desktop - only for collaborators */}
                   {userRole && (
-                    <div className="block lg:hidden">
+                    <div className="flex items-center gap-2 lg:hidden">
+                    {event.isPrivate && (
+                      <span className="flex items-center gap-1 rounded-full border border-purple-500/30 bg-purple-500/20 px-2 py-1 text-xs font-semibold text-purple-400">
+                        <Lock className="h-3 w-3" />
+                        Private
+                      </span>
+                    )}
                       <span
                         className={`rounded-full border px-3 py-1 text-xs font-semibold ${
                           statusColors[event.status] || "bg-gray-500/20 text-gray-400 border-gray-500/30"
@@ -967,6 +1108,63 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       </span>
                     )}
                   </div>
+
+                  {/* Blacklist Warning Notice */}
+                  {blacklistStatus?.isBlacklisted && (
+                    <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500/20">
+                          <Ban className="h-5 w-5 text-red-400" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-red-400">
+                            You cannot register for this event
+                          </h3>
+                          <p className="mt-1 text-sm text-red-300/80">
+                            {blacklistStatus.reason}
+                          </p>
+                          {blacklistStatus.appealStatus === BlacklistAppealStatus.NONE && blacklistStatus.canAppeal && (
+                            <button
+                              onClick={() => setShowAppealModal(true)}
+                              className="mt-3 rounded-lg bg-red-500/20 px-4 py-2 text-sm font-medium text-red-300 transition-colors hover:bg-red-500/30"
+                            >
+                              Submit Appeal
+                            </button>
+                          )}
+                          {blacklistStatus.appealStatus === BlacklistAppealStatus.PENDING && (
+                            <p className="mt-2 text-sm text-amber-400">
+                              Your appeal is under review by the organizer.
+                            </p>
+                          )}
+                          {blacklistStatus.appealStatus === BlacklistAppealStatus.DENIED && (
+                            <p className="mt-2 text-sm text-red-400">
+                              Your appeal was denied. This decision is final.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Private Event Notice (when no invite token) */}
+                  {event.isPrivate && !hasValidInvitation && !hasUserTicket && canRegister && (
+                    <div className="mb-4 rounded-xl border border-purple-500/30 bg-purple-500/10 p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-500/20">
+                          <Lock className="h-5 w-5 text-purple-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-purple-400">
+                            Private Event
+                          </h3>
+                          <p className="mt-1 text-sm text-purple-300/80">
+                            This is a private event. You&apos;ll need an invite link from the organizer to register for tickets.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-2 sm:space-y-3">
                     {event.eventTickets.map((ticket) => {
                       const remaining = ticket.quantityLeft ?? 0;
@@ -979,13 +1177,15 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       const isInvitedTicket = hasValidInvitation && ticket.id === invitedTicketId;
                       // In invitation mode, only the invited ticket is selectable
                       const isDisabledByInvitation = hasValidInvitation && !isInvitedTicket;
+                      // Private events require an invite link (unless user already has a ticket)
+                      const isDisabledByPrivate = event.isPrivate && !hasValidInvitation && !hasUserTicket;
                       // Can select sold out tickets for waitlist, but not if organizer disabled or user has ticket
-                      const isDisabled = !canRegister || isManuallyUnavailable || hasUserTicket || isDisabledByInvitation;
+                      const isDisabled = !canRegister || isManuallyUnavailable || hasUserTicket || isDisabledByInvitation || isDisabledByPrivate;
 
                       return (
                         <div
                           key={ticket.id}
-                          onClick={() => !isDisabled && !isDisabledByInvitation && setSelectedTicketId(ticket.id)}
+                          onClick={() => !isDisabled && setSelectedTicketId(ticket.id)}
                           className={`flex items-center justify-between gap-2 sm:gap-4 rounded-xl border p-3 sm:p-4 transition-all ${
                             isOwnedTicket
                               ? isActiveTicket
@@ -1007,7 +1207,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                               <CheckCircle2 className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 ${isActiveTicket ? "text-green-400" : "text-yellow-400"}`} />
                             ) : isInvitedTicket ? (
                               <Gift className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-emerald-400" />
-                            ) : canRegister && !isManuallyUnavailable && !isDisabledByInvitation && (
+                            ) : canRegister && !isManuallyUnavailable && !isDisabledByInvitation && !isDisabledByPrivate && (
                               <div
                                 className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                                   isSelected ? "border-primary" : "border-white/30"
@@ -1076,10 +1276,10 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                           )}
                         </div>
                         <Link
-                          href="/my-tickets"
+                          href={`/my-tickets?ticketId=${event.userTicket.id}`}
                           className="text-sm text-green-400 hover:text-green-300 transition-colors shrink-0"
                         >
-                          My Tickets →
+                          View Ticket →
                         </Link>
                       </div>
                     </div>
@@ -1106,8 +1306,8 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                     </button>
                   )}
 
-                  {/* Register/Join Waitlist Button (for normal mode) */}
-                  {!hasValidInvitation && canRegister && event.eventTickets.some(t => t.isAvailable) && (
+                  {/* Register/Join Waitlist Button (for normal mode - hidden for private events without invite) */}
+                  {!hasValidInvitation && !event.isPrivate && canRegister && event.eventTickets.some(t => t.isAvailable) && (
                     <button
                       onClick={() => selectedTicketId && handleRegister(selectedTicketId)}
                       disabled={!selectedTicketId || isRegistering}
@@ -1192,6 +1392,76 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
           isSubmitting={isRegistering}
         />
       )}
+
+      {/* Report Event Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg rounded-xl border border-neutral-700 bg-card-background p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-foreground">Report Event</h2>
+              <button
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportDescription("");
+                }}
+                className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <p className="mb-4 text-sm text-muted-foreground">
+              Please describe why you're reporting this event. Our team will review your report.
+            </p>
+
+            <textarea
+              value={reportDescription}
+              onChange={(e) => setReportDescription(e.target.value)}
+              placeholder="Describe the issue with this event..."
+              className="mb-4 w-full rounded-lg border border-neutral-700 bg-card-secondary-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 min-h-[150px] resize-y"
+              disabled={isReporting}
+            />
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportDescription("");
+                }}
+                disabled={isReporting}
+                className="flex-1 rounded-lg border border-neutral-700 bg-card-secondary-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReportEvent}
+                disabled={isReporting || !reportDescription.trim()}
+                className="flex-1 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isReporting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Reporting...
+                  </>
+                ) : (
+                  <>
+                    <Flag className="h-4 w-4" />
+                    Submit Report
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Blacklist Appeal Modal */}
+      <AppealModal
+        isOpen={showAppealModal}
+        onClose={() => setShowAppealModal(false)}
+        onSubmit={handleSubmitAppeal}
+        reason={blacklistStatus?.reason || ""}
+      />
 
       </div>
     </>

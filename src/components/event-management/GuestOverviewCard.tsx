@@ -11,6 +11,10 @@ interface GuestOverviewCardProps {
   approvedCount: number;
   pendingApprovalCount: number;
   waitlistedCount: number;
+  onCheckedInClick?: () => void;
+  onApprovedClick?: () => void;
+  onPendingClick?: () => void;
+  onWaitlistedClick?: () => void;
 }
 
 export function GuestOverviewCard({
@@ -19,6 +23,10 @@ export function GuestOverviewCard({
   approvedCount,
   pendingApprovalCount,
   waitlistedCount,
+  onCheckedInClick,
+  onApprovedClick,
+  onPendingClick,
+  onWaitlistedClick,
 }: GuestOverviewCardProps) {
   return (
     <div className="bg-card-background rounded-2xl border border-white/5 overflow-hidden">
@@ -41,7 +49,11 @@ export function GuestOverviewCard({
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {/* Checked In */}
-            <div className="rounded-xl bg-white/5 p-3">
+            <button
+              onClick={onCheckedInClick}
+              disabled={!onCheckedInClick}
+              className={`rounded-xl bg-white/5 p-3 text-left ${onCheckedInClick ? 'cursor-pointer transition-colors hover:bg-white/10' : ''}`}
+            >
               <div className="flex items-center gap-2 mb-1">
                 <UserCheck className="h-4 w-4 text-purple-400" />
                 <span className="text-xs text-muted-foreground">Checked In</span>
@@ -52,19 +64,27 @@ export function GuestOverviewCard({
                   ({checkInStats.percentageCheckedIn.toFixed(0)}%)
                 </span>
               </div>
-            </div>
+            </button>
 
             {/* Approved */}
-            <div className="rounded-xl bg-white/5 p-3">
+            <button
+              onClick={onApprovedClick}
+              disabled={!onApprovedClick}
+              className={`rounded-xl bg-white/5 p-3 text-left ${onApprovedClick ? 'cursor-pointer transition-colors hover:bg-white/10' : ''}`}
+            >
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle2 className="h-4 w-4 text-green-400" />
                 <span className="text-xs text-muted-foreground">Approved</span>
               </div>
               <span className="text-xl font-bold text-foreground">{approvedCount}</span>
-            </div>
+            </button>
 
             {/* Pending Approval */}
-            <div className={`rounded-xl p-3 ${pendingApprovalCount > 0 ? "bg-amber-500/10" : "bg-white/5"}`}>
+            <button
+              onClick={onPendingClick}
+              disabled={!onPendingClick}
+              className={`rounded-xl p-3 text-left ${pendingApprovalCount > 0 ? "bg-amber-500/10" : "bg-white/5"} ${onPendingClick ? 'cursor-pointer transition-colors hover:bg-amber-500/20' : ''}`}
+            >
               <div className="flex items-center gap-2 mb-1">
                 <Clock className={`h-4 w-4 ${pendingApprovalCount > 0 ? "text-amber-400" : "text-muted-foreground"}`} />
                 <span className="text-xs text-muted-foreground">Pending</span>
@@ -72,16 +92,20 @@ export function GuestOverviewCard({
               <span className={`text-xl font-bold ${pendingApprovalCount > 0 ? "text-amber-400" : "text-foreground"}`}>
                 {pendingApprovalCount}
               </span>
-            </div>
+            </button>
 
             {/* Waitlisted */}
-            <div className="rounded-xl bg-white/5 p-3">
+            <button
+              onClick={onWaitlistedClick}
+              disabled={!onWaitlistedClick}
+              className={`rounded-xl bg-white/5 p-3 text-left ${onWaitlistedClick ? 'cursor-pointer transition-colors hover:bg-white/10' : ''}`}
+            >
               <div className="flex items-center gap-2 mb-1">
                 <Users className="h-4 w-4 text-blue-400" />
                 <span className="text-xs text-muted-foreground">Waitlisted</span>
               </div>
               <span className="text-xl font-bold text-foreground">{waitlistedCount}</span>
-            </div>
+            </button>
           </div>
         )}
       </div>

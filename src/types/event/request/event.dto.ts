@@ -3,7 +3,7 @@
  * Backend source: src/features/event-management/events/dto/create-event.dto.ts
  */
 
-import { EventStatus } from '../status';
+import { EventStatus, EventFormat } from '../status';
 import { EventCategoryType } from '../../category/types';
 import { LocationDto } from '../../address/location.dto';
 import { CreateEventTicketDto } from '../../event-ticket/request/create-ticket.dto';
@@ -28,12 +28,18 @@ export interface CreateEventDto {
   endDateTime: Date | string;
   status?: EventStatus;
   isPrivate?: boolean;
+  requiresApproval?: boolean;
+  format?: EventFormat;
+  virtualMeetingUrl?: string;
+  virtualCapacity?: number;
   addressId?: string;
   addressData?: CreateEventAddressDto;
   cateringOrderId?: string;
   categoryIds?: string[];
   eventUrl?: string;
   tickets?: CreateEventTicketDto[];
+  acceptingNewTickets?: boolean;
+  stopAcceptingOnStart?: boolean;
 }
 
 export interface UpdateEventDto {
@@ -46,12 +52,18 @@ export interface UpdateEventDto {
   endDateTime?: Date | string;
   status?: EventStatus;
   isPrivate?: boolean;
+  requiresApproval?: boolean;
+  format?: EventFormat;
+  virtualMeetingUrl?: string;
+  virtualCapacity?: number;
   addressId?: string;
   addressData?: CreateEventAddressDto;
   cateringOrderId?: string;
   categoryIds?: string[];
   eventUrl?: string;
   tickets?: CreateEventTicketDto[];
+  acceptingNewTickets?: boolean;
+  stopAcceptingOnStart?: boolean;
 }
 
 export interface EventQueryDto {
@@ -61,6 +73,8 @@ export interface EventQueryDto {
   category?: EventCategoryType;
   startDate?: string;
   endDate?: string;
+  today?: boolean;
+  currentMonth?: boolean;
   isPrivate?: boolean;
   ownerId?: string;
   skip?: number;

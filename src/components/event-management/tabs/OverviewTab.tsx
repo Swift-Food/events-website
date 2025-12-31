@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { EventResponseDto, EventStatus } from "@/types";
-import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, EyeOff, AlertTriangle, Loader2, CreditCard } from "lucide-react";
+import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, AlertTriangle, Loader2, CreditCard, Video } from "lucide-react";
+import { isVirtualEvent, isHybridEvent } from "@/types/event/status";
 import { GuestTicketResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
 import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
 import { InviteGuestsModal } from "@/components/event-management/InviteGuestsModal";
@@ -19,6 +20,8 @@ interface OverviewTabProps {
   eventData: EventResponseDto;
   onEditClick: () => void;
   onScanClick: () => void;
+  onTeamClick: () => void;
+  onGuestsClick: (filter?: string) => void;
   onDeleteClick: () => Promise<void>;
   isDeleting?: boolean;
   userRole?: UserRole;
@@ -26,7 +29,7 @@ interface OverviewTabProps {
   isPublishLoading?: boolean;
 }
 
-export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick, isDeleting, userRole, onPublishToggle, isPublishLoading }: OverviewTabProps) {
+export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, onGuestsClick, onDeleteClick, isDeleting, userRole, onPublishToggle, isPublishLoading }: OverviewTabProps) {
   // Scanner can only scan, not edit or delete
   const canEdit = userRole === "owner" || userRole === "admin";
   const canDelete = userRole === "owner" || userRole === "admin";
@@ -258,10 +261,39 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
             {/* Where */}
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                <MapPin className="h-4 w-4 text-primary" />
+                {isVirtualEvent(eventData.format) ? (
+                  <Video className="h-4 w-4 text-primary" />
+                ) : (
+                  <MapPin className="h-4 w-4 text-primary" />
+                )}
               </div>
               <div className="min-w-0">
-                {eventData.address ? (
+                {isVirtualEvent(eventData.format) ? (
+                  <>
+                    <p className="text-sm font-medium text-foreground">Online Event</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {eventData.virtualMeetingUrl ? "Virtual meeting link available" : "Link to be shared"}
+                    </p>
+                  </>
+                ) : isHybridEvent(eventData.format) ? (
+                  <>
+                    {eventData.address ? (
+                      <>
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {eventData.address.addressLine1}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {eventData.address.city}, {eventData.address.zipcode} • Also Online
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm font-medium text-foreground">Hybrid Event</p>
+                        <p className="text-xs text-muted-foreground">Online + Location TBD</p>
+                      </>
+                    )}
+                  </>
+                ) : eventData.address ? (
                   <>
                     <p className="text-sm font-medium text-foreground truncate">
                       {eventData.address.addressLine1}
@@ -297,13 +329,24 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
         {/* Actions Row */}
         <div className="border-t border-white/5 px-5 sm:px-6 py-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
             <button
-              onClick={onScanClick}
-              className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <ScanLine className="h-4 w-4" />
-              Scan Tickets
+                onClick={onScanClick}
+                className="flex items-center gap-2 rounded-xl bg-primary px-4 sm:px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <ScanLine className="h-4 w-4" />
+                <span className="hidden xs:inline">Scan Tickets</span>
             </button>
+            {canEdit && (
+              <button
+                onClick={onTeamClick}
+                className="flex items-center gap-2 rounded-xl bg-white/5 px-3 sm:px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
+              >
+                <UserPlus className="h-4 w-4" />
+                <span className="hidden sm:inline">Add Scanners</span>
+                </button>
+            )}
+          </div>
 
             {/* Publish/Unpublish Button */}
             {canPublish && onPublishToggle && (
@@ -334,7 +377,7 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
             <div className="flex items-center gap-2">
               <button
                 onClick={onEditClick}
-                className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
+                className="flex items-center gap-2 rounded-xl bg-white/5 px-3 sm:px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
               >
                 <Edit className="h-4 w-4" />
                 <span className="hidden sm:inline">Edit</span>
@@ -359,6 +402,10 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onDeleteClick
         approvedCount={approvedCount}
         pendingApprovalCount={pendingApprovalCount}
         waitlistedCount={waitlistedCount}
+        onCheckedInClick={() => onGuestsClick("checked_in")}
+        onApprovedClick={() => onGuestsClick("active")}
+        onPendingClick={() => onGuestsClick("pending_approval")}
+        onWaitlistedClick={() => onGuestsClick("waitlisted")}
       />
 
       {canViewStats && (

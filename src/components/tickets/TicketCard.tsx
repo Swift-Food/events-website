@@ -22,6 +22,7 @@ interface TicketCardProps {
   isLeavingWaitlist?: boolean;
   waitlistPosition?: number;
   waitlistTotal?: number;
+  autoShowQR?: boolean;
 }
 
 // Confirmation Modal Component
@@ -149,8 +150,9 @@ export default function TicketCard({
   isLeavingWaitlist,
   waitlistPosition,
   waitlistTotal,
+  autoShowQR = false,
 }: TicketCardProps) {
-  const [showQRModal, setShowQRModal] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(autoShowQR);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [showLeaveWaitlistModal, setShowLeaveWaitlistModal] = useState(false);

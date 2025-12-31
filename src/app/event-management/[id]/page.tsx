@@ -35,6 +35,9 @@ export default function EventManagementPage() {
   // Get current tab from URL, default to "overview"
   const currentTab = (searchParams.get("tab") as TabType) || "overview";
 
+  // Get guest filter from URL
+  const guestFilter = searchParams.get("filter") || "all";
+
   const [eventData, setEventData] = useState<EventResponseDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,8 +48,11 @@ export default function EventManagementPage() {
   const [isPublishLoading, setIsPublishLoading] = useState(false);
   const [showUnpublishConfirm, setShowUnpublishConfirm] = useState(false);
 
-  const setTab = (tab: TabType) => {
-    router.push(`/event-management/${eventId}?tab=${tab}`);
+  const setTab = (tab: TabType, filter?: string) => {
+    const url = filter
+      ? `/event-management/${eventId}?tab=${tab}&filter=${filter}`
+      : `/event-management/${eventId}?tab=${tab}`;
+    router.push(url);
   };
 
   // Fetch event data
@@ -365,6 +371,8 @@ export default function EventManagementPage() {
             eventData={eventData}
             onEditClick={() => setShowEditModal(true)}
             onScanClick={() => router.push(`/event-management/${eventId}/scanner`)}
+            onTeamClick={() => setTab("team")}
+            onGuestsClick={(filter) => setTab("guests", filter)}
             onDeleteClick={handleDeleteEvent}
             isDeleting={isDeleting}
             userRole={userRole}
@@ -373,7 +381,12 @@ export default function EventManagementPage() {
           />
         )}
 
-        {currentTab === "guests" && <GuestsTab eventId={eventId} />}
+        {currentTab === "guests" && (
+          <GuestsTab
+            eventId={eventId}
+            initialFilter={guestFilter as any}
+          />
+        )}
 
         {currentTab === "registration" && (
           <RegistrationTab
