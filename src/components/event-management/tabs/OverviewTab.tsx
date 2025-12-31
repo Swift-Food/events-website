@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { EventResponseDto, EventStatus } from "@/types";
-import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, AlertTriangle, Loader2, CreditCard, Video } from "lucide-react";
+import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, EyeOff, AlertTriangle, Loader2, CreditCard, Video, UserPlus } from "lucide-react";
 import { isVirtualEvent, isHybridEvent } from "@/types/event/status";
 import { GuestTicketResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
 import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";

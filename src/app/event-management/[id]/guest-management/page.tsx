@@ -15,7 +15,7 @@ import { GuestFilters, GuestTable, BulkActionBar, ReviewGuestModal } from "@/com
 import { BlacklistModal } from "@/components/blacklist";
 import { Loader, Link as LinkIcon, Copy, Check } from "lucide-react";
 
-type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in";
+type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in" | "blacklisted";
 
 /**
  * Extract guest display name with proper fallbacks
