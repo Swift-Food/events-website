@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { eventCollaboratorService } from "@/services/event-collaborator.service";
+import { blacklistService } from "@/services/blacklist.service";
 import { CollaboratorRole } from "@/types/event-collaborator";
 import { paymentService } from "@/services/payment.service";
 import { mailService } from "@/services/mail.service";
@@ -12,6 +13,7 @@ import { useAuth } from "@/lib/auth/authContext";
 import { EventResponseDto, EventStatus } from "@/types/event";
 import { isVirtualEvent, isHybridEvent } from "@/types/event/status";
 import { GuestTicketStatus, TicketInvitationPreviewDto } from "@/types/guest-ticket";
+import { BlacklistStatusDto, BlacklistAppealStatus } from "@/types/blacklist";
 import type { PaymentFlowState } from "@/types/payment";
 import {
   Calendar,
@@ -32,12 +34,14 @@ import {
   Flag,
   Lock,
   Video,
+  Ban,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
 import PaymentModal, { PaymentSuccessModal } from "@/components/payments/PaymentModal";
+import { AppealModal } from "@/components/blacklist";
 import RegistrationQuestionsModal from "@/components/RegistrationQuestionsModal";
 import { getTicketStatusText, getTicketStatusBadgeClasses, isTicketUsable } from "@/utils/ticket-status";
 import {
@@ -110,6 +114,10 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
   const [reportDescription, setReportDescription] = useState("");
   const [isReporting, setIsReporting] = useState(false);
 
+  // Blacklist status state
+  const [blacklistStatus, setBlacklistStatus] = useState<BlacklistStatusDto | null>(null);
+  const [showAppealModal, setShowAppealModal] = useState(false);
+
   // Check if user can manage this event and their role
   type UserRole = "owner" | "admin" | "scanner" | null;
   const [userRole, setUserRole] = useState<UserRole>(null);
@@ -128,6 +136,26 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
     };
 
     fetchAuthenticatedEventData();
+  }, [isAuthenticated, authLoading, eventId]);
+
+  // Check if user is blacklisted from this event
+  useEffect(() => {
+    const checkBlacklistStatus = async () => {
+      if (!isAuthenticated || authLoading) {
+        setBlacklistStatus(null);
+        return;
+      }
+
+      try {
+        const status = await blacklistService.getMyBlacklistStatus(eventId);
+        setBlacklistStatus(status);
+      } catch (err) {
+        // User is not blacklisted or error fetching - either way, don't block
+        setBlacklistStatus(null);
+      }
+    };
+
+    checkBlacklistStatus();
   }, [isAuthenticated, authLoading, eventId]);
 
   // Fetch invitation preview when inviteToken is present
@@ -418,6 +446,30 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
       toast.error(error.response?.data?.message || "Failed to report event. Please try again.");
     } finally {
       setIsReporting(false);
+    }
+  };
+
+  const handleSubmitAppeal = async (appealMessage: string) => {
+    if (!blacklistStatus?.blacklistId) {
+      toast.error("Unable to submit appeal");
+      return;
+    }
+
+    try {
+      const result = await blacklistService.submitAppeal(blacklistStatus.blacklistId, {
+        appealMessage,
+      });
+      if (result.success) {
+        toast.success("Appeal submitted successfully. The organizer will review your request.");
+        // Refresh blacklist status
+        const newStatus = await blacklistService.getMyBlacklistStatus(eventId);
+        setBlacklistStatus(newStatus);
+      } else {
+        throw new Error(result.message || "Failed to submit appeal");
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || "Failed to submit appeal");
+      throw error;
     }
   };
 
@@ -1053,6 +1105,43 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                     )}
                   </div>
 
+                  {/* Blacklist Warning Notice */}
+                  {blacklistStatus?.isBlacklisted && (
+                    <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500/20">
+                          <Ban className="h-5 w-5 text-red-400" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-red-400">
+                            You cannot register for this event
+                          </h3>
+                          <p className="mt-1 text-sm text-red-300/80">
+                            {blacklistStatus.reason}
+                          </p>
+                          {blacklistStatus.appealStatus === BlacklistAppealStatus.NONE && blacklistStatus.canAppeal && (
+                            <button
+                              onClick={() => setShowAppealModal(true)}
+                              className="mt-3 rounded-lg bg-red-500/20 px-4 py-2 text-sm font-medium text-red-300 transition-colors hover:bg-red-500/30"
+                            >
+                              Submit Appeal
+                            </button>
+                          )}
+                          {blacklistStatus.appealStatus === BlacklistAppealStatus.PENDING && (
+                            <p className="mt-2 text-sm text-amber-400">
+                              Your appeal is under review by the organizer.
+                            </p>
+                          )}
+                          {blacklistStatus.appealStatus === BlacklistAppealStatus.DENIED && (
+                            <p className="mt-2 text-sm text-red-400">
+                              Your appeal was denied. This decision is final.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Private Event Notice (when no invite token) */}
                   {event.isPrivate && !hasValidInvitation && !hasUserTicket && canRegister && (
                     <div className="mb-4 rounded-xl border border-purple-500/30 bg-purple-500/10 p-4">
@@ -1361,6 +1450,14 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
           </div>
         </div>
       )}
+
+      {/* Blacklist Appeal Modal */}
+      <AppealModal
+        isOpen={showAppealModal}
+        onClose={() => setShowAppealModal(false)}
+        onSubmit={handleSubmitAppeal}
+        reason={blacklistStatus?.reason || ""}
+      />
 
       </div>
     </>
