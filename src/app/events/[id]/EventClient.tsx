@@ -542,16 +542,18 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   </div>
                 )}
 
-                {/* Status Badge - Only on lg+ */}
-                <div className="absolute right-4 top-4 hidden lg:block">
-                  <span
-                    className={`rounded-full border px-4 py-2 text-sm font-semibold backdrop-blur-md ${
-                      statusColors[event.status] || "bg-gray-500/20 text-gray-400 border-gray-500/30"
-                    }`}
-                  >
-                    {event.status || "Unknown"}
-                  </span>
-                </div>
+                {/* Status Badge - Only on lg+ and only for collaborators */}
+                {userRole && (
+                  <div className="absolute right-4 top-4 hidden lg:block">
+                    <span
+                      className={`rounded-full border px-4 py-2 text-sm font-semibold backdrop-blur-md ${
+                        statusColors[event.status] || "bg-gray-500/20 text-gray-400 border-gray-500/30"
+                      }`}
+                    >
+                      {event.status || "Unknown"}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Event Title & Categories - Show on mobile & tablet, hide on desktop */}
@@ -774,16 +776,18 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   <h3 className="text-lg font-semibold text-foreground">
                     Organized by
                   </h3>
-                  {/* Status Badge - Show on mobile/tablet, hide on desktop */}
-                  <div className="block lg:hidden">
-                    <span
-                      className={`rounded-full border px-3 py-1 text-xs font-semibold ${
-                        statusColors[event.status] || "bg-gray-500/20 text-gray-400 border-gray-500/30"
-                      }`}
-                    >
-                      {event.status}
-                    </span>
-                  </div>
+                  {/* Status Badge - Show on mobile/tablet, hide on desktop - only for collaborators */}
+                  {userRole && (
+                    <div className="block lg:hidden">
+                      <span
+                        className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                          statusColors[event.status] || "bg-gray-500/20 text-gray-400 border-gray-500/30"
+                        }`}
+                      >
+                        {event.status}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 {event.owner?.user ? (
                   <div className="flex items-center gap-3">

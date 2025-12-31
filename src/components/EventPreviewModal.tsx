@@ -461,17 +461,19 @@ export default function EventPreviewModal({
                   </div>
                 )}
 
-                {/* Status Badge */}
-                <div className="absolute right-4 top-4">
-                  <span
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold backdrop-blur-md ${
-                      statusColors[event.status] ||
-                      "bg-gray-500/20 text-gray-400 border-gray-500/30"
-                    }`}
-                  >
-                    {event.status || "Unknown"}
-                  </span>
-                </div>
+                {/* Status Badge - only for collaborators */}
+                {userRole && (
+                  <div className="absolute right-4 top-4">
+                    <span
+                      className={`rounded-full border px-3 py-1.5 text-xs font-semibold backdrop-blur-md ${
+                        statusColors[event.status] ||
+                        "bg-gray-500/20 text-gray-400 border-gray-500/30"
+                      }`}
+                    >
+                      {event.status || "Unknown"}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Event Title */}
