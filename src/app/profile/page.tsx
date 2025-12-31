@@ -11,7 +11,7 @@ import {
   eventUserService,
   EventUserStats,
 } from "@/services/event-user.service";
-import { EventResponseDto } from "@/types/event";
+import { EventResponseDto, EventFormat } from "@/types/event";
 import EventCard from "@/components/EventCard";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
 import {
@@ -156,6 +156,9 @@ export default function ProfilePage() {
           description: "",
           eventColor: "#000000",
           isPrivate: false,
+          format: EventFormat.IN_PERSON,
+          virtualMeetingUrl: null,
+          virtualCapacity: null,
           eventUrl: null,
           viewCount: 0,
           acceptingNewTickets: true,
@@ -204,6 +207,9 @@ export default function ProfilePage() {
           description: "",
           eventColor: "#000000",
           isPrivate: false,
+          format: EventFormat.IN_PERSON,
+          virtualMeetingUrl: null,
+          virtualCapacity: null,
           eventUrl: null,
           viewCount: 0,
           acceptingNewTickets: true,

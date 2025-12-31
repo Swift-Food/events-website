@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, MapPin, Users } from "lucide-react";
-import { EventResponseDto, EventStatus } from "@/types/event";
+import { Calendar, MapPin, Users, Video, Lock } from "lucide-react";
+import { EventResponseDto, EventStatus, EventFormat } from "@/types/event";
 
 interface EventCardProps {
   event: EventResponseDto;
@@ -35,16 +35,39 @@ export default function EventCard({ event, isHostedEvent = false }: EventCardPro
       href={isHostedEvent ? `/event-management/${event.id}` : `/events/${event.id}`}
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-card-background transition-all hover:border-white/20 hover:shadow-2xl"
     >
-      {/* Ongoing Badge */}
-      {isOngoing && (
-        <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-green-500/90 px-2 py-1 backdrop-blur-sm">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-white"></span>
-          </span>
-          <span className="text-xs font-semibold text-white">LIVE</span>
-        </div>
-      )}
+      {/* Top Badges */}
+      <div className="absolute right-3 top-3 z-10 flex flex-col items-end gap-2">
+        {/* Ongoing Badge */}
+        {isOngoing && (
+          <div className="flex items-center gap-1.5 rounded-full bg-green-500/90 px-2 py-1 backdrop-blur-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-white"></span>
+            </span>
+            <span className="text-xs font-semibold text-white">LIVE</span>
+          </div>
+        )}
+        {/* Format Badge */}
+        {event.format === EventFormat.VIRTUAL && (
+          <div className="flex items-center gap-1 rounded-full bg-purple-500/90 px-2 py-1 backdrop-blur-sm">
+            <Video className="h-3 w-3 text-white" />
+            <span className="text-xs font-semibold text-white">Virtual</span>
+          </div>
+        )}
+        {event.format === EventFormat.BOTH && (
+          <div className="flex items-center gap-1 rounded-full bg-blue-500/90 px-2 py-1 backdrop-blur-sm">
+            <Video className="h-3 w-3 text-white" />
+            <span className="text-xs font-semibold text-white">In Person + Online</span>
+          </div>
+        )}
+        {/* Private Badge */}
+        {event.isPrivate && (
+          <div className="flex items-center gap-1 rounded-full bg-amber-500/90 px-2 py-1 backdrop-blur-sm">
+            <Lock className="h-3 w-3 text-white" />
+            <span className="text-xs font-semibold text-white">Invite Only</span>
+          </div>
+        )}
+      </div>
       {/* Event Image */}
       <div className="relative aspect-video w-full flex-shrink-0 overflow-hidden bg-card-secondary-background">
         {event.eventImage ? (
@@ -78,16 +101,22 @@ export default function EventCard({ event, isHostedEvent = false }: EventCardPro
           </div>
 
           {/* Location */}
-          {event.address &&
+          {event.format === EventFormat.VIRTUAL ? (
+            <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
+              <Video className="h-4 w-4 text-purple-400" />
+              <span className="line-clamp-1">Online Event</span>
+            </div>
+          ) : event.address &&
             event.address.city &&
-            event.address.city !== "TBD" && (
+            event.address.city !== "TBD" ? (
               <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
                 <span className="line-clamp-1">
                   {event.address.city}, {event.address.zipcode}
+                  {event.format === EventFormat.BOTH && " + Online"}
                 </span>
               </div>
-            )}
+            ) : null}
 
           {/* Categories */}
           {event.categories && event.categories.length > 0 && (

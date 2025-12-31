@@ -3,7 +3,7 @@
  * Backend source: src/features/event-management/events/dto/create-event.dto.ts
  */
 
-import { EventStatus } from '../status';
+import { EventStatus, EventFormat } from '../status';
 import { EventCategoryType } from '../../category/types';
 import { LocationDto } from '../../address/location.dto';
 import { CreateEventTicketDto } from '../../event-ticket/request/create-ticket.dto';
@@ -28,6 +28,9 @@ export interface CreateEventDto {
   endDateTime: Date | string;
   status?: EventStatus;
   isPrivate?: boolean;
+  format?: EventFormat;
+  virtualMeetingUrl?: string;
+  virtualCapacity?: number;
   addressId?: string;
   addressData?: CreateEventAddressDto;
   cateringOrderId?: string;
@@ -48,6 +51,9 @@ export interface UpdateEventDto {
   endDateTime?: Date | string;
   status?: EventStatus;
   isPrivate?: boolean;
+  format?: EventFormat;
+  virtualMeetingUrl?: string;
+  virtualCapacity?: number;
   addressId?: string;
   addressData?: CreateEventAddressDto;
   cateringOrderId?: string;

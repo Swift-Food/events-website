@@ -10,3 +10,13 @@ export enum EventStatus {
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
 }
+
+/**
+ * Event format enum
+ * Backend source: src/shared/entities/events/event.entity.ts
+ */
+export enum EventFormat {
+  IN_PERSON = 'in_person',
+  VIRTUAL = 'virtual',
+  BOTH = 'both',
+}
