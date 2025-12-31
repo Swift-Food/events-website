@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare } from "lucide-react";
+import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Eye, EyeOff } from "lucide-react";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import FormFieldModal from "@/components/event-edit/FormFieldModal";
@@ -14,7 +14,7 @@ import {
   EventCreationProvider,
   useEventCreation,
 } from "@/context/EventCreationContext";
-import { TicketType, UpdateEventDto } from "@/types";
+import { TicketType, UpdateEventDto, EventStatus } from "@/types";
 import { FormField } from "@/types";
 import { eventService } from "@/services/event.service";
 import { imageService } from "@/services/image.service";
@@ -39,9 +39,12 @@ interface EventFormProps {
   mode: "create" | "edit";
   eventId?: string;
   initialData?: any; // You can type this better based on your event structure
+  eventStatus?: EventStatus;
+  onPublishToggle?: () => void;
+  isPublishLoading?: boolean;
 }
 
-function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
+function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishToggle, isPublishLoading }: EventFormProps) {
   const {
     eventName,
     setEventName,
@@ -1243,6 +1246,51 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
               </button>
             </div>
           </div>
+
+          {/* Visibility Toggle - Only shown in edit mode */}
+          {mode === "edit" && onPublishToggle && (
+            <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 md:p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {eventStatus === EventStatus.PUBLISHED ? (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/20">
+                      <Eye className="h-5 w-5 text-green-400" />
+                    </div>
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/20">
+                      <EyeOff className="h-5 w-5 text-amber-400" />
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-base font-semibold text-foreground">
+                      {eventStatus === EventStatus.PUBLISHED ? "Published" : "Draft"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {eventStatus === EventStatus.PUBLISHED
+                        ? "Visible to everyone"
+                        : "Only visible to you"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={onPublishToggle}
+                  disabled={isPublishLoading}
+                  className={`rounded-xl px-4 py-2 text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                    eventStatus === EventStatus.PUBLISHED
+                      ? "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
+                      : "bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                  }`}
+                >
+                  {isPublishLoading
+                    ? "..."
+                    : eventStatus === EventStatus.PUBLISHED
+                    ? "Unpublish"
+                    : "Publish"}
+                </button>
+              </div>
+            </div>
+          )}
 
           <button
             type="button"
