@@ -58,6 +58,8 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     setEventFormat,
     virtualMeetingUrl,
     setVirtualMeetingUrl,
+    isPrivate,
+    setIsPrivate,
     venueName,
     setVenueName,
     addressLine1,
@@ -141,8 +143,9 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
       setStart(formatDateTimeForInput(initialData.startDateTime));
       setEnd(formatDateTimeForInput(initialData.endDateTime));
 
-      // Require approval (isPrivate)
-      setRequireApproval(initialData.isPrivate || false);
+      // Private event and approval settings
+      setIsPrivate(initialData.isPrivate || false);
+      setRequireApproval(initialData.requiresApproval || false);
 
       // Event format
       setEventFormat(initialData.format || EventFormat.IN_PERSON);
@@ -407,7 +410,8 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
         ownerEventUserId: eventUser.id,
         startDateTime: start,
         endDateTime: end,
-        isPrivate: requireApproval,
+        isPrivate: isPrivate,
+        requiresApproval: requireApproval,
         format: eventFormat,
         virtualMeetingUrl: virtualMeetingUrl || undefined,
         addressData: (eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH)
@@ -1305,13 +1309,43 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
               </button>
             )}
 
+            {/* Private Event Toggle */}
+            <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
+              <div>
+                <p className="text-base font-semibold text-foreground">
+                  Private Event
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Only people with invite link can get tickets
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPrivate((prev) => !prev)}
+                className={`h-7 w-14 rounded-full transition-all ${
+                  isPrivate
+                    ? "bg-primary"
+                    : "bg-card-secondary-background"
+                }`}
+              >
+                <span
+                  className={`block h-6 w-6 rounded-full transition-all ${
+                    isPrivate
+                      ? "translate-x-7 bg-primary-foreground"
+                      : "translate-x-0.5 bg-foreground"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Require Approval Toggle */}
             <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
               <div>
                 <p className="text-base font-semibold text-foreground">
                   Require Approval
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Attendees must be approved
+                  Manually approve each ticket request
                 </p>
               </div>
               <button

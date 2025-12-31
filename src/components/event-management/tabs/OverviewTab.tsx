@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { EventResponseDto } from "@/types";
-import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, AlertTriangle, Loader2, CreditCard, UserPlus } from "lucide-react";
+import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, AlertTriangle, Loader2, CreditCard, UserPlus, Video } from "lucide-react";
+import { isVirtualEvent, isHybridEvent } from "@/types/event/status";
 import { GuestTicketResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
 import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
 import { InviteGuestsModal } from "@/components/event-management/InviteGuestsModal";
@@ -252,10 +253,39 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
             {/* Where */}
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                <MapPin className="h-4 w-4 text-primary" />
+                {isVirtualEvent(eventData.format) ? (
+                  <Video className="h-4 w-4 text-primary" />
+                ) : (
+                  <MapPin className="h-4 w-4 text-primary" />
+                )}
               </div>
               <div className="min-w-0">
-                {eventData.address ? (
+                {isVirtualEvent(eventData.format) ? (
+                  <>
+                    <p className="text-sm font-medium text-foreground">Online Event</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {eventData.virtualMeetingUrl ? "Virtual meeting link available" : "Link to be shared"}
+                    </p>
+                  </>
+                ) : isHybridEvent(eventData.format) ? (
+                  <>
+                    {eventData.address ? (
+                      <>
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {eventData.address.addressLine1}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {eventData.address.city}, {eventData.address.zipcode} • Also Online
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm font-medium text-foreground">Hybrid Event</p>
+                        <p className="text-xs text-muted-foreground">Online + Location TBD</p>
+                      </>
+                    )}
+                  </>
+                ) : eventData.address ? (
                   <>
                     <p className="text-sm font-medium text-foreground truncate">
                       {eventData.address.addressLine1}

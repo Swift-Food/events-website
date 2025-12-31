@@ -28,6 +28,7 @@ export interface CreateEventDto {
   endDateTime: Date | string;
   status?: EventStatus;
   isPrivate?: boolean;
+  requiresApproval?: boolean;
   format?: EventFormat;
   virtualMeetingUrl?: string;
   virtualCapacity?: number;
@@ -51,6 +52,7 @@ export interface UpdateEventDto {
   endDateTime?: Date | string;
   status?: EventStatus;
   isPrivate?: boolean;
+  requiresApproval?: boolean;
   format?: EventFormat;
   virtualMeetingUrl?: string;
   virtualCapacity?: number;

@@ -30,6 +30,7 @@ export interface EventResponseDto {
   endDateTime: string | Date;
   status: EventStatus;
   isPrivate: boolean;
+  requiresApproval: boolean;
   format: EventFormat;
   virtualMeetingUrl: string | null;
   virtualCapacity: number | null;

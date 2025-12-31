@@ -20,3 +20,23 @@ export enum EventFormat {
   VIRTUAL = 'virtual',
   BOTH = 'both',
 }
+
+/**
+ * Helper functions for event format checks
+ * These handle both enum and string comparisons since API returns strings
+ */
+export const isVirtualEvent = (format: EventFormat | string | undefined): boolean => {
+  return format === EventFormat.VIRTUAL || format === 'virtual';
+};
+
+export const isHybridEvent = (format: EventFormat | string | undefined): boolean => {
+  return format === EventFormat.BOTH || format === 'both';
+};
+
+export const isInPersonEvent = (format: EventFormat | string | undefined): boolean => {
+  return format === EventFormat.IN_PERSON || format === 'in_person' || !format;
+};
+
+export const hasOnlineComponent = (format: EventFormat | string | undefined): boolean => {
+  return isVirtualEvent(format) || isHybridEvent(format);
+};

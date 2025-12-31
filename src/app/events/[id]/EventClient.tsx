@@ -10,6 +10,7 @@ import { paymentService } from "@/services/payment.service";
 import { mailService } from "@/services/mail.service";
 import { useAuth } from "@/lib/auth/authContext";
 import { EventResponseDto, EventStatus } from "@/types/event";
+import { isVirtualEvent, isHybridEvent } from "@/types/event/status";
 import { GuestTicketStatus, TicketInvitationPreviewDto } from "@/types/guest-ticket";
 import type { PaymentFlowState } from "@/types/payment";
 import {
@@ -29,6 +30,8 @@ import {
   Shield,
   Gift,
   Flag,
+  Lock,
+  Video,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -593,7 +596,13 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                 )}
 
                 {/* Status Badge - Only on lg+ */}
-                <div className="absolute right-4 top-4 hidden lg:block">
+                <div className="absolute right-4 top-4 hidden lg:flex lg:items-center lg:gap-2">
+                  {event.isPrivate && (
+                    <span className="flex items-center gap-1.5 rounded-full border border-purple-500/30 bg-purple-500/20 px-3 py-2 text-sm font-semibold text-purple-400 backdrop-blur-md">
+                      <Lock className="h-3.5 w-3.5" />
+                      Private
+                    </span>
+                  )}
                   <span
                     className={`rounded-full border px-4 py-2 text-sm font-semibold backdrop-blur-md ${
                       statusColors[event.status] || "bg-gray-500/20 text-gray-400 border-gray-500/30"
@@ -769,7 +778,17 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
 
               {/* Location Card - Bottom right */}
               <div className="rounded-xl border border-neutral-700 bg-card-background overflow-hidden sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
-                {event.address ? (
+                {isVirtualEvent(event.format) ? (
+                  <div className="p-4 sm:p-6">
+                    <div className="h-32 w-full bg-primary/10 rounded-lg flex flex-col items-center justify-center gap-2 mb-4">
+                      <Video className="h-8 w-8 text-primary" />
+                      <span className="text-sm font-medium text-primary">Online Event</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {event.virtualMeetingUrl ? "Virtual meeting link will be available to ticket holders" : "Meeting link will be shared before the event"}
+                    </p>
+                  </div>
+                ) : event.address ? (
                   <>
                     {/* Map Area */}
                     {event.address.location?.latitude && event.address.location?.longitude ? (
@@ -802,8 +821,22 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                           event.address.zipcode
                         ].filter(Boolean).join(', ')}
                       </p>
+                      {isHybridEvent(event.format) && (
+                        <p className="text-sm text-primary mt-2 flex items-center gap-1">
+                          <Video className="h-4 w-4" />
+                          Also available online
+                        </p>
+                      )}
                     </div>
                   </>
+                ) : isHybridEvent(event.format) ? (
+                  <div className="p-4 sm:p-6">
+                    <div className="h-32 w-full bg-primary/10 rounded-lg flex flex-col items-center justify-center gap-2 mb-4">
+                      <Video className="h-8 w-8 text-primary" />
+                      <span className="text-sm font-medium text-primary">Hybrid Event</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Online + Physical location TBD</p>
+                  </div>
                 ) : (
                   <div className="p-4 sm:p-6">
                     <div className="h-32 w-full bg-card-secondary-background rounded-lg flex flex-col items-center justify-center gap-2 mb-4">
@@ -825,7 +858,13 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                     Organized by
                   </h3>
                   {/* Status Badge - Show on mobile/tablet, hide on desktop */}
-                  <div className="block lg:hidden">
+                  <div className="flex items-center gap-2 lg:hidden">
+                    {event.isPrivate && (
+                      <span className="flex items-center gap-1 rounded-full border border-purple-500/30 bg-purple-500/20 px-2 py-1 text-xs font-semibold text-purple-400">
+                        <Lock className="h-3 w-3" />
+                        Private
+                      </span>
+                    )}
                     <span
                       className={`rounded-full border px-3 py-1 text-xs font-semibold ${
                         statusColors[event.status] || "bg-gray-500/20 text-gray-400 border-gray-500/30"
@@ -1013,6 +1052,26 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       </span>
                     )}
                   </div>
+
+                  {/* Private Event Notice (when no invite token) */}
+                  {event.isPrivate && !hasValidInvitation && !hasUserTicket && canRegister && (
+                    <div className="mb-4 rounded-xl border border-purple-500/30 bg-purple-500/10 p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-500/20">
+                          <Lock className="h-5 w-5 text-purple-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-purple-400">
+                            Private Event
+                          </h3>
+                          <p className="mt-1 text-sm text-purple-300/80">
+                            This is a private event. You&apos;ll need an invite link from the organizer to register for tickets.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-2 sm:space-y-3">
                     {event.eventTickets.map((ticket) => {
                       const remaining = ticket.quantityLeft ?? 0;
@@ -1025,13 +1084,15 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       const isInvitedTicket = hasValidInvitation && ticket.id === invitedTicketId;
                       // In invitation mode, only the invited ticket is selectable
                       const isDisabledByInvitation = hasValidInvitation && !isInvitedTicket;
+                      // Private events require an invite link (unless user already has a ticket)
+                      const isDisabledByPrivate = event.isPrivate && !hasValidInvitation && !hasUserTicket;
                       // Can select sold out tickets for waitlist, but not if organizer disabled or user has ticket
-                      const isDisabled = !canRegister || isManuallyUnavailable || hasUserTicket || isDisabledByInvitation;
+                      const isDisabled = !canRegister || isManuallyUnavailable || hasUserTicket || isDisabledByInvitation || isDisabledByPrivate;
 
                       return (
                         <div
                           key={ticket.id}
-                          onClick={() => !isDisabled && !isDisabledByInvitation && setSelectedTicketId(ticket.id)}
+                          onClick={() => !isDisabled && setSelectedTicketId(ticket.id)}
                           className={`flex items-center justify-between gap-2 sm:gap-4 rounded-xl border p-3 sm:p-4 transition-all ${
                             isOwnedTicket
                               ? isActiveTicket
@@ -1053,7 +1114,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                               <CheckCircle2 className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 ${isActiveTicket ? "text-green-400" : "text-yellow-400"}`} />
                             ) : isInvitedTicket ? (
                               <Gift className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-emerald-400" />
-                            ) : canRegister && !isManuallyUnavailable && !isDisabledByInvitation && (
+                            ) : canRegister && !isManuallyUnavailable && !isDisabledByInvitation && !isDisabledByPrivate && (
                               <div
                                 className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                                   isSelected ? "border-primary" : "border-white/30"
@@ -1152,8 +1213,8 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                     </button>
                   )}
 
-                  {/* Register/Join Waitlist Button (for normal mode) */}
-                  {!hasValidInvitation && canRegister && event.eventTickets.some(t => t.isAvailable) && (
+                  {/* Register/Join Waitlist Button (for normal mode - hidden for private events without invite) */}
+                  {!hasValidInvitation && !event.isPrivate && canRegister && event.eventTickets.some(t => t.isAvailable) && (
                     <button
                       onClick={() => selectedTicketId && handleRegister(selectedTicketId)}
                       disabled={!selectedTicketId || isRegistering}

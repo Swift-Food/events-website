@@ -33,6 +33,10 @@ interface EventCreationContextType {
   virtualMeetingUrl: string;
   setVirtualMeetingUrl: Dispatch<SetStateAction<string>>;
 
+  // Event visibility
+  isPrivate: boolean;
+  setIsPrivate: Dispatch<SetStateAction<boolean>>;
+
   // Address details
   venueName: string;
   setVenueName: Dispatch<SetStateAction<string>>;
@@ -98,6 +102,7 @@ type EventDraft = {
   description: string;
   eventFormat: EventFormat;
   virtualMeetingUrl: string;
+  isPrivate: boolean;
   venueName: string;
   addressLine1: string;
   addressLine2: string;
@@ -194,6 +199,11 @@ export function EventCreationProvider({
     storedDraft.virtualMeetingUrl ?? ""
   );
 
+  // Event visibility
+  const [isPrivate, setIsPrivate] = useState(
+    storedDraft.isPrivate ?? false
+  );
+
   // Address details
   const [venueName, setVenueName] = useState(storedDraft.venueName ?? "");
   const [addressLine1, setAddressLine1] = useState(storedDraft.addressLine1 ?? "");
@@ -279,6 +289,7 @@ export function EventCreationProvider({
       description,
       eventFormat,
       virtualMeetingUrl,
+      isPrivate,
       venueName,
       addressLine1,
       addressLine2,
@@ -313,6 +324,7 @@ export function EventCreationProvider({
     eventName,
     eventFormat,
     virtualMeetingUrl,
+    isPrivate,
     hasWaitingList,
     isUnlimitedCapacity,
     location,
@@ -344,6 +356,7 @@ export function EventCreationProvider({
     setDescription("");
     setEventFormat(EventFormat.IN_PERSON);
     setVirtualMeetingUrl("");
+    setIsPrivate(false);
     setVenueName("");
     setAddressLine1("");
     setAddressLine2("");
@@ -382,6 +395,8 @@ export function EventCreationProvider({
         setEventFormat,
         virtualMeetingUrl,
         setVirtualMeetingUrl,
+        isPrivate,
+        setIsPrivate,
         venueName,
         setVenueName,
         addressLine1,

@@ -62,9 +62,9 @@ export default function EventCard({ event, isHostedEvent = false }: EventCardPro
         )}
         {/* Private Badge */}
         {event.isPrivate && (
-          <div className="flex items-center gap-1 rounded-full bg-amber-500/90 px-2 py-1 backdrop-blur-sm">
+          <div className="group/private flex items-center gap-1 rounded-full bg-purple-500/90 px-1.5 py-1 backdrop-blur-sm transition-all duration-200">
             <Lock className="h-3 w-3 text-white" />
-            <span className="text-xs font-semibold text-white">Invite Only</span>
+            <span className="max-w-0 overflow-hidden text-xs font-semibold text-white transition-all duration-200 group-hover/private:max-w-[60px] group-hover/private:ml-0.5">Private</span>
           </div>
         )}
       </div>
