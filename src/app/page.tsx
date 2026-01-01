@@ -115,18 +115,15 @@ export default function DiscoveryPage() {
               Browse by Category
             </h2>
 
-            {/* Single Horizontal Scroll Layout */}
-            <div className="-mx-4 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              <div className="flex gap-2 w-max">
-                {allCategories.map((category) => (
-                  <div
-                    key={category.id}
-                    className="flex-shrink-0 rounded-full px-4 py-2.5 text-sm font-medium border border-white/10 bg-card-background text-foreground"
-                  >
-                    {getCategoryLabel(category.name)}
-                  </div>
-                ))}
-              </div>
+            <div className="grid grid-cols-4 gap-2">
+              {allCategories.slice(0, 12).map((category) => (
+                <div
+                  key={category.id}
+                  className="rounded-full px-3 py-2.5 text-sm font-medium border border-white/10 bg-card-background text-foreground hover:bg-card-background/80 cursor-pointer transition-colors text-center truncate"
+                >
+                  {getCategoryLabel(category.name)}
+                </div>
+              ))}
             </div>
           </div>
         )}
