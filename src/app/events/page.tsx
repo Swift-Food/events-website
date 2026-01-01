@@ -28,17 +28,26 @@ export default function EventsPage() {
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [categoryFilter, setCategoryFilter] = useState<EventCategoryType | 'all'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<EventCategoryType | 'all'>(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam && Object.values(EventCategoryType).includes(categoryParam as EventCategoryType)) {
+      return categoryParam as EventCategoryType;
+    }
+    return 'all';
+  });
   const [showFilters, setShowFilters] = useState(false);
 
   // Filter dropdown ref
   const filterDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Initialize category filter from URL params
+  // Sync category filter when URL params change (e.g., browser back/forward)
   useEffect(() => {
     const categoryParam = searchParams.get('category');
-    if (categoryParam && Object.values(EventCategoryType).includes(categoryParam as EventCategoryType)) {
-      setCategoryFilter(categoryParam as EventCategoryType);
+    const newCategory = categoryParam && Object.values(EventCategoryType).includes(categoryParam as EventCategoryType)
+      ? categoryParam as EventCategoryType
+      : 'all';
+    if (newCategory !== categoryFilter) {
+      setCategoryFilter(newCategory);
     }
   }, [searchParams]);
 
@@ -147,7 +156,7 @@ export default function EventsPage() {
   // Fetch on mount and when filters change
   useEffect(() => {
     fetchEvents();
-  }, [searchTerm, currentPage, dateFilter, customStartDate, customEndDate, sortOrder, categoryFilter]);
+  }, [searchTerm, currentPage, dateFilter, customStartDate, customEndDate, sortOrder, categoryFilter, searchParams]);
 
   const totalPages = Math.ceil(total / eventsPerPage);
 
