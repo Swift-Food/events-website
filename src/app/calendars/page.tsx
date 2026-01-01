@@ -107,7 +107,7 @@ export default function CalendarDiscoveryPage() {
           </div>
 
           {/* Type Filter */}
-          <div className="flex flex-wrap gap-2">
+          {/* <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setCalendarType("all")}
               className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
@@ -138,7 +138,7 @@ export default function CalendarDiscoveryPage() {
             >
               Team
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Results Count */}
