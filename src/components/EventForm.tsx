@@ -938,7 +938,120 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             <span>Edit Description</span>
           </button>
 
-          {/* Event Location */}
+          {/* Event Format Selector */}
+          <div className="rounded-xl bg-card-background backdrop-blur-xl p-4">
+            <p className="text-sm font-medium text-muted-foreground mb-3">Event Format</p>
+            <div className="flex rounded-xl overflow-hidden bg-card-secondary-background">
+              <button
+                type="button"
+                onClick={() => setEventFormat(EventFormat.IN_PERSON)}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 transition-all ${
+                  eventFormat === EventFormat.IN_PERSON
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <MapPin className="h-4 w-4" />
+                <span className="text-sm font-medium">In Person</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setEventFormat(EventFormat.VIRTUAL)}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 transition-all ${
+                  eventFormat === EventFormat.VIRTUAL
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Video className="h-4 w-4" />
+                <span className="text-sm font-medium">Virtual</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setEventFormat(EventFormat.BOTH)}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 transition-all ${
+                  eventFormat === EventFormat.BOTH
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Users className="h-4 w-4" />
+                <span className="text-sm font-medium">Both</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Virtual Meeting URL (for Virtual and Both/Hybrid events) */}
+          {(eventFormat === EventFormat.VIRTUAL || eventFormat === EventFormat.BOTH) && (
+            <div className="rounded-xl bg-card-background backdrop-blur-xl p-4">
+              <p className="text-sm font-medium text-muted-foreground mb-3">Meeting URL *</p>
+              <div className="flex items-center gap-3 rounded-xl bg-card-secondary-background px-4 py-3">
+                <Link className="h-5 w-5 text-muted-foreground" />
+                <input
+                  type="url"
+                  value={virtualMeetingUrl}
+                  onChange={(e) => setVirtualMeetingUrl(e.target.value)}
+                  placeholder="https://zoom.us/j/... or Google Meet link"
+                  className="flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Zoom, Google Meet, Teams, or any meeting URL
+              </p>
+            </div>
+          )}
+
+          {/* Event Categories */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-muted-foreground">
+              Event Categories (Select all that apply)
+            </label>
+            {loadingCategories ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-primary"></div>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {availableCategories.map((category) => {
+                  const isSelected = selectedCategoryIds.includes(category.id);
+                  // Helper to get display label
+                  const getCategoryLabel = (categoryName: string) => {
+                    return categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
+                  };
+                  return (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedCategoryIds(
+                            selectedCategoryIds.filter((id) => id !== category.id)
+                          );
+                        } else {
+                          setSelectedCategoryIds([...selectedCategoryIds, category.id]);
+                        }
+                      }}
+                      className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                        isSelected
+                          ? "bg-primary text-white shadow-lg"
+                          : "border border-white/10 bg-card-background text-foreground hover:border-white/20"
+                      }`}
+                    >
+                      {getCategoryLabel(category.name)}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            {!loadingCategories && selectedCategoryIds.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                Select at least one category to help people discover your event
+              </p>
+            )}
+          </div>
+
+          {/* Event Location (for In Person and Both/Hybrid events) */}
+          {(eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH) && (
           <div className="space-y-4">
             <div className="relative">
               <button
@@ -961,7 +1074,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   ) : (
                     <>
                       <p className="text-base font-semibold text-foreground">
-                        Add Event Location
+                        Add Event Location {eventFormat === EventFormat.BOTH && "(Physical Venue)"}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         Set the venue address
