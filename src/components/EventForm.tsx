@@ -939,70 +939,6 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           </button>
 
 
-          {/* Event Location & Format */}
-          <div className="space-y-4">
-            <div className="relative">
-              <button
-                type="button"
-                data-location-trigger
-                onClick={() => setIsLocationModalOpen(!isLocationModalOpen)}
-                className="flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer"
-              >
-                <MapPin className="h-5 w-5 text-muted-foreground" />
-                <div className="flex-1 text-left">
-                  {eventFormat === EventFormat.VIRTUAL ? (
-                    <>
-                      <p className="text-base font-semibold text-foreground">
-                        Virtual Event
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {virtualMeetingUrl ? "Meeting URL set" : "Click to add meeting URL"}
-                      </p>
-                    </>
-                  ) : addressLine1 ? (
-                    <>
-                      <p className="text-base font-semibold text-foreground">
-                        {eventFormat === EventFormat.BOTH ? "Hybrid Event" : venueName || addressLine1}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {[addressLine1, addressLine2, city, postcode].filter(Boolean).join(", ")}
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-base font-semibold text-foreground">
-                        Event Location & Format
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Set event format and location
-                      </p>
-                    </>
-                  )}
-                </div>
-                <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isLocationModalOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {/* Location Dropdown */}
-              {isLocationModalOpen && (
-                <LocationModal
-                  isOpen={isLocationModalOpen}
-                  onClose={() => setIsLocationModalOpen(false)}
-                />
-              )}
-            </div>
-
-            {/* Google Map - shown when location is set for in-person/hybrid events */}
-            {(eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH) &&
-              latitude !== null && longitude !== null && !isLocationModalOpen && (
-                <GoogleMap
-                  latitude={latitude}
-                  longitude={longitude}
-                  title={venueName || addressLine1}
-                  className="h-48 w-full rounded-xl"
-                />
-              )}
-          </div>
-
           {/* Event Categories */}
           <div className="space-y-4">
             <div className="relative">
@@ -1072,6 +1008,89 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 setSelectedCategoryIds={setSelectedCategoryIds}
               />
             </div>
+          </div>
+
+          {/* Event Location & Format */}
+          <div className="space-y-4">
+            <div className="relative">
+              <button
+                type="button"
+                data-location-trigger
+                onClick={() => setIsLocationModalOpen(!isLocationModalOpen)}
+                className="flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer"
+              >
+                <MapPin className="h-5 w-5 text-muted-foreground" />
+                <div className="flex-1 text-left">
+                  {eventFormat === EventFormat.VIRTUAL ? (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <p className="text-base font-semibold text-foreground">Virtual</p>
+                        <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">Online</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {virtualMeetingUrl ? "Meeting link added" : "Add meeting link"}
+                      </p>
+                    </>
+                  ) : eventFormat === EventFormat.BOTH ? (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <p className="text-base font-semibold text-foreground">Hybrid</p>
+                        <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">In Person + Online</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {addressLine1 && virtualMeetingUrl
+                          ? `${venueName || city || addressLine1} + Meeting link`
+                          : addressLine1
+                          ? `${venueName || city || addressLine1} - Add meeting link`
+                          : virtualMeetingUrl
+                          ? "Meeting link added - Add venue"
+                          : "Add venue and meeting link"}
+                      </p>
+                    </>
+                  ) : addressLine1 ? (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <p className="text-base font-semibold text-foreground">In Person</p>
+                        <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">Physical</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {venueName || [addressLine1, city].filter(Boolean).join(", ")}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <p className="text-base font-semibold text-foreground">In Person</p>
+                        <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">Physical</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Add venue location
+                      </p>
+                    </>
+                  )}
+                </div>
+                <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isLocationModalOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Location Dropdown */}
+              {isLocationModalOpen && (
+                <LocationModal
+                  isOpen={isLocationModalOpen}
+                  onClose={() => setIsLocationModalOpen(false)}
+                />
+              )}
+            </div>
+
+            {/* Google Map - shown when location is set for in-person/hybrid events */}
+            {(eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH) &&
+              latitude !== null && longitude !== null && !isLocationModalOpen && (
+                <GoogleMap
+                  latitude={latitude}
+                  longitude={longitude}
+                  title={venueName || addressLine1}
+                  className="h-48 w-full rounded-xl"
+                />
+              )}
           </div>
 
           <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 md:p-5 space-y-5">
