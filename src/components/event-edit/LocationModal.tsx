@@ -102,12 +102,28 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
     };
   }, [isOpen, onClose]);
 
+  // Check if physical location fields should be shown
+  const showPhysicalLocation = localEventFormat === EventFormat.IN_PERSON || localEventFormat === EventFormat.BOTH;
+
   // Initialize Google Places Autocomplete
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !showPhysicalLocation) {
+      // Clean up when closing or switching to virtual-only
+      if (autocompleteRef.current) {
+        google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        autocompleteRef.current = null;
+      }
+      return;
+    }
 
     const initializeAutocomplete = () => {
       if (!locationInputRef.current || !window.google?.maps?.places) return;
+
+      // Clean up any existing instance first
+      if (autocompleteRef.current) {
+        google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        autocompleteRef.current = null;
+      }
 
       autocompleteRef.current = new google.maps.places.Autocomplete(
         locationInputRef.current,
@@ -135,14 +151,19 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
       autocompleteRef.current.addListener("place_changed", handlePlaceSelect);
     };
 
-    loadGoogleMapsScript().then(initializeAutocomplete);
+    // Small delay to ensure the input is mounted
+    const timeoutId = setTimeout(() => {
+      loadGoogleMapsScript().then(initializeAutocomplete);
+    }, 100);
 
     return () => {
+      clearTimeout(timeoutId);
       if (autocompleteRef.current) {
         google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        autocompleteRef.current = null;
       }
     };
-  }, [isOpen]);
+  }, [isOpen, showPhysicalLocation]);
 
   const handlePlaceSelect = () => {
     const place = autocompleteRef.current?.getPlace();
@@ -379,7 +400,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
         )}
 
         {/* Physical Location (for In Person and Both events) */}
-        {(localEventFormat === EventFormat.IN_PERSON || localEventFormat === EventFormat.BOTH) && (
+        {showPhysicalLocation && (
           <>
             {/* Divider for Both/Hybrid events */}
             {localEventFormat === EventFormat.BOTH && (
