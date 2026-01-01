@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Calendar, MapPin, Ticket, Video, Lock } from "lucide-react";
 import { EventResponseDto } from "@/types/event";
 import { isVirtualEvent, isHybridEvent, hasOnlineComponent } from "@/types/event/status";
@@ -75,6 +76,75 @@ export default function HorizontalEventCard({
       onClick(e, event);
     }
   };
+
+  // Auto-overflow categories
+  const categoriesContainerRef = useRef<HTMLDivElement>(null);
+  const categoryWidthsRef = useRef<number[]>([]);
+  const [visibleCount, setVisibleCount] = useState(event.categories?.length ?? 0);
+
+  const calculateVisibleCategories = useCallback(() => {
+    const container = categoriesContainerRef.current;
+    if (!container || !event.categories?.length) return;
+
+    const children = Array.from(container.children) as HTMLElement[];
+    const containerWidth = container.offsetWidth;
+    const gap = 6; // gap-1.5 = 0.375rem = 6px
+    const overflowBadgeWidth = 40; // approximate width for "+N" badge
+
+    // Measure and store widths on first run (when all items are visible)
+    if (categoryWidthsRef.current.length !== event.categories.length) {
+      categoryWidthsRef.current = children
+        .filter(child => !child.dataset.overflow)
+        .map(child => child.offsetWidth);
+    }
+
+    const widths = categoryWidthsRef.current;
+    let totalWidth = 0;
+    let count = 0;
+
+    for (let i = 0; i < widths.length; i++) {
+      const childWidth = widths[i];
+      const widthWithGap = totalWidth + childWidth + (count > 0 ? gap : 0);
+
+      // Check if we need space for overflow badge
+      const remainingItems = event.categories.length - (count + 1);
+      const needsOverflowBadge = remainingItems > 0;
+      const requiredWidth = needsOverflowBadge ? widthWithGap + gap + overflowBadgeWidth : widthWithGap;
+
+      if (requiredWidth <= containerWidth) {
+        totalWidth = widthWithGap;
+        count++;
+      } else {
+        break;
+      }
+    }
+
+    setVisibleCount(Math.max(1, count)); // show at least 1
+  }, [event.categories?.length]);
+
+  useEffect(() => {
+    // Reset stored widths when categories change
+    categoryWidthsRef.current = [];
+    setVisibleCount(event.categories?.length ?? 0);
+  }, [event.categories]);
+
+  useEffect(() => {
+    // Small delay to ensure DOM is ready for measurement
+    const timer = setTimeout(calculateVisibleCategories, 0);
+
+    const resizeObserver = new ResizeObserver(() => {
+      calculateVisibleCategories();
+    });
+
+    if (categoriesContainerRef.current) {
+      resizeObserver.observe(categoriesContainerRef.current);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      resizeObserver.disconnect();
+    };
+  }, [calculateVisibleCategories]);
 
   return (
     <Link
@@ -192,20 +262,25 @@ export default function HorizontalEventCard({
             </div>
 
             {/* Row 2: Categories */}
-            <div className="mt-1.5 flex items-center gap-1.5">
-              {event.categories.slice(0, 3).map((category) => (
+            <div ref={categoriesContainerRef} className="mt-1.5 flex items-center gap-1.5">
+              {event.categories.map((category, index) => (
                 <span
                   key={category.id}
-                  className="rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground"
+                  className={`rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground ${
+                    index >= visibleCount ? "hidden" : ""
+                  }`}
                 >
                   {category.name.toLowerCase()}
                 </span>
               ))}
-              {event.categories.length > 3 && (
-                <span className="group/tooltip relative rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground cursor-default">
-                  +{event.categories.length - 3}
+              {event.categories.length > visibleCount && (
+                <span
+                  data-overflow="true"
+                  className="group/tooltip relative rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground cursor-default"
+                >
+                  +{event.categories.length - visibleCount}
                   <span className="pointer-events-none absolute top-full left-1/2 z-50 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover/tooltip:opacity-100">
-                    {event.categories.slice(3).map(c => c.name.toLowerCase()).join(', ')}
+                    {event.categories.slice(visibleCount).map(c => c.name.toLowerCase()).join(', ')}
                   </span>
                 </span>
               )}
