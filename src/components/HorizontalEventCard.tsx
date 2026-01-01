@@ -127,20 +127,6 @@ export default function HorizontalEventCard({
           {event.name}
         </h3>
 
-        {/* Categories */}
-        {event.categories && event.categories.length > 0 && (
-          <div className="mb-1.5 flex flex-wrap gap-1.5">
-            {event.categories.map((category) => (
-              <span
-                key={category.id}
-                className="rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground"
-              >
-                {category.name.toLowerCase()}
-              </span>
-            ))}
-          </div>
-        )}
-
         {/* Location & Price Row */}
         <div className="flex items-center gap-3">
           {/* Location */}
@@ -170,6 +156,20 @@ export default function HorizontalEventCard({
             </div>
           )}
         </div>
+
+        {/* Categories */}
+        {event.categories && event.categories.length > 0 && (
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {event.categories.map((category) => (
+              <span
+                key={category.id}
+                className="rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground"
+              >
+                {category.name.toLowerCase()}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </Link>
   );
