@@ -69,8 +69,8 @@ export default function HorizontalEventCard({
       onClick={handleClick}
       className="group relative flex gap-4 overflow-hidden rounded-2xl border border-white/10 bg-card-background p-4 transition-all hover:border-white/20 hover:shadow-2xl"
     >
-      {/* Top Right: Status Badges & Categories */}
-      <div className="absolute right-3 top-3 z-10 flex flex-wrap items-center justify-end gap-1.5 max-w-[60%]">
+      {/* Status Badges */}
+      <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">
         {/* Private/Invite-Only Event Badge */}
         {event.isPrivate && (
           <div className="group/private flex items-center gap-1 rounded-full bg-purple-500/90 px-1.5 py-0.5 backdrop-blur-sm transition-all duration-200">
@@ -95,15 +95,6 @@ export default function HorizontalEventCard({
             <span className="text-[10px] font-semibold text-white">LIVE</span>
           </div>
         )}
-        {/* Categories */}
-        {event.categories && event.categories.map((category) => (
-          <span
-            key={category.id}
-            className="rounded-full bg-primary/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold text-white"
-          >
-            {category.name.toLowerCase()}
-          </span>
-        ))}
       </div>
       {/* Event Image */}
       <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-card-secondary-background">
@@ -136,30 +127,47 @@ export default function HorizontalEventCard({
           {event.name}
         </h3>
 
-        {/* Location */}
-        {isVirtualEvent(event.format) ? (
-          <div className="mb-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-            <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
-            <span className="truncate text-blue-400">Online Event</span>
-          </div>
-        ) : event.address &&
-          event.address.city &&
-          event.address.city !== "TBD" && (
-            <div className="mb-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-              <span className="truncate">
-                {event.address.city}, {event.address.zipcode}
+        {/* Categories */}
+        {event.categories && event.categories.length > 0 && (
+          <div className="mb-1.5 flex flex-wrap gap-1.5">
+            {event.categories.map((category) => (
+              <span
+                key={category.id}
+                className="rounded-full border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground"
+              >
+                {category.name.toLowerCase()}
               </span>
-            </div>
-          )}
-
-        {/* Price */}
-        {formatPrice() && (
-          <div className={`flex items-center gap-1.5 text-sm ${isSoldOut ? "text-red-400" : "text-muted-foreground"}`}>
-            <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
-            <span className={isSoldOut ? "font-medium" : ""}>{formatPrice()}</span>
+            ))}
           </div>
         )}
+
+        {/* Location & Price Row */}
+        <div className="flex items-center gap-3">
+          {/* Location */}
+          {isVirtualEvent(event.format) ? (
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
+              <span className="truncate text-blue-400">Online Event</span>
+            </div>
+          ) : event.address &&
+            event.address.city &&
+            event.address.city !== "TBD" && (
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="truncate">
+                  {event.address.city}, {event.address.zipcode}
+                </span>
+              </div>
+            )}
+
+          {/* Price */}
+          {formatPrice() && (
+            <div className={`flex items-center gap-1.5 text-sm flex-shrink-0 ${isSoldOut ? "text-red-400" : "text-muted-foreground"}`}>
+              <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className={isSoldOut ? "font-medium" : ""}>{formatPrice()}</span>
+            </div>
+          )}
+        </div>
       </div>
     </Link>
   );
