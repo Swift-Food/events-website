@@ -85,14 +85,14 @@ export default function HorizontalEventCard({
       {/* Status Badges */}
       <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">
         {/* Private/Invite-Only Event Badge */}
-        {event.isPrivate && (
+        {/* {event.isPrivate && (
           <div className="group/private flex items-center gap-1 rounded-full bg-purple-500/90 px-1.5 py-0.5 backdrop-blur-sm transition-all duration-200">
             <Lock className="h-2.5 w-2.5 text-white" />
             <span className="max-w-0 overflow-hidden text-[10px] font-semibold text-white transition-all duration-200 group-hover/private:max-w-[50px] group-hover/private:ml-0.5">PRIVATE</span>
           </div>
-        )}
+        )} */}
         {/* Virtual/Hybrid Event Badge */}
-        {isHybridEvent(event.format) ? (
+        {/* {isHybridEvent(event.format) ? (
           <div className="group/hybrid flex items-center gap-1 rounded-full bg-violet-500/90 px-1.5 py-0.5 backdrop-blur-sm transition-all duration-200">
             <Video className="h-2.5 w-2.5 text-white" />
             <span className="max-w-0 overflow-hidden text-[10px] font-semibold text-white transition-all duration-200 group-hover/hybrid:max-w-[80px] group-hover/hybrid:ml-0.5">Live + Online</span>
@@ -102,7 +102,7 @@ export default function HorizontalEventCard({
             <Video className="h-2.5 w-2.5 text-white" />
             <span className="max-w-0 overflow-hidden text-[10px] font-semibold text-white transition-all duration-200 group-hover/virtual:max-w-[50px] group-hover/virtual:ml-0.5">Online</span>
           </div>
-        )}
+        )} */}
         {/* Ongoing Badge */}
         {isOngoing && (
           <div className="flex items-center gap-1 rounded-full bg-green-500/90 px-1.5 py-0.5 backdrop-blur-sm">
