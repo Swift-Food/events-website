@@ -1,21 +1,19 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { eventsApi } from "@/services/events";
-import { calendarsApi } from "@/services/calendars";
 import { categoriesApi } from "@/services/categories";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
-import { Calendar as CalendarType } from "@/types/calendar";
 import { EventCategoryType, EventCategoryResponseDto } from "@/types/category";
-import { Search, Calendar, ChevronLeft, ChevronRight, X, ChevronRight as ArrowRight, ArrowUpDown } from "lucide-react";
+import { Search, Calendar, ChevronLeft, ChevronRight, X, ArrowUpDown } from "lucide-react";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
-import CalendarCard from "@/components/CalendarCard";
-import UpcomingEventsSection from "@/components/UpcomingEventsSection";
-import HorizontalCalendarCard from "@/components/HorizontalCalendarCard";
 import EventPreviewModal from "@/components/EventPreviewModal";
-import Link from "next/link";
 
-export default function EventCataloguePage() {
+export default function EventsPage() {
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get("category") as EventCategoryType | null;
+
   const [events, setEvents] = useState<EventResponseDto[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -29,7 +27,7 @@ export default function EventCataloguePage() {
   const [customEndDate, setCustomEndDate] = useState("");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<EventCategoryType | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<EventCategoryType | null>(initialCategory);
 
   // Track which date headers are stuck
   const [stuckHeaders, setStuckHeaders] = useState<Set<string>>(new Set());
@@ -37,10 +35,6 @@ export default function EventCataloguePage() {
 
   // Modal state
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-
-  // Calendars state
-  const [calendars, setCalendars] = useState<CalendarType[]>([]);
-  const [loadingCalendars, setLoadingCalendars] = useState(true);
 
   // Categories
   const [allCategories, setAllCategories] = useState<EventCategoryResponseDto[]>([]);
@@ -52,30 +46,12 @@ export default function EventCataloguePage() {
   const fetchAllCategories = async () => {
     try {
       setLoadingCategories(true);
-
-      // Fetch all categories from the backend
       const categories = await categoriesApi.findAll();
       setAllCategories(categories);
     } catch (err) {
       console.error("Failed to fetch categories:", err);
     } finally {
       setLoadingCategories(false);
-    }
-  };
-
-  // Fetch calendars
-  const fetchCalendars = async () => {
-    try {
-      setLoadingCalendars(true);
-      const result = await calendarsApi.findAll({
-        isPublic: true,
-        take: 10, // Show top 10 calendars
-      });
-      setCalendars(result.calendars ?? []);
-    } catch (err) {
-      console.error("Failed to fetch calendars:", err);
-    } finally {
-      setLoadingCalendars(false);
     }
   };
 
@@ -146,9 +122,8 @@ export default function EventCataloguePage() {
     setCurrentPage(1);
   }, [searchTerm, dateFilter, customStartDate, customEndDate, sortOrder, selectedCategory]);
 
-  // Fetch calendars and categories on mount
+  // Fetch categories on mount
   useEffect(() => {
-    fetchCalendars();
     fetchAllCategories();
   }, []);
 
@@ -223,6 +198,11 @@ export default function EventCataloguePage() {
     }
   };
 
+  // Helper function to get display label
+  const getCategoryLabel = (categoryName: EventCategoryType) => {
+    return categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
+  };
+
   const hasActiveSearch = !!searchTerm;
 
   const handleEventClick = (_e: React.MouseEvent, event: EventResponseDto) => {
@@ -269,84 +249,14 @@ export default function EventCataloguePage() {
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-            Discover Events
+            All Events
           </h1>
           <p className="mt-2 text-md text-muted-foreground">
-            Find and join exciting events happening around you
+            Browse and search through all upcoming events
           </p>
         </div>
-
-        {/* Upcoming Events Section */}
-        <UpcomingEventsSection />
-
-        {/* Calendars Section */}
-        {!loadingCalendars && calendars.length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">
-                Browse Calendars
-              </h2>
-              <Link
-                href="/calendars"
-                className="flex items-center gap-1 text-sm text-primary hover:underline"
-              >
-                View All
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            {/* Mobile: Horizontal scroll */}
-            <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              {calendars.slice(0, 5).map((calendar) => (
-                <div key={calendar.id} className="flex-shrink-0 w-[80vw]">
-                  <HorizontalCalendarCard calendar={calendar} />
-                </div>
-              ))}
-            </div>
-            {/* Desktop: 3-column grid */}
-            <div className="hidden sm:grid sm:grid-cols-3 gap-3">
-              {calendars.slice(0, 3).map((calendar) => (
-                <CalendarCard key={calendar.id} calendar={calendar} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Event Categories Section */}
-        {!loadingCategories && allCategories.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-foreground mb-4">
-              Browse by Category
-            </h2>
-
-            {/* Single Horizontal Scroll Layout */}
-            <div className="-mx-4 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              <div className="flex gap-2 w-max">
-                {allCategories.map((category) => {
-                  // Helper function to get display label
-                  const getCategoryLabel = (categoryName: EventCategoryType) => {
-                    return categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
-                  };
-
-                  return (
-                    <button
-                      key={category.id}
-                      onClick={() => handleCategoryClick(category.name)}
-                      className={`flex-shrink-0 rounded-full px-4 py-2.5 text-sm font-medium transition-all ${
-                        selectedCategory === category.name
-                          ? 'bg-primary text-white'
-                          : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
-                      }`}
-                    >
-                      {getCategoryLabel(category.name)}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Sticky Search Bar and Filters */}
         <div className="sticky top-16 z-40 -mx-4 px-4 sm:-mx-6 sm:px-6 pt-4 pb-4 bg-gradient-to-b from-background via-background to-transparent">
@@ -376,16 +286,6 @@ export default function EventCataloguePage() {
           {/* Filter Chips and Sort */}
           <div className="-mx-4 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <div className="flex items-center gap-2 w-max">
-              {/* <button
-                onClick={() => handleDateFilterChange('all')}
-                className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                  dateFilter === 'all'
-                    ? 'bg-primary text-white'
-                    : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
-                }`}
-              >
-                All
-              </button> */}
               <button
                 onClick={() => handleDateFilterChange('today')}
                 className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
@@ -427,6 +327,27 @@ export default function EventCataloguePage() {
               </button>
             </div>
           </div>
+
+          {/* Category Filter Chips */}
+          {!loadingCategories && allCategories.length > 0 && (
+            <div className="-mx-4 px-4 mt-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              <div className="flex items-center gap-2 w-max">
+                {allCategories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => handleCategoryClick(category.name)}
+                    className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                      selectedCategory === category.name
+                        ? 'bg-primary text-white'
+                        : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
+                    }`}
+                  >
+                    {getCategoryLabel(category.name)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Results Count */}
@@ -491,7 +412,7 @@ export default function EventCataloguePage() {
         {/* Events Grouped by Date */}
         {!loading && !error && events.length > 0 && (
           <div>
-            {groupedEvents.map(([dateKey, dateEvents], index) => {
+            {groupedEvents.map(([dateKey, dateEvents]) => {
               const firstEventDate = new Date(dateEvents[0].startDateTime);
               const monthAbbrev = firstEventDate.toLocaleDateString("en-US", {
                 month: "short",
@@ -500,7 +421,6 @@ export default function EventCataloguePage() {
               const dayName = firstEventDate.toLocaleDateString("en-US", {
                 weekday: "long",
               });
-              const isLast = index === groupedEvents.length - 1;
 
               return (
                 <div key={dateKey} className="relative flex">

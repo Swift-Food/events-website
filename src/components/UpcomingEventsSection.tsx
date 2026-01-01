@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { eventsApi } from "@/services/events";
 import { EventResponseDto } from "@/types/event";
-import { Calendar, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
 import EventPreviewModal from "@/components/EventPreviewModal";
 
@@ -106,18 +106,6 @@ export default function UpcomingEventsSection({
             onClick={handleEventClick}
           />
         ))}
-      </div>
-
-      {/* View All Events Button */}
-      <div className="mt-6 text-center">
-        <Link
-          href="/events"
-          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-card-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:border-white/20 hover:bg-card-background/80"
-        >
-          <Calendar className="h-4 w-4" />
-          View All Events
-          <ChevronRight className="h-4 w-4" />
-        </Link>
       </div>
 
       {/* Event Preview Modal */}
