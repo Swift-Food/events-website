@@ -150,7 +150,7 @@ export default function HorizontalEventCard({
     <Link
       href={linkToManagement ? `/event-management/${event.id}` : `/events/${event.id}`}
       onClick={handleClick}
-      className="group relative flex gap-4 rounded-2xl transition-all py-2 pl-2"
+      className="group relative flex gap-4 rounded-2xl transition-all py-4 pl-2"
     >
       {/* Status Badges */}
       <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">
