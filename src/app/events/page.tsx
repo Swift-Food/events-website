@@ -189,7 +189,7 @@ export default function EventsPage() {
         });
       },
       {
-        rootMargin: "-80px 0px 0px 0px",
+        rootMargin: "-184px 0px 0px 0px",
         threshold: 0,
       }
     );
@@ -364,7 +364,7 @@ export default function EventsPage() {
                     {/* Continuous line */}
                     <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-white/20" />
                     {/* Dot positioned at header level */}
-                    <div className="sticky top-20 z-40 flex h-8 items-center justify-center">
+                    <div className="sticky top-46 z-40 flex h-8 items-center justify-center">
                       <div
                         className={`h-2 w-2 rounded-full transition-colors ${
                           stuckHeaders.has(dateKey)
@@ -387,7 +387,7 @@ export default function EventsPage() {
                     />
 
                     {/* Sticky Date Header */}
-                    <div className="sticky top-20 z-30 pb-3">
+                    <div className="sticky top-46 z-30 pb-3">
                       <div
                         className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors ${
                           stuckHeaders.has(dateKey)
