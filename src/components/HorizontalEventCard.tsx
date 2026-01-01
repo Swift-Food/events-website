@@ -102,7 +102,7 @@ export default function HorizontalEventCard({
         )}
       </div>
       {/* Event Image */}
-      <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-card-secondary-background">
+      <div className="relative h-20 w-20 sm:h-24 sm:w-24 flex-shrink-0 overflow-hidden rounded-xl bg-card-secondary-background">
         {event.eventImage ? (
           <Image
             src={event.eventImage}
@@ -157,9 +157,10 @@ export default function HorizontalEventCard({
                   )}
                   {/* Online indicator for Hybrid events */}
                   {isHybridEvent(event.format) && (
-                    <div className="flex items-center gap-1 text-sm text-blue-400">
-                      <Video className="h-3.5 w-3.5 flex-shrink-0" />
-                      <span className="text-xs">+ Online</span>
+                    <div className="flex items-center gap-1 text-xs text-blue-400 flex-shrink-0 whitespace-nowrap">
+                      <span>+</span>
+                      <Video className="hidden sm:block h-3.5 w-3.5 flex-shrink-0" />
+                      <span>Online</span>
                     </div>
                   )}
                 </>
@@ -217,9 +218,10 @@ export default function HorizontalEventCard({
                 )}
                 {/* Online indicator for Hybrid events */}
                 {isHybridEvent(event.format) && (
-                  <div className="flex items-center gap-1 text-sm text-blue-400">
-                    <Video className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="text-xs">+ Online</span>
+                  <div className="flex items-center gap-1 text-xs text-blue-400 flex-shrink-0 whitespace-nowrap">
+                    <span>+</span>
+                    <Video className="hidden sm:block h-3.5 w-3.5 flex-shrink-0" />
+                    <span>Online</span>
                   </div>
                 )}
               </div>
