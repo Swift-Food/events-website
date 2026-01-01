@@ -5,11 +5,11 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import EventForm from "@/components/EventForm";
 import { eventService } from "@/services/event.service";
 import { eventCollaboratorService } from "@/services/event-collaborator.service";
-import { EventResponseDto } from "@/types";
+import { EventResponseDto, EventStatus } from "@/types";
 import { CollaboratorRole } from "@/types/event-collaborator";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";
-import { Eye, X, Crown, Shield, Scan } from "lucide-react";
+import { Eye, X, Crown, Shield, Scan, AlertTriangle, EyeOff } from "lucide-react";
 
 // Tab components
 import {
@@ -45,6 +45,8 @@ export default function EventManagementPage() {
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isPublishLoading, setIsPublishLoading] = useState(false);
+  const [showUnpublishConfirm, setShowUnpublishConfirm] = useState(false);
 
   const setTab = (tab: TabType, filter?: string) => {
     const url = filter
@@ -89,6 +91,50 @@ export default function EventManagementPage() {
       toast.error(errorMessage);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  // Handle publish toggle
+  const handlePublishToggle = () => {
+    if (eventData?.status === EventStatus.PUBLISHED) {
+      setShowUnpublishConfirm(true);
+    } else {
+      handlePublish();
+    }
+  };
+
+  // Publish event
+  const handlePublish = async () => {
+    try {
+      setIsPublishLoading(true);
+      const response = await eventService.publishEvent(eventId);
+      if (response.success) {
+        setEventData(response.event);
+        toast.success("Event published!");
+      }
+    } catch (err: any) {
+      console.error("Error publishing event:", err);
+      toast.error(err.response?.data?.message || "Failed to publish event");
+    } finally {
+      setIsPublishLoading(false);
+    }
+  };
+
+  // Unpublish event
+  const handleUnpublish = async () => {
+    try {
+      setIsPublishLoading(true);
+      const response = await eventService.unpublishEvent(eventId);
+      if (response.success) {
+        setEventData(response.event);
+        toast.success("Event unpublished");
+      }
+    } catch (err: any) {
+      console.error("Error unpublishing event:", err);
+      toast.error(err.response?.data?.message || "Failed to unpublish event");
+    } finally {
+      setIsPublishLoading(false);
+      setShowUnpublishConfirm(false);
     }
   };
 
@@ -330,6 +376,8 @@ export default function EventManagementPage() {
             onDeleteClick={handleDeleteEvent}
             isDeleting={isDeleting}
             userRole={userRole}
+            onPublishToggle={handlePublishToggle}
+            isPublishLoading={isPublishLoading}
           />
         )}
 
@@ -377,8 +425,72 @@ export default function EventManagementPage() {
             </div>
 
             {/* Event Form */}
+            <EventForm
+              mode="edit"
+              eventId={eventId}
+              initialData={eventData}
+              eventStatus={eventData.status}
+              onPublishToggle={handlePublishToggle}
+              isPublishLoading={isPublishLoading}
+            />
+          </div>
+        </>
+      )}
 
-            <EventForm mode="edit" eventId={eventId} initialData={eventData} />
+      {/* Unpublish Confirmation Modal */}
+      {showUnpublishConfirm && (
+        <>
+          <div
+            className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm"
+            onClick={() => setShowUnpublishConfirm(false)}
+          />
+          <div className="fixed left-1/2 top-1/2 z-[70] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-card-background border border-white/5 p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/20">
+                <AlertTriangle className="h-5 w-5 text-amber-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground">Unpublish Event</h3>
+            </div>
+
+            <p className="text-sm text-muted-foreground mb-4">
+              This will hide the event from public view. Are you sure you want to unpublish{" "}
+              <span className="font-medium text-foreground">{eventData.name}</span>?
+            </p>
+
+            <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <EyeOff className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="text-amber-400/80">
+                    The event will only be visible to you and your team. Public users will not be able to find or register for it.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowUnpublishConfirm(false)}
+                disabled={isPublishLoading}
+                className="flex-1 rounded-xl bg-white/5 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUnpublish}
+                disabled={isPublishLoading}
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-medium text-black transition-colors hover:bg-amber-400 disabled:opacity-50"
+              >
+                {isPublishLoading ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent" />
+                    Unpublishing...
+                  </>
+                ) : (
+                  "Unpublish"
+                )}
+              </button>
+            </div>
           </div>
         </>
       )}

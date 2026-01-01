@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, MapPin, Ticket } from "lucide-react";
+import { Calendar, MapPin, Ticket, Video, Lock } from "lucide-react";
 import { EventResponseDto } from "@/types/event";
+import { isVirtualEvent } from "@/types/event/status";
 
 interface HorizontalEventCardProps {
   event: EventResponseDto;
@@ -69,16 +70,33 @@ export default function HorizontalEventCard({
       onClick={handleClick}
       className="group relative flex gap-4 overflow-hidden rounded-2xl border border-white/10 bg-card-background p-4 transition-all hover:border-white/20 hover:shadow-2xl"
     >
-      {/* Ongoing Badge */}
-      {isOngoing && (
-        <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full bg-green-500/90 px-1.5 py-0.5 backdrop-blur-sm">
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white"></span>
-          </span>
-          <span className="text-[10px] font-semibold text-white">LIVE</span>
-        </div>
-      )}
+      {/* Status Badges */}
+      <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">
+        {/* Private/Invite-Only Event Badge */}
+        {event.isPrivate && (
+          <div className="group/private flex items-center gap-1 rounded-full bg-purple-500/90 px-1.5 py-0.5 backdrop-blur-sm transition-all duration-200">
+            <Lock className="h-2.5 w-2.5 text-white" />
+            <span className="max-w-0 overflow-hidden text-[10px] font-semibold text-white transition-all duration-200 group-hover/private:max-w-[50px] group-hover/private:ml-0.5">PRIVATE</span>
+          </div>
+        )}
+        {/* Virtual Event Badge */}
+        {isVirtualEvent(event.format) && (
+          <div className="flex items-center gap-1 rounded-full bg-blue-500/90 px-1.5 py-0.5 backdrop-blur-sm">
+            <Video className="h-2.5 w-2.5 text-white" />
+            <span className="text-[10px] font-semibold text-white">ONLINE</span>
+          </div>
+        )}
+        {/* Ongoing Badge */}
+        {isOngoing && (
+          <div className="flex items-center gap-1 rounded-full bg-green-500/90 px-1.5 py-0.5 backdrop-blur-sm">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white"></span>
+            </span>
+            <span className="text-[10px] font-semibold text-white">LIVE</span>
+          </div>
+        )}
+      </div>
       {/* Event Image */}
       <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-card-secondary-background">
         {event.eventImage ? (
@@ -118,7 +136,12 @@ export default function HorizontalEventCard({
         </h3>
 
         {/* Location */}
-        {event.address &&
+        {isVirtualEvent(event.format) ? (
+          <div className="mb-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
+            <span className="truncate text-blue-400">Online Event</span>
+          </div>
+        ) : event.address &&
           event.address.city &&
           event.address.city !== "TBD" && (
             <div className="mb-1 flex items-center gap-1.5 text-sm text-muted-foreground">

@@ -3,7 +3,7 @@
  * Backend source: src/features/event-management/events/dto/response.dto.ts
  */
 
-import { EventStatus } from '../status';
+import { EventStatus, EventFormat } from '../status';
 import { EventOwnerResponseDto } from './owner.dto';
 import { EventAddressResponseDto } from '../../address/response.dto';
 import { EventCategoryResponseDto } from '../../category/response.dto';
@@ -30,6 +30,10 @@ export interface EventResponseDto {
   endDateTime: string | Date;
   status: EventStatus;
   isPrivate: boolean;
+  requiresApproval: boolean;
+  format: EventFormat;
+  virtualMeetingUrl: string | null;
+  virtualCapacity: number | null;
   eventUrl: string | null;
   viewCount: number;
   acceptingNewTickets: boolean;

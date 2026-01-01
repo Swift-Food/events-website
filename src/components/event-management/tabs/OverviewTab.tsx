@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { EventResponseDto } from "@/types";
-import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, AlertTriangle, Loader2, CreditCard, UserPlus } from "lucide-react";
+import { EventResponseDto, EventStatus } from "@/types";
+import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, EyeOff, AlertTriangle, Loader2, CreditCard, Video, UserPlus } from "lucide-react";
+import { isVirtualEvent, isHybridEvent } from "@/types/event/status";
 import { GuestTicketResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
 import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
 import { InviteGuestsModal } from "@/components/event-management/InviteGuestsModal";
@@ -24,13 +25,17 @@ interface OverviewTabProps {
   onDeleteClick: () => Promise<void>;
   isDeleting?: boolean;
   userRole?: UserRole;
+  onPublishToggle?: () => void;
+  isPublishLoading?: boolean;
 }
 
-export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, onGuestsClick, onDeleteClick, isDeleting, userRole }: OverviewTabProps) {
+export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, onGuestsClick, onDeleteClick, isDeleting, userRole, onPublishToggle, isPublishLoading }: OverviewTabProps) {
   // Scanner can only scan, not edit or delete
   const canEdit = userRole === "owner" || userRole === "admin";
   const canDelete = userRole === "owner" || userRole === "admin";
   const canViewStats = userRole === "owner" || userRole === "admin";
+  const canPublish = userRole === "owner" || userRole === "admin";
+  const isPublished = eventData.status === EventStatus.PUBLISHED;
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [refundableInfo, setRefundableInfo] = useState<{ count: number; totalAmount: number } | null>(null);
   const [isLoadingRefundInfo, setIsLoadingRefundInfo] = useState(false);
@@ -201,7 +206,11 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-medium capitalize text-green-400">
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
+                      isPublished
+                        ? "bg-green-500/20 text-green-400"
+                        : "bg-amber-500/20 text-amber-400"
+                    }`}>
                       {eventData.status}
                     </span>
                   </div>
@@ -252,10 +261,39 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
             {/* Where */}
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                <MapPin className="h-4 w-4 text-primary" />
+                {isVirtualEvent(eventData.format) ? (
+                  <Video className="h-4 w-4 text-primary" />
+                ) : (
+                  <MapPin className="h-4 w-4 text-primary" />
+                )}
               </div>
               <div className="min-w-0">
-                {eventData.address ? (
+                {isVirtualEvent(eventData.format) ? (
+                  <>
+                    <p className="text-sm font-medium text-foreground">Online Event</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {eventData.virtualMeetingUrl ? "Virtual meeting link available" : "Link to be shared"}
+                    </p>
+                  </>
+                ) : isHybridEvent(eventData.format) ? (
+                  <>
+                    {eventData.address ? (
+                      <>
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {eventData.address.addressLine1}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {eventData.address.city}, {eventData.address.zipcode} • Also Online
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm font-medium text-foreground">Hybrid Event</p>
+                        <p className="text-xs text-muted-foreground">Online + Location TBD</p>
+                      </>
+                    )}
+                  </>
+                ) : eventData.address ? (
                   <>
                     <p className="text-sm font-medium text-foreground truncate">
                       {eventData.address.addressLine1}
@@ -291,12 +329,13 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
         {/* Actions Row */}
         <div className="border-t border-white/5 px-5 sm:px-6 py-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
             <button
-              onClick={onScanClick}
-              className="flex items-center gap-2 rounded-xl bg-primary px-4 sm:px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <ScanLine className="h-4 w-4" />
-              <span className="hidden xs:inline">Scan Tickets</span>
+                onClick={onScanClick}
+                className="flex items-center gap-2 rounded-xl bg-primary px-4 sm:px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <ScanLine className="h-4 w-4" />
+                <span className="hidden xs:inline">Scan Tickets</span>
             </button>
             {canEdit && (
               <button
@@ -305,6 +344,31 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
               >
                 <UserPlus className="h-4 w-4" />
                 <span className="hidden sm:inline">Add Scanners</span>
+                </button>
+            )}
+          </div>
+
+            {/* Publish/Unpublish Button */}
+            {canPublish && onPublishToggle && (
+              <button
+                onClick={onPublishToggle}
+                disabled={isPublishLoading}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${
+                  isPublished
+                    ? "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
+                    : "bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                }`}
+              >
+                {isPublishLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : isPublished ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+                <span className="hidden sm:inline">
+                  {isPublishLoading ? "..." : isPublished ? "Unpublish" : "Publish"}
+                </span>
               </button>
             )}
           </div>

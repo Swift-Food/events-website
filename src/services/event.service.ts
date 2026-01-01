@@ -104,6 +104,13 @@ class EventService {
     return response.data;
   }
 
+  async unpublishEvent(id: string): Promise<UpdateEventResponse> {
+    const response: AxiosResponse<UpdateEventResponse> = await apiClient.patch(
+      `${this.baseUrl}/${id}/unpublish`
+    );
+    return response.data;
+  }
+
   async cancelEvent(id: string): Promise<UpdateEventResponse> {
     const response: AxiosResponse<UpdateEventResponse> = await apiClient.patch(
       `${this.baseUrl}/${id}/cancel`

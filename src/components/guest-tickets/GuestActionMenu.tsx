@@ -7,6 +7,7 @@ import {
   ArrowUpCircle,
   UserCheck,
   Download,
+  Ban,
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 
@@ -17,6 +18,7 @@ interface GuestActionMenuProps {
   onReject: (ticketId: string, reason?: string) => void;
   onCheckIn: (qrCode: string) => void;
   onPromote: (ticketId: string) => void;
+  onBlacklist: (guest: GuestTicketResponseDto) => void;
 }
 
 export const GuestActionMenu = ({
@@ -26,6 +28,7 @@ export const GuestActionMenu = ({
   onReject,
   onCheckIn,
   onPromote,
+  onBlacklist,
 }: GuestActionMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
   console.log("guest in action menu,", guest)
@@ -92,7 +95,6 @@ export const GuestActionMenu = ({
 
   // Common actions
   menuItems.push(
-   
     {
       label: "View QR Code",
       icon: QrCode,
@@ -115,13 +117,35 @@ export const GuestActionMenu = ({
     }
   );
 
+  // Dangerous actions (blacklist)
+  // Only show if ticket is not already cancelled/refunded
+  if (
+    guest.status !== GuestTicketStatus.CANCELLED &&
+    guest.status !== GuestTicketStatus.REFUNDED
+  ) {
+    menuItems.push({
+      label: "Blacklist User",
+      icon: Ban,
+      onClick: () => {
+        onBlacklist(guest);
+        onClose();
+      },
+      color: "text-red-500",
+      isDanger: true,
+    });
+  }
+
+  // Separate normal and dangerous items
+  const normalItems = menuItems.filter((item) => !(item as any).isDanger);
+  const dangerItems = menuItems.filter((item) => (item as any).isDanger);
+
   return (
     <div
       ref={menuRef}
       className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl bg-card-secondary-background shadow-xl ring-1 ring-border"
     >
       <div className="py-1">
-        {menuItems.map((item, index) => {
+        {normalItems.map((item, index) => {
           const Icon = item.icon;
           return (
             <button
@@ -134,6 +158,24 @@ export const GuestActionMenu = ({
             </button>
           );
         })}
+        {dangerItems.length > 0 && (
+          <>
+            <div className="my-1 border-t border-border" />
+            {dangerItems.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={`danger-${index}`}
+                  onClick={item.onClick}
+                  className={`flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-red-500/10 ${item.color}`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </button>
+              );
+            })}
+          </>
+        )}
       </div>
     </div>
   );

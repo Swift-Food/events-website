@@ -11,6 +11,7 @@ interface GuestTableProps {
   onReject: (ticketId: string, reason?: string) => void;
   onCheckIn: (qrCode: string) => void;
   onPromote: (ticketId: string) => void;
+  onBlacklist: (guest: GuestTicketResponseDto) => void;
   onReview?: (guest: GuestTicketResponseDto) => void;
   onRowClick?: (guest: GuestTicketResponseDto) => void;
 }
@@ -24,6 +25,7 @@ export const GuestTable = ({
   onReject,
   onCheckIn,
   onPromote,
+  onBlacklist,
   onReview,
   onRowClick,
 }: GuestTableProps) => {
@@ -85,6 +87,7 @@ export const GuestTable = ({
                 onReject={onReject}
                 onCheckIn={onCheckIn}
                 onPromote={onPromote}
+                onBlacklist={onBlacklist}
                 onReview={onReview}
                 onRowClick={onRowClick}
               />

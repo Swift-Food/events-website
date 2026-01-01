@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare } from "lucide-react";
+import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Video, Users, Link, Eye, EyeOff } from "lucide-react";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import FormFieldModal from "@/components/event-edit/FormFieldModal";
@@ -14,9 +14,10 @@ import {
   EventCreationProvider,
   useEventCreation,
 } from "@/context/EventCreationContext";
-import { TicketType, UpdateEventDto } from "@/types";
+import { TicketType, UpdateEventDto, EventStatus } from "@/types";
 import { FormField } from "@/types";
 import { EventCategoryResponseDto } from "@/types/category";
+import { EventFormat } from "@/types/event/status";
 import { eventService } from "@/services/event.service";
 import { imageService } from "@/services/image.service";
 import { paymentService } from "@/services/payment.service";
@@ -41,9 +42,12 @@ interface EventFormProps {
   mode: "create" | "edit";
   eventId?: string;
   initialData?: any; // You can type this better based on your event structure
+  eventStatus?: EventStatus;
+  onPublishToggle?: () => void;
+  isPublishLoading?: boolean;
 }
 
-function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
+function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishToggle, isPublishLoading }: EventFormProps) {
   const {
     eventName,
     setEventName,
@@ -55,6 +59,12 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     setEnd,
     location,
     setLocation,
+    eventFormat,
+    setEventFormat,
+    virtualMeetingUrl,
+    setVirtualMeetingUrl,
+    isPrivate,
+    setIsPrivate,
     venueName,
     setVenueName,
     addressLine1,
@@ -162,8 +172,13 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
       setStart(formatDateTimeForInput(initialData.startDateTime));
       setEnd(formatDateTimeForInput(initialData.endDateTime));
 
-      // Require approval (isPrivate)
-      setRequireApproval(initialData.isPrivate || false);
+      // Private event and approval settings
+      setIsPrivate(initialData.isPrivate || false);
+      setRequireApproval(initialData.requiresApproval || false);
+
+      // Event format
+      setEventFormat(initialData.format || EventFormat.IN_PERSON);
+      setVirtualMeetingUrl(initialData.virtualMeetingUrl || "");
 
       // Address data
       if (initialData.address) {
@@ -365,14 +380,26 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
       return;
     }
 
-    if (!addressLine1 || !city || !postcode) {
-      toast.error("Please complete the event location");
+    // Validate virtual meeting URL for virtual/hybrid events
+    if (
+      (eventFormat === EventFormat.VIRTUAL || eventFormat === EventFormat.BOTH) &&
+      !virtualMeetingUrl.trim()
+    ) {
+      toast.error("Please enter a virtual meeting URL");
       return;
     }
 
-    if (!validateUKPostcode(postcode)) {
-      toast.error("Please enter a valid UK postcode");
-      return;
+    // Validate location for in-person/hybrid events
+    if (eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH) {
+      if (!addressLine1 || !city || !postcode) {
+        toast.error("Please complete the event location");
+        return;
+      }
+
+      if (!validateUKPostcode(postcode)) {
+        toast.error("Please enter a valid UK postcode");
+        return;
+      }
     }
 
     // Check authentication using auth context
@@ -418,19 +445,24 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
         ownerEventUserId: eventUser.id,
         startDateTime: start,
         endDateTime: end,
-        isPrivate: requireApproval,
-        addressData: {
-          name: venueName || undefined,
-          addressLine1: addressLine1,
-          addressLine2: addressLine2 || undefined,
-          city: city,
-          zipcode: postcode,
-          location:
-            latitude !== null && longitude !== null
-              ? { latitude, longitude }
-              : undefined,
-        },
-        categoryIds: selectedCategoryIds,
+        isPrivate: isPrivate,
+        requiresApproval: requireApproval,
+        format: eventFormat,
+        virtualMeetingUrl: virtualMeetingUrl || undefined,
+        addressData: (eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH)
+          ? {
+              name: venueName || undefined,
+              addressLine1: addressLine1,
+              addressLine2: addressLine2 || undefined,
+              city: city,
+              zipcode: postcode,
+              location:
+                latitude !== null && longitude !== null
+                  ? { latitude, longitude }
+                  : undefined,
+            }
+          : undefined,
+        categoryIds: [],
         eventUrl: undefined,
         tickets: ticketsPayload,
       };
@@ -1008,25 +1040,26 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
                 )}
               </button>
 
-              {/* Location Dropdown */}
-              {isLocationModalOpen && (
-                <LocationModal
-                  isOpen={isLocationModalOpen}
-                  onClose={() => setIsLocationModalOpen(false)}
+                {/* Location Dropdown */}
+                {isLocationModalOpen && (
+                  <LocationModal
+                    isOpen={isLocationModalOpen}
+                    onClose={() => setIsLocationModalOpen(false)}
+                  />
+                )}
+              </div>
+
+              {/* Google Map - shown when location is set */}
+              {latitude !== null && longitude !== null && !isLocationModalOpen && (
+                <GoogleMap
+                  latitude={latitude}
+                  longitude={longitude}
+                  title={venueName || addressLine1}
+                  className="h-48 w-full rounded-xl"
                 />
               )}
             </div>
-
-            {/* Google Map - shown when location is set */}
-            {latitude !== null && longitude !== null && !isLocationModalOpen && (
-              <GoogleMap
-                latitude={latitude}
-                longitude={longitude}
-                title={venueName || addressLine1}
-                className="h-48 w-full rounded-xl"
-              />
-            )}
-          </div>
+  
 
           <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 md:p-5 space-y-5">
             <div className="flex items-center justify-between">
@@ -1296,13 +1329,43 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
               </button>
             )}
 
+            {/* Private Event Toggle */}
+            <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
+              <div>
+                <p className="text-base font-semibold text-foreground">
+                  Private Event
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Only people with invite link can get tickets
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPrivate((prev) => !prev)}
+                className={`h-7 w-14 rounded-full transition-all ${
+                  isPrivate
+                    ? "bg-primary"
+                    : "bg-card-secondary-background"
+                }`}
+              >
+                <span
+                  className={`block h-6 w-6 rounded-full transition-all ${
+                    isPrivate
+                      ? "translate-x-7 bg-primary-foreground"
+                      : "translate-x-0.5 bg-foreground"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Require Approval Toggle */}
             <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
               <div>
                 <p className="text-base font-semibold text-foreground">
                   Require Approval
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Attendees must be approved
+                  Manually approve each ticket request
                 </p>
               </div>
               <button
@@ -1324,6 +1387,51 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
               </button>
             </div>
           </div>
+
+          {/* Visibility Toggle - Only shown in edit mode */}
+          {mode === "edit" && onPublishToggle && (
+            <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 md:p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {eventStatus === EventStatus.PUBLISHED ? (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/20">
+                      <Eye className="h-5 w-5 text-green-400" />
+                    </div>
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/20">
+                      <EyeOff className="h-5 w-5 text-amber-400" />
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-base font-semibold text-foreground">
+                      {eventStatus === EventStatus.PUBLISHED ? "Published" : "Draft"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {eventStatus === EventStatus.PUBLISHED
+                        ? "Visible to everyone"
+                        : "Only visible to you"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={onPublishToggle}
+                  disabled={isPublishLoading}
+                  className={`rounded-xl px-4 py-2 text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                    eventStatus === EventStatus.PUBLISHED
+                      ? "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
+                      : "bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                  }`}
+                >
+                  {isPublishLoading
+                    ? "..."
+                    : eventStatus === EventStatus.PUBLISHED
+                    ? "Unpublish"
+                    : "Publish"}
+                </button>
+              </div>
+            </div>
+          )}
 
           <button
             type="button"

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { eventTicketService } from "@/services/event-ticket.service";
+import { blacklistService } from "@/services/blacklist.service";
 import { AdminTicketResponseDto, GuestTicketResponseDto, GuestTicketStatus, ReservationMode } from "@/types/guest-ticket";
 import { EventTicketResponseDto } from "@/types/event-ticket/response/ticket.dto";
 import { toast } from "sonner";
@@ -11,9 +12,10 @@ import { useAuth } from "@/lib/auth/authContext";
 import { GuestManagementHeader } from "@/components/guest-tickets/GuestManagementHeader";
 import { GuestStatsCards } from "@/components/guest-tickets/GuestTicketStatsCard";
 import { GuestFilters, GuestTable, BulkActionBar, ReviewGuestModal } from "@/components/guest-tickets";
+import { BlacklistModal } from "@/components/blacklist";
 import { Loader, Link as LinkIcon, Copy, Check } from "lucide-react";
 
-type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in";
+type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in" | "blacklisted";
 
 /**
  * Extract guest display name with proper fallbacks
@@ -66,6 +68,11 @@ export default function GuestManagementPage() {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewGuest, setReviewGuest] = useState<GuestTicketResponseDto | null>(null);
   const [isReviewLoading, setIsReviewLoading] = useState(false);
+
+  // Blacklist modal state
+  const [showBlacklistModal, setShowBlacklistModal] = useState(false);
+  const [blacklistGuest, setBlacklistGuest] = useState<GuestTicketResponseDto | null>(null);
+  const [isBlacklistLoading, setIsBlacklistLoading] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated && !authLoading) {
@@ -179,6 +186,45 @@ export default function GuestManagementPage() {
       await fetchGuestData();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to promote guest");
+    }
+  };
+
+  const handleOpenBlacklist = (guest: GuestTicketResponseDto) => {
+    setBlacklistGuest(guest);
+    setShowBlacklistModal(true);
+  };
+
+  const handleCloseBlacklist = () => {
+    setShowBlacklistModal(false);
+    setBlacklistGuest(null);
+  };
+
+  const handleConfirmBlacklist = async (reason: string) => {
+    if (!blacklistGuest) return;
+
+    try {
+      setIsBlacklistLoading(true);
+      const result = await blacklistService.blacklistUser(eventId, {
+        blockedUserId: blacklistGuest.guest?.userId,
+        blockedEmail: blacklistGuest.guest?.user?.email,
+        reason,
+      });
+
+      if (result.success) {
+        toast.success(result.message || "User blacklisted successfully");
+        if (result.ticketRefunded) {
+          toast.info(`Ticket refunded: £${result.refundAmount?.toFixed(2)}`);
+        }
+        handleCloseBlacklist();
+        await fetchGuestData();
+      } else {
+        throw new Error(result.message || "Failed to blacklist user");
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || "Failed to blacklist user");
+      throw error;
+    } finally {
+      setIsBlacklistLoading(false);
     }
   };
 
@@ -323,6 +369,7 @@ export default function GuestManagementPage() {
           onReject={handleReject}
           onCheckIn={handleCheckIn}
           onPromote={handlePromoteFromWaitlist}
+          onBlacklist={handleOpenBlacklist}
           onReview={handleOpenReview}
         />
 
@@ -425,6 +472,13 @@ export default function GuestManagementPage() {
           onApprove={handleApprove}
           onReject={handleReject}
           isLoading={isReviewLoading}
+        />
+        <BlacklistModal
+          isOpen={showBlacklistModal}
+          guest={blacklistGuest}
+          onClose={handleCloseBlacklist}
+          onConfirm={handleConfirmBlacklist}
+          isLoading={isBlacklistLoading}
         />
       </div>
     </div>

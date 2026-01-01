@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { eventTicketService } from "@/services/event-ticket.service";
+import { blacklistService } from "@/services/blacklist.service";
 import {
   AdminTicketResponseDto,
   GuestTicketResponseDto,
@@ -18,9 +19,10 @@ import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
 import { InviteGuestsModal } from "@/components/event-management/InviteGuestsModal";
 import { InviteLinkModal } from "@/components/event-management/InviteLinkModal";
 import { InvitationsSection } from "@/components/event-management/InvitationsSection";
+import { BlacklistModal, BlacklistSection } from "@/components/blacklist";
 import { toast } from "sonner";
 
-type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in";
+type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in" | "blacklisted";
 
 /**
  * Extract guest display name with proper fallbacks (for search filtering)
@@ -80,6 +82,14 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
   // Guest details modal state
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [detailsGuest, setDetailsGuest] = useState<GuestTicketResponseDto | null>(null);
+
+  // Blacklist modal state
+  const [showBlacklistModal, setShowBlacklistModal] = useState(false);
+  const [blacklistGuest, setBlacklistGuest] = useState<GuestTicketResponseDto | null>(null);
+  const [isBlacklistLoading, setIsBlacklistLoading] = useState(false);
+
+  // Blacklist count for filter badge
+  const [blacklistedCount, setBlacklistedCount] = useState(0);
 
   useEffect(() => {
     fetchGuestData();
@@ -206,6 +216,45 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
     }
   };
 
+  const handleOpenBlacklist = (guest: GuestTicketResponseDto) => {
+    setBlacklistGuest(guest);
+    setShowBlacklistModal(true);
+  };
+
+  const handleCloseBlacklist = () => {
+    setShowBlacklistModal(false);
+    setBlacklistGuest(null);
+  };
+
+  const handleConfirmBlacklist = async (reason: string) => {
+    if (!blacklistGuest) return;
+
+    try {
+      setIsBlacklistLoading(true);
+      const result = await blacklistService.blacklistUser(eventId, {
+        blockedUserId: blacklistGuest.guest?.userId,
+        blockedEmail: blacklistGuest.guest?.user?.email,
+        reason,
+      });
+
+      if (result.success) {
+        toast.success(result.message || "User blacklisted successfully");
+        if (result.ticketRefunded) {
+          toast.info(`Ticket refunded: £${result.refundAmount?.toFixed(2)}`);
+        }
+        handleCloseBlacklist();
+        await fetchGuestData();
+      } else {
+        throw new Error(result.message || "Failed to blacklist user");
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || "Failed to blacklist user");
+      throw error;
+    } finally {
+      setIsBlacklistLoading(false);
+    }
+  };
+
   const handleOpenInviteModal = async () => {
     try {
       const tickets = await eventTicketService.getEventTickets(eventId);
@@ -319,29 +368,40 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
           waitlistedCount={guests.filter((g) => g.status === GuestTicketStatus.WAITLISTED).length}
           cancelledCount={guests.filter((g) => g.status === GuestTicketStatus.CANCELLED).length}
           checkedInCount={guests.filter((g) => g.status === GuestTicketStatus.CHECKED_IN).length}
+          blacklistedCount={blacklistedCount}
         />
 
-        {selectedGuests.size > 0 && (
-          <BulkActionBar
-            selectedCount={selectedGuests.size}
-            onApprove={handleBulkApprove}
-            onReject={handleBulkReject}
-            onCancel={() => setSelectedGuests(new Set())}
+        {filterStatus === "blacklisted" ? (
+          <BlacklistSection
+            eventId={eventId}
+            onBlacklistCountChange={setBlacklistedCount}
           />
-        )}
+        ) : (
+          <>
+            {selectedGuests.size > 0 && (
+              <BulkActionBar
+                selectedCount={selectedGuests.size}
+                onApprove={handleBulkApprove}
+                onReject={handleBulkReject}
+                onCancel={() => setSelectedGuests(new Set())}
+              />
+            )}
 
-        <GuestTable
-          guests={filteredGuests}
-          selectedGuests={selectedGuests}
-          onToggleSelect={toggleSelectGuest}
-          onToggleSelectAll={toggleSelectAll}
-          onApprove={handleApprove}
-          onReject={handleReject}
-          onCheckIn={handleCheckIn}
-          onPromote={handlePromoteFromWaitlist}
-          onReview={handleOpenReview}
-          onRowClick={handleOpenDetails}
-        />
+            <GuestTable
+              guests={filteredGuests}
+              selectedGuests={selectedGuests}
+              onToggleSelect={toggleSelectGuest}
+              onToggleSelectAll={toggleSelectAll}
+              onApprove={handleApprove}
+              onReject={handleReject}
+              onCheckIn={handleCheckIn}
+              onPromote={handlePromoteFromWaitlist}
+              onBlacklist={handleOpenBlacklist}
+              onReview={handleOpenReview}
+              onRowClick={handleOpenDetails}
+            />
+          </>
+        )}
       </div>
 
       <InviteLinkModal
@@ -381,6 +441,13 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
         onCheckIn={handleCheckIn}
         onPromote={handlePromoteFromWaitlist}
         onReview={handleOpenReview}
+      />
+      <BlacklistModal
+        isOpen={showBlacklistModal}
+        guest={blacklistGuest}
+        onClose={handleCloseBlacklist}
+        onConfirm={handleConfirmBlacklist}
+        isLoading={isBlacklistLoading}
       />
     </>
   );

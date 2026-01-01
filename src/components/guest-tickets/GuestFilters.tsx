@@ -1,6 +1,6 @@
-import { Search } from "lucide-react";
+import { Search, Ban } from "lucide-react";
 
-type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in";
+type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in" | "blacklisted";
 
 interface GuestFiltersProps {
   filterStatus: FilterStatus;
@@ -12,6 +12,7 @@ interface GuestFiltersProps {
   waitlistedCount: number;
   cancelledCount: number;
   checkedInCount: number;
+  blacklistedCount?: number;
 }
 
 export const GuestFilters = ({
@@ -24,6 +25,7 @@ export const GuestFilters = ({
   waitlistedCount,
   cancelledCount,
   checkedInCount,
+  blacklistedCount = 0,
 }: GuestFiltersProps) => {
   const filters = [
     { value: "all" as FilterStatus, label: "All" },
@@ -32,6 +34,7 @@ export const GuestFilters = ({
     { value: "checked_in" as FilterStatus, label: "Checked In", count: checkedInCount },
     { value: "waitlisted" as FilterStatus, label: "Waitlisted", count: waitlistedCount },
     { value: "cancelled" as FilterStatus, label: "Cancelled", count: cancelledCount },
+    { value: "blacklisted" as FilterStatus, label: "Blacklisted", count: blacklistedCount, icon: Ban, isDanger: true },
   ];
 
   return (
@@ -51,20 +54,39 @@ export const GuestFilters = ({
       {/* Filter Tabs */}
       <div className="overflow-x-auto">
         <div className="flex gap-2">
-          {filters.map((filter) => (
-            <button
-              key={filter.value}
-              onClick={() => onFilterChange(filter.value)}
-              className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition-all ${
-                filterStatus === filter.value
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-card-secondary-background text-foreground hover:bg-white/15"
-              }`}
-            >
-              {filter.label}
-             
-            </button>
-          ))}
+          {filters.map((filter) => {
+            const Icon = (filter as any).icon;
+            const isDanger = (filter as any).isDanger;
+            return (
+              <button
+                key={filter.value}
+                onClick={() => onFilterChange(filter.value)}
+                className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition-all ${
+                  filterStatus === filter.value
+                    ? isDanger
+                      ? "bg-red-500 text-white"
+                      : "bg-primary text-primary-foreground"
+                    : isDanger
+                      ? "bg-card-secondary-background text-red-400 hover:bg-red-500/10"
+                      : "bg-card-secondary-background text-foreground hover:bg-white/15"
+                }`}
+              >
+                {Icon && <Icon className="h-4 w-4" />}
+                {filter.label}
+                {filter.count !== undefined && filter.count > 0 && (
+                  <span className={`rounded-full px-2 py-0.5 text-xs ${
+                    filterStatus === filter.value
+                      ? "bg-white/20"
+                      : isDanger
+                        ? "bg-red-500/20 text-red-400"
+                        : "bg-white/10"
+                  }`}>
+                    {filter.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
