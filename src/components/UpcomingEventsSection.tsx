@@ -103,6 +103,8 @@ export default function UpcomingEventsSection({
           <HorizontalEventCard
             key={event.id}
             event={event}
+            showDate
+            showCategories={false}
             onClick={handleEventClick}
           />
         ))}

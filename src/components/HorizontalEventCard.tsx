@@ -7,12 +7,16 @@ import { isVirtualEvent, isHybridEvent, hasOnlineComponent } from "@/types/event
 interface HorizontalEventCardProps {
   event: EventResponseDto;
   linkToManagement?: boolean;
+  showDate?: boolean;
+  showCategories?: boolean;
   onClick?: (e: React.MouseEvent, event: EventResponseDto) => void;
 }
 
 export default function HorizontalEventCard({
   event,
   linkToManagement = false,
+  showDate = false,
+  showCategories = true,
   onClick,
 }: HorizontalEventCardProps) {
   const formatTime = (date: string | Date) => {
@@ -20,6 +24,15 @@ export default function HorizontalEventCard({
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
+    });
+  };
+
+  const formatDate = (date: string | Date) => {
+    const d = new Date(date);
+    return d.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -122,8 +135,9 @@ export default function HorizontalEventCard({
 
       {/* Event Details */}
       <div className="flex min-w-0 flex-1 flex-col justify-center">
-        {/* Time */}
+        {/* Date/Time */}
         <span className="mb-1 text-sm text-muted-foreground">
+          {showDate && <>{formatDate(event.startDateTime)} &middot; </>}
           {formatTime(event.startDateTime)}
         </span>
 
@@ -134,7 +148,7 @@ export default function HorizontalEventCard({
 
         {/* With categories: Address + Ticket on same row, Categories below */}
         {/* Without categories: Address on one row, Ticket on next row */}
-        {event.categories && event.categories.length > 0 ? (
+        {showCategories && event.categories && event.categories.length > 0 ? (
           <>
             {/* Row 1: Address + Ticket */}
             <div className="flex items-center gap-3">
