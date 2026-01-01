@@ -1,19 +1,13 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useSearchParams } from "next/navigation";
 import { eventsApi } from "@/services/events";
-import { categoriesApi } from "@/services/categories";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
-import { EventCategoryType, EventCategoryResponseDto } from "@/types/category";
 import { Search, Calendar, ChevronLeft, ChevronRight, X, ArrowUpDown } from "lucide-react";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
 import EventPreviewModal from "@/components/EventPreviewModal";
 
 export default function EventsPage() {
-  const searchParams = useSearchParams();
-  const initialCategory = searchParams.get("category") as EventCategoryType | null;
-
   const [events, setEvents] = useState<EventResponseDto[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -27,7 +21,6 @@ export default function EventsPage() {
   const [customEndDate, setCustomEndDate] = useState("");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<EventCategoryType | null>(initialCategory);
 
   // Track which date headers are stuck
   const [stuckHeaders, setStuckHeaders] = useState<Set<string>>(new Set());
@@ -36,24 +29,7 @@ export default function EventsPage() {
   // Modal state
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
-  // Categories
-  const [allCategories, setAllCategories] = useState<EventCategoryResponseDto[]>([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
-
   const eventsPerPage = 12;
-
-  // Fetch all categories
-  const fetchAllCategories = async () => {
-    try {
-      setLoadingCategories(true);
-      const categories = await categoriesApi.findAll();
-      setAllCategories(categories);
-    } catch (err) {
-      console.error("Failed to fetch categories:", err);
-    } finally {
-      setLoadingCategories(false);
-    }
-  };
 
   // Calculate date filters based on selected filter
   const getDateFilters = () => {
@@ -91,7 +67,6 @@ export default function EventsPage() {
 
       const result: EventListResponseDto = await eventsApi.findAll({
         search: searchTerm || undefined,
-        category: selectedCategory || undefined,
         startDate,
         endDate,
         today,
@@ -120,17 +95,12 @@ export default function EventsPage() {
       return;
     }
     setCurrentPage(1);
-  }, [searchTerm, dateFilter, customStartDate, customEndDate, sortOrder, selectedCategory]);
-
-  // Fetch categories on mount
-  useEffect(() => {
-    fetchAllCategories();
-  }, []);
+  }, [searchTerm, dateFilter, customStartDate, customEndDate, sortOrder]);
 
   // Fetch on mount and when filters change
   useEffect(() => {
     fetchEvents();
-  }, [searchTerm, currentPage, dateFilter, customStartDate, customEndDate, sortOrder, selectedCategory]);
+  }, [searchTerm, currentPage, dateFilter, customStartDate, customEndDate, sortOrder]);
 
   const totalPages = Math.ceil(total / eventsPerPage);
 
@@ -187,20 +157,6 @@ export default function EventsPage() {
 
   const toggleSortOrder = () => {
     setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
-  };
-
-  const handleCategoryClick = (categoryName: EventCategoryType) => {
-    // Toggle off if clicking the same category
-    if (selectedCategory === categoryName) {
-      setSelectedCategory(null);
-    } else {
-      setSelectedCategory(categoryName);
-    }
-  };
-
-  // Helper function to get display label
-  const getCategoryLabel = (categoryName: EventCategoryType) => {
-    return categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
   };
 
   const hasActiveSearch = !!searchTerm;
@@ -327,27 +283,6 @@ export default function EventsPage() {
               </button>
             </div>
           </div>
-
-          {/* Category Filter Chips */}
-          {!loadingCategories && allCategories.length > 0 && (
-            <div className="-mx-4 px-4 mt-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              <div className="flex items-center gap-2 w-max">
-                {allCategories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => handleCategoryClick(category.name)}
-                    className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                      selectedCategory === category.name
-                        ? 'bg-primary text-white'
-                        : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
-                    }`}
-                  >
-                    {getCategoryLabel(category.name)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Results Count */}

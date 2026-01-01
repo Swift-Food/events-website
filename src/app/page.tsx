@@ -119,13 +119,12 @@ export default function DiscoveryPage() {
             <div className="-mx-4 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               <div className="flex gap-2 w-max">
                 {allCategories.map((category) => (
-                  <Link
+                  <div
                     key={category.id}
-                    href={`/events?category=${category.name}`}
-                    className="flex-shrink-0 rounded-full px-4 py-2.5 text-sm font-medium transition-all border border-white/10 bg-card-background text-foreground hover:border-white/20"
+                    className="flex-shrink-0 rounded-full px-4 py-2.5 text-sm font-medium border border-white/10 bg-card-background text-foreground"
                   >
                     {getCategoryLabel(category.name)}
-                  </Link>
+                  </div>
                 ))}
               </div>
             </div>
