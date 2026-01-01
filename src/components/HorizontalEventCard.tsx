@@ -49,7 +49,6 @@ export default function HorizontalEventCard({
     return `From £${minPrice.toFixed(2)}`;
   };
 
-  const primaryCategory = event.categories?.[0];
 
   // Check if event is currently ongoing
   const now = new Date();
@@ -70,8 +69,8 @@ export default function HorizontalEventCard({
       onClick={handleClick}
       className="group relative flex gap-4 overflow-hidden rounded-2xl border border-white/10 bg-card-background p-4 transition-all hover:border-white/20 hover:shadow-2xl"
     >
-      {/* Status Badges */}
-      <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">
+      {/* Top Right: Status Badges & Categories */}
+      <div className="absolute right-3 top-3 z-10 flex flex-wrap items-center justify-end gap-1.5 max-w-[60%]">
         {/* Private/Invite-Only Event Badge */}
         {event.isPrivate && (
           <div className="group/private flex items-center gap-1 rounded-full bg-purple-500/90 px-1.5 py-0.5 backdrop-blur-sm transition-all duration-200">
@@ -96,6 +95,15 @@ export default function HorizontalEventCard({
             <span className="text-[10px] font-semibold text-white">LIVE</span>
           </div>
         )}
+        {/* Categories */}
+        {event.categories && event.categories.map((category) => (
+          <span
+            key={category.id}
+            className="rounded-full bg-primary/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold text-white"
+          >
+            {category.name.toLowerCase()}
+          </span>
+        ))}
       </div>
       {/* Event Image */}
       <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-card-secondary-background">
@@ -118,17 +126,10 @@ export default function HorizontalEventCard({
 
       {/* Event Details */}
       <div className="flex min-w-0 flex-1 flex-col justify-center">
-        {/* Top row: Category and Time */}
-        <div className="mb-1 flex items-center gap-3">
-          {primaryCategory && (
-            <span className="rounded-md bg-primary px-2 py-0.5 text-xs font-semibold text-white">
-              {primaryCategory.name}
-            </span>
-          )}
-          <span className="text-sm text-muted-foreground">
-            {formatTime(event.startDateTime)}
-          </span>
-        </div>
+        {/* Time */}
+        <span className="mb-1 text-sm text-muted-foreground">
+          {formatTime(event.startDateTime)}
+        </span>
 
         {/* Event Name */}
         <h3 className="mb-1 truncate text-base font-semibold text-foreground group-hover:text-primary">
