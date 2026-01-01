@@ -120,7 +120,7 @@ export default function DiscoveryPage() {
                 <Link
                   key={category.id}
                   href={`/events?category=${category.name}`}
-                  className="rounded-full px-3 py-2.5 text-sm font-medium border border-white/10 bg-card-background text-foreground hover:bg-card-background/80 cursor-pointer transition-colors text-center truncate"
+                  className="rounded-xl px-3 py-2.5 text-sm font-medium border border-white/10 bg-card-background text-foreground hover:bg-card-background/80 cursor-pointer transition-colors text-center truncate"
                 >
                   {getCategoryLabel(category.name)}
                 </Link>
