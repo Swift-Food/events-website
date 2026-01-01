@@ -6,7 +6,7 @@ import { eventsApi } from "@/services/events";
 import { categoriesApi } from "@/services/categories";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
 import { EventCategoryType, EventCategoryResponseDto } from "@/types/category";
-import { Search, Calendar, ChevronLeft, ChevronRight, X, SlidersHorizontal, Check } from "lucide-react";
+import { Search, Calendar, X, SlidersHorizontal, Check } from "lucide-react";
 import EventsTimeline from "@/components/EventsTimeline";
 
 export default function EventsPage() {
@@ -219,16 +219,16 @@ function EventsPageContent() {
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground">
             All Events
           </h1>
-          <p className="mt-2 text-md text-muted-foreground">
+          <p className="mt-2 text-sm sm:text-md text-muted-foreground">
             Browse and search through all upcoming events
           </p>
         </div>
 
         {/* Sticky Search Bar */}
-        <div className="sticky top-16 z-40 -mx-4 px-4 sm:-mx-6 sm:px-6 pt-4 pb-4 bg-gradient-to-b from-background via-background to-transparent">
+        <div className="sticky top-20 z-40 -mx-4 px-4 sm:-mx-6 sm:px-6 pb-4 bg-gradient-to-b from-background via-background to-transparent">
           {/* Search Bar with Filter Button */}
           <div ref={filterDropdownRef} className="relative flex items-center gap-2">
             <div className="relative flex-1">

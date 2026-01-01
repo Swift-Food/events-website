@@ -21,7 +21,7 @@ export default function EventsTimeline({
   events,
   enablePreviewModal = true,
   linkToManagement = false,
-  stickyTopClass = "top-36",
+  stickyTopClass = "top-34",
   observerRootMargin = "-144px 0px 0px 0px",
 }: EventsTimelineProps) {
   // Track which date headers are stuck
@@ -168,14 +168,18 @@ export default function EventsTimeline({
                 </div>
 
                 {/* Events for this date */}
-                <div className="min-w-0 space-y-3">
-                  {dateEvents.map((event) => (
-                    <HorizontalEventCard
-                      key={event.id}
-                      event={event}
-                      linkToManagement={linkToManagement}
-                      onClick={enablePreviewModal ? handleEventClick : undefined}
-                    />
+                <div className="min-w-0">
+                  {dateEvents.map((event, index) => (
+                    <div key={event.id}>
+                      <HorizontalEventCard
+                        event={event}
+                        linkToManagement={linkToManagement}
+                        onClick={enablePreviewModal ? handleEventClick : undefined}
+                      />
+                      {index < dateEvents.length - 1 && (
+                        <div className="ml-[104px] sm:ml-[120px] border-b border-white/10" />
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
