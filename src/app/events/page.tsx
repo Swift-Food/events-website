@@ -503,9 +503,7 @@ export default function EventCataloguePage() {
                   {/* Timeline column - continuous line */}
                   <div className="hidden sm:block sm:w-8 relative">
                     {/* Continuous line */}
-                    {!isLast && (
-                      <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-white/20" />
-                    )}
+                    <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-white/20" />
                     {/* Dot positioned at header level */}
                     <div className="sticky top-20 z-40 flex h-8 items-center justify-center">
                       <div
