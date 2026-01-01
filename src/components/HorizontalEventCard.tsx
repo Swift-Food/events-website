@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Calendar, MapPin, Ticket, Video, Lock } from "lucide-react";
 import { EventResponseDto } from "@/types/event";
-import { isVirtualEvent } from "@/types/event/status";
+import { isVirtualEvent, isHybridEvent, hasOnlineComponent } from "@/types/event/status";
 
 interface HorizontalEventCardProps {
   event: EventResponseDto;
@@ -78,8 +78,13 @@ export default function HorizontalEventCard({
             <span className="max-w-0 overflow-hidden text-[10px] font-semibold text-white transition-all duration-200 group-hover/private:max-w-[50px] group-hover/private:ml-0.5">PRIVATE</span>
           </div>
         )}
-        {/* Virtual Event Badge */}
-        {isVirtualEvent(event.format) && (
+        {/* Virtual/Hybrid Event Badge */}
+        {isHybridEvent(event.format) ? (
+          <div className="flex items-center gap-1 rounded-full bg-violet-500/90 px-1.5 py-0.5 backdrop-blur-sm">
+            <Video className="h-2.5 w-2.5 text-white" />
+            <span className="text-[10px] font-semibold text-white">HYBRID</span>
+          </div>
+        ) : isVirtualEvent(event.format) && (
           <div className="flex items-center gap-1 rounded-full bg-blue-500/90 px-1.5 py-0.5 backdrop-blur-sm">
             <Video className="h-2.5 w-2.5 text-white" />
             <span className="text-[10px] font-semibold text-white">ONLINE</span>
@@ -133,22 +138,32 @@ export default function HorizontalEventCard({
           <>
             {/* Row 1: Address + Ticket */}
             <div className="flex items-center gap-3">
-              {/* Location */}
+              {/* Location - Virtual only */}
               {isVirtualEvent(event.format) ? (
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
                   <span className="truncate text-blue-400">Online Event</span>
                 </div>
-              ) : event.address &&
-                event.address.city &&
-                event.address.city !== "TBD" && (
-                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="truncate">
-                      {event.address.city}, {event.address.zipcode}
-                    </span>
-                  </div>
-                )}
+              ) : (
+                <>
+                  {/* Physical address for In Person and Hybrid */}
+                  {event.address && event.address.city && event.address.city !== "TBD" && (
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span className="truncate">
+                        {event.address.city}, {event.address.zipcode}
+                      </span>
+                    </div>
+                  )}
+                  {/* Online indicator for Hybrid events */}
+                  {isHybridEvent(event.format) && (
+                    <div className="flex items-center gap-1 text-sm text-blue-400">
+                      <Video className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span className="text-xs">+ Online</span>
+                    </div>
+                  )}
+                </>
+              )}
 
               {/* Price */}
               {formatPrice() && (
@@ -189,16 +204,26 @@ export default function HorizontalEventCard({
                 <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
                 <span className="truncate text-blue-400">Online Event</span>
               </div>
-            ) : event.address &&
-              event.address.city &&
-              event.address.city !== "TBD" && (
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                  <span className="truncate">
-                    {event.address.city}, {event.address.zipcode}
-                  </span>
-                </div>
-              )}
+            ) : (
+              <div className="flex items-center gap-3">
+                {/* Physical address for In Person and Hybrid */}
+                {event.address && event.address.city && event.address.city !== "TBD" && (
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                    <span className="truncate">
+                      {event.address.city}, {event.address.zipcode}
+                    </span>
+                  </div>
+                )}
+                {/* Online indicator for Hybrid events */}
+                {isHybridEvent(event.format) && (
+                  <div className="flex items-center gap-1 text-sm text-blue-400">
+                    <Video className="h-3.5 w-3.5 flex-shrink-0" />
+                    <span className="text-xs">+ Online</span>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Row 2: Price */}
             {formatPrice() && (
