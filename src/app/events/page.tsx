@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { categoriesApi } from "@/services/categories";
@@ -10,6 +10,30 @@ import { Search, Calendar, ChevronLeft, ChevronRight, X, SlidersHorizontal, Chec
 import EventsTimeline from "@/components/EventsTimeline";
 
 export default function EventsPage() {
+  return (
+    <Suspense fallback={<EventsPageSkeleton />}>
+      <EventsPageContent />
+    </Suspense>
+  );
+}
+
+function EventsPageSkeleton() {
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
+        <div className="mb-6">
+          <div className="h-8 w-48 bg-card-background rounded animate-pulse" />
+          <div className="mt-2 h-5 w-72 bg-card-background rounded animate-pulse" />
+        </div>
+        <div className="flex min-h-[400px] items-center justify-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EventsPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -49,7 +73,7 @@ export default function EventsPage() {
     if (newCategory !== categoryFilter) {
       setCategoryFilter(newCategory);
     }
-  }, [searchParams]);
+  }, [searchParams, categoryFilter]);
 
   // Fetch all categories
   useEffect(() => {
@@ -86,39 +110,33 @@ export default function EventsPage() {
 
   const eventsPerPage = 12;
 
-  // Calculate date filters based on selected filter
-  const getDateFilters = () => {
-    let startDate: string | undefined;
-    let endDate: string | undefined;
-    let today: boolean | undefined;
-    let currentMonth: boolean | undefined;
-
-    switch (dateFilter) {
-      case 'today':
-        today = true;
-        break;
-      case 'month':
-        currentMonth = true;
-        break;
-      case 'custom':
-        startDate = customStartDate ? new Date(customStartDate).toISOString() : undefined;
-        endDate = customEndDate ? new Date(customEndDate).toISOString() : undefined;
-        break;
-      case 'all':
-      default:
-        startDate = undefined;
-        endDate = undefined;
-    }
-
-    return { startDate, endDate, today, currentMonth };
-  };
-
   // Fetch events
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const { startDate, endDate, today, currentMonth } = getDateFilters();
+      // Calculate date filters based on selected filter
+      let startDate: string | undefined;
+      let endDate: string | undefined;
+      let today: boolean | undefined;
+      let currentMonth: boolean | undefined;
+
+      switch (dateFilter) {
+        case 'today':
+          today = true;
+          break;
+        case 'month':
+          currentMonth = true;
+          break;
+        case 'custom':
+          startDate = customStartDate ? new Date(customStartDate).toISOString() : undefined;
+          endDate = customEndDate ? new Date(customEndDate).toISOString() : undefined;
+          break;
+        case 'all':
+        default:
+          startDate = undefined;
+          endDate = undefined;
+      }
 
       const result: EventListResponseDto = await eventsApi.findAll({
         search: searchTerm || undefined,
@@ -141,7 +159,7 @@ export default function EventsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, dateFilter, customStartDate, customEndDate, categoryFilter, sortOrder, currentPage]);
 
   // Reset to page 1 when search or filters change (skip initial render)
   const isFirstRender = useRef(true);
@@ -156,7 +174,7 @@ export default function EventsPage() {
   // Fetch on mount and when filters change
   useEffect(() => {
     fetchEvents();
-  }, [searchTerm, currentPage, dateFilter, customStartDate, customEndDate, sortOrder, categoryFilter, searchParams]);
+  }, [fetchEvents]);
 
   const totalPages = Math.ceil(total / eventsPerPage);
 
