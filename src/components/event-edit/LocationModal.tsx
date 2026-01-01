@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search } from "lucide-react";
+import { Search, MapPin, Video, Users, Link } from "lucide-react";
 import { useEventCreation } from "@/context/EventCreationContext";
 import { GOOGLE_MAPS_CONFIG } from "@/constants/google-maps";
 import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
+import { EventFormat } from "@/types/event/status";
 
 // UK Postcode validation regex
 const UK_POSTCODE_REGEX = /^([A-Z]{1,2}\d{1,2}[A-Z]?)\s?(\d[A-Z]{2})$/i;
@@ -36,9 +37,15 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
     longitude,
     setLongitude,
     setLocation,
+    eventFormat,
+    setEventFormat,
+    virtualMeetingUrl,
+    setVirtualMeetingUrl,
   } = useEventCreation();
 
   // Local state for editing
+  const [localEventFormat, setLocalEventFormat] = useState(eventFormat);
+  const [localVirtualMeetingUrl, setLocalVirtualMeetingUrl] = useState(virtualMeetingUrl);
   const [localVenueName, setLocalVenueName] = useState(venueName);
   const [localAddressLine1, setLocalAddressLine1] = useState(addressLine1);
   const [localAddressLine2, setLocalAddressLine2] = useState(addressLine2);
@@ -56,6 +63,8 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
   // Update local state when modal opens
   useEffect(() => {
     if (isOpen) {
+      setLocalEventFormat(eventFormat);
+      setLocalVirtualMeetingUrl(virtualMeetingUrl);
       setLocalVenueName(venueName);
       setLocalAddressLine1(addressLine1);
       setLocalAddressLine2(addressLine2);
@@ -65,7 +74,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
       setLocalLongitude(longitude);
       setAddressValidationError(null);
     }
-  }, [isOpen, venueName, addressLine1, addressLine2, city, postcode, latitude, longitude]);
+  }, [isOpen, eventFormat, virtualMeetingUrl, venueName, addressLine1, addressLine2, city, postcode, latitude, longitude]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -224,31 +233,58 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
   };
 
   const handleSave = () => {
-    // Validate required fields
-    if (!localAddressLine1 || !localCity || !localPostcode) {
-      setAddressValidationError("Please complete all required address fields");
+    // Validate virtual meeting URL for virtual/hybrid events
+    if (
+      (localEventFormat === EventFormat.VIRTUAL || localEventFormat === EventFormat.BOTH) &&
+      !localVirtualMeetingUrl.trim()
+    ) {
+      setAddressValidationError("Please enter a virtual meeting URL");
       return;
     }
 
-    if (!validateUKPostcode(localPostcode)) {
-      setAddressValidationError("Please enter a valid UK postcode");
-      return;
+    // Validate address for in-person/hybrid events
+    if (localEventFormat === EventFormat.IN_PERSON || localEventFormat === EventFormat.BOTH) {
+      if (!localAddressLine1 || !localCity || !localPostcode) {
+        setAddressValidationError("Please complete all required address fields");
+        return;
+      }
+
+      if (!validateUKPostcode(localPostcode)) {
+        setAddressValidationError("Please enter a valid UK postcode");
+        return;
+      }
     }
 
-    // Save to context
-    setVenueName(localVenueName);
-    setAddressLine1(localAddressLine1);
-    setAddressLine2(localAddressLine2);
-    setCity(localCity);
-    setPostcode(localPostcode);
-    setLatitude(localLatitude);
-    setLongitude(localLongitude);
+    // Save event format and virtual URL to context
+    setEventFormat(localEventFormat);
+    setVirtualMeetingUrl(localVirtualMeetingUrl);
 
-    // Update the full location string
-    const fullAddress = [localAddressLine1, localAddressLine2, localCity, localPostcode]
-      .filter(Boolean)
-      .join(", ");
-    setLocation(fullAddress);
+    // Save address to context (only if in-person or both)
+    if (localEventFormat === EventFormat.IN_PERSON || localEventFormat === EventFormat.BOTH) {
+      setVenueName(localVenueName);
+      setAddressLine1(localAddressLine1);
+      setAddressLine2(localAddressLine2);
+      setCity(localCity);
+      setPostcode(localPostcode);
+      setLatitude(localLatitude);
+      setLongitude(localLongitude);
+
+      // Update the full location string
+      const fullAddress = [localAddressLine1, localAddressLine2, localCity, localPostcode]
+        .filter(Boolean)
+        .join(", ");
+      setLocation(fullAddress);
+    } else {
+      // Clear address fields for virtual-only events
+      setVenueName("");
+      setAddressLine1("");
+      setAddressLine2("");
+      setCity("");
+      setPostcode("");
+      setLatitude(null);
+      setLongitude(null);
+      setLocation("");
+    }
 
     onClose();
   };
@@ -261,16 +297,48 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
       className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-card-background/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
     >
       <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
-        {/* Google Places Search */}
+        {/* Event Format Selector */}
         <div>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              ref={locationInputRef}
-              type="text"
-              placeholder="Enter location"
-              className="w-full rounded-lg bg-card-secondary-background pl-10 pr-4 py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
-            />
+          <label className="block text-xs font-medium text-muted-foreground mb-2">
+            Event Format
+          </label>
+          <div className="flex rounded-lg overflow-hidden bg-card-secondary-background border border-white/10">
+            <button
+              type="button"
+              onClick={() => setLocalEventFormat(EventFormat.IN_PERSON)}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 transition-all ${
+                localEventFormat === EventFormat.IN_PERSON
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <MapPin className="h-4 w-4" />
+              <span className="text-sm font-medium">In Person</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setLocalEventFormat(EventFormat.VIRTUAL)}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 transition-all ${
+                localEventFormat === EventFormat.VIRTUAL
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Video className="h-4 w-4" />
+              <span className="text-sm font-medium">Virtual</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setLocalEventFormat(EventFormat.BOTH)}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 transition-all ${
+                localEventFormat === EventFormat.BOTH
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Users className="h-4 w-4" />
+              <span className="text-sm font-medium">Both</span>
+            </button>
           </div>
         </div>
 
@@ -280,88 +348,145 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
           </div>
         )}
 
-        <div className="border-t border-white/10 pt-4 space-y-3">
-          {/* Venue Name */}
-          <div>
+        {/* Virtual Meeting URL (for Virtual and Both events) */}
+        {(localEventFormat === EventFormat.VIRTUAL || localEventFormat === EventFormat.BOTH) && (
+          <div className="border-t border-white/10 pt-4">
+            {/* Label for Both/Hybrid events */}
+            {localEventFormat === EventFormat.BOTH && (
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex-1 h-px bg-white/10"></div>
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Virtual Meeting</span>
+                <div className="flex-1 h-px bg-white/10"></div>
+              </div>
+            )}
             <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-              Venue Name (Optional)
+              Meeting URL <span className="text-red-400">*</span>
             </label>
-            <input
-              type="text"
-              value={localVenueName}
-              onChange={(e) => setLocalVenueName(e.target.value)}
-              placeholder="e.g., UCL Student Centre"
-              className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
-            />
-          </div>
-
-          {/* Address Line 1 */}
-          <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-              Address Line 1 <span className="text-red-400">*</span>
-            </label>
-            <input
-              type="text"
-              value={localAddressLine1}
-              onChange={(e) => setLocalAddressLine1(e.target.value)}
-              placeholder="Street address"
-              className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
-            />
-          </div>
-
-          {/* Address Line 2 */}
-          <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-              Address Line 2 (Optional)
-            </label>
-            <input
-              type="text"
-              value={localAddressLine2}
-              onChange={(e) => setLocalAddressLine2(e.target.value)}
-              placeholder="Apartment, suite, building, etc."
-              className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
-            />
-          </div>
-
-          {/* City and Postcode */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                City <span className="text-red-400">*</span>
-              </label>
+            <div className="flex items-center gap-2 rounded-lg bg-card-secondary-background px-3 py-2 border border-white/10 focus-within:border-primary/50 transition-all">
+              <Link className="h-4 w-4 text-muted-foreground" />
               <input
-                type="text"
-                value={localCity}
-                onChange={(e) => setLocalCity(e.target.value)}
-                placeholder="City"
-                className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+                type="url"
+                value={localVirtualMeetingUrl}
+                onChange={(e) => setLocalVirtualMeetingUrl(e.target.value)}
+                placeholder="https://zoom.us/j/... or Google Meet link"
+                className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
               />
             </div>
-            <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                Postcode <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text"
-                value={localPostcode}
-                onChange={(e) => setLocalPostcode(e.target.value.toUpperCase())}
-                placeholder="e.g., SW1A 1AA"
-                className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
-              />
-            </div>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              Zoom, Google Meet, Teams, or any meeting URL
+            </p>
           </div>
+        )}
 
-          {/* Postcode validation feedback */}
-          {localPostcode && (
-            <div>
-              {validateUKPostcode(localPostcode) ? (
-                <p className="text-xs text-green-400">Valid UK postcode</p>
-              ) : (
-                <p className="text-xs text-red-400">Please enter a valid UK postcode</p>
+        {/* Physical Location (for In Person and Both events) */}
+        {(localEventFormat === EventFormat.IN_PERSON || localEventFormat === EventFormat.BOTH) && (
+          <>
+            {/* Divider for Both/Hybrid events */}
+            {localEventFormat === EventFormat.BOTH && (
+              <div className="flex items-center gap-3 pt-2">
+                <div className="flex-1 h-px bg-white/10"></div>
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Physical Venue</span>
+                <div className="flex-1 h-px bg-white/10"></div>
+              </div>
+            )}
+
+            <div className={localEventFormat === EventFormat.BOTH ? "" : "border-t border-white/10 pt-4"}>
+              {/* Google Places Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  ref={locationInputRef}
+                  type="text"
+                  placeholder="Search for a location"
+                  className="w-full rounded-lg bg-card-secondary-background pl-10 pr-4 py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {/* Venue Name */}
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                  Venue Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={localVenueName}
+                  onChange={(e) => setLocalVenueName(e.target.value)}
+                  placeholder="e.g., UCL Student Centre"
+                  className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+                />
+              </div>
+
+              {/* Address Line 1 */}
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                  Address Line 1 <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={localAddressLine1}
+                  onChange={(e) => setLocalAddressLine1(e.target.value)}
+                  placeholder="Street address"
+                  className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+                />
+              </div>
+
+              {/* Address Line 2 */}
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                  Address Line 2 (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={localAddressLine2}
+                  onChange={(e) => setLocalAddressLine2(e.target.value)}
+                  placeholder="Apartment, suite, building, etc."
+                  className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+                />
+              </div>
+
+              {/* City and Postcode */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                    City <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={localCity}
+                    onChange={(e) => setLocalCity(e.target.value)}
+                    placeholder="City"
+                    className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                    Postcode <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={localPostcode}
+                    onChange={(e) => setLocalPostcode(e.target.value.toUpperCase())}
+                    placeholder="e.g., SW1A 1AA"
+                    className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Postcode validation feedback */}
+              {localPostcode && (
+                <div>
+                  {validateUKPostcode(localPostcode) ? (
+                    <p className="text-xs text-green-400">Valid UK postcode</p>
+                  ) : (
+                    <p className="text-xs text-red-400">Please enter a valid UK postcode</p>
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </div>
+          </>
+        )}
 
         {/* Save Button */}
         <div className="pt-2">
@@ -370,7 +495,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
             onClick={handleSave}
             className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90"
           >
-            Save Location
+            Save
           </button>
         </div>
       </div>
