@@ -1001,54 +1001,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             </div>
           )}
 
-          {/* Event Categories */}
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-muted-foreground">
-              Event Categories (Select all that apply)
-            </label>
-            {loadingCategories ? (
-              <div className="flex items-center justify-center py-4">
-                <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-primary"></div>
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {availableCategories.map((category) => {
-                  const isSelected = selectedCategoryIds.includes(category.id);
-                  // Helper to get display label
-                  const getCategoryLabel = (categoryName: string) => {
-                    return categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
-                  };
-                  return (
-                    <button
-                      key={category.id}
-                      type="button"
-                      onClick={() => {
-                        if (isSelected) {
-                          setSelectedCategoryIds(
-                            selectedCategoryIds.filter((id) => id !== category.id)
-                          );
-                        } else {
-                          setSelectedCategoryIds([...selectedCategoryIds, category.id]);
-                        }
-                      }}
-                      className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                        isSelected
-                          ? "bg-primary text-white shadow-lg"
-                          : "border border-white/10 bg-card-background text-foreground hover:border-white/20"
-                      }`}
-                    >
-                      {getCategoryLabel(category.name)}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-            {!loadingCategories && selectedCategoryIds.length === 0 && (
-              <p className="text-xs text-muted-foreground">
-                Select at least one category to help people discover your event
-              </p>
-            )}
-          </div>
+        
 
           {/* Event Location (for In Person and Both/Hybrid events) */}
           {(eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH) && (
