@@ -127,48 +127,89 @@ export default function HorizontalEventCard({
           {event.name}
         </h3>
 
-        {/* Location & Price Row */}
-        <div className="flex items-center gap-3">
-          {/* Location */}
-          {isVirtualEvent(event.format) ? (
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
-              <span className="truncate text-blue-400">Online Event</span>
+        {/* With categories: Address + Ticket on same row, Categories below */}
+        {/* Without categories: Address on one row, Ticket on next row */}
+        {event.categories && event.categories.length > 0 ? (
+          <>
+            {/* Row 1: Address + Ticket */}
+            <div className="flex items-center gap-3">
+              {/* Location */}
+              {isVirtualEvent(event.format) ? (
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
+                  <span className="truncate text-blue-400">Online Event</span>
+                </div>
+              ) : event.address &&
+                event.address.city &&
+                event.address.city !== "TBD" && (
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                    <span className="truncate">
+                      {event.address.city}, {event.address.zipcode}
+                    </span>
+                  </div>
+                )}
+
+              {/* Price */}
+              {formatPrice() && (
+                <div className={`flex items-center gap-1.5 text-sm flex-shrink-0 ${
+                  isSoldOut ? "text-red-400" : minPrice === 0 ? "text-green-400" : "text-orange-400"
+                }`}>
+                  <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className={isSoldOut ? "font-medium" : ""}>{formatPrice()}</span>
+                </div>
+              )}
             </div>
-          ) : event.address &&
-            event.address.city &&
-            event.address.city !== "TBD" && (
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className="truncate">
-                  {event.address.city}, {event.address.zipcode}
+
+            {/* Row 2: Categories */}
+            <div className="mt-1.5 flex items-center gap-1.5">
+              {event.categories.slice(0, 3).map((category) => (
+                <span
+                  key={category.id}
+                  className="rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground"
+                >
+                  {category.name.toLowerCase()}
                 </span>
+              ))}
+              {event.categories.length > 3 && (
+                <span
+                  className="rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground cursor-default"
+                  title={event.categories.slice(3).map(c => c.name.toLowerCase()).join(', ')}
+                >
+                  +{event.categories.length - 3}
+                </span>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Row 1: Address */}
+            {isVirtualEvent(event.format) ? (
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
+                <span className="truncate text-blue-400">Online Event</span>
+              </div>
+            ) : event.address &&
+              event.address.city &&
+              event.address.city !== "TBD" && (
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className="truncate">
+                    {event.address.city}, {event.address.zipcode}
+                  </span>
+                </div>
+              )}
+
+            {/* Row 2: Price */}
+            {formatPrice() && (
+              <div className={`mt-1 flex items-center gap-1.5 text-sm ${
+                isSoldOut ? "text-red-400" : minPrice === 0 ? "text-green-400" : "text-orange-400"
+              }`}>
+                <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className={isSoldOut ? "font-medium" : ""}>{formatPrice()}</span>
               </div>
             )}
-
-          {/* Price */}
-          {formatPrice() && (
-            <div className={`flex items-center gap-1.5 text-sm flex-shrink-0 ${
-              isSoldOut ? "text-red-400" : minPrice === 0 ? "text-green-400" : "text-orange-400"
-            }`}>
-              <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
-              <span className={isSoldOut ? "font-medium" : ""}>{formatPrice()}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Categories */}
-        {event.categories && event.categories.length > 0 && (
-          <div className="mt-1.5 flex flex-wrap gap-1.5">
-            {event.categories.map((category) => (
-              <span
-                key={category.id}
-                className="rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground"
-              >
-                {category.name.toLowerCase()}
-              </span>
-            ))}
-          </div>
+          </>
         )}
       </div>
     </Link>
