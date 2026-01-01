@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { eventsApi } from "@/services/events";
 import { EventResponseDto } from "@/types/event";
@@ -51,28 +51,6 @@ export default function UpcomingEventsSection({
     fetchUpcomingEvents();
   }, [maxEvents]);
 
-  // Group events by date
-  const groupedEvents = useMemo(() => {
-    const groups = new Map<string, EventResponseDto[]>();
-
-    (events ?? []).forEach((event) => {
-      const date = new Date(event.startDateTime);
-      const dateKey = date.toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      });
-
-      if (!groups.has(dateKey)) {
-        groups.set(dateKey, []);
-      }
-      groups.get(dateKey)!.push(event);
-    });
-
-    return Array.from(groups.entries());
-  }, [events]);
-
   const handleEventClick = (_e: React.MouseEvent, event: EventResponseDto) => {
     setSelectedEventId(event.id);
   };
@@ -119,60 +97,15 @@ export default function UpcomingEventsSection({
         </Link>
       </div>
 
-      {/* Events Timeline */}
-      <div>
-        {groupedEvents.map(([dateKey, dateEvents]) => {
-          const firstEventDate = new Date(dateEvents[0].startDateTime);
-          const monthAbbrev = firstEventDate.toLocaleDateString("en-US", {
-            month: "short",
-          });
-          const dayNum = firstEventDate.getDate();
-          const dayName = firstEventDate.toLocaleDateString("en-US", {
-            weekday: "long",
-          });
-
-          return (
-            <div key={dateKey} className="relative flex">
-              {/* Timeline column */}
-              <div className="hidden sm:block sm:w-8 relative">
-                {/* Continuous line */}
-                <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-white/20" />
-                {/* Dot */}
-                <div className="flex h-8 items-center justify-center">
-                  <div className="h-2 w-2 rounded-full bg-muted-foreground" />
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="min-w-0 flex-1 pb-6">
-                {/* Date Header */}
-                <div className="pb-3">
-                  <div className="inline-flex items-center gap-2">
-                    {/* Mobile dot */}
-                    <div className="h-2 w-2 flex-shrink-0 rounded-full bg-muted-foreground sm:hidden" />
-                    <span className="text-sm font-semibold text-foreground">
-                      {monthAbbrev} {dayNum}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {dayName}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Events for this date */}
-                <div className="min-w-0 space-y-3">
-                  {dateEvents.map((event) => (
-                    <HorizontalEventCard
-                      key={event.id}
-                      event={event}
-                      onClick={handleEventClick}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+      {/* Events Grid - 1 column on mobile, 2 columns on desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {events.map((event) => (
+          <HorizontalEventCard
+            key={event.id}
+            event={event}
+            onClick={handleEventClick}
+          />
+        ))}
       </div>
 
       {/* View All Events Button */}
