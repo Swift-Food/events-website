@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { eventsApi } from "@/services/events";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
-import { Search, Calendar, ChevronLeft, ChevronRight, X, ArrowUpDown } from "lucide-react";
+import { Search, Calendar, ChevronLeft, ChevronRight, X, SlidersHorizontal, Check } from "lucide-react";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
 import EventPreviewModal from "@/components/EventPreviewModal";
 
@@ -21,6 +21,7 @@ export default function EventsPage() {
   const [customEndDate, setCustomEndDate] = useState("");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Track which date headers are stuck
   const [stuckHeaders, setStuckHeaders] = useState<Set<string>>(new Set());
@@ -28,6 +29,29 @@ export default function EventsPage() {
 
   // Modal state
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+
+  // Filter dropdown ref
+  const filterDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close filter dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        filterDropdownRef.current &&
+        !filterDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowFilters(false);
+      }
+    };
+
+    if (showFilters) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showFilters]);
 
   const eventsPerPage = 12;
 
@@ -136,15 +160,6 @@ export default function EventsPage() {
   };
 
   const handleDateFilterChange = (filter: 'all' | 'today' | 'month' | 'custom') => {
-    // Toggle off if clicking the same filter (except 'all')
-    if (dateFilter === filter && filter !== 'all') {
-      setDateFilter('all');
-      setShowDatePicker(false);
-      setCustomStartDate("");
-      setCustomEndDate("");
-      return;
-    }
-
     setDateFilter(filter);
     if (filter === 'custom') {
       setShowDatePicker(true);
@@ -153,10 +168,6 @@ export default function EventsPage() {
       setCustomStartDate("");
       setCustomEndDate("");
     }
-  };
-
-  const toggleSortOrder = () => {
-    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
   };
 
   const hasActiveSearch = !!searchTerm;
@@ -189,7 +200,7 @@ export default function EventsPage() {
         });
       },
       {
-        rootMargin: "-184px 0px 0px 0px",
+        rootMargin: "-144px 0px 0px 0px",
         threshold: 0,
       }
     );
@@ -214,15 +225,15 @@ export default function EventsPage() {
           </p>
         </div>
 
-        {/* Sticky Search Bar and Filters */}
+        {/* Sticky Search Bar */}
         <div className="sticky top-16 z-40 -mx-4 px-4 sm:-mx-6 sm:px-6 pt-4 pb-4 bg-gradient-to-b from-background via-background to-transparent">
-          {/* Search Bar */}
-          <div className="mb-2">
-            <div className="relative">
+          {/* Search Bar with Filter Button */}
+          <div ref={filterDropdownRef} className="relative flex items-center gap-2">
+            <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search events by name or description..."
+                placeholder="Search events..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full rounded-full border border-white/10 bg-card-background py-3 pl-12 pr-4 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
@@ -237,51 +248,80 @@ export default function EventsPage() {
                 </button>
               )}
             </div>
-          </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border transition-colors ${
+                showFilters || dateFilter !== 'all' || sortOrder !== 'asc'
+                  ? 'border-primary bg-primary text-white'
+                  : 'border-white/10 bg-card-background text-foreground hover:border-white/20'
+              }`}
+              aria-label="Toggle filters"
+            >
+              <SlidersHorizontal className="h-5 w-5" />
+            </button>
 
-          {/* Filter Chips and Sort */}
-          <div className="-mx-4 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            <div className="flex items-center gap-2 w-max">
-              <button
-                onClick={() => handleDateFilterChange('today')}
-                className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                  dateFilter === 'today'
-                    ? 'bg-primary text-white'
-                    : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
-                }`}
-              >
-                Today
-              </button>
-              <button
-                onClick={() => handleDateFilterChange('month')}
-                className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                  dateFilter === 'month'
-                    ? 'bg-primary text-white'
-                    : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
-                }`}
-              >
-                This Month
-              </button>
-              <button
-                onClick={() => handleDateFilterChange('custom')}
-                className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                  dateFilter === 'custom'
-                    ? 'bg-primary text-white'
-                    : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
-                }`}
-              >
-                Custom Range
-              </button>
-              <button
-                onClick={toggleSortOrder}
-                className="flex-shrink-0 flex items-center gap-2 rounded-full border border-white/10 bg-card-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-white/20"
-                aria-label="Toggle sort order"
-              >
-                <ArrowUpDown className="h-4 w-4" />
-                <span className="hidden sm:inline">Sort:</span>
-                {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}
-              </button>
-            </div>
+            {/* Filter Dropdown */}
+            {showFilters && (
+              <div className="absolute right-0 top-full mt-2 w-64 z-50 rounded-xl bg-card-background/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden">
+                {/* When Section */}
+                <div className="p-3">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">When</p>
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => handleDateFilterChange('all')}
+                      className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                    >
+                      <span>All Time</span>
+                      {dateFilter === 'all' && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                    <button
+                      onClick={() => handleDateFilterChange('today')}
+                      className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                    >
+                      <span>Today</span>
+                      {dateFilter === 'today' && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                    <button
+                      onClick={() => handleDateFilterChange('month')}
+                      className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                    >
+                      <span>This Month</span>
+                      {dateFilter === 'month' && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                    <button
+                      onClick={() => handleDateFilterChange('custom')}
+                      className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                    >
+                      <span>Custom Range</span>
+                      {dateFilter === 'custom' && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="h-px bg-white/10" />
+
+                {/* Sort Section */}
+                <div className="p-3">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Sort</p>
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => setSortOrder('asc')}
+                      className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                    >
+                      <span>Oldest First</span>
+                      {sortOrder === 'asc' && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                    <button
+                      onClick={() => setSortOrder('desc')}
+                      className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                    >
+                      <span>Newest First</span>
+                      {sortOrder === 'desc' && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -364,7 +404,7 @@ export default function EventsPage() {
                     {/* Continuous line */}
                     <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-white/20" />
                     {/* Dot positioned at header level */}
-                    <div className="sticky top-46 z-40 flex h-8 items-center justify-center">
+                    <div className="sticky top-36 z-40 flex h-8 items-center justify-center">
                       <div
                         className={`h-2 w-2 rounded-full transition-colors ${
                           stuckHeaders.has(dateKey)
@@ -387,7 +427,7 @@ export default function EventsPage() {
                     />
 
                     {/* Sticky Date Header */}
-                    <div className="sticky top-46 z-30 pb-3">
+                    <div className="sticky top-36 z-30 pb-3">
                       <div
                         className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors ${
                           stuckHeaders.has(dateKey)
