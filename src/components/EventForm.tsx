@@ -938,54 +938,6 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             <span>Edit Description</span>
           </button>
 
-          {/* Event Categories */}
-          <div className="space-y-4">
-            <div className="relative">
-              <button
-                type="button"
-                data-category-trigger
-                onClick={() => setIsCategoryModalOpen(!isCategoryModalOpen)}
-                className="flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer"
-              >
-                <Tags className="h-5 w-5 text-muted-foreground" />
-                <div className="flex-1 text-left">
-                  {loadingCategories ? (
-                    <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-primary"></div>
-                      <span className="text-sm text-muted-foreground">Loading categories...</span>
-                    </div>
-                  ) : selectedCategoryIds.length > 0 ? (
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">
-                        {selectedCategoryIds.length} {selectedCategoryIds.length === 1 ? 'category' : 'categories'} selected
-                      </p>
-                      <p className="text-xs text-muted-foreground line-clamp-1">
-                        {availableCategories
-                          .filter((cat) => selectedCategoryIds.includes(cat.id))
-                          .map((cat) => cat.name.charAt(0).toUpperCase() + cat.name.slice(1).toLowerCase())
-                          .join(', ')}
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Select event categories
-                    </p>
-                  )}
-                </div>
-                <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isCategoryModalOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {/* Category Dropdown */}
-              <CategoryModal
-                isOpen={isCategoryModalOpen}
-                onClose={() => setIsCategoryModalOpen(false)}
-                availableCategories={availableCategories}
-                selectedCategoryIds={selectedCategoryIds}
-                setSelectedCategoryIds={setSelectedCategoryIds}
-              />
-            </div>
-          </div>
-
           {/* Event Location */}
           <div className="space-y-4">
             <div className="relative">
@@ -1060,7 +1012,77 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 />
               )}
             </div>
-  
+
+          {/* Event Categories */}
+          <div className="space-y-4">
+            <div className="relative">
+              <button
+                type="button"
+                data-category-trigger
+                onClick={() => setIsCategoryModalOpen(!isCategoryModalOpen)}
+                className="flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer"
+              >
+                <Tags className="h-5 w-5 text-muted-foreground" />
+                <div className="flex-1 text-left">
+                  {loadingCategories ? (
+                    <>
+                      <p className="text-base font-semibold text-foreground">
+                        Event Categories
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <div className="h-3 w-3 animate-spin rounded-full border-b-2 border-primary"></div>
+                        <span className="text-sm text-muted-foreground">Loading...</span>
+                      </div>
+                    </>
+                  ) : selectedCategoryIds.length > 0 ? (
+                    <>
+                      <p className="text-base font-semibold text-foreground">
+                        {selectedCategoryIds.length} {selectedCategoryIds.length === 1 ? 'Category' : 'Categories'} Selected
+                      </p>
+                      <p className="text-sm text-muted-foreground line-clamp-1">
+                        {availableCategories
+                          .filter((cat) => selectedCategoryIds.includes(cat.id))
+                          .map((cat) => cat.name.charAt(0).toUpperCase() + cat.name.slice(1).toLowerCase())
+                          .join(', ')}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-base font-semibold text-foreground">
+                        Event Categories
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Select categories to help people discover your event
+                      </p>
+                    </>
+                  )}
+                </div>
+                {selectedCategoryIds.length > 0 ? (
+                  <div
+                    role="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCategoryIds([]);
+                    }}
+                    className="p-1 rounded-full hover:bg-white/10 transition-all"
+                  >
+                    <X className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+                  </div>
+                ) : (
+                  <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isCategoryModalOpen ? 'rotate-180' : ''}`} />
+                )}
+              </button>
+
+              {/* Category Dropdown */}
+              <CategoryModal
+                isOpen={isCategoryModalOpen}
+                onClose={() => setIsCategoryModalOpen(false)}
+                availableCategories={availableCategories}
+                selectedCategoryIds={selectedCategoryIds}
+                setSelectedCategoryIds={setSelectedCategoryIds}
+              />
+            </div>
+          </div>
 
           <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 md:p-5 space-y-5">
             <div className="flex items-center justify-between">
