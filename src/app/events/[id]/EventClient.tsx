@@ -680,14 +680,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       <span
                         key={category.id}
                         className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-foreground"
-                        style={
-                          category.color
-                            ? {
-                                borderColor: category.color + "40",
-                                color: category.color,
-                              }
-                            : undefined
-                        }
+            
                       >
                         {category.name}
                       </span>
@@ -1024,14 +1017,6 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                     <span
                       key={category.id}
                       className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-foreground"
-                      style={
-                        category.color
-                          ? {
-                              borderColor: category.color + "40",
-                              color: category.color,
-                            }
-                          : undefined
-                      }
                     >
                       {category.name}
                     </span>
