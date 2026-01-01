@@ -93,14 +93,14 @@ export default function HorizontalEventCard({
         )}
         {/* Virtual/Hybrid Event Badge */}
         {isHybridEvent(event.format) ? (
-          <div className="flex items-center gap-1 rounded-full bg-violet-500/90 px-1.5 py-0.5 backdrop-blur-sm">
+          <div className="group/hybrid flex items-center gap-1 rounded-full bg-violet-500/90 px-1.5 py-0.5 backdrop-blur-sm transition-all duration-200">
             <Video className="h-2.5 w-2.5 text-white" />
-            <span className="text-[10px] font-semibold text-white">HYBRID</span>
+            <span className="max-w-0 overflow-hidden text-[10px] font-semibold text-white transition-all duration-200 group-hover/hybrid:max-w-[80px] group-hover/hybrid:ml-0.5">Live + Online</span>
           </div>
         ) : isVirtualEvent(event.format) && (
-          <div className="flex items-center gap-1 rounded-full bg-blue-500/90 px-1.5 py-0.5 backdrop-blur-sm">
+          <div className="group/virtual flex items-center gap-1 rounded-full bg-blue-500/90 px-1.5 py-0.5 backdrop-blur-sm transition-all duration-200">
             <Video className="h-2.5 w-2.5 text-white" />
-            <span className="text-[10px] font-semibold text-white">ONLINE</span>
+            <span className="max-w-0 overflow-hidden text-[10px] font-semibold text-white transition-all duration-200 group-hover/virtual:max-w-[50px] group-hover/virtual:ml-0.5">Online</span>
           </div>
         )}
         {/* Ongoing Badge */}
