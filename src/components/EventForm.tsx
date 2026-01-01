@@ -1125,6 +1125,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 />
               )}
             </div>
+          )}
 
           {/* Event Categories */}
           <div className="space-y-4">
