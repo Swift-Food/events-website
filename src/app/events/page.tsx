@@ -331,8 +331,8 @@ export default function EventCataloguePage() {
                       onClick={() => handleCategoryClick(category.name)}
                       className={`flex-shrink-0 rounded-full px-4 py-2.5 text-sm font-medium transition-all ${
                         selectedCategory === category.name
-                          ? 'bg-primary text-white shadow-lg scale-105'
-                          : 'border border-white/10 bg-card-background text-foreground hover:border-white/20 hover:scale-105'
+                          ? 'bg-primary text-white'
+                          : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
                       }`}
                     >
                       {getCategoryLabel(category.name)}
