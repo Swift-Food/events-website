@@ -133,7 +133,7 @@ export default function HorizontalEventCard({
             {event.categories.map((category) => (
               <span
                 key={category.id}
-                className="rounded-full border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground"
+                className="rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground"
               >
                 {category.name.toLowerCase()}
               </span>
@@ -162,7 +162,9 @@ export default function HorizontalEventCard({
 
           {/* Price */}
           {formatPrice() && (
-            <div className={`flex items-center gap-1.5 text-sm flex-shrink-0 ${isSoldOut ? "text-red-400" : "text-muted-foreground"}`}>
+            <div className={`flex items-center gap-1.5 text-sm flex-shrink-0 ${
+              isSoldOut ? "text-red-400" : minPrice === 0 ? "text-green-400" : "text-orange-400"
+            }`}>
               <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
               <span className={isSoldOut ? "font-medium" : ""}>{formatPrice()}</span>
             </div>
