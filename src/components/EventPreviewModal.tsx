@@ -486,14 +486,14 @@ export default function EventPreviewModal({
                     <span
                       key={category.id}
                       className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-medium text-foreground"
-                      style={
-                        category.color
-                          ? {
-                              borderColor: category.color + "40",
-                              color: category.color,
-                            }
-                          : undefined
-                      }
+                      // style={
+                      //   category.color
+                      //     ? {
+                      //         borderColor: category.color + "40",
+                      //         color: category.color,
+                      //       }
+                      //     : undefined
+                      // }
                     >
                       {category.name}
                     </span>

@@ -3,8 +3,10 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { eventsApi } from "@/services/events";
 import { calendarsApi } from "@/services/calendars";
+import { categoriesApi } from "@/services/categories";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
 import { Calendar as CalendarType } from "@/types/calendar";
+import { EventCategoryType, EventCategoryResponseDto } from "@/types/category";
 import { Search, Calendar, ChevronLeft, ChevronRight, X, ChevronRight as ArrowRight, ArrowUpDown } from "lucide-react";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
 import CalendarCard from "@/components/CalendarCard";
@@ -26,6 +28,7 @@ export default function EventCataloguePage() {
   const [customEndDate, setCustomEndDate] = useState("");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<EventCategoryType | null>(null);
 
   // Track which date headers are stuck
   const [stuckHeaders, setStuckHeaders] = useState<Set<string>>(new Set());
@@ -38,7 +41,26 @@ export default function EventCataloguePage() {
   const [calendars, setCalendars] = useState<CalendarType[]>([]);
   const [loadingCalendars, setLoadingCalendars] = useState(true);
 
+  // Categories
+  const [allCategories, setAllCategories] = useState<EventCategoryResponseDto[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
   const eventsPerPage = 12;
+
+  // Fetch all categories
+  const fetchAllCategories = async () => {
+    try {
+      setLoadingCategories(true);
+
+      // Fetch all categories from the backend
+      const categories = await categoriesApi.findAll();
+      setAllCategories(categories);
+    } catch (err) {
+      console.error("Failed to fetch categories:", err);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
 
   // Fetch calendars
   const fetchCalendars = async () => {
@@ -92,6 +114,7 @@ export default function EventCataloguePage() {
 
       const result: EventListResponseDto = await eventsApi.findAll({
         search: searchTerm || undefined,
+        category: selectedCategory || undefined,
         startDate,
         endDate,
         today,
@@ -120,17 +143,18 @@ export default function EventCataloguePage() {
       return;
     }
     setCurrentPage(1);
-  }, [searchTerm, dateFilter, customStartDate, customEndDate, sortOrder]);
+  }, [searchTerm, dateFilter, customStartDate, customEndDate, sortOrder, selectedCategory]);
 
-  // Fetch calendars on mount
+  // Fetch calendars and categories on mount
   useEffect(() => {
     fetchCalendars();
+    fetchAllCategories();
   }, []);
 
   // Fetch on mount and when filters change
   useEffect(() => {
     fetchEvents();
-  }, [searchTerm, currentPage, dateFilter, customStartDate, customEndDate, sortOrder]);
+  }, [searchTerm, currentPage, dateFilter, customStartDate, customEndDate, sortOrder, selectedCategory]);
 
   const totalPages = Math.ceil(total / eventsPerPage);
 
@@ -187,6 +211,15 @@ export default function EventCataloguePage() {
 
   const toggleSortOrder = () => {
     setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
+
+  const handleCategoryClick = (categoryName: EventCategoryType) => {
+    // Toggle off if clicking the same category
+    if (selectedCategory === categoryName) {
+      setSelectedCategory(null);
+    } else {
+      setSelectedCategory(categoryName);
+    }
   };
 
   const hasActiveSearch = !!searchTerm;
@@ -272,6 +305,41 @@ export default function EventCataloguePage() {
               {calendars.slice(0, 3).map((calendar) => (
                 <CalendarCard key={calendar.id} calendar={calendar} />
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Event Categories Section */}
+        {!loadingCategories && allCategories.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-foreground mb-4">
+              Browse by Category
+            </h2>
+
+            {/* Single Horizontal Scroll Layout */}
+            <div className="-mx-4 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              <div className="flex gap-2 w-max">
+                {allCategories.map((category) => {
+                  // Helper function to get display label
+                  const getCategoryLabel = (categoryName: EventCategoryType) => {
+                    return categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
+                  };
+
+                  return (
+                    <button
+                      key={category.id}
+                      onClick={() => handleCategoryClick(category.name)}
+                      className={`flex-shrink-0 rounded-full px-4 py-2.5 text-sm font-medium transition-all ${
+                        selectedCategory === category.name
+                          ? 'bg-primary text-white shadow-lg scale-105'
+                          : 'border border-white/10 bg-card-background text-foreground hover:border-white/20 hover:scale-105'
+                      }`}
+                    >
+                      {getCategoryLabel(category.name)}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}

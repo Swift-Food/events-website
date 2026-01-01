@@ -4,14 +4,16 @@
  */
 
 export enum EventCategoryType {
-  CONFERENCE = 'CONFERENCE',
-  WORKSHOP = 'WORKSHOP',
-  SEMINAR = 'SEMINAR',
-  NETWORKING = 'NETWORKING',
-  SOCIAL = 'SOCIAL',
-  SPORTS = 'SPORTS',
-  ARTS = 'ARTS',
-  MUSIC = 'MUSIC',
-  FOOD = 'FOOD',
-  OTHER = 'OTHER',
+  CONFERENCE = 'conference',
+  WORKSHOP = 'workshop',
+  NETWORKING = 'networking',
+  SOCIAL = 'social',
+  FUNDRAISER = 'fundraiser',
+  SPORTS = 'sports',
+  ARTS = 'arts',
+  MUSIC = 'music',
+  FOOD = 'food',
+  EDUCATION = 'education',
+  BUSINESS = 'business',
+  OTHER = 'other',
 }

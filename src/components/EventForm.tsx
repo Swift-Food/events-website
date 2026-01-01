@@ -16,9 +16,11 @@ import {
 } from "@/context/EventCreationContext";
 import { TicketType, UpdateEventDto } from "@/types";
 import { FormField } from "@/types";
+import { EventCategoryResponseDto } from "@/types/category";
 import { eventService } from "@/services/event.service";
 import { imageService } from "@/services/image.service";
 import { paymentService } from "@/services/payment.service";
+import { categoriesApi } from "@/services/categories";
 import { CreateEventDto, QuestionType, CreateEventTicketDto } from "@/types";
 import type { EventTicketResponseDto, QuestionBlock } from "@/types/event-ticket/response/ticket.dto";
 import type { StripeConnectStatus } from "@/types/payment";
@@ -83,6 +85,8 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
     setCoverPreview,
     coverName,
     setCoverName,
+    selectedCategoryIds,
+    setSelectedCategoryIds,
     clearForm,
   } = useEventCreation();
 
@@ -111,9 +115,31 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
   const [isLoadingStripeStatus, setIsLoadingStripeStatus] = useState(false);
   const [isStartingOnboarding, setIsStartingOnboarding] = useState(false);
 
+  // Categories state
+  const [availableCategories, setAvailableCategories] = useState<EventCategoryResponseDto[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
   console.log("Ticket Types: ", ticketTypes);
 
   const [isInitialDataLoaded, setIsInitialDataLoaded] = useState(false);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoadingCategories(true);
+        const categories = await categoriesApi.findAll();
+        setAvailableCategories(categories);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+        toast.error("Failed to load categories");
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // Load initial data for edit mode
   useEffect(() => {
@@ -157,6 +183,12 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
       setCoverPreview(initialData.eventImage || null);
       if (initialData.eventImage) {
         setCoverName("event-cover.png");
+      }
+
+      // Load categories (store category IDs)
+      if (initialData.categories && initialData.categories.length > 0) {
+        const categoryIds = initialData.categories.map((cat: any) => cat.id as string);
+        setSelectedCategoryIds(categoryIds);
       }
 
       // Load tickets with their questions
@@ -398,7 +430,7 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
               ? { latitude, longitude }
               : undefined,
         },
-        categoryIds: [],
+        categoryIds: selectedCategoryIds,
         eventUrl: undefined,
         tickets: ticketsPayload,
       };
@@ -871,6 +903,55 @@ function EventFormInner({ mode, eventId, initialData }: EventFormProps) {
             <Edit className="h-5 w-5" />
             <span>Edit Description</span>
           </button>
+
+          {/* Event Categories */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-muted-foreground">
+              Event Categories (Select all that apply)
+            </label>
+            {loadingCategories ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-primary"></div>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {availableCategories.map((category) => {
+                  const isSelected = selectedCategoryIds.includes(category.id);
+                  // Helper to get display label
+                  const getCategoryLabel = (categoryName: string) => {
+                    return categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
+                  };
+                  return (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedCategoryIds(
+                            selectedCategoryIds.filter((id) => id !== category.id)
+                          );
+                        } else {
+                          setSelectedCategoryIds([...selectedCategoryIds, category.id]);
+                        }
+                      }}
+                      className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                        isSelected
+                          ? "bg-primary text-white shadow-lg"
+                          : "border border-white/10 bg-card-background text-foreground hover:border-white/20"
+                      }`}
+                    >
+                      {getCategoryLabel(category.name)}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            {!loadingCategories && selectedCategoryIds.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                Select at least one category to help people discover your event
+              </p>
+            )}
+          </div>
 
           {/* Event Location */}
           <div className="space-y-4">
