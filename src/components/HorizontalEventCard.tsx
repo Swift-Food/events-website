@@ -6,13 +6,13 @@ import { isVirtualEvent, isHybridEvent, hasOnlineComponent } from "@/types/event
 
 interface HorizontalEventCardProps {
   event: EventResponseDto;
-  isHostedEvent?: boolean;
+  linkToManagement?: boolean;
   onClick?: (e: React.MouseEvent, event: EventResponseDto) => void;
 }
 
 export default function HorizontalEventCard({
   event,
-  isHostedEvent = false,
+  linkToManagement = false,
   onClick,
 }: HorizontalEventCardProps) {
   const formatTime = (date: string | Date) => {
@@ -65,7 +65,7 @@ export default function HorizontalEventCard({
 
   return (
     <Link
-      href={isHostedEvent ? `/event-management/${event.id}` : `/events/${event.id}`}
+      href={linkToManagement ? `/event-management/${event.id}` : `/events/${event.id}`}
       onClick={handleClick}
       className="group relative flex gap-4 overflow-hidden rounded-2xl border border-white/10 bg-card-background p-4 transition-all hover:border-white/20 hover:shadow-2xl"
     >

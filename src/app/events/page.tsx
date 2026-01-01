@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { eventsApi } from "@/services/events";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
 import { Search, Calendar, ChevronLeft, ChevronRight, X, SlidersHorizontal, Check } from "lucide-react";
-import HorizontalEventCard from "@/components/HorizontalEventCard";
-import EventPreviewModal from "@/components/EventPreviewModal";
+import EventsTimeline from "@/components/EventsTimeline";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<EventResponseDto[]>([]);
@@ -21,13 +20,6 @@ export default function EventsPage() {
   const [customEndDate, setCustomEndDate] = useState("");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [showFilters, setShowFilters] = useState(false);
-
-  // Track which date headers are stuck
-  const [stuckHeaders, setStuckHeaders] = useState<Set<string>>(new Set());
-  const sentinelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-
-  // Modal state
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
   // Filter dropdown ref
   const filterDropdownRef = useRef<HTMLDivElement>(null);
@@ -131,28 +123,6 @@ export default function EventsPage() {
   const startIndex = (currentPage - 1) * eventsPerPage + 1;
   const endIndex = Math.min(currentPage * eventsPerPage, total);
 
-  // Group events by date (preserving order received from API)
-  const groupedEvents = useMemo(() => {
-    const groups = new Map<string, EventResponseDto[]>();
-
-    (events ?? []).forEach((event) => {
-      const date = new Date(event.startDateTime);
-      const dateKey = date.toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      });
-
-      if (!groups.has(dateKey)) {
-        groups.set(dateKey, []);
-      }
-      groups.get(dateKey)!.push(event);
-    });
-
-    return Array.from(groups.entries());
-  }, [events]);
-
   const clearSearch = () => {
     setSearchTerm("");
     setCurrentPage(1);
@@ -167,46 +137,6 @@ export default function EventsPage() {
   };
 
   const hasActiveSearch = !!searchTerm;
-
-  const handleEventClick = (_e: React.MouseEvent, event: EventResponseDto) => {
-    setSelectedEventId(event.id);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedEventId(null);
-  };
-
-  // Intersection observer to detect when headers become stuck
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const dateKey = entry.target.getAttribute("data-date-key");
-          if (dateKey) {
-            setStuckHeaders((prev) => {
-              const next = new Set(prev);
-              if (entry.isIntersecting) {
-                next.delete(dateKey);
-              } else {
-                next.add(dateKey);
-              }
-              return next;
-            });
-          }
-        });
-      },
-      {
-        rootMargin: "-144px 0px 0px 0px",
-        threshold: 0,
-      }
-    );
-
-    sentinelRefs.current.forEach((element) => {
-      observer.observe(element);
-    });
-
-    return () => observer.disconnect();
-  }, [groupedEvents]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -403,89 +333,9 @@ export default function EventsPage() {
           </div>
         )}
 
-        {/* Events Grouped by Date */}
+        {/* Events Timeline */}
         {!loading && !error && events.length > 0 && (
-          <div>
-            {groupedEvents.map(([dateKey, dateEvents]) => {
-              const firstEventDate = new Date(dateEvents[0].startDateTime);
-              const monthAbbrev = firstEventDate.toLocaleDateString("en-US", {
-                month: "short",
-              });
-              const dayNum = firstEventDate.getDate();
-              const dayName = firstEventDate.toLocaleDateString("en-US", {
-                weekday: "long",
-              });
-
-              return (
-                <div key={dateKey} className="relative flex">
-                  {/* Timeline column - continuous line */}
-                  <div className="hidden sm:block sm:w-8 relative">
-                    {/* Continuous line */}
-                    <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-white/20" />
-                    {/* Dot positioned at header level */}
-                    <div className="sticky top-36 z-40 flex h-8 items-center justify-center">
-                      <div
-                        className={`h-2 w-2 rounded-full transition-colors ${
-                          stuckHeaders.has(dateKey)
-                            ? "bg-primary"
-                            : "bg-muted-foreground"
-                        }`}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="min-w-0 flex-1 pb-8">
-                    {/* Sentinel for detecting stuck state */}
-                    <div
-                      ref={(el) => {
-                        if (el) sentinelRefs.current.set(dateKey, el);
-                      }}
-                      data-date-key={dateKey}
-                      className="h-0"
-                    />
-
-                    {/* Sticky Date Header */}
-                    <div className="sticky top-36 z-30 pb-3">
-                      <div
-                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors ${
-                          stuckHeaders.has(dateKey)
-                            ? "border border-white/10 bg-card-background"
-                            : ""
-                        }`}
-                      >
-                        {/* Mobile dot - only show on mobile */}
-                        <div
-                          className={`h-2 w-2 flex-shrink-0 rounded-full transition-colors sm:hidden ${
-                            stuckHeaders.has(dateKey)
-                              ? "bg-primary"
-                              : "bg-muted-foreground"
-                          }`}
-                        />
-                        <span className="text-sm font-semibold text-foreground">
-                          {monthAbbrev} {dayNum}
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          {dayName}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Events for this date */}
-                    <div className="min-w-0 space-y-3">
-                      {dateEvents.map((event) => (
-                        <HorizontalEventCard
-                          key={event.id}
-                          event={event}
-                          onClick={handleEventClick}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <EventsTimeline events={events} />
         )}
 
         {/* Pagination */}
@@ -541,14 +391,6 @@ export default function EventsPage() {
         )}
 
       </div>
-
-      {/* Event Preview Modal */}
-      <EventPreviewModal
-        eventId={selectedEventId}
-        isOpen={!!selectedEventId}
-        onClose={handleCloseModal}
-      />
-
     </div>
   );
 }

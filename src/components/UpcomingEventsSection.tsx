@@ -5,8 +5,7 @@ import Link from "next/link";
 import { eventsApi } from "@/services/events";
 import { EventResponseDto } from "@/types/event";
 import { ChevronRight } from "lucide-react";
-import HorizontalEventCard from "@/components/HorizontalEventCard";
-import EventPreviewModal from "@/components/EventPreviewModal";
+import EventsTimeline from "@/components/EventsTimeline";
 
 interface UpcomingEventsSectionProps {
   title?: string;
@@ -22,9 +21,6 @@ export default function UpcomingEventsSection({
   const [events, setEvents] = useState<EventResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Modal state
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
   // Fetch upcoming events
   useEffect(() => {
@@ -50,14 +46,6 @@ export default function UpcomingEventsSection({
 
     fetchUpcomingEvents();
   }, [maxEvents]);
-
-  const handleEventClick = (_e: React.MouseEvent, event: EventResponseDto) => {
-    setSelectedEventId(event.id);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedEventId(null);
-  };
 
   // Don't render if loading or error or no events
   if (loading) {
@@ -97,22 +85,11 @@ export default function UpcomingEventsSection({
         </Link>
       </div>
 
-      {/* Events Grid - 1 column on mobile, 2 columns on desktop */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {events.map((event) => (
-          <HorizontalEventCard
-            key={event.id}
-            event={event}
-            onClick={handleEventClick}
-          />
-        ))}
-      </div>
-
-      {/* Event Preview Modal */}
-      <EventPreviewModal
-        eventId={selectedEventId}
-        isOpen={!!selectedEventId}
-        onClose={handleCloseModal}
+      {/* Events Timeline */}
+      <EventsTimeline
+        events={events}
+        stickyTopClass="top-20"
+        observerRootMargin="-80px 0px 0px 0px"
       />
     </div>
   );
