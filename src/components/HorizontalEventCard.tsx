@@ -80,7 +80,7 @@ export default function HorizontalEventCard({
     <Link
       href={linkToManagement ? `/event-management/${event.id}` : `/events/${event.id}`}
       onClick={handleClick}
-      className="group relative flex gap-4 overflow-hidden rounded-2xl border border-white/10 bg-card-background p-4 transition-all hover:border-white/20 hover:shadow-2xl"
+      className="group relative flex gap-4 rounded-2xl border border-white/10 bg-card-background p-4 transition-all hover:border-white/20 hover:shadow-2xl"
     >
       {/* Status Badges */}
       <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">
@@ -202,11 +202,11 @@ export default function HorizontalEventCard({
                 </span>
               ))}
               {event.categories.length > 3 && (
-                <span
-                  className="rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground cursor-default"
-                  title={event.categories.slice(3).map(c => c.name.toLowerCase()).join(', ')}
-                >
+                <span className="group/tooltip relative rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground cursor-default">
                   +{event.categories.length - 3}
+                  <span className="pointer-events-none absolute top-full left-1/2 z-50 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover/tooltip:opacity-100">
+                    {event.categories.slice(3).map(c => c.name.toLowerCase()).join(', ')}
+                  </span>
                 </span>
               )}
             </div>
