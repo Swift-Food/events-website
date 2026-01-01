@@ -79,18 +79,20 @@ export default function EventManagementPage() {
   }, [isAuthenticated]);
 
   // Filter events based on active tab
+  // Past = events where endDateTime has passed
+  // Upcoming = everything else (not started yet + currently ongoing)
   const now = new Date();
 
   const upcomingEvents = useMemo(
-    () => events.filter((event) => new Date(event.startDateTime) > now),
+    () => events.filter((event) => new Date(event.endDateTime) >= now),
     [events]
   );
 
   const pastEvents = useMemo(
     () =>
       events
-        .filter((event) => new Date(event.startDateTime) <= now)
-        .sort((a, b) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime()),
+        .filter((event) => new Date(event.endDateTime) < now)
+        .sort((a, b) => new Date(b.endDateTime).getTime() - new Date(a.endDateTime).getTime()),
     [events]
   );
 

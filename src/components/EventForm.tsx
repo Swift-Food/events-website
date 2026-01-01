@@ -4,11 +4,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Video, Users, Link, Eye, EyeOff } from "lucide-react";
+import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Video, Users, Link, Eye, EyeOff, Tags } from "lucide-react";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import FormFieldModal from "@/components/event-edit/FormFieldModal";
 import LocationModal from "@/components/event-edit/LocationModal";
+import CategoryModal from "@/components/event-edit/CategoryModal";
 import GoogleMap from "@/components/GoogleMap";
 import {
   EventCreationProvider,
@@ -110,6 +111,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   const [activeTicketIdForQuestions, setActiveTicketIdForQuestions] = useState<string | null>(null);
   const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -462,7 +464,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   : undefined,
             }
           : undefined,
-        categoryIds: [],
+        categoryIds: selectedCategoryIds,
         eventUrl: undefined,
         tickets: ticketsPayload,
       };
@@ -1123,7 +1125,77 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 />
               )}
             </div>
-          )}
+
+          {/* Event Categories */}
+          <div className="space-y-4">
+            <div className="relative">
+              <button
+                type="button"
+                data-category-trigger
+                onClick={() => setIsCategoryModalOpen(!isCategoryModalOpen)}
+                className="flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer"
+              >
+                <Tags className="h-5 w-5 text-muted-foreground" />
+                <div className="flex-1 text-left">
+                  {loadingCategories ? (
+                    <>
+                      <p className="text-base font-semibold text-foreground">
+                        Event Categories
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <div className="h-3 w-3 animate-spin rounded-full border-b-2 border-primary"></div>
+                        <span className="text-sm text-muted-foreground">Loading...</span>
+                      </div>
+                    </>
+                  ) : selectedCategoryIds.length > 0 ? (
+                    <>
+                      <p className="text-base font-semibold text-foreground">
+                        {selectedCategoryIds.length} {selectedCategoryIds.length === 1 ? 'Category' : 'Categories'} Selected
+                      </p>
+                      <p className="text-sm text-muted-foreground line-clamp-1">
+                        {availableCategories
+                          .filter((cat) => selectedCategoryIds.includes(cat.id))
+                          .map((cat) => cat.name.charAt(0).toUpperCase() + cat.name.slice(1).toLowerCase())
+                          .join(', ')}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-base font-semibold text-foreground">
+                        Event Categories
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Select categories to help people discover your event
+                      </p>
+                    </>
+                  )}
+                </div>
+                {selectedCategoryIds.length > 0 ? (
+                  <div
+                    role="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCategoryIds([]);
+                    }}
+                    className="p-1 rounded-full hover:bg-white/10 transition-all"
+                  >
+                    <X className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+                  </div>
+                ) : (
+                  <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isCategoryModalOpen ? 'rotate-180' : ''}`} />
+                )}
+              </button>
+
+              {/* Category Dropdown */}
+              <CategoryModal
+                isOpen={isCategoryModalOpen}
+                onClose={() => setIsCategoryModalOpen(false)}
+                availableCategories={availableCategories}
+                selectedCategoryIds={selectedCategoryIds}
+                setSelectedCategoryIds={setSelectedCategoryIds}
+              />
+            </div>
+          </div>
 
           <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 md:p-5 space-y-5">
             <div className="flex items-center justify-between">

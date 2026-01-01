@@ -49,7 +49,6 @@ export default function HorizontalEventCard({
     return `From £${minPrice.toFixed(2)}`;
   };
 
-  const primaryCategory = event.categories?.[0];
 
   // Check if event is currently ongoing
   const now = new Date();
@@ -118,46 +117,99 @@ export default function HorizontalEventCard({
 
       {/* Event Details */}
       <div className="flex min-w-0 flex-1 flex-col justify-center">
-        {/* Top row: Category and Time */}
-        <div className="mb-1 flex items-center gap-3">
-          {primaryCategory && (
-            <span className="rounded-md bg-primary px-2 py-0.5 text-xs font-semibold text-white">
-              {primaryCategory.name}
-            </span>
-          )}
-          <span className="text-sm text-muted-foreground">
-            {formatTime(event.startDateTime)}
-          </span>
-        </div>
+        {/* Time */}
+        <span className="mb-1 text-sm text-muted-foreground">
+          {formatTime(event.startDateTime)}
+        </span>
 
         {/* Event Name */}
         <h3 className="mb-1 truncate text-base font-semibold text-foreground group-hover:text-primary">
           {event.name}
         </h3>
 
-        {/* Location */}
-        {isVirtualEvent(event.format) ? (
-          <div className="mb-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-            <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
-            <span className="truncate text-blue-400">Online Event</span>
-          </div>
-        ) : event.address &&
-          event.address.city &&
-          event.address.city !== "TBD" && (
-            <div className="mb-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-              <span className="truncate">
-                {event.address.city}, {event.address.zipcode}
-              </span>
-            </div>
-          )}
+        {/* With categories: Address + Ticket on same row, Categories below */}
+        {/* Without categories: Address on one row, Ticket on next row */}
+        {event.categories && event.categories.length > 0 ? (
+          <>
+            {/* Row 1: Address + Ticket */}
+            <div className="flex items-center gap-3">
+              {/* Location */}
+              {isVirtualEvent(event.format) ? (
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
+                  <span className="truncate text-blue-400">Online Event</span>
+                </div>
+              ) : event.address &&
+                event.address.city &&
+                event.address.city !== "TBD" && (
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                    <span className="truncate">
+                      {event.address.city}, {event.address.zipcode}
+                    </span>
+                  </div>
+                )}
 
-        {/* Price */}
-        {formatPrice() && (
-          <div className={`flex items-center gap-1.5 text-sm ${isSoldOut ? "text-red-400" : "text-muted-foreground"}`}>
-            <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
-            <span className={isSoldOut ? "font-medium" : ""}>{formatPrice()}</span>
-          </div>
+              {/* Price */}
+              {formatPrice() && (
+                <div className={`flex items-center gap-1.5 text-sm flex-shrink-0 ${
+                  isSoldOut ? "text-red-400" : minPrice === 0 ? "text-green-400" : "text-orange-400"
+                }`}>
+                  <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className={isSoldOut ? "font-medium" : ""}>{formatPrice()}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Row 2: Categories */}
+            <div className="mt-1.5 flex items-center gap-1.5">
+              {event.categories.slice(0, 3).map((category) => (
+                <span
+                  key={category.id}
+                  className="rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground"
+                >
+                  {category.name.toLowerCase()}
+                </span>
+              ))}
+              {event.categories.length > 3 && (
+                <span
+                  className="rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground cursor-default"
+                  title={event.categories.slice(3).map(c => c.name.toLowerCase()).join(', ')}
+                >
+                  +{event.categories.length - 3}
+                </span>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Row 1: Address */}
+            {isVirtualEvent(event.format) ? (
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
+                <span className="truncate text-blue-400">Online Event</span>
+              </div>
+            ) : event.address &&
+              event.address.city &&
+              event.address.city !== "TBD" && (
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className="truncate">
+                    {event.address.city}, {event.address.zipcode}
+                  </span>
+                </div>
+              )}
+
+            {/* Row 2: Price */}
+            {formatPrice() && (
+              <div className={`mt-1 flex items-center gap-1.5 text-sm ${
+                isSoldOut ? "text-red-400" : minPrice === 0 ? "text-green-400" : "text-orange-400"
+              }`}>
+                <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className={isSoldOut ? "font-medium" : ""}>{formatPrice()}</span>
+              </div>
+            )}
+          </>
         )}
       </div>
     </Link>
