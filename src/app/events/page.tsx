@@ -10,6 +10,7 @@ import { EventCategoryType, EventCategoryResponseDto } from "@/types/category";
 import { Search, Calendar, ChevronLeft, ChevronRight, X, ChevronRight as ArrowRight, ArrowUpDown } from "lucide-react";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
 import CalendarCard from "@/components/CalendarCard";
+import UpcomingEventsSection from "@/components/UpcomingEventsSection";
 import HorizontalCalendarCard from "@/components/HorizontalCalendarCard";
 import EventPreviewModal from "@/components/EventPreviewModal";
 import Link from "next/link";
@@ -276,6 +277,9 @@ export default function EventCataloguePage() {
             Find and join exciting events happening around you
           </p>
         </div>
+
+        {/* Upcoming Events Section */}
+        <UpcomingEventsSection />
 
         {/* Calendars Section */}
         {!loadingCalendars && calendars.length > 0 && (
