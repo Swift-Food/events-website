@@ -1,16 +1,25 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { eventsApi } from "@/services/events";
+import { categoriesApi } from "@/services/categories";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
+import { EventCategoryType, EventCategoryResponseDto } from "@/types/category";
 import { Search, Calendar, ChevronLeft, ChevronRight, X, SlidersHorizontal, Check } from "lucide-react";
 import EventsTimeline from "@/components/EventsTimeline";
 
 export default function EventsPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [events, setEvents] = useState<EventResponseDto[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Categories
+  const [allCategories, setAllCategories] = useState<EventCategoryResponseDto[]>([]);
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,10 +28,32 @@ export default function EventsPage() {
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [categoryFilter, setCategoryFilter] = useState<EventCategoryType | 'all'>('all');
   const [showFilters, setShowFilters] = useState(false);
 
   // Filter dropdown ref
   const filterDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Initialize category filter from URL params
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam && Object.values(EventCategoryType).includes(categoryParam as EventCategoryType)) {
+      setCategoryFilter(categoryParam as EventCategoryType);
+    }
+  }, [searchParams]);
+
+  // Fetch all categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categories = await categoriesApi.findAll();
+        setAllCategories(categories);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Close filter dropdown when clicking outside
   useEffect(() => {
@@ -86,6 +117,7 @@ export default function EventsPage() {
         endDate,
         today,
         currentMonth,
+        category: categoryFilter !== 'all' ? categoryFilter : undefined,
         sortBy: 'startDateTime',
         sortOrder,
         skip: (currentPage - 1) * eventsPerPage,
@@ -110,12 +142,12 @@ export default function EventsPage() {
       return;
     }
     setCurrentPage(1);
-  }, [searchTerm, dateFilter, customStartDate, customEndDate, sortOrder]);
+  }, [searchTerm, dateFilter, customStartDate, customEndDate, sortOrder, categoryFilter]);
 
   // Fetch on mount and when filters change
   useEffect(() => {
     fetchEvents();
-  }, [searchTerm, currentPage, dateFilter, customStartDate, customEndDate, sortOrder]);
+  }, [searchTerm, currentPage, dateFilter, customStartDate, customEndDate, sortOrder, categoryFilter]);
 
   const totalPages = Math.ceil(total / eventsPerPage);
 
@@ -136,7 +168,24 @@ export default function EventsPage() {
     }
   };
 
+  const handleCategoryFilterChange = (category: EventCategoryType | 'all') => {
+    setCategoryFilter(category);
+    // Update URL without full page reload
+    const params = new URLSearchParams(searchParams.toString());
+    if (category === 'all') {
+      params.delete('category');
+    } else {
+      params.set('category', category);
+    }
+    router.push(`/events${params.toString() ? `?${params.toString()}` : ''}`, { scroll: false });
+  };
+
+  const getCategoryLabel = (categoryName: EventCategoryType) => {
+    return categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
+  };
+
   const hasActiveSearch = !!searchTerm;
+  const hasActiveFilters = dateFilter !== 'all' || sortOrder !== 'asc' || categoryFilter !== 'all';
 
   return (
     <div className="min-h-screen bg-background">
@@ -177,7 +226,7 @@ export default function EventsPage() {
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border transition-colors ${
-                showFilters || dateFilter !== 'all' || sortOrder !== 'asc'
+                showFilters || hasActiveFilters
                   ? 'border-primary bg-primary text-white'
                   : 'border-white/10 bg-card-background text-foreground hover:border-white/20'
               }`}
@@ -244,6 +293,32 @@ export default function EventsPage() {
                         </div>
                       </div>
                     )}
+                  </div>
+                </div>
+
+                <div className="h-px bg-white/10" />
+
+                {/* Category Section */}
+                <div className="p-3">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Category</p>
+                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                    <button
+                      onClick={() => handleCategoryFilterChange('all')}
+                      className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                    >
+                      <span>All Categories</span>
+                      {categoryFilter === 'all' && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                    {allCategories.map((category) => (
+                      <button
+                        key={category.id}
+                        onClick={() => handleCategoryFilterChange(category.name)}
+                        className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                      >
+                        <span>{getCategoryLabel(category.name)}</span>
+                        {categoryFilter === category.name && <Check className="h-4 w-4 text-primary" />}
+                      </button>
+                    ))}
                   </div>
                 </div>
 

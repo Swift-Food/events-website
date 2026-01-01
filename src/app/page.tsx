@@ -117,12 +117,13 @@ export default function DiscoveryPage() {
 
             <div className="grid grid-cols-4 gap-2">
               {allCategories.slice(0, 12).map((category) => (
-                <div
+                <Link
                   key={category.id}
+                  href={`/events?category=${category.name}`}
                   className="rounded-full px-3 py-2.5 text-sm font-medium border border-white/10 bg-card-background text-foreground hover:bg-card-background/80 cursor-pointer transition-colors text-center truncate"
                 >
                   {getCategoryLabel(category.name)}
-                </div>
+                </Link>
               ))}
             </div>
           </div>
