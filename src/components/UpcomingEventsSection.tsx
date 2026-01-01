@@ -32,9 +32,9 @@ export default function UpcomingEventsSection({
       setLoading(true);
       setError(null);
       try {
-        const now = new Date().toISOString();
+        // const now = new Date().toISOString();
         const result = await eventsApi.findAll({
-          startDate: now,
+          // startDate: now,
           sortBy: "startDateTime",
           sortOrder: "asc",
           take: maxEvents,
