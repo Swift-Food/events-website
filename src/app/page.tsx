@@ -26,6 +26,7 @@ export default function DiscoveryPage() {
       setLoadingCategories(true);
       const categories = await categoriesApi.findAll();
       setAllCategories(categories);
+      console.log("Categories: ", categories)
     } catch (err) {
       console.error("Failed to fetch categories:", err);
     } finally {
@@ -115,7 +116,29 @@ export default function DiscoveryPage() {
               Browse by Category
             </h2>
 
-            <div className="grid grid-cols-4 gap-2">
+            {/* Mobile: Horizontal scroll with 2 rows */}
+            <div className="overflow-x-auto pb-4 -mx-4 px-4 sm:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              <div className="flex flex-col gap-2">
+                {[0, 1].map((rowIndex) => (
+                  <div key={rowIndex} className="flex gap-2">
+                    {allCategories
+                      .slice(0, 12)
+                      .filter((_, i) => i % 2 === rowIndex)
+                      .map((category) => (
+                        <Link
+                          key={category.id}
+                          href={`/events?category=${category.name}`}
+                          className="rounded-xl px-4 py-2.5 text-sm font-medium border border-white/10 bg-card-background text-foreground hover:bg-card-background/80 cursor-pointer transition-colors text-center whitespace-nowrap"
+                        >
+                          {getCategoryLabel(category.name)}
+                        </Link>
+                      ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Desktop: 4-column grid */}
+            <div className="hidden sm:grid sm:grid-cols-4 gap-2">
               {allCategories.slice(0, 12).map((category) => (
                 <Link
                   key={category.id}
