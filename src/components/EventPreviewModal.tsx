@@ -633,21 +633,6 @@ export default function EventPreviewModal({
                 </div>
               </div>
 
-              {/* Description */}
-              <div className="mb-4">
-                <h2 className="mb-3 text-lg font-semibold text-muted-foreground">
-                  About this event
-                </h2>
-                {event.description ? (
-                  <div
-                    className="tiptap-editor tiptap-view-mode"
-                    dangerouslySetInnerHTML={{ __html: event.description }}
-                  />
-                ) : (
-                  <p className="text-muted-foreground">No description provided.</p>
-                )}
-              </div>
-
               {/* Location */}
               {event.address && (
                 <div className="rounded-xl border border-neutral-700 bg-card-background overflow-hidden mb-4">
@@ -703,70 +688,6 @@ export default function EventPreviewModal({
                   </div>
                 </div>
               )}
-
-              
-
-              {/* Organizer & Stats Row */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                {/* Organizer */}
-                <div className="rounded-xl border border-white/10 bg-card-background p-4">
-                  <p className="text-xs text-muted-foreground mb-2">Organized by</p>
-                  {event.owner?.user ? (
-                    <div className="flex items-center gap-2">
-                      {event.owner.user.profilePicture ? (
-                        <Image
-                          src={event.owner.user.profilePicture}
-                          alt={event.owner.user.username || "Organizer"}
-                          width={32}
-                          height={32}
-                          className="rounded-full"
-                        />
-                      ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                          <User className="h-4 w-4 text-primary" />
-                        </div>
-                      )}
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {event.owner.user.username || "Anonymous"}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                        <User className="h-4 w-4 text-primary" />
-                      </div>
-                      <p className="text-sm font-medium text-foreground">
-                        Event Organizer
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Stats */}
-                <div className="rounded-xl border border-neutral-700 bg-card-background p-4">
-                  <p className="text-xs text-muted-foreground mb-2">Stats</p>
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <Users className="h-3 w-3" />
-                        Attendees
-                      </span>
-                      <span className="font-medium text-foreground">
-                        {event.attendeesCount || 0}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        Views
-                      </span>
-                      <span className="font-medium text-foreground">
-                        {event.viewCount ?? 0}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               {/* Tickets */}
               {event.eventTickets &&
@@ -928,7 +849,82 @@ export default function EventPreviewModal({
                   );
                 })()}
 
-              
+              {/* Description */}
+              <div className="mb-4">
+                <h2 className="mb-3 text-lg font-semibold text-muted-foreground">
+                  About this event
+                </h2>
+                {event.description ? (
+                  <div
+                    className="tiptap-editor tiptap-view-mode"
+                    dangerouslySetInnerHTML={{ __html: event.description }}
+                  />
+                ) : (
+                  <p className="text-muted-foreground">No description provided.</p>
+                )}
+              </div>
+
+              {/* Organizer & Stats Row */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                {/* Organizer */}
+                <div className="rounded-xl border border-white/10 bg-card-background p-4">
+                  <p className="text-xs text-muted-foreground mb-2">Organized by</p>
+                  {event.owner?.user ? (
+                    <div className="flex items-center gap-2">
+                      {event.owner.user.profilePicture ? (
+                        <Image
+                          src={event.owner.user.profilePicture}
+                          alt={event.owner.user.username || "Organizer"}
+                          width={32}
+                          height={32}
+                          className="rounded-full"
+                        />
+                      ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                          <User className="h-4 w-4 text-primary" />
+                        </div>
+                      )}
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {event.owner.user.username || "Anonymous"}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                        <User className="h-4 w-4 text-primary" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground">
+                        Event Organizer
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Stats */}
+                <div className="rounded-xl border border-neutral-700 bg-card-background p-4">
+                  <p className="text-xs text-muted-foreground mb-2">Stats</p>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        Attendees
+                      </span>
+                      <span className="font-medium text-foreground">
+                        {event.attendeesCount || 0}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        Views
+                      </span>
+                      <span className="font-medium text-foreground">
+                        {event.viewCount ?? 0}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
