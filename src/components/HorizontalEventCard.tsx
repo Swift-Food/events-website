@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Calendar, MapPin, Ticket, Video, Lock } from "lucide-react";
+import { Calendar, Clock, MapPin, Ticket, Video, Lock } from "lucide-react";
 import { EventResponseDto } from "@/types/event";
 import { isVirtualEvent, isHybridEvent, hasOnlineComponent } from "@/types/event/status";
 
@@ -206,7 +206,8 @@ export default function HorizontalEventCard({
       {/* Event Details */}
       <div className="flex min-w-0 flex-1 flex-col justify-center">
         {/* Date/Time */}
-        <span className="mb-1 text-sm text-muted-foreground">
+        <span className="mb-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Clock className="h-3.5 w-3.5 flex-shrink-0" />
           {showDate && <>{formatDate(event.startDateTime)} &middot; </>}
           {formatTime(event.startDateTime)}
         </span>
@@ -241,11 +242,11 @@ export default function HorizontalEventCard({
                   )}
                   {/* Online indicator for Hybrid events */}
                   {isHybridEvent(event.format) && (
-                    <div className="flex items-center gap-1 text-xs text-blue-400 flex-shrink-0 whitespace-nowrap">
+                    <span className="flex items-center gap-1 rounded-md border border-white/20 bg-white/5 px-2 py-0.5 text-xs text-muted-foreground flex-shrink-0">
                       <span>+</span>
-                      <Video className="hidden sm:block h-3.5 w-3.5 flex-shrink-0" />
+                      <Video className="h-3 w-3 flex-shrink-0" />
                       <span>Online</span>
-                    </div>
+                    </span>
                   )}
                 </>
               )}
@@ -307,11 +308,11 @@ export default function HorizontalEventCard({
                 )}
                 {/* Online indicator for Hybrid events */}
                 {isHybridEvent(event.format) && (
-                  <div className="flex items-center gap-1 text-xs text-blue-400 flex-shrink-0 whitespace-nowrap">
+                  <span className="flex items-center gap-1 rounded-md border border-white/20 bg-white/5 px-2 py-0.5 text-xs text-muted-foreground flex-shrink-0">
                     <span>+</span>
-                    <Video className="hidden sm:block h-3.5 w-3.5 flex-shrink-0" />
+                    <Video className="h-3 w-3 flex-shrink-0" />
                     <span>Online</span>
-                  </div>
+                  </span>
                 )}
               </div>
             )}
