@@ -837,8 +837,13 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   </div>
                 ) : event.address ? (
                   <>
-                    {/* Map Area */}
-                    {event.address.location?.latitude && event.address.location?.longitude ? (
+                    {/* Map Area - only show if address is not obscured */}
+                    {event.address.isObscured ? (
+                      <div className="h-40 w-full bg-card-secondary-background flex flex-col items-center justify-center gap-2">
+                        <MapPin className="h-5 w-5 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Location hidden</span>
+                      </div>
+                    ) : event.address.location?.latitude && event.address.location?.longitude ? (
                       <GoogleMap
                         latitude={event.address.location.latitude}
                         longitude={event.address.location.longitude}
@@ -855,19 +860,32 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
 
                     {/* Address Details */}
                     <div className="p-4">
-                      {event.address.name && event.address.name !== event.name && (
-                        <h3 className="font-semibold text-foreground mb-1">
-                          {event.address.name}
-                        </h3>
+                      {event.address.isObscured ? (
+                        <>
+                          <p className="text-sm text-muted-foreground">
+                            {event.address.city}, {event.address.zipcode}
+                          </p>
+                          <p className="text-xs text-muted-foreground/70 mt-2">
+                            Full address revealed after registration
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          {event.address.name && event.address.name !== event.name && (
+                            <h3 className="font-semibold text-foreground mb-1">
+                              {event.address.name}
+                            </h3>
+                          )}
+                          <p className="text-sm text-muted-foreground">
+                            {[
+                              event.address.addressLine1,
+                              event.address.addressLine2,
+                              event.address.city,
+                              event.address.zipcode
+                            ].filter(Boolean).join(', ')}
+                          </p>
+                        </>
                       )}
-                      <p className="text-sm text-muted-foreground">
-                        {[
-                          event.address.addressLine1,
-                          event.address.addressLine2,
-                          event.address.city,
-                          event.address.zipcode
-                        ].filter(Boolean).join(', ')}
-                      </p>
                       {isHybridEvent(event.format) && (
                         <p className="text-sm text-primary mt-2 flex items-center gap-1">
                           <Video className="h-4 w-4" />

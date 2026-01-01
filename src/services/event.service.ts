@@ -57,10 +57,9 @@ class EventService {
     return response.data;
   }
 
-  async getEventById(id: string, options?: { obscureAddress?: boolean }): Promise<EventResponseDto> {
+  async getEventById(id: string): Promise<EventResponseDto> {
     const response: AxiosResponse<EventResponseDto> = await apiClient.get(
-      `${this.baseUrl}/${id}`,
-      { params: options }
+      `${this.baseUrl}/${id}`
     );
     return response.data;
   }

@@ -651,7 +651,12 @@ export default function EventPreviewModal({
               {/* Location */}
               {event.address && (
                 <div className="rounded-xl border border-neutral-700 bg-card-background overflow-hidden mb-4">
-                  {event.address.location?.latitude &&
+                  {event.address.isObscured ? (
+                    <div className="h-32 w-full bg-card-secondary-background flex flex-col items-center justify-center gap-2">
+                      <MapPin className="h-5 w-5 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Location hidden</span>
+                    </div>
+                  ) : event.address.location?.latitude &&
                   event.address.location?.longitude ? (
                     <GoogleMap
                       latitude={event.address.location.latitude}
@@ -667,21 +672,34 @@ export default function EventPreviewModal({
                     </div>
                   )}
                   <div className="p-4">
-                    {event.address.name && event.address.name !== event.name && (
-                      <h3 className="font-semibold text-foreground mb-1">
-                        {event.address.name}
-                      </h3>
+                    {event.address.isObscured ? (
+                      <>
+                        <p className="text-sm text-muted-foreground">
+                          {event.address.city}, {event.address.zipcode}
+                        </p>
+                        <p className="text-xs text-muted-foreground/70 mt-2">
+                          Full address revealed after registration
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        {event.address.name && event.address.name !== event.name && (
+                          <h3 className="font-semibold text-foreground mb-1">
+                            {event.address.name}
+                          </h3>
+                        )}
+                        <p className="text-sm text-muted-foreground">
+                          {[
+                            event.address.addressLine1,
+                            event.address.addressLine2,
+                            event.address.city,
+                            event.address.zipcode,
+                          ]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </p>
+                      </>
                     )}
-                    <p className="text-sm text-muted-foreground">
-                      {[
-                        event.address.addressLine1,
-                        event.address.addressLine2,
-                        event.address.city,
-                        event.address.zipcode,
-                      ]
-                        .filter(Boolean)
-                        .join(", ")}
-                    </p>
                   </div>
                 </div>
               )}
