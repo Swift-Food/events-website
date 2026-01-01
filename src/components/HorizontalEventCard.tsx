@@ -150,7 +150,7 @@ export default function HorizontalEventCard({
     <Link
       href={linkToManagement ? `/event-management/${event.id}` : `/events/${event.id}`}
       onClick={handleClick}
-      className="group relative flex gap-4 rounded-2xl border border-white/10 bg-card-background p-4 transition-all hover:border-white/20 hover:shadow-2xl"
+      className="group relative flex gap-4 rounded-2xl transition-all py-2 pl-2"
     >
       {/* Status Badges */}
       <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">
@@ -217,116 +217,67 @@ export default function HorizontalEventCard({
           {event.name}
         </h3>
 
-        {/* With categories: Address + Ticket on same row, Categories below */}
-        {/* Without categories: Address on one row, Ticket on next row */}
-        {showCategories && event.categories && event.categories.length > 0 ? (
-          <>
-            {/* Row 1: Address + Ticket */}
-            <div className="flex items-center gap-3">
-              {/* Location - Virtual only */}
-              {isVirtualEvent(event.format) ? (
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
-                  <span className="truncate text-blue-400">Online Event</span>
-                </div>
-              ) : (
-                <>
-                  {/* Physical address for In Person and Hybrid */}
-                  {event.address && event.address.city && event.address.city !== "TBD" && (
-                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                      <span className="truncate">
-                        {event.address.city}, {event.address.zipcode}
-                      </span>
-                    </div>
-                  )}
-                  {/* Online indicator for Hybrid events */}
-                  {isHybridEvent(event.format) && (
-                    <span className="flex items-center gap-1 rounded-md border border-white/20 bg-white/5 px-2 py-0.5 text-xs text-muted-foreground flex-shrink-0">
-                      <span>+</span>
-                      <Video className="h-3 w-3 flex-shrink-0" />
-                      <span>Online</span>
-                    </span>
-                  )}
-                </>
-              )}
-
-              {/* Price */}
-              {formatPrice() && (
-                <div className={`flex items-center gap-1.5 text-sm flex-shrink-0 ${
-                  isSoldOut ? "text-red-400" : minPrice === 0 ? "text-green-400" : "text-orange-400"
-                }`}>
-                  <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
-                  <span className={isSoldOut ? "font-medium" : ""}>{formatPrice()}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Row 2: Categories */}
-            <div ref={categoriesContainerRef} className="mt-1.5 flex items-center gap-1.5">
-              {event.categories.map((category, index) => (
-                <span
-                  key={category.id}
-                  className={`rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground ${
-                    index >= visibleCount ? "hidden" : ""
-                  }`}
-                >
-                  {category.name.toLowerCase()}
-                </span>
-              ))}
-              {event.categories.length > visibleCount && (
-                <span
-                  data-overflow="true"
-                  className="group/tooltip relative rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground cursor-default"
-                >
-                  +{event.categories.length - visibleCount}
-                  <span className="pointer-events-none absolute top-full left-1/2 z-50 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover/tooltip:opacity-100">
-                    {event.categories.slice(visibleCount).map(c => c.name.toLowerCase()).join(', ')}
-                  </span>
-                </span>
-              )}
-            </div>
-          </>
+        {/* Row 1: Address */}
+        {isVirtualEvent(event.format) ? (
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
+            <span className="truncate text-blue-400">Online Event</span>
+          </div>
         ) : (
-          <>
-            {/* Row 1: Address */}
-            {isVirtualEvent(event.format) ? (
+          <div className="flex items-center gap-3">
+            {event.address && event.address.city && event.address.city !== "TBD" && (
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
-                <span className="truncate text-blue-400">Online Event</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                {/* Physical address for In Person and Hybrid */}
-                {event.address && event.address.city && event.address.city !== "TBD" && (
-                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="truncate">
-                      {event.address.city}, {event.address.zipcode}
-                    </span>
-                  </div>
-                )}
-                {/* Online indicator for Hybrid events */}
-                {isHybridEvent(event.format) && (
-                  <span className="flex items-center gap-1 rounded-md border border-white/20 bg-white/5 px-2 py-0.5 text-xs text-muted-foreground flex-shrink-0">
-                    <span>+</span>
-                    <Video className="h-3 w-3 flex-shrink-0" />
-                    <span>Online</span>
-                  </span>
-                )}
+                <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="truncate">
+                  {event.address.city}, {event.address.zipcode}
+                </span>
               </div>
             )}
+            {isHybridEvent(event.format) && (
+              <span className="flex items-center gap-1 rounded-md border border-white/20 bg-white/5 px-2 py-0.5 text-xs text-muted-foreground flex-shrink-0">
+                <span>+</span>
+                <Video className="h-3 w-3 flex-shrink-0" />
+                <span>Online</span>
+              </span>
+            )}
+          </div>
+        )}
 
-            {/* Row 2: Price */}
-            {formatPrice() && (
-              <div className={`mt-1 flex items-center gap-1.5 text-sm ${
-                isSoldOut ? "text-red-400" : minPrice === 0 ? "text-green-400" : "text-orange-400"
-              }`}>
-                <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className={isSoldOut ? "font-medium" : ""}>{formatPrice()}</span>
-              </div>
+        {/* Row 2: Price */}
+        {formatPrice() && (
+          <div className={`mt-1 flex items-center gap-1.5 text-sm ${
+            isSoldOut ? "text-red-400" : minPrice === 0 ? "text-green-400" : "text-orange-400"
+          }`}>
+            <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className={isSoldOut ? "font-medium" : ""}>{formatPrice()}</span>
+          </div>
+        )}
+
+        {/* Row 3: Categories */}
+        {showCategories && event.categories && event.categories.length > 0 && (
+          <div ref={categoriesContainerRef} className="mt-1.5 flex items-center gap-1.5">
+            {event.categories.map((category, index) => (
+              <span
+                key={category.id}
+                className={`rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground ${
+                  index >= visibleCount ? "hidden" : ""
+                }`}
+              >
+                {category.name.toLowerCase()}
+              </span>
+            ))}
+            {event.categories.length > visibleCount && (
+              <span
+                data-overflow="true"
+                className="group/tooltip relative rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground cursor-default"
+              >
+                +{event.categories.length - visibleCount}
+                <span className="pointer-events-none absolute top-full left-1/2 z-50 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover/tooltip:opacity-100">
+                  {event.categories.slice(visibleCount).map(c => c.name.toLowerCase()).join(', ')}
+                </span>
+              </span>
             )}
-          </>
+          </div>
         )}
       </div>
     </Link>
