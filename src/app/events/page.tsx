@@ -20,7 +20,6 @@ export default function EventsPage() {
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   // Track which date headers are stuck
@@ -161,10 +160,7 @@ export default function EventsPage() {
 
   const handleDateFilterChange = (filter: 'all' | 'today' | 'month' | 'custom') => {
     setDateFilter(filter);
-    if (filter === 'custom') {
-      setShowDatePicker(true);
-    } else {
-      setShowDatePicker(false);
+    if (filter !== 'custom') {
       setCustomStartDate("");
       setCustomEndDate("");
     }
@@ -295,6 +291,29 @@ export default function EventsPage() {
                       <span>Custom Range</span>
                       {dateFilter === 'custom' && <Check className="h-4 w-4 text-primary" />}
                     </button>
+                    {dateFilter === 'custom' && (
+                      <div className="mt-2 space-y-2 px-2">
+                        <div>
+                          <label className="block text-[10px] font-medium text-muted-foreground mb-1">From</label>
+                          <input
+                            type="date"
+                            value={customStartDate}
+                            onChange={(e) => setCustomStartDate(e.target.value)}
+                            className="w-full rounded-lg border border-white/10 bg-card-secondary-background px-3 py-1.5 text-sm text-foreground focus:border-primary focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-medium text-muted-foreground mb-1">To</label>
+                          <input
+                            type="date"
+                            value={customEndDate}
+                            onChange={(e) => setCustomEndDate(e.target.value)}
+                            min={customStartDate || undefined}
+                            className="w-full rounded-lg border border-white/10 bg-card-secondary-background px-3 py-1.5 text-sm text-foreground focus:border-primary focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -530,80 +549,6 @@ export default function EventsPage() {
         onClose={handleCloseModal}
       />
 
-      {/* Custom Date Range Picker Modal */}
-      {showDatePicker && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl border border-white/10 bg-card-background p-6 shadow-xl">
-            <div className="mb-6 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground">
-                Select Date Range
-              </h3>
-              <button
-                onClick={() => {
-                  setShowDatePicker(false);
-                  if (!customStartDate && !customEndDate) {
-                    setDateFilter('all');
-                  }
-                }}
-                className="text-muted-foreground transition-colors hover:text-foreground"
-                aria-label="Close date picker"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-foreground">
-                  Start Date
-                </label>
-                <input
-                  type="date"
-                  value={customStartDate}
-                  onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-foreground">
-                  End Date
-                </label>
-                <input
-                  type="date"
-                  value={customEndDate}
-                  onChange={(e) => setCustomEndDate(e.target.value)}
-                  min={customStartDate || undefined}
-                  className="w-full rounded-lg border border-white/10 bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-            </div>
-
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={() => {
-                  setCustomStartDate("");
-                  setCustomEndDate("");
-                  setDateFilter('all');
-                  setShowDatePicker(false);
-                }}
-                className="flex-1 rounded-full border border-white/10 bg-card-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-white/20"
-              >
-                Clear
-              </button>
-              <button
-                onClick={() => {
-                  setShowDatePicker(false);
-                }}
-                disabled={!customStartDate || !customEndDate}
-                className="flex-1 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/80 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Apply
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
