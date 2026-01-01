@@ -1,24 +1,25 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { eventsApi } from "@/services/events";
-import { calendarsApi } from "@/services/calendars";
 import { categoriesApi } from "@/services/categories";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
-import { Calendar as CalendarType } from "@/types/calendar";
 import { EventCategoryType, EventCategoryResponseDto } from "@/types/category";
-import { Search, Calendar, ChevronLeft, ChevronRight, X, ChevronRight as ArrowRight, ArrowUpDown } from "lucide-react";
-import HorizontalEventCard from "@/components/HorizontalEventCard";
-import CalendarCard from "@/components/CalendarCard";
-import HorizontalCalendarCard from "@/components/HorizontalCalendarCard";
-import EventPreviewModal from "@/components/EventPreviewModal";
-import Link from "next/link";
+import { Search, Calendar, ChevronLeft, ChevronRight, X, SlidersHorizontal, Check } from "lucide-react";
+import EventsTimeline from "@/components/EventsTimeline";
 
-export default function EventCataloguePage() {
+export default function EventsPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [events, setEvents] = useState<EventResponseDto[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Categories
+  const [allCategories, setAllCategories] = useState<EventCategoryResponseDto[]>([]);
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,56 +28,63 @@ export default function EventCataloguePage() {
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<EventCategoryType | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<EventCategoryType | 'all'>(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam && Object.values(EventCategoryType).includes(categoryParam as EventCategoryType)) {
+      return categoryParam as EventCategoryType;
+    }
+    return 'all';
+  });
+  const [showFilters, setShowFilters] = useState(false);
 
-  // Track which date headers are stuck
-  const [stuckHeaders, setStuckHeaders] = useState<Set<string>>(new Set());
-  const sentinelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  // Filter dropdown ref
+  const filterDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Modal state
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-
-  // Calendars state
-  const [calendars, setCalendars] = useState<CalendarType[]>([]);
-  const [loadingCalendars, setLoadingCalendars] = useState(true);
-
-  // Categories
-  const [allCategories, setAllCategories] = useState<EventCategoryResponseDto[]>([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
-
-  const eventsPerPage = 12;
+  // Sync category filter when URL params change (e.g., browser back/forward)
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    const newCategory = categoryParam && Object.values(EventCategoryType).includes(categoryParam as EventCategoryType)
+      ? categoryParam as EventCategoryType
+      : 'all';
+    if (newCategory !== categoryFilter) {
+      setCategoryFilter(newCategory);
+    }
+  }, [searchParams]);
 
   // Fetch all categories
-  const fetchAllCategories = async () => {
-    try {
-      setLoadingCategories(true);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categories = await categoriesApi.findAll();
+        setAllCategories(categories);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
-      // Fetch all categories from the backend
-      const categories = await categoriesApi.findAll();
-      setAllCategories(categories);
-    } catch (err) {
-      console.error("Failed to fetch categories:", err);
-    } finally {
-      setLoadingCategories(false);
-    }
-  };
+  // Close filter dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        filterDropdownRef.current &&
+        !filterDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowFilters(false);
+      }
+    };
 
-  // Fetch calendars
-  const fetchCalendars = async () => {
-    try {
-      setLoadingCalendars(true);
-      const result = await calendarsApi.findAll({
-        isPublic: true,
-        take: 10, // Show top 10 calendars
-      });
-      setCalendars(result.calendars ?? []);
-    } catch (err) {
-      console.error("Failed to fetch calendars:", err);
-    } finally {
-      setLoadingCalendars(false);
+    if (showFilters) {
+      document.addEventListener("mousedown", handleClickOutside);
     }
-  };
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showFilters]);
+
+  const eventsPerPage = 12;
 
   // Calculate date filters based on selected filter
   const getDateFilters = () => {
@@ -114,11 +122,11 @@ export default function EventCataloguePage() {
 
       const result: EventListResponseDto = await eventsApi.findAll({
         search: searchTerm || undefined,
-        category: selectedCategory || undefined,
         startDate,
         endDate,
         today,
         currentMonth,
+        category: categoryFilter !== 'all' ? categoryFilter : undefined,
         sortBy: 'startDateTime',
         sortOrder,
         skip: (currentPage - 1) * eventsPerPage,
@@ -143,18 +151,12 @@ export default function EventCataloguePage() {
       return;
     }
     setCurrentPage(1);
-  }, [searchTerm, dateFilter, customStartDate, customEndDate, sortOrder, selectedCategory]);
-
-  // Fetch calendars and categories on mount
-  useEffect(() => {
-    fetchCalendars();
-    fetchAllCategories();
-  }, []);
+  }, [searchTerm, dateFilter, customStartDate, customEndDate, sortOrder, categoryFilter]);
 
   // Fetch on mount and when filters change
   useEffect(() => {
     fetchEvents();
-  }, [searchTerm, currentPage, dateFilter, customStartDate, customEndDate, sortOrder, selectedCategory]);
+  }, [searchTerm, currentPage, dateFilter, customStartDate, customEndDate, sortOrder, categoryFilter, searchParams]);
 
   const totalPages = Math.ceil(total / eventsPerPage);
 
@@ -162,197 +164,60 @@ export default function EventCataloguePage() {
   const startIndex = (currentPage - 1) * eventsPerPage + 1;
   const endIndex = Math.min(currentPage * eventsPerPage, total);
 
-  // Group events by date (preserving order received from API)
-  const groupedEvents = useMemo(() => {
-    const groups = new Map<string, EventResponseDto[]>();
-
-    (events ?? []).forEach((event) => {
-      const date = new Date(event.startDateTime);
-      const dateKey = date.toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      });
-
-      if (!groups.has(dateKey)) {
-        groups.set(dateKey, []);
-      }
-      groups.get(dateKey)!.push(event);
-    });
-
-    return Array.from(groups.entries());
-  }, [events]);
-
   const clearSearch = () => {
     setSearchTerm("");
     setCurrentPage(1);
   };
 
   const handleDateFilterChange = (filter: 'all' | 'today' | 'month' | 'custom') => {
-    // Toggle off if clicking the same filter (except 'all')
-    if (dateFilter === filter && filter !== 'all') {
-      setDateFilter('all');
-      setShowDatePicker(false);
-      setCustomStartDate("");
-      setCustomEndDate("");
-      return;
-    }
-
     setDateFilter(filter);
-    if (filter === 'custom') {
-      setShowDatePicker(true);
-    } else {
-      setShowDatePicker(false);
+    if (filter !== 'custom') {
       setCustomStartDate("");
       setCustomEndDate("");
     }
   };
 
-  const toggleSortOrder = () => {
-    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  const handleCategoryFilterChange = (category: EventCategoryType | 'all') => {
+    setCategoryFilter(category);
+    // Update URL without full page reload
+    const params = new URLSearchParams(searchParams.toString());
+    if (category === 'all') {
+      params.delete('category');
+    } else {
+      params.set('category', category);
+    }
+    router.push(`/events${params.toString() ? `?${params.toString()}` : ''}`, { scroll: false });
   };
 
-  const handleCategoryClick = (categoryName: EventCategoryType) => {
-    // Toggle off if clicking the same category
-    if (selectedCategory === categoryName) {
-      setSelectedCategory(null);
-    } else {
-      setSelectedCategory(categoryName);
-    }
+  const getCategoryLabel = (categoryName: EventCategoryType) => {
+    return categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
   };
 
   const hasActiveSearch = !!searchTerm;
-
-  const handleEventClick = (_e: React.MouseEvent, event: EventResponseDto) => {
-    setSelectedEventId(event.id);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedEventId(null);
-  };
-
-  // Intersection observer to detect when headers become stuck
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const dateKey = entry.target.getAttribute("data-date-key");
-          if (dateKey) {
-            setStuckHeaders((prev) => {
-              const next = new Set(prev);
-              if (entry.isIntersecting) {
-                next.delete(dateKey);
-              } else {
-                next.add(dateKey);
-              }
-              return next;
-            });
-          }
-        });
-      },
-      {
-        rootMargin: "-80px 0px 0px 0px",
-        threshold: 0,
-      }
-    );
-
-    sentinelRefs.current.forEach((element) => {
-      observer.observe(element);
-    });
-
-    return () => observer.disconnect();
-  }, [groupedEvents]);
+  const hasActiveFilters = dateFilter !== 'all' || sortOrder !== 'asc' || categoryFilter !== 'all';
 
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-            Discover Events
+            All Events
           </h1>
           <p className="mt-2 text-md text-muted-foreground">
-            Find and join exciting events happening around you
+            Browse and search through all upcoming events
           </p>
         </div>
 
-        {/* Calendars Section */}
-        {!loadingCalendars && calendars.length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">
-                Browse Calendars
-              </h2>
-              <Link
-                href="/calendars"
-                className="flex items-center gap-1 text-sm text-primary hover:underline"
-              >
-                View All
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            {/* Mobile: Horizontal scroll */}
-            <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              {calendars.slice(0, 5).map((calendar) => (
-                <div key={calendar.id} className="flex-shrink-0 w-[80vw]">
-                  <HorizontalCalendarCard calendar={calendar} />
-                </div>
-              ))}
-            </div>
-            {/* Desktop: 3-column grid */}
-            <div className="hidden sm:grid sm:grid-cols-3 gap-3">
-              {calendars.slice(0, 3).map((calendar) => (
-                <CalendarCard key={calendar.id} calendar={calendar} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Event Categories Section */}
-        {!loadingCategories && allCategories.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-foreground mb-4">
-              Browse by Category
-            </h2>
-
-            {/* Single Horizontal Scroll Layout */}
-            <div className="-mx-4 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              <div className="flex gap-2 w-max">
-                {allCategories.map((category) => {
-                  // Helper function to get display label
-                  const getCategoryLabel = (categoryName: EventCategoryType) => {
-                    return categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
-                  };
-
-                  return (
-                    <button
-                      key={category.id}
-                      onClick={() => handleCategoryClick(category.name)}
-                      className={`flex-shrink-0 rounded-full px-4 py-2.5 text-sm font-medium transition-all ${
-                        selectedCategory === category.name
-                          ? 'bg-primary text-white'
-                          : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
-                      }`}
-                    >
-                      {getCategoryLabel(category.name)}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Sticky Search Bar and Filters */}
+        {/* Sticky Search Bar */}
         <div className="sticky top-16 z-40 -mx-4 px-4 sm:-mx-6 sm:px-6 pt-4 pb-4 bg-gradient-to-b from-background via-background to-transparent">
-          {/* Search Bar */}
-          <div className="mb-2">
-            <div className="relative">
+          {/* Search Bar with Filter Button */}
+          <div ref={filterDropdownRef} className="relative flex items-center gap-2">
+            <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search events by name or description..."
+                placeholder="Search events..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full rounded-full border border-white/10 bg-card-background py-3 pl-12 pr-4 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
@@ -367,61 +232,129 @@ export default function EventCataloguePage() {
                 </button>
               )}
             </div>
-          </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border transition-colors ${
+                showFilters || hasActiveFilters
+                  ? 'border-primary bg-primary text-white'
+                  : 'border-white/10 bg-card-background text-foreground hover:border-white/20'
+              }`}
+              aria-label="Toggle filters"
+            >
+              <SlidersHorizontal className="h-5 w-5" />
+            </button>
 
-          {/* Filter Chips and Sort */}
-          <div className="-mx-4 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            <div className="flex items-center gap-2 w-max">
-              {/* <button
-                onClick={() => handleDateFilterChange('all')}
-                className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                  dateFilter === 'all'
-                    ? 'bg-primary text-white'
-                    : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
-                }`}
-              >
-                All
-              </button> */}
-              <button
-                onClick={() => handleDateFilterChange('today')}
-                className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                  dateFilter === 'today'
-                    ? 'bg-primary text-white'
-                    : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
-                }`}
-              >
-                Today
-              </button>
-              <button
-                onClick={() => handleDateFilterChange('month')}
-                className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                  dateFilter === 'month'
-                    ? 'bg-primary text-white'
-                    : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
-                }`}
-              >
-                This Month
-              </button>
-              <button
-                onClick={() => handleDateFilterChange('custom')}
-                className={`flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                  dateFilter === 'custom'
-                    ? 'bg-primary text-white'
-                    : 'border border-white/10 bg-card-background text-foreground hover:border-white/20'
-                }`}
-              >
-                Custom Range
-              </button>
-              <button
-                onClick={toggleSortOrder}
-                className="flex-shrink-0 flex items-center gap-2 rounded-full border border-white/10 bg-card-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-white/20"
-                aria-label="Toggle sort order"
-              >
-                <ArrowUpDown className="h-4 w-4" />
-                <span className="hidden sm:inline">Sort:</span>
-                {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}
-              </button>
-            </div>
+            {/* Filter Dropdown */}
+            {showFilters && (
+              <div className="absolute right-0 top-full mt-2 w-64 z-50 rounded-xl bg-card-background/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden">
+                {/* When Section */}
+                <div className="p-3">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">When</p>
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => handleDateFilterChange('all')}
+                      className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                    >
+                      <span>All Time</span>
+                      {dateFilter === 'all' && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                    <button
+                      onClick={() => handleDateFilterChange('today')}
+                      className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                    >
+                      <span>Today</span>
+                      {dateFilter === 'today' && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                    <button
+                      onClick={() => handleDateFilterChange('month')}
+                      className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                    >
+                      <span>This Month</span>
+                      {dateFilter === 'month' && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                    <button
+                      onClick={() => handleDateFilterChange('custom')}
+                      className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                    >
+                      <span>Custom Range</span>
+                      {dateFilter === 'custom' && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                    {dateFilter === 'custom' && (
+                      <div className="mt-2 space-y-2 px-2">
+                        <div>
+                          <label className="block text-[10px] font-medium text-muted-foreground mb-1">From</label>
+                          <input
+                            type="date"
+                            value={customStartDate}
+                            onChange={(e) => setCustomStartDate(e.target.value)}
+                            className="w-full rounded-lg border border-white/10 bg-card-secondary-background px-3 py-1.5 text-sm text-foreground focus:border-primary focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-medium text-muted-foreground mb-1">To</label>
+                          <input
+                            type="date"
+                            value={customEndDate}
+                            onChange={(e) => setCustomEndDate(e.target.value)}
+                            min={customStartDate || undefined}
+                            className="w-full rounded-lg border border-white/10 bg-card-secondary-background px-3 py-1.5 text-sm text-foreground focus:border-primary focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="h-px bg-white/10" />
+
+                {/* Category Section */}
+                <div className="p-3">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Category</p>
+                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                    <button
+                      onClick={() => handleCategoryFilterChange('all')}
+                      className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                    >
+                      <span>All Categories</span>
+                      {categoryFilter === 'all' && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                    {allCategories.map((category) => (
+                      <button
+                        key={category.id}
+                        onClick={() => handleCategoryFilterChange(category.name)}
+                        className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                      >
+                        <span>{getCategoryLabel(category.name)}</span>
+                        {categoryFilter === category.name && <Check className="h-4 w-4 text-primary" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="h-px bg-white/10" />
+
+                {/* Sort Section */}
+                <div className="p-3">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Sort</p>
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => setSortOrder('asc')}
+                      className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                    >
+                      <span>Oldest First</span>
+                      {sortOrder === 'asc' && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                    <button
+                      onClick={() => setSortOrder('desc')}
+                      className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
+                    >
+                      <span>Newest First</span>
+                      {sortOrder === 'desc' && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -484,90 +417,9 @@ export default function EventCataloguePage() {
           </div>
         )}
 
-        {/* Events Grouped by Date */}
+        {/* Events Timeline */}
         {!loading && !error && events.length > 0 && (
-          <div>
-            {groupedEvents.map(([dateKey, dateEvents], index) => {
-              const firstEventDate = new Date(dateEvents[0].startDateTime);
-              const monthAbbrev = firstEventDate.toLocaleDateString("en-US", {
-                month: "short",
-              });
-              const dayNum = firstEventDate.getDate();
-              const dayName = firstEventDate.toLocaleDateString("en-US", {
-                weekday: "long",
-              });
-              const isLast = index === groupedEvents.length - 1;
-
-              return (
-                <div key={dateKey} className="relative flex">
-                  {/* Timeline column - continuous line */}
-                  <div className="hidden sm:block sm:w-8 relative">
-                    {/* Continuous line */}
-                    <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-white/20" />
-                    {/* Dot positioned at header level */}
-                    <div className="sticky top-20 z-40 flex h-8 items-center justify-center">
-                      <div
-                        className={`h-2 w-2 rounded-full transition-colors ${
-                          stuckHeaders.has(dateKey)
-                            ? "bg-primary"
-                            : "bg-muted-foreground"
-                        }`}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="min-w-0 flex-1 pb-8">
-                    {/* Sentinel for detecting stuck state */}
-                    <div
-                      ref={(el) => {
-                        if (el) sentinelRefs.current.set(dateKey, el);
-                      }}
-                      data-date-key={dateKey}
-                      className="h-0"
-                    />
-
-                    {/* Sticky Date Header */}
-                    <div className="sticky top-20 z-30 pb-3">
-                      <div
-                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors ${
-                          stuckHeaders.has(dateKey)
-                            ? "border border-white/10 bg-card-background"
-                            : ""
-                        }`}
-                      >
-                        {/* Mobile dot - only show on mobile */}
-                        <div
-                          className={`h-2 w-2 flex-shrink-0 rounded-full transition-colors sm:hidden ${
-                            stuckHeaders.has(dateKey)
-                              ? "bg-primary"
-                              : "bg-muted-foreground"
-                          }`}
-                        />
-                        <span className="text-sm font-semibold text-foreground">
-                          {monthAbbrev} {dayNum}
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          {dayName}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Events for this date */}
-                    <div className="min-w-0 space-y-3">
-                      {dateEvents.map((event) => (
-                        <HorizontalEventCard
-                          key={event.id}
-                          event={event}
-                          onClick={handleEventClick}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <EventsTimeline events={events} />
         )}
 
         {/* Pagination */}
@@ -623,88 +475,6 @@ export default function EventCataloguePage() {
         )}
 
       </div>
-
-      {/* Event Preview Modal */}
-      <EventPreviewModal
-        eventId={selectedEventId}
-        isOpen={!!selectedEventId}
-        onClose={handleCloseModal}
-      />
-
-      {/* Custom Date Range Picker Modal */}
-      {showDatePicker && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl border border-white/10 bg-card-background p-6 shadow-xl">
-            <div className="mb-6 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground">
-                Select Date Range
-              </h3>
-              <button
-                onClick={() => {
-                  setShowDatePicker(false);
-                  if (!customStartDate && !customEndDate) {
-                    setDateFilter('all');
-                  }
-                }}
-                className="text-muted-foreground transition-colors hover:text-foreground"
-                aria-label="Close date picker"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-foreground">
-                  Start Date
-                </label>
-                <input
-                  type="date"
-                  value={customStartDate}
-                  onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-foreground">
-                  End Date
-                </label>
-                <input
-                  type="date"
-                  value={customEndDate}
-                  onChange={(e) => setCustomEndDate(e.target.value)}
-                  min={customStartDate || undefined}
-                  className="w-full rounded-lg border border-white/10 bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-            </div>
-
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={() => {
-                  setCustomStartDate("");
-                  setCustomEndDate("");
-                  setDateFilter('all');
-                  setShowDatePicker(false);
-                }}
-                className="flex-1 rounded-full border border-white/10 bg-card-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-white/20"
-              >
-                Clear
-              </button>
-              <button
-                onClick={() => {
-                  setShowDatePicker(false);
-                }}
-                disabled={!customStartDate || !customEndDate}
-                className="flex-1 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/80 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Apply
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
