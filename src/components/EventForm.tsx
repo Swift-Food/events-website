@@ -46,9 +46,10 @@ interface EventFormProps {
   eventStatus?: EventStatus;
   onPublishToggle?: () => void;
   isPublishLoading?: boolean;
+  onSaveSuccess?: () => void;
 }
 
-function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishToggle, isPublishLoading }: EventFormProps) {
+function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishToggle, isPublishLoading, onSaveSuccess }: EventFormProps) {
   const {
     eventName,
     setEventName,
@@ -499,7 +500,11 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
         const response = await eventService.updateEvent(eventId, eventData);
         if (response.success) {
           toast.success("Event updated successfully!");
-          router.push(`/event-management/${eventId}`);
+          if (onSaveSuccess) {
+            onSaveSuccess();
+          } else {
+            router.push(`/event-management/${eventId}`);
+          }
         }
       }
     } catch (error: any) {

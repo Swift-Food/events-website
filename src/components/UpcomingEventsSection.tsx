@@ -39,6 +39,7 @@ export default function UpcomingEventsSection({
           sortOrder: "asc",
           take: maxEvents,
         });
+        console.log("Upcoming section events: ", result.events)
         setEvents(result.events ?? []);
       } catch (err) {
         console.error("Failed to fetch upcoming events:", err);

@@ -120,6 +120,7 @@ export default function EventPreviewModal({
         setLoading(true);
         setError(null);
         const data = await eventsApi.findById(eventId);
+        console.log("Event details in modal: ", data)
         setEvent(data);
       } catch (err) {
         console.error("Failed to fetch event details:", err);
