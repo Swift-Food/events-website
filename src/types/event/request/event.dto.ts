@@ -40,6 +40,7 @@ export interface CreateEventDto {
   tickets?: CreateEventTicketDto[];
   acceptingNewTickets?: boolean;
   stopAcceptingOnStart?: boolean;
+  hideFullAddress?: boolean;
 }
 
 export interface UpdateEventDto {
@@ -64,6 +65,7 @@ export interface UpdateEventDto {
   tickets?: CreateEventTicketDto[];
   acceptingNewTickets?: boolean;
   stopAcceptingOnStart?: boolean;
+  hideFullAddress?: boolean;
 }
 
 export interface EventQueryDto {

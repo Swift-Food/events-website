@@ -164,6 +164,7 @@ export default function ProfilePage() {
           viewCount: 0,
           acceptingNewTickets: true,
           stopAcceptingOnStart: false,
+          hideFullAddress: false,
           createdAt: new Date(),
           updatedAt: new Date(),
           owner: {
@@ -216,6 +217,7 @@ export default function ProfilePage() {
           viewCount: 0,
           acceptingNewTickets: true,
           stopAcceptingOnStart: false,
+          hideFullAddress: false,
           createdAt: new Date(),
           updatedAt: new Date(),
           owner: {

@@ -66,6 +66,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     setVirtualMeetingUrl,
     isPrivate,
     setIsPrivate,
+    hideFullAddress,
+    setHideFullAddress,
     venueName,
     setVenueName,
     addressLine1,
@@ -177,6 +179,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
       // Private event and approval settings
       setIsPrivate(initialData.isPrivate || false);
       setRequireApproval(initialData.requiresApproval || false);
+      setHideFullAddress(initialData.hideFullAddress || false);
 
       // Event format
       setEventFormat(initialData.format || EventFormat.IN_PERSON);
@@ -449,6 +452,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
         endDateTime: end,
         isPrivate: isPrivate,
         requiresApproval: requireApproval,
+        hideFullAddress: hideFullAddress,
         format: eventFormat,
         virtualMeetingUrl: virtualMeetingUrl || undefined,
         addressData: (eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH)
@@ -1412,6 +1416,35 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 <span
                   className={`block h-6 w-6 rounded-full transition-all ${
                     requireApproval
+                      ? "translate-x-7 bg-primary-foreground"
+                      : "translate-x-0.5 bg-foreground"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Hide Full Address Toggle */}
+            <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
+              <div>
+                <p className="text-base font-semibold text-foreground">
+                  Hide Full Address
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Only reveal full address after registration
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHideFullAddress((prev) => !prev)}
+                className={`h-7 w-14 rounded-full transition-all ${
+                  hideFullAddress
+                    ? "bg-primary"
+                    : "bg-card-secondary-background"
+                }`}
+              >
+                <span
+                  className={`block h-6 w-6 rounded-full transition-all ${
+                    hideFullAddress
                       ? "translate-x-7 bg-primary-foreground"
                       : "translate-x-0.5 bg-foreground"
                   }`}
