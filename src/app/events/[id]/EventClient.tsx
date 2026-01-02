@@ -35,6 +35,7 @@ import {
   Lock,
   Video,
   Ban,
+  ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -123,6 +124,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
   const [userRole, setUserRole] = useState<UserRole>(null);
 
   // Re-fetch event data when user is authenticated to get userTicket info
+  // This is needed because the initial server-side fetch doesn't have auth context
   useEffect(() => {
     const fetchAuthenticatedEventData = async () => {
       if (!isAuthenticated || authLoading) return;
@@ -393,7 +395,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
     }
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = async () => {
     setShowPaymentModal(false);
     if (paymentData) {
       setSuccessTicketDetails({
@@ -403,6 +405,14 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
     }
     setShowSuccessModal(true);
     setPaymentData(null);
+
+    // Re-fetch event data to get updated info (virtualMeetingUrl, userTicket, etc.)
+    try {
+      const data = await eventsApi.findById(eventId);
+      setEvent(data);
+    } catch (err) {
+      console.error("Failed to refresh event data after payment:", err);
+    }
   };
 
   const handlePaymentClose = () => {
@@ -831,9 +841,21 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       <Video className="h-8 w-8 text-primary" />
                       <span className="text-sm font-medium text-primary">Online Event</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {event.virtualMeetingUrl ? "Virtual meeting link will be available to ticket holders" : "Meeting link will be shared before the event"}
-                    </p>
+                    {event.virtualMeetingUrl ? (
+                      <a
+                        href={event.virtualMeetingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-sm text-primary hover:underline"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        Join Virtual Meeting
+                      </a>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        Meeting link will be shared before the event
+                      </p>
+                    )}
                   </div>
                 ) : event.address ? (
                   <>
@@ -887,10 +909,25 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                         </>
                       )}
                       {isHybridEvent(event.format) && (
-                        <p className="text-sm text-primary mt-2 flex items-center gap-1">
-                          <Video className="h-4 w-4" />
-                          Also available online
-                        </p>
+                        <div className="mt-3 pt-3 border-t border-neutral-700">
+                          {event.virtualMeetingUrl ? (
+                            <a
+                              href={event.virtualMeetingUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 text-sm text-primary hover:underline"
+                            >
+                              <Video className="h-4 w-4" />
+                              Join Virtual Meeting
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          ) : (
+                            <p className="text-sm text-primary flex items-center gap-1">
+                              <Video className="h-4 w-4" />
+                              Also available online
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                   </>
@@ -900,7 +937,18 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       <Video className="h-8 w-8 text-primary" />
                       <span className="text-sm font-medium text-primary">Hybrid Event</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">Online + Physical location TBD</p>
+                    {event.virtualMeetingUrl ? (
+                      <a
+                        href={event.virtualMeetingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-sm text-primary hover:underline mb-2"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        Join Virtual Meeting
+                      </a>
+                    ) : null}
+                    <p className="text-sm text-muted-foreground">Physical location TBD</p>
                   </div>
                 ) : (
                   <div className="p-4 sm:p-6">
