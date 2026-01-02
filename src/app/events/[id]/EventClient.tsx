@@ -509,6 +509,24 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
     );
   };
 
+  // Ensure URL has a protocol for external links
+  const formatExternalUrl = (url: string) => {
+    if (!url) return url;
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    return `https://${url}`;
+  };
+
+  // Check if virtual meeting can be joined (10 minutes before event start)
+  const canJoinVirtualMeeting = () => {
+    if (!event) return false;
+    const now = new Date();
+    const eventStart = new Date(event.startDateTime);
+    const tenMinutesBefore = new Date(eventStart.getTime() - 10 * 60 * 1000);
+    return now >= tenMinutesBefore;
+  };
+
   const statusColors = {
     [EventStatus.PUBLISHED]:
       "bg-green-500/20 text-green-400 border-green-500/30",
@@ -842,15 +860,21 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       <span className="text-sm font-medium text-primary">Online Event</span>
                     </div>
                     {event.virtualMeetingUrl ? (
-                      <a
-                        href={event.virtualMeetingUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-sm text-primary hover:underline"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                        Join Virtual Meeting
-                      </a>
+                      canJoinVirtualMeeting() ? (
+                        <a
+                          href={formatExternalUrl(event.virtualMeetingUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-sm text-primary hover:underline"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Join Virtual Meeting
+                        </a>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          Meeting link available 10 minutes before event
+                        </p>
+                      )
                     ) : (
                       <p className="text-sm text-muted-foreground">
                         Meeting link will be shared before the event
@@ -911,16 +935,23 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       {isHybridEvent(event.format) && (
                         <div className="mt-3 pt-3 border-t border-neutral-700">
                           {event.virtualMeetingUrl ? (
-                            <a
-                              href={event.virtualMeetingUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2 text-sm text-primary hover:underline"
-                            >
-                              <Video className="h-4 w-4" />
-                              Join Virtual Meeting
-                              <ExternalLink className="h-3 w-3" />
-                            </a>
+                            canJoinVirtualMeeting() ? (
+                              <a
+                                href={formatExternalUrl(event.virtualMeetingUrl)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-sm text-primary hover:underline"
+                              >
+                                <Video className="h-4 w-4" />
+                                Join Virtual Meeting
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            ) : (
+                              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                <Video className="h-4 w-4" />
+                                Meeting link available 10 minutes before event
+                              </p>
+                            )
                           ) : (
                             <p className="text-sm text-primary flex items-center gap-1">
                               <Video className="h-4 w-4" />
@@ -938,15 +969,21 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       <span className="text-sm font-medium text-primary">Hybrid Event</span>
                     </div>
                     {event.virtualMeetingUrl ? (
-                      <a
-                        href={event.virtualMeetingUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-sm text-primary hover:underline mb-2"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                        Join Virtual Meeting
-                      </a>
+                      canJoinVirtualMeeting() ? (
+                        <a
+                          href={formatExternalUrl(event.virtualMeetingUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-sm text-primary hover:underline mb-2"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Join Virtual Meeting
+                        </a>
+                      ) : (
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Meeting link available 10 minutes before event
+                        </p>
+                      )
                     ) : null}
                     <p className="text-sm text-muted-foreground">Physical location TBD</p>
                   </div>
