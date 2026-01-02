@@ -385,6 +385,12 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
       return;
     }
 
+    // Validate event format is selected
+    if (eventFormat === null) {
+      toast.error("Please select an event format (location)");
+      return;
+    }
+
     // Validate virtual meeting URL for virtual/hybrid events
     if (
       (eventFormat === EventFormat.VIRTUAL || eventFormat === EventFormat.BOTH) &&
@@ -1025,7 +1031,14 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               >
                 <MapPin className="h-5 w-5 text-muted-foreground" />
                 <div className="flex-1 text-left">
-                  {eventFormat === EventFormat.VIRTUAL ? (
+                  {eventFormat === null ? (
+                    <>
+                      <p className="text-base font-semibold text-foreground">Location</p>
+                      <p className="text-sm text-muted-foreground">
+                        Add venue location or virtual link
+                      </p>
+                    </>
+                  ) : eventFormat === EventFormat.VIRTUAL ? (
                     <>
                       <div className="flex items-center gap-2">
                         <p className="text-base font-semibold text-foreground">Virtual</p>
@@ -1423,34 +1436,6 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               </button>
             </div>
 
-            {/* Hide Full Address Toggle */}
-            <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
-              <div>
-                <p className="text-base font-semibold text-foreground">
-                  Hide Full Address
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Only reveal full address after registration
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setHideFullAddress((prev) => !prev)}
-                className={`h-7 w-14 rounded-full transition-all ${
-                  hideFullAddress
-                    ? "bg-primary"
-                    : "bg-card-secondary-background"
-                }`}
-              >
-                <span
-                  className={`block h-6 w-6 rounded-full transition-all ${
-                    hideFullAddress
-                      ? "translate-x-7 bg-primary-foreground"
-                      : "translate-x-0.5 bg-foreground"
-                  }`}
-                />
-              </button>
-            </div>
           </div>
 
           {/* Visibility Toggle - Only shown in edit mode */}

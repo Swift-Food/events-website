@@ -41,6 +41,8 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
     setEventFormat,
     virtualMeetingUrl,
     setVirtualMeetingUrl,
+    hideFullAddress,
+    setHideFullAddress,
   } = useEventCreation();
 
   // Local state for editing
@@ -53,6 +55,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
   const [localPostcode, setLocalPostcode] = useState(postcode);
   const [localLatitude, setLocalLatitude] = useState<number | null>(latitude);
   const [localLongitude, setLocalLongitude] = useState<number | null>(longitude);
+  const [localHideFullAddress, setLocalHideFullAddress] = useState(hideFullAddress);
   const [addressValidationError, setAddressValidationError] = useState<string | null>(null);
 
   // Google Places Autocomplete refs
@@ -72,9 +75,10 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
       setLocalPostcode(postcode);
       setLocalLatitude(latitude);
       setLocalLongitude(longitude);
+      setLocalHideFullAddress(hideFullAddress);
       setAddressValidationError(null);
     }
-  }, [isOpen, eventFormat, virtualMeetingUrl, venueName, addressLine1, addressLine2, city, postcode, latitude, longitude]);
+  }, [isOpen, eventFormat, virtualMeetingUrl, venueName, addressLine1, addressLine2, city, postcode, latitude, longitude, hideFullAddress]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -254,6 +258,12 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
   };
 
   const handleSave = () => {
+    // Validate format is selected
+    if (localEventFormat === null) {
+      setAddressValidationError("Please select an event format");
+      return;
+    }
+
     // Validate virtual meeting URL for virtual/hybrid events
     if (
       (localEventFormat === EventFormat.VIRTUAL || localEventFormat === EventFormat.BOTH) &&
@@ -289,6 +299,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
       setPostcode(localPostcode);
       setLatitude(localLatitude);
       setLongitude(localLongitude);
+      setHideFullAddress(localHideFullAddress);
 
       // Update the full location string
       const fullAddress = [localAddressLine1, localAddressLine2, localCity, localPostcode]
@@ -305,6 +316,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
       setLatitude(null);
       setLongitude(null);
       setLocation("");
+      setHideFullAddress(false);
     }
 
     onClose();
@@ -505,6 +517,35 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
                   )}
                 </div>
               )}
+
+              {/* Hide Full Address Toggle */}
+              <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    Hide Full Address
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Only reveal after registration
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setLocalHideFullAddress((prev) => !prev)}
+                  className={`h-6 w-11 rounded-full transition-all ${
+                    localHideFullAddress
+                      ? "bg-primary"
+                      : "bg-card-secondary-background"
+                  }`}
+                >
+                  <span
+                    className={`block h-5 w-5 rounded-full transition-all ${
+                      localHideFullAddress
+                        ? "translate-x-5 bg-primary-foreground"
+                        : "translate-x-0.5 bg-foreground"
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
           </>
         )}
