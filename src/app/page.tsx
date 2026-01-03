@@ -5,11 +5,24 @@ import { calendarsApi } from "@/services/calendars";
 import { categoriesApi } from "@/services/categories";
 import { Calendar as CalendarType } from "@/types/calendar";
 import { EventCategoryType, EventCategoryResponseDto } from "@/types/category";
-import { ChevronRight as ArrowRight } from "lucide-react";
+import { ChevronRight as ArrowRight, icons, LucideProps } from "lucide-react";
 import CalendarCard from "@/components/CalendarCard";
 import UpcomingEventsSection from "@/components/UpcomingEventsSection";
 import HorizontalCalendarCard from "@/components/HorizontalCalendarCard";
 import Link from "next/link";
+
+// Dynamic icon component for Lucide icons
+const DynamicIcon = ({ name, ...props }: { name: string } & LucideProps) => {
+  const IconComponent = icons[name as keyof typeof icons];
+
+  if (!IconComponent) {
+    // Fallback to a default icon if not found
+    const FallbackIcon = icons.Circle;
+    return <FallbackIcon {...props} />;
+  }
+
+  return <IconComponent {...props} />;
+};
 
 export default function DiscoveryPage() {
   // Calendars state
@@ -74,6 +87,44 @@ export default function DiscoveryPage() {
           </p>
         </div>
 
+        {/* Event Categories Section */}
+        {!loadingCategories && allCategories.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-foreground mb-4">
+              Browse by Category
+            </h2>
+
+            <div className="overflow-x-auto pb-4 -mx-4 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              <div className="flex gap-6">
+                {allCategories.slice(0, 12).map((category) => (
+                  <Link
+                    key={category.id}
+                    href={`/events?category=${category.name}`}
+                    className="flex flex-col items-center gap-2 cursor-pointer group"
+                  >
+                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      {category.iconName ? (
+                        <DynamicIcon
+                          name={category.iconName}
+                          className="w-6 h-6 text-primary"
+                        />
+                      ) : (
+                        <DynamicIcon
+                          name="circle"
+                          className="w-6 h-6 text-primary"
+                        />
+                      )}
+                    </div>
+                    <span className="text-xs font-medium text-foreground text-center whitespace-nowrap">
+                      {getCategoryLabel(category.name)}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Upcoming Events Section */}
         <UpcomingEventsSection />
 
@@ -104,49 +155,6 @@ export default function DiscoveryPage() {
             <div className="hidden sm:grid sm:grid-cols-3 gap-3">
               {calendars.slice(0, 3).map((calendar) => (
                 <CalendarCard key={calendar.id} calendar={calendar} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Event Categories Section */}
-        {!loadingCategories && allCategories.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-foreground mb-4">
-              Browse by Category
-            </h2>
-
-            {/* Mobile: Horizontal scroll with 2 rows */}
-            <div className="overflow-x-auto pb-4 -mx-4 px-4 sm:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              <div className="flex flex-col gap-2">
-                {[0, 1].map((rowIndex) => (
-                  <div key={rowIndex} className="flex gap-2">
-                    {allCategories
-                      .slice(0, 12)
-                      .filter((_, i) => i % 2 === rowIndex)
-                      .map((category) => (
-                        <Link
-                          key={category.id}
-                          href={`/events?category=${category.name}`}
-                          className="rounded-xl px-4 py-2.5 text-sm font-medium border border-white/10 bg-card-background text-foreground hover:bg-card-background/80 cursor-pointer transition-colors text-center whitespace-nowrap"
-                        >
-                          {getCategoryLabel(category.name)}
-                        </Link>
-                      ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* Desktop: 4-column grid */}
-            <div className="hidden sm:grid sm:grid-cols-4 gap-2">
-              {allCategories.slice(0, 12).map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/events?category=${category.name}`}
-                  className="rounded-xl px-3 py-2.5 text-sm font-medium border border-white/10 bg-card-background text-foreground hover:bg-card-background/80 cursor-pointer transition-colors text-center truncate"
-                >
-                  {getCategoryLabel(category.name)}
-                </Link>
               ))}
             </div>
           </div>
