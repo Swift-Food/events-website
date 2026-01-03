@@ -9,9 +9,9 @@ import { useAuth } from "@/lib/auth/authContext";
 
 const navLinks = [
   // { href: "/", label: "Home" },
+  { href: "/", label: "Discover" },
   { href: "/my-tickets", label: "Tickets", requiresAuth: true },
   { href: "/event-management", label: "Manage", requiresAuth: true },
-  // { href: "/profile", label: "Profile" },
 ];
 
 export default function Navbar() {
