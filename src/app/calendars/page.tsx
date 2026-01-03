@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { calendarsApi } from "@/services/calendars";
 import { Calendar, CalendarType } from "@/types/calendar";
 import { Search, Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-react";
-import CalendarCard from "@/components/CalendarCard";
+import SquareCalendarCard from "@/components/SquareCalendarCard";
 
 export default function CalendarDiscoveryPage() {
   const [calendars, setCalendars] = useState<Calendar[]>([]);
@@ -72,7 +72,7 @@ export default function CalendarDiscoveryPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
@@ -206,9 +206,9 @@ export default function CalendarDiscoveryPage() {
 
         {/* Calendar Grid */}
         {!loading && !error && calendars.length > 0 && (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="flex flex-wrap gap-4">
             {calendars.map((calendar) => (
-              <CalendarCard key={calendar.id} calendar={calendar} />
+              <SquareCalendarCard key={calendar.id} calendar={calendar} size={180} />
             ))}
           </div>
         )}

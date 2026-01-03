@@ -6,9 +6,8 @@ import { categoriesApi } from "@/services/categories";
 import { Calendar as CalendarType } from "@/types/calendar";
 import { EventCategoryType, EventCategoryResponseDto } from "@/types/category";
 import { ChevronRight as ArrowRight, icons, LucideProps } from "lucide-react";
-import CalendarCard from "@/components/CalendarCard";
+import SquareCalendarCard from "@/components/SquareCalendarCard";
 import UpcomingEventsSection from "@/components/UpcomingEventsSection";
-import HorizontalCalendarCard from "@/components/HorizontalCalendarCard";
 import Link from "next/link";
 
 // Dynamic icon component for Lucide icons
@@ -143,18 +142,11 @@ export default function DiscoveryPage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-            {/* Mobile: Horizontal scroll */}
-            <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              {calendars.slice(0, 5).map((calendar) => (
-                <div key={calendar.id} className="flex-shrink-0 w-[80vw]">
-                  <HorizontalCalendarCard calendar={calendar} />
+            <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              {calendars.slice(0, 6).map((calendar) => (
+                <div key={calendar.id} className="flex-shrink-0">
+                  <SquareCalendarCard calendar={calendar} size={200} />
                 </div>
-              ))}
-            </div>
-            {/* Desktop: 3-column grid */}
-            <div className="hidden sm:grid sm:grid-cols-3 gap-3">
-              {calendars.slice(0, 3).map((calendar) => (
-                <CalendarCard key={calendar.id} calendar={calendar} />
               ))}
             </div>
           </div>
