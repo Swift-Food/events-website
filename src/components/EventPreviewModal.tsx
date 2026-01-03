@@ -506,20 +506,14 @@ export default function EventPreviewModal({
               {event.categories && event.categories.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-6">
                   {event.categories.map((category) => (
-                    <span
+                    <Link
                       key={category.id}
-                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-medium text-foreground"
-                      // style={
-                      //   category.color
-                      //     ? {
-                      //         borderColor: category.color + "40",
-                      //         color: category.color,
-                      //       }
-                      //     : undefined
-                      // }
+                      href={`/events?category=${category.name}`}
+                      onClick={handleClose}
+                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-medium text-foreground transition-colors hover:border-primary/50 hover:bg-primary/10"
                     >
                       {category.name}
-                    </span>
+                    </Link>
                   ))}
                 </div>
               )}
