@@ -10,4 +10,6 @@ export interface EventCategoryResponseDto {
   name: EventCategoryType;
   description?: string;
   image?: string | null;
+  iconName?: string | null;
+  eventCount?: number;
 }
