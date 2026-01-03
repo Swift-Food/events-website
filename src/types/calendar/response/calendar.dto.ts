@@ -1,3 +1,8 @@
+/**
+ * Calendar response DTOs
+ * Backend source: src/features/event-management/calendars/dto/response.dto.ts
+ */
+
 import { CalendarType, CalendarRole } from '../enums';
 import { EventResponseDto } from '@/types/event';
 
@@ -103,6 +108,8 @@ export interface CalendarSubscription {
 export interface ListCalendarsResponse {
   calendars: Calendar[];
   total: number;
+  skip: number;
+  take: number;
 }
 
 export interface AcceptInviteResponse {
