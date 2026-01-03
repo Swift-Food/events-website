@@ -9,8 +9,7 @@ interface SquareCalendarCardProps {
 }
 
 export default function SquareCalendarCard({ calendar, size = 160 }: SquareCalendarCardProps) {
-  // Use subscriber count as event count placeholder
-  const eventCount = calendar.subscriberCount || 0;
+  const eventCount = calendar.eventCount ?? 0;
 
   return (
     <Link
@@ -49,7 +48,7 @@ export default function SquareCalendarCard({ calendar, size = 160 }: SquareCalen
           {calendar.name}
         </h3>
         <p className="text-white/70 text-sm mt-0.5">
-          {eventCount} subscriber{eventCount !== 1 ? "s" : ""}
+          {eventCount} event{eventCount !== 1 ? "s" : ""}
         </p>
       </div>
     </Link>

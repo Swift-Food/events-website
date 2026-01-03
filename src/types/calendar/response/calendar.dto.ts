@@ -51,6 +51,7 @@ export interface Calendar {
   isPublic: boolean;
   addressId?: string;
   subscriberCount: number;
+  eventCount?: number;
   createdAt: string; // ISO date
   updatedAt: string; // ISO date
 
