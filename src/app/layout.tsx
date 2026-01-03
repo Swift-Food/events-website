@@ -80,7 +80,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_GB",
-    url: "https://prismo-events.netlify.app/",
+    url: "https://prismo.live/",
     siteName: "Prismo",
     title: "Prismo",
     description: "",
