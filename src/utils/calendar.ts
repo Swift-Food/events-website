@@ -139,8 +139,14 @@ export function buildLocationString(address?: {
   addressLine2?: string | null;
   city?: string | null;
   zipcode?: string | null;
+  isObscured?: boolean;
 }): string {
   if (!address) return '';
+
+  // For obscured addresses, only show city and partial postcode
+  if (address.isObscured) {
+    return [address.city, address.zipcode].filter(Boolean).join(', ');
+  }
 
   return [
     address.name,

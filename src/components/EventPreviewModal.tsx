@@ -9,6 +9,7 @@ import { CollaboratorRole } from "@/types/event-collaborator";
 import { paymentService } from "@/services/payment.service";
 import { useAuth } from "@/lib/auth/authContext";
 import { EventResponseDto, EventStatus } from "@/types/event";
+import { isVirtualEvent, isHybridEvent } from "@/types/event/status";
 import { GuestTicketStatus } from "@/types/guest-ticket";
 import type { PaymentFlowState } from "@/types/payment";
 import {
@@ -26,6 +27,7 @@ import {
   ScanLine,
   Crown,
   Shield,
+  Video,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -120,6 +122,7 @@ export default function EventPreviewModal({
         setLoading(true);
         setError(null);
         const data = await eventsApi.findById(eventId);
+        console.log("Event details in modal: ", data)
         setEvent(data);
       } catch (err) {
         console.error("Failed to fetch event details:", err);
@@ -323,6 +326,24 @@ export default function EventPreviewModal({
     );
   };
 
+  // Ensure URL has a protocol for external links
+  const formatExternalUrl = (url: string) => {
+    if (!url) return url;
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    return `https://${url}`;
+  };
+
+  // Check if virtual meeting can be joined (10 minutes before event start)
+  const canJoinVirtualMeeting = () => {
+    if (!event) return false;
+    const now = new Date();
+    const eventStart = new Date(event.startDateTime);
+    const tenMinutesBefore = new Date(eventStart.getTime() - 10 * 60 * 1000);
+    return now >= tenMinutesBefore;
+  };
+
   const handleClose = () => {
     setIsAnimating(false);
     setTimeout(() => {
@@ -443,7 +464,7 @@ export default function EventPreviewModal({
               )}
 
               {/* Event Image */}
-              <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-neutral-700 bg-card-secondary-background mb-6">
+              <div className="relative aspect-square w-3/5 mx-auto overflow-hidden rounded-2xl border border-neutral-700 bg-card-secondary-background mb-6">
                 {event.eventImage ? (
                   <Image
                     src={event.eventImage}
@@ -633,121 +654,151 @@ export default function EventPreviewModal({
                 </div>
               </div>
 
-              {/* Description */}
-              <div className="mb-4">
-                <h2 className="mb-3 text-lg font-semibold text-muted-foreground">
-                  About this event
-                </h2>
-                {event.description ? (
-                  <div
-                    className="tiptap-editor tiptap-view-mode"
-                    dangerouslySetInnerHTML={{ __html: event.description }}
-                  />
-                ) : (
-                  <p className="text-muted-foreground">No description provided.</p>
-                )}
-              </div>
-
               {/* Location */}
-              {event.address && (
-                <div className="rounded-xl border border-neutral-700 bg-card-background overflow-hidden mb-4">
-                  {event.address.location?.latitude &&
-                  event.address.location?.longitude ? (
-                    <GoogleMap
-                      latitude={event.address.location.latitude}
-                      longitude={event.address.location.longitude}
-                      title={event.address.name}
-                      className="h-32 w-full !rounded-none"
-                      placeId={event.address.placeId}
-                    />
-                  ) : (
-                    <div className="h-32 w-full bg-card-secondary-background flex flex-col items-center justify-center gap-2">
+              <div className="rounded-xl border border-neutral-700 bg-card-background overflow-hidden mb-4">
+                {isVirtualEvent(event.format) ? (
+                  <div className="p-4">
+                    <div className="h-32 w-full bg-primary/10 rounded-lg flex flex-col items-center justify-center gap-2 mb-4">
+                      <Video className="h-8 w-8 text-primary" />
+                      <span className="text-sm font-medium text-primary">Online Event</span>
+                    </div>
+                    {event.virtualMeetingUrl ? (
+                      canJoinVirtualMeeting() ? (
+                        <a
+                          href={formatExternalUrl(event.virtualMeetingUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-sm text-primary hover:underline"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Join Virtual Meeting
+                        </a>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          Meeting link available 10 minutes before event
+                        </p>
+                      )
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        Meeting link will be shared before the event
+                      </p>
+                    )}
+                  </div>
+                ) : event.address ? (
+                  <>
+                    {event.address.isObscured ? (
+                      <div className="h-32 w-full bg-card-secondary-background flex flex-col items-center justify-center gap-2">
+                        <MapPin className="h-5 w-5 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Location hidden</span>
+                      </div>
+                    ) : event.address.location?.latitude &&
+                    event.address.location?.longitude ? (
+                      <GoogleMap
+                        latitude={event.address.location.latitude}
+                        longitude={event.address.location.longitude}
+                        title={event.address.name}
+                        className="h-32 w-full !rounded-none"
+                        placeId={event.address.placeId}
+                      />
+                    ) : (
+                      <div className="h-32 w-full bg-card-secondary-background flex flex-col items-center justify-center gap-2">
+                        <MapPin className="h-5 w-5 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Map</span>
+                      </div>
+                    )}
+                    <div className="p-4">
+                      {event.address.isObscured ? (
+                        <>
+                          <p className="text-sm text-muted-foreground">
+                            {event.address.city}, {event.address.zipcode}
+                          </p>
+                          <p className="text-xs text-muted-foreground/70 mt-2">
+                            Full address revealed after registration
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          {event.address.name && event.address.name !== event.name && (
+                            <h3 className="font-semibold text-foreground mb-1">
+                              {event.address.name}
+                            </h3>
+                          )}
+                          <p className="text-sm text-muted-foreground">
+                            {[
+                              event.address.addressLine1,
+                              event.address.addressLine2,
+                              event.address.city,
+                              event.address.zipcode,
+                            ]
+                              .filter(Boolean)
+                              .join(", ")}
+                          </p>
+                        </>
+                      )}
+                      {isHybridEvent(event.format) && (
+                        <div className="mt-3 pt-3 border-t border-neutral-700">
+                          {event.virtualMeetingUrl ? (
+                            canJoinVirtualMeeting() ? (
+                              <a
+                                href={formatExternalUrl(event.virtualMeetingUrl)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-sm text-primary hover:underline"
+                              >
+                                <Video className="h-4 w-4" />
+                                Join Virtual Meeting
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            ) : (
+                              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                <Video className="h-4 w-4" />
+                                Meeting link available 10 minutes before event
+                              </p>
+                            )
+                          ) : (
+                            <p className="text-sm text-primary flex items-center gap-1">
+                              <Video className="h-4 w-4" />
+                              Also available online
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : isHybridEvent(event.format) ? (
+                  <div className="p-4">
+                    <div className="h-32 w-full bg-primary/10 rounded-lg flex flex-col items-center justify-center gap-2 mb-4">
+                      <Video className="h-8 w-8 text-primary" />
+                      <span className="text-sm font-medium text-primary">Hybrid Event</span>
+                    </div>
+                    {event.virtualMeetingUrl ? (
+                      canJoinVirtualMeeting() ? (
+                        <a
+                          href={formatExternalUrl(event.virtualMeetingUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-sm text-primary hover:underline mb-2"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Join Virtual Meeting
+                        </a>
+                      ) : (
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Meeting link available 10 minutes before event
+                        </p>
+                      )
+                    ) : null}
+                    <p className="text-sm text-muted-foreground">Physical location TBD</p>
+                  </div>
+                ) : (
+                  <div className="p-4">
+                    <div className="h-32 w-full bg-card-secondary-background rounded-lg flex flex-col items-center justify-center gap-2 mb-4">
                       <MapPin className="h-5 w-5 text-muted-foreground" />
                       <span className="text-sm text-muted-foreground">Map</span>
                     </div>
-                  )}
-                  <div className="p-4">
-                    {event.address.name && event.address.name !== event.name && (
-                      <h3 className="font-semibold text-foreground mb-1">
-                        {event.address.name}
-                      </h3>
-                    )}
-                    <p className="text-sm text-muted-foreground">
-                      {[
-                        event.address.addressLine1,
-                        event.address.addressLine2,
-                        event.address.city,
-                        event.address.zipcode,
-                      ]
-                        .filter(Boolean)
-                        .join(", ")}
-                    </p>
+                    <p className="text-sm text-muted-foreground">Location TBD</p>
                   </div>
-                </div>
-              )}
-
-              
-
-              {/* Organizer & Stats Row */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                {/* Organizer */}
-                <div className="rounded-xl border border-white/10 bg-card-background p-4">
-                  <p className="text-xs text-muted-foreground mb-2">Organized by</p>
-                  {event.owner?.user ? (
-                    <div className="flex items-center gap-2">
-                      {event.owner.user.profilePicture ? (
-                        <Image
-                          src={event.owner.user.profilePicture}
-                          alt={event.owner.user.username || "Organizer"}
-                          width={32}
-                          height={32}
-                          className="rounded-full"
-                        />
-                      ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                          <User className="h-4 w-4 text-primary" />
-                        </div>
-                      )}
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {event.owner.user.username || "Anonymous"}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                        <User className="h-4 w-4 text-primary" />
-                      </div>
-                      <p className="text-sm font-medium text-foreground">
-                        Event Organizer
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Stats */}
-                <div className="rounded-xl border border-neutral-700 bg-card-background p-4">
-                  <p className="text-xs text-muted-foreground mb-2">Stats</p>
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <Users className="h-3 w-3" />
-                        Attendees
-                      </span>
-                      <span className="font-medium text-foreground">
-                        {event.attendeesCount || 0}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        Views
-                      </span>
-                      <span className="font-medium text-foreground">
-                        {event.viewCount ?? 0}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Tickets */}
@@ -910,7 +961,82 @@ export default function EventPreviewModal({
                   );
                 })()}
 
-              
+              {/* Description */}
+              <div className="mb-4">
+                <h2 className="mb-3 text-lg font-semibold text-muted-foreground">
+                  About this event
+                </h2>
+                {event.description ? (
+                  <div
+                    className="tiptap-editor tiptap-view-mode"
+                    dangerouslySetInnerHTML={{ __html: event.description }}
+                  />
+                ) : (
+                  <p className="text-muted-foreground">No description provided.</p>
+                )}
+              </div>
+
+              {/* Organizer & Stats Row */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                {/* Organizer */}
+                <div className="rounded-xl border border-white/10 bg-card-background p-4">
+                  <p className="text-xs text-muted-foreground mb-2">Organized by</p>
+                  {event.owner?.user ? (
+                    <div className="flex items-center gap-2">
+                      {event.owner.user.profilePicture ? (
+                        <Image
+                          src={event.owner.user.profilePicture}
+                          alt={event.owner.user.username || "Organizer"}
+                          width={32}
+                          height={32}
+                          className="rounded-full"
+                        />
+                      ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                          <User className="h-4 w-4 text-primary" />
+                        </div>
+                      )}
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {event.owner.user.username || "Anonymous"}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                        <User className="h-4 w-4 text-primary" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground">
+                        Event Organizer
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Stats */}
+                <div className="rounded-xl border border-neutral-700 bg-card-background p-4">
+                  <p className="text-xs text-muted-foreground mb-2">Stats</p>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        Attendees
+                      </span>
+                      <span className="font-medium text-foreground">
+                        {event.attendeesCount || 0}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        Views
+                      </span>
+                      <span className="font-medium text-foreground">
+                        {event.viewCount ?? 0}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>

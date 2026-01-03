@@ -432,6 +432,10 @@ export default function EventManagementPage() {
               eventStatus={eventData.status}
               onPublishToggle={handlePublishToggle}
               isPublishLoading={isPublishLoading}
+              onSaveSuccess={() => {
+                setShowEditModal(false);
+                fetchEvent();
+              }}
             />
           </div>
         </>

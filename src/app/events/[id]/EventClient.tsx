@@ -35,6 +35,7 @@ import {
   Lock,
   Video,
   Ban,
+  ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -123,6 +124,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
   const [userRole, setUserRole] = useState<UserRole>(null);
 
   // Re-fetch event data when user is authenticated to get userTicket info
+  // This is needed because the initial server-side fetch doesn't have auth context
   useEffect(() => {
     const fetchAuthenticatedEventData = async () => {
       if (!isAuthenticated || authLoading) return;
@@ -393,7 +395,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
     }
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = async () => {
     setShowPaymentModal(false);
     if (paymentData) {
       setSuccessTicketDetails({
@@ -403,6 +405,14 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
     }
     setShowSuccessModal(true);
     setPaymentData(null);
+
+    // Re-fetch event data to get updated info (virtualMeetingUrl, userTicket, etc.)
+    try {
+      const data = await eventsApi.findById(eventId);
+      setEvent(data);
+    } catch (err) {
+      console.error("Failed to refresh event data after payment:", err);
+    }
   };
 
   const handlePaymentClose = () => {
@@ -497,6 +507,24 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
       d1.getMonth() === d2.getMonth() &&
       d1.getDate() === d2.getDate()
     );
+  };
+
+  // Ensure URL has a protocol for external links
+  const formatExternalUrl = (url: string) => {
+    if (!url) return url;
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    return `https://${url}`;
+  };
+
+  // Check if virtual meeting can be joined (10 minutes before event start)
+  const canJoinVirtualMeeting = () => {
+    if (!event) return false;
+    const now = new Date();
+    const eventStart = new Date(event.startDateTime);
+    const tenMinutesBefore = new Date(eventStart.getTime() - 10 * 60 * 1000);
+    return now >= tenMinutesBefore;
   };
 
   const statusColors = {
@@ -831,14 +859,37 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       <Video className="h-8 w-8 text-primary" />
                       <span className="text-sm font-medium text-primary">Online Event</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {event.virtualMeetingUrl ? "Virtual meeting link will be available to ticket holders" : "Meeting link will be shared before the event"}
-                    </p>
+                    {event.virtualMeetingUrl ? (
+                      canJoinVirtualMeeting() ? (
+                        <a
+                          href={formatExternalUrl(event.virtualMeetingUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-sm text-primary hover:underline"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Join Virtual Meeting
+                        </a>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          Meeting link available 10 minutes before event
+                        </p>
+                      )
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        Meeting link will be shared before the event
+                      </p>
+                    )}
                   </div>
                 ) : event.address ? (
                   <>
-                    {/* Map Area */}
-                    {event.address.location?.latitude && event.address.location?.longitude ? (
+                    {/* Map Area - only show if address is not obscured */}
+                    {event.address.isObscured ? (
+                      <div className="h-40 w-full bg-card-secondary-background flex flex-col items-center justify-center gap-2">
+                        <MapPin className="h-5 w-5 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Location hidden</span>
+                      </div>
+                    ) : event.address.location?.latitude && event.address.location?.longitude ? (
                       <GoogleMap
                         latitude={event.address.location.latitude}
                         longitude={event.address.location.longitude}
@@ -855,24 +906,59 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
 
                     {/* Address Details */}
                     <div className="p-4">
-                      {event.address.name && event.address.name !== event.name && (
-                        <h3 className="font-semibold text-foreground mb-1">
-                          {event.address.name}
-                        </h3>
+                      {event.address.isObscured ? (
+                        <>
+                          <p className="text-sm text-muted-foreground">
+                            {event.address.city}, {event.address.zipcode}
+                          </p>
+                          <p className="text-xs text-muted-foreground/70 mt-2">
+                            Full address revealed after registration
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          {event.address.name && event.address.name !== event.name && (
+                            <h3 className="font-semibold text-foreground mb-1">
+                              {event.address.name}
+                            </h3>
+                          )}
+                          <p className="text-sm text-muted-foreground">
+                            {[
+                              event.address.addressLine1,
+                              event.address.addressLine2,
+                              event.address.city,
+                              event.address.zipcode
+                            ].filter(Boolean).join(', ')}
+                          </p>
+                        </>
                       )}
-                      <p className="text-sm text-muted-foreground">
-                        {[
-                          event.address.addressLine1,
-                          event.address.addressLine2,
-                          event.address.city,
-                          event.address.zipcode
-                        ].filter(Boolean).join(', ')}
-                      </p>
                       {isHybridEvent(event.format) && (
-                        <p className="text-sm text-primary mt-2 flex items-center gap-1">
-                          <Video className="h-4 w-4" />
-                          Also available online
-                        </p>
+                        <div className="mt-3 pt-3 border-t border-neutral-700">
+                          {event.virtualMeetingUrl ? (
+                            canJoinVirtualMeeting() ? (
+                              <a
+                                href={formatExternalUrl(event.virtualMeetingUrl)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-sm text-primary hover:underline"
+                              >
+                                <Video className="h-4 w-4" />
+                                Join Virtual Meeting
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            ) : (
+                              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                <Video className="h-4 w-4" />
+                                Meeting link available 10 minutes before event
+                              </p>
+                            )
+                          ) : (
+                            <p className="text-sm text-primary flex items-center gap-1">
+                              <Video className="h-4 w-4" />
+                              Also available online
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                   </>
@@ -882,7 +968,24 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       <Video className="h-8 w-8 text-primary" />
                       <span className="text-sm font-medium text-primary">Hybrid Event</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">Online + Physical location TBD</p>
+                    {event.virtualMeetingUrl ? (
+                      canJoinVirtualMeeting() ? (
+                        <a
+                          href={formatExternalUrl(event.virtualMeetingUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-sm text-primary hover:underline mb-2"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Join Virtual Meeting
+                        </a>
+                      ) : (
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Meeting link available 10 minutes before event
+                        </p>
+                      )
+                    ) : null}
+                    <p className="text-sm text-muted-foreground">Physical location TBD</p>
                   </div>
                 ) : (
                   <div className="p-4 sm:p-6">

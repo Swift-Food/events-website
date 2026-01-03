@@ -1,18 +1,23 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, MapPin, Ticket, Video, Lock } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Calendar, Clock, MapPin, Ticket, Video, Lock } from "lucide-react";
 import { EventResponseDto } from "@/types/event";
-import { isVirtualEvent } from "@/types/event/status";
+import { isVirtualEvent, isHybridEvent, hasOnlineComponent } from "@/types/event/status";
 
 interface HorizontalEventCardProps {
   event: EventResponseDto;
-  isHostedEvent?: boolean;
+  linkToManagement?: boolean;
+  showDate?: boolean;
+  showCategories?: boolean;
   onClick?: (e: React.MouseEvent, event: EventResponseDto) => void;
 }
 
 export default function HorizontalEventCard({
   event,
-  isHostedEvent = false,
+  linkToManagement = false,
+  showDate = false,
+  showCategories = true,
   onClick,
 }: HorizontalEventCardProps) {
   const formatTime = (date: string | Date) => {
@@ -20,6 +25,15 @@ export default function HorizontalEventCard({
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
+    });
+  };
+
+  const formatDate = (date: string | Date) => {
+    const d = new Date(date);
+    return d.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -49,7 +63,6 @@ export default function HorizontalEventCard({
     return `From £${minPrice.toFixed(2)}`;
   };
 
-  const primaryCategory = event.categories?.[0];
 
   // Check if event is currently ongoing
   const now = new Date();
@@ -64,28 +77,102 @@ export default function HorizontalEventCard({
     }
   };
 
+  // Auto-overflow categories
+  const categoriesContainerRef = useRef<HTMLDivElement>(null);
+  const categoryWidthsRef = useRef<number[]>([]);
+  const [visibleCount, setVisibleCount] = useState(event.categories?.length ?? 0);
+
+  const calculateVisibleCategories = useCallback(() => {
+    const container = categoriesContainerRef.current;
+    if (!container || !event.categories?.length) return;
+
+    const children = Array.from(container.children) as HTMLElement[];
+    const containerWidth = container.offsetWidth;
+    const gap = 6; // gap-1.5 = 0.375rem = 6px
+    const overflowBadgeWidth = 40; // approximate width for "+N" badge
+
+    // Measure and store widths on first run (when all items are visible)
+    if (categoryWidthsRef.current.length !== event.categories.length) {
+      categoryWidthsRef.current = children
+        .filter(child => !child.dataset.overflow)
+        .map(child => child.offsetWidth);
+    }
+
+    const widths = categoryWidthsRef.current;
+    let totalWidth = 0;
+    let count = 0;
+
+    for (let i = 0; i < widths.length; i++) {
+      const childWidth = widths[i];
+      const widthWithGap = totalWidth + childWidth + (count > 0 ? gap : 0);
+
+      // Check if we need space for overflow badge
+      const remainingItems = event.categories.length - (count + 1);
+      const needsOverflowBadge = remainingItems > 0;
+      const requiredWidth = needsOverflowBadge ? widthWithGap + gap + overflowBadgeWidth : widthWithGap;
+
+      if (requiredWidth <= containerWidth) {
+        totalWidth = widthWithGap;
+        count++;
+      } else {
+        break;
+      }
+    }
+
+    setVisibleCount(Math.max(1, count)); // show at least 1
+  }, [event.categories?.length]);
+
+  useEffect(() => {
+    // Reset stored widths when categories change
+    categoryWidthsRef.current = [];
+    setVisibleCount(event.categories?.length ?? 0);
+  }, [event.categories]);
+
+  useEffect(() => {
+    // Small delay to ensure DOM is ready for measurement
+    const timer = setTimeout(calculateVisibleCategories, 0);
+
+    const resizeObserver = new ResizeObserver(() => {
+      calculateVisibleCategories();
+    });
+
+    if (categoriesContainerRef.current) {
+      resizeObserver.observe(categoriesContainerRef.current);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      resizeObserver.disconnect();
+    };
+  }, [calculateVisibleCategories]);
+
   return (
     <Link
-      href={isHostedEvent ? `/event-management/${event.id}` : `/events/${event.id}`}
+      href={linkToManagement ? `/event-management/${event.id}` : `/events/${event.id}`}
       onClick={handleClick}
-      className="group relative flex gap-4 overflow-hidden rounded-2xl border border-white/10 bg-card-background p-4 transition-all hover:border-white/20 hover:shadow-2xl"
+      className="group relative flex gap-4 rounded-2xl transition-all py-4 pl-2"
     >
       {/* Status Badges */}
       <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">
         {/* Private/Invite-Only Event Badge */}
-        {event.isPrivate && (
+        {/* {event.isPrivate && (
           <div className="group/private flex items-center gap-1 rounded-full bg-purple-500/90 px-1.5 py-0.5 backdrop-blur-sm transition-all duration-200">
             <Lock className="h-2.5 w-2.5 text-white" />
             <span className="max-w-0 overflow-hidden text-[10px] font-semibold text-white transition-all duration-200 group-hover/private:max-w-[50px] group-hover/private:ml-0.5">PRIVATE</span>
           </div>
-        )}
-        {/* Virtual Event Badge */}
-        {isVirtualEvent(event.format) && (
-          <div className="flex items-center gap-1 rounded-full bg-blue-500/90 px-1.5 py-0.5 backdrop-blur-sm">
+        )} */}
+        {/* Virtual/Hybrid Event Badge */}
+        {/* {isHybridEvent(event.format) ? (
+          <div className="group/hybrid flex items-center gap-1 rounded-full bg-violet-500/90 px-1.5 py-0.5 backdrop-blur-sm transition-all duration-200">
             <Video className="h-2.5 w-2.5 text-white" />
-            <span className="text-[10px] font-semibold text-white">ONLINE</span>
+            <span className="max-w-0 overflow-hidden text-[10px] font-semibold text-white transition-all duration-200 group-hover/hybrid:max-w-[80px] group-hover/hybrid:ml-0.5">Live + Online</span>
           </div>
-        )}
+        ) : isVirtualEvent(event.format) && (
+          <div className="group/virtual flex items-center gap-1 rounded-full bg-blue-500/90 px-1.5 py-0.5 backdrop-blur-sm transition-all duration-200">
+            <Video className="h-2.5 w-2.5 text-white" />
+            <span className="max-w-0 overflow-hidden text-[10px] font-semibold text-white transition-all duration-200 group-hover/virtual:max-w-[50px] group-hover/virtual:ml-0.5">Online</span>
+          </div>
+        )} */}
         {/* Ongoing Badge */}
         {isOngoing && (
           <div className="flex items-center gap-1 rounded-full bg-green-500/90 px-1.5 py-0.5 backdrop-blur-sm">
@@ -98,7 +185,7 @@ export default function HorizontalEventCard({
         )}
       </div>
       {/* Event Image */}
-      <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-card-secondary-background">
+      <div className="relative h-20 w-20 sm:h-24 sm:w-24 flex-shrink-0 overflow-hidden rounded-xl bg-card-secondary-background">
         {event.eventImage ? (
           <Image
             src={event.eventImage}
@@ -118,45 +205,78 @@ export default function HorizontalEventCard({
 
       {/* Event Details */}
       <div className="flex min-w-0 flex-1 flex-col justify-center">
-        {/* Top row: Category and Time */}
-        <div className="mb-1 flex items-center gap-3">
-          {primaryCategory && (
-            <span className="rounded-md bg-primary px-2 py-0.5 text-xs font-semibold text-white">
-              {primaryCategory.name}
-            </span>
-          )}
-          <span className="text-sm text-muted-foreground">
-            {formatTime(event.startDateTime)}
-          </span>
-        </div>
+        {/* Date/Time */}
+        <span className="mb-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Clock className="h-3.5 w-3.5 flex-shrink-0" />
+          {showDate && <>{formatDate(event.startDateTime)} &middot; </>}
+          {formatTime(event.startDateTime)}
+        </span>
 
         {/* Event Name */}
         <h3 className="mb-1 truncate text-base font-semibold text-foreground group-hover:text-primary">
           {event.name}
         </h3>
 
-        {/* Location */}
+        {/* Row 1: Address */}
         {isVirtualEvent(event.format) ? (
-          <div className="mb-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
             <span className="truncate text-blue-400">Online Event</span>
           </div>
-        ) : event.address &&
-          event.address.city &&
-          event.address.city !== "TBD" && (
-            <div className="mb-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-              <span className="truncate">
-                {event.address.city}, {event.address.zipcode}
+        ) : (
+          <div className="flex items-center gap-3">
+            {event.address && event.address.city && event.address.city !== "TBD" && (
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="truncate">
+                  {event.address.city}, {event.address.zipcode}
+                </span>
+              </div>
+            )}
+            {isHybridEvent(event.format) && (
+              <span className="flex items-center gap-1 rounded-md border border-white/20 bg-white/5 px-2 py-0.5 text-xs text-muted-foreground flex-shrink-0">
+                <span>+</span>
+                <Video className="h-3 w-3 flex-shrink-0" />
+                <span>Online</span>
               </span>
-            </div>
-          )}
+            )}
+          </div>
+        )}
 
-        {/* Price */}
+        {/* Row 2: Price */}
         {formatPrice() && (
-          <div className={`flex items-center gap-1.5 text-sm ${isSoldOut ? "text-red-400" : "text-muted-foreground"}`}>
+          <div className={`mt-1 flex items-center gap-1.5 text-sm ${
+            isSoldOut ? "text-red-400" : minPrice === 0 ? "text-green-400" : "text-orange-400"
+          }`}>
             <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
             <span className={isSoldOut ? "font-medium" : ""}>{formatPrice()}</span>
+          </div>
+        )}
+
+        {/* Row 3: Categories */}
+        {showCategories && event.categories && event.categories.length > 0 && (
+          <div ref={categoriesContainerRef} className="mt-1.5 flex items-center gap-1.5">
+            {event.categories.map((category, index) => (
+              <span
+                key={category.id}
+                className={`rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground ${
+                  index >= visibleCount ? "hidden" : ""
+                }`}
+              >
+                {category.name.toLowerCase()}
+              </span>
+            ))}
+            {event.categories.length > visibleCount && (
+              <span
+                data-overflow="true"
+                className="group/tooltip relative rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground cursor-default"
+              >
+                +{event.categories.length - visibleCount}
+                <span className="pointer-events-none absolute top-full left-1/2 z-50 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover/tooltip:opacity-100">
+                  {event.categories.slice(visibleCount).map(c => c.name.toLowerCase()).join(', ')}
+                </span>
+              </span>
+            )}
           </div>
         )}
       </div>

@@ -38,6 +38,7 @@ export interface EventResponseDto {
   viewCount: number;
   acceptingNewTickets: boolean;
   stopAcceptingOnStart: boolean;
+  hideFullAddress: boolean;
   createdAt: string | Date;
   updatedAt: string | Date;
   owner: EventOwnerResponseDto;

@@ -25,16 +25,16 @@ class EventService {
     return response.data;
   }
 
-  async getUpcomingEvents(take: number = 10): Promise<EventListResponseDto> {
-    const response: AxiosResponse<EventListResponseDto> = await apiClient.get(
+  async getUpcomingEvents(take: number = 10): Promise<EventResponseDto[]> {
+    const response: AxiosResponse<EventResponseDto[]> = await apiClient.get(
       `${this.baseUrl}/upcoming`,
       { params: { take } }
     );
     return response.data;
   }
 
-  async getTrendingEvents(take: number = 10): Promise<EventListResponseDto> {
-    const response: AxiosResponse<EventListResponseDto> = await apiClient.get(
+  async getTrendingEvents(take: number = 10): Promise<EventResponseDto[]> {
+    const response: AxiosResponse<EventResponseDto[]> = await apiClient.get(
       `${this.baseUrl}/trending`,
       { params: { take } }
     );
