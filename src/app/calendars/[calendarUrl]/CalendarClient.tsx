@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { calendarService } from "@/services/calendar.service";
 import { useAuth } from "@/lib/auth/authContext";
-import { Calendar, CalendarRole, CalendarType } from "@/types/calendar";
+import { Calendar, CalendarRole } from "@/types/calendar";
 import { EventResponseDto } from "@/types/event";
 import {
   Calendar as CalendarIcon,
@@ -17,7 +17,6 @@ import {
   Settings,
   Trash2,
   UserPlus,
-  Briefcase,
   Crown,
   Shield,
   Edit3,
@@ -317,23 +316,6 @@ export default function CalendarClient({
                 </div>
               )}
 
-              {/* Type Badge */}
-              <div className="absolute right-4 top-4">
-                <span
-                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold backdrop-blur-md ${
-                    calendar.calendarType === CalendarType.TEAM
-                      ? "bg-purple-500/20 text-purple-400 border-purple-500/30"
-                      : "bg-blue-500/20 text-blue-400 border-blue-500/30"
-                  }`}
-                >
-                  {calendar.calendarType === CalendarType.TEAM ? (
-                    <Briefcase className="h-3 w-3" />
-                  ) : (
-                    <User className="h-3 w-3" />
-                  )}
-                  {calendar.calendarType === CalendarType.TEAM ? "Team" : "Personal"}
-                </span>
-              </div>
             </div>
 
             {/* Location Card */}

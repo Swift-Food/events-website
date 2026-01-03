@@ -354,36 +354,6 @@ export default function EditCalendarPage() {
             </div>
           </div>
 
-          {/* Type Selector */}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Calendar Type
-            </label>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setCalendarType(CalendarType.PERSONAL)}
-                className={`flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-all ${
-                  calendarType === CalendarType.PERSONAL
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-white/10 bg-card-background text-foreground hover:border-white/20"
-                }`}
-              >
-                Personal
-              </button>
-              <button
-                type="button"
-                onClick={() => setCalendarType(CalendarType.TEAM)}
-                className={`flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-all ${
-                  calendarType === CalendarType.TEAM
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-white/10 bg-card-background text-foreground hover:border-white/20"
-                }`}
-              >
-                Team
-              </button>
-            </div>
-          </div>
 
           {/* Public/Private Toggle */}
           <div className="flex items-center justify-between rounded-lg border border-white/10 bg-card-background p-4">
