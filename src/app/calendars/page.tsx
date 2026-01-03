@@ -106,39 +106,6 @@ export default function CalendarDiscoveryPage() {
             )}
           </div>
 
-          {/* Type Filter */}
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setCalendarType("all")}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                calendarType === "all"
-                  ? "bg-primary text-white"
-                  : "border border-white/10 bg-card-background text-foreground hover:border-white/20"
-              }`}
-            >
-              All Calendars
-            </button>
-            <button
-              onClick={() => setCalendarType(CalendarType.PERSONAL)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                calendarType === CalendarType.PERSONAL
-                  ? "bg-primary text-white"
-                  : "border border-white/10 bg-card-background text-foreground hover:border-white/20"
-              }`}
-            >
-              Personal
-            </button>
-            <button
-              onClick={() => setCalendarType(CalendarType.TEAM)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                calendarType === CalendarType.TEAM
-                  ? "bg-primary text-white"
-                  : "border border-white/10 bg-card-background text-foreground hover:border-white/20"
-              }`}
-            >
-              Team
-            </button>
-          </div>
         </div>
 
         {/* Results Count */}

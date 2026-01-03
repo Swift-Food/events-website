@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar as CalendarIcon, Users, Briefcase, User } from "lucide-react";
-import { Calendar, CalendarType } from "@/types/calendar";
+import { Calendar as CalendarIcon, Users } from "lucide-react";
+import { Calendar } from "@/types/calendar";
 
 interface CalendarCardProps {
   calendar: Calendar;
@@ -31,22 +31,6 @@ export default function CalendarCard({ calendar }: CalendarCardProps) {
           </div>
         )}
 
-        {/* Type Badge */}
-        <div className="absolute right-2 top-2">
-          <span
-            className={`flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-semibold backdrop-blur-md ${
-              calendar.calendarType === CalendarType.TEAM
-                ? "bg-purple-500/20 text-purple-400 border-purple-500/30"
-                : "bg-blue-500/20 text-blue-400 border-blue-500/30"
-            }`}
-          >
-            {calendar.calendarType === CalendarType.TEAM ? (
-              <Briefcase className="h-3 w-3" />
-            ) : (
-              <User className="h-3 w-3" />
-            )}
-          </span>
-        </div>
       </div>
 
       {/* Calendar Details */}
