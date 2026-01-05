@@ -976,7 +976,11 @@ export default function EventPreviewModal({
                 <div className="rounded-xl border border-white/10 bg-card-background p-4">
                   <p className="text-xs text-muted-foreground mb-2">Organized by</p>
                   {event.owner?.user ? (
-                    <div className="flex items-center gap-2">
+                    <Link
+                      href={`/organizer/${event.owner.user.id}`}
+                      onClick={handleClose}
+                      className="flex items-center gap-2 group"
+                    >
                       {event.owner.user.profilePicture ? (
                         <Image
                           src={event.owner.user.profilePicture}
@@ -990,10 +994,10 @@ export default function EventPreviewModal({
                           <User className="h-4 w-4 text-primary" />
                         </div>
                       )}
-                      <p className="text-sm font-medium text-foreground truncate">
+                      <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
                         {event.owner.user.username || "Anonymous"}
                       </p>
-                    </div>
+                    </Link>
                   ) : (
                     <div className="flex items-center gap-2">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">

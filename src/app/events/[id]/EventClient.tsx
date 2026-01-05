@@ -1027,7 +1027,10 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   )}
                 </div>
                 {event.owner?.user ? (
-                  <div className="flex items-center gap-3">
+                  <Link
+                    href={`/organizer/${event.owner.user.id}`}
+                    className="flex items-center gap-3 group"
+                  >
                     {event.owner.user.profilePicture ? (
                       <Image
                         src={event.owner.user.profilePicture}
@@ -1044,14 +1047,14 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       </div>
                     )}
                     <div>
-                      <p className="font-medium text-foreground">
+                      <p className="font-medium text-foreground group-hover:text-primary transition-colors">
                         {(event.owner.firstName || event.owner.lastName)
                           ? [event.owner.firstName, event.owner.lastName].filter(Boolean).join(' ')
                           : event.owner.user.username || "Anonymous"}
                       </p>
                       <p className="text-sm text-muted-foreground">Organizer</p>
                     </div>
-                  </div>
+                  </Link>
                 ) : (
                   <div className="flex items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
