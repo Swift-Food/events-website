@@ -131,7 +131,7 @@ export function useOAuth({
   // Initialize Apple Sign-In
   useEffect(() => {
     const initializeApple = () => {
-      if (window.AppleID?.auth) {
+      if (window.AppleID?.auth && process.env.NEXT_PUBLIC_APPLE_CLIENT_ID) {
         try {
           window.AppleID.auth.init({
             clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,

@@ -5,23 +5,28 @@ import Image from "next/image";
 import { eventsApi } from "@/services/events";
 import { EventResponseDto, EventListResponseDto, EventStatus } from "@/types/event";
 import EventsTimeline from "@/components/EventsTimeline";
-import { User, Calendar, Users } from "lucide-react";
+import { User, Calendar } from "lucide-react";
 
 interface OrganizerProfile {
   id: string;
   userId: string;
-  organizationName: string | null;
-  eventsCreated: number;
-  eventsAttended: number;
+  firstName?: string;
+  lastName?: string;
+  organizationName?: string;
+  bio?: string;
+  website?: string;
+  twitterHandle?: string;
+  linkedinUrl?: string;
+  totalEventsCreated: number;
+  totalEventsAttended: number;
   createdAt: string;
   updatedAt: string;
-  user: {
+  profilePicture?: string;
+  user?: {
     id: string;
     email: string;
-    username: string;
-    profilePicture: string | null;
-    firstName: string | null;
-    lastName: string | null;
+    username?: string;
+    profilePicture?: string;
   };
 }
 
@@ -47,11 +52,13 @@ export default function OrganizerProfileClient({
 
   const displayName =
     initialProfile.organizationName ||
-    [initialProfile.user.firstName, initialProfile.user.lastName]
+    [initialProfile.firstName, initialProfile.lastName]
       .filter(Boolean)
       .join(" ") ||
-    initialProfile.user.username ||
+    initialProfile.user?.username ||
     "Organizer";
+
+  const profileImage = initialProfile.profilePicture || initialProfile.user?.profilePicture;
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
@@ -138,9 +145,9 @@ export default function OrganizerProfileClient({
         <div className="mb-8">
           <div className="flex items-start gap-4">
             {/* Avatar */}
-            {initialProfile.user.profilePicture ? (
+            {profileImage ? (
               <Image
-                src={initialProfile.user.profilePicture}
+                src={profileImage}
                 alt={displayName}
                 width={80}
                 height={80}
@@ -158,7 +165,7 @@ export default function OrganizerProfileClient({
                 {displayName}
               </h1>
               {initialProfile.organizationName &&
-                initialProfile.user.username && (
+                initialProfile.user?.username && (
                   <p className="text-sm text-muted-foreground">
                     @{initialProfile.user.username}
                   </p>
@@ -170,18 +177,9 @@ export default function OrganizerProfileClient({
                   <Calendar className="h-4 w-4" />
                   <span>
                     <span className="font-semibold text-foreground">
-                      {initialProfile.eventsCreated}
+                      {initialProfile.totalEventsCreated}
                     </span>{" "}
                     events created
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Users className="h-4 w-4" />
-                  <span>
-                    <span className="font-semibold text-foreground">
-                      {initialProfile.eventsAttended}
-                    </span>{" "}
-                    attended
                   </span>
                 </div>
               </div>
@@ -237,7 +235,7 @@ export default function OrganizerProfileClient({
 
           {/* Events Timeline */}
           {!loading && !error && events.length > 0 && (
-            <EventsTimeline events={events} />
+            <EventsTimeline events={events} stickyTopClass="top-20"/>
           )}
 
           {/* Infinite scroll sentinel */}

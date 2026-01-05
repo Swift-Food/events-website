@@ -9,25 +9,30 @@ interface PageProps {
 interface OrganizerProfile {
   id: string;
   userId: string;
-  organizationName: string | null;
-  eventsCreated: number;
-  eventsAttended: number;
+  firstName?: string;
+  lastName?: string;
+  organizationName?: string;
+  bio?: string;
+  website?: string;
+  twitterHandle?: string;
+  linkedinUrl?: string;
+  totalEventsCreated: number;
+  totalEventsAttended: number;
   createdAt: string;
   updatedAt: string;
-  user: {
+  profilePicture?: string;
+  user?: {
     id: string;
     email: string;
-    username: string;
-    profilePicture: string | null;
-    firstName: string | null;
-    lastName: string | null;
+    username?: string;
+    profilePicture?: string;
   };
 }
 
-async function getOrganizerProfile(userId: string): Promise<OrganizerProfile | null> {
+async function getOrganizerProfile(eventUserId: string): Promise<OrganizerProfile | null> {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/event-users/user/${userId}/profile`,
+      `${process.env.NEXT_PUBLIC_API_URL}/event-users/${eventUserId}`,
       {
         cache: "no-store",
       }
@@ -58,11 +63,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const displayName = profile.organizationName ||
-    [profile.user.firstName, profile.user.lastName].filter(Boolean).join(" ") ||
-    profile.user.username ||
+    [profile.firstName, profile.lastName].filter(Boolean).join(" ") ||
+    profile.user?.username ||
     "Organizer";
 
-  const description = `View events by ${displayName}. ${profile.eventsCreated} events created.`;
+  const profileImage = profile.profilePicture || profile.user?.profilePicture;
+  const description = `View events by ${displayName}. ${profile.totalEventsCreated} events created.`;
 
   return {
     title: `${displayName} | Organizer Profile`,
@@ -70,14 +76,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title: `${displayName} | Organizer Profile`,
       description,
-      images: profile.user.profilePicture ? [profile.user.profilePicture] : [],
+      images: profileImage ? [profileImage] : [],
       type: "profile",
     },
     twitter: {
       card: "summary",
       title: `${displayName} | Organizer Profile`,
       description,
-      images: profile.user.profilePicture ? [profile.user.profilePicture] : [],
+      images: profileImage ? [profileImage] : [],
     },
   };
 }
@@ -91,15 +97,17 @@ export default async function OrganizerProfilePage({ params }: PageProps) {
   }
 
   const displayName = profile.organizationName ||
-    [profile.user.firstName, profile.user.lastName].filter(Boolean).join(" ") ||
-    profile.user.username ||
+    [profile.firstName, profile.lastName].filter(Boolean).join(" ") ||
+    profile.user?.username ||
     "Organizer";
+
+  const profileImage = profile.profilePicture || profile.user?.profilePicture;
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
     name: displayName,
-    image: profile.user.profilePicture || undefined,
+    image: profileImage || undefined,
   };
 
   return (
