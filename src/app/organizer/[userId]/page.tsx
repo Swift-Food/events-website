@@ -1,32 +1,10 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import OrganizerProfileClient from "./OrganizerProfileClient";
+import { OrganizerProfile } from "@/types/organizer";
 
 interface PageProps {
   params: Promise<{ userId: string }>;
-}
-
-interface OrganizerProfile {
-  id: string;
-  userId: string;
-  firstName?: string;
-  lastName?: string;
-  organizationName?: string;
-  bio?: string;
-  website?: string;
-  twitterHandle?: string;
-  linkedinUrl?: string;
-  totalEventsCreated: number;
-  totalEventsAttended: number;
-  createdAt: string;
-  updatedAt: string;
-  profilePicture?: string;
-  user?: {
-    id: string;
-    email: string;
-    username?: string;
-    profilePicture?: string;
-  };
 }
 
 async function getOrganizerProfile(eventUserId: string): Promise<OrganizerProfile | null> {

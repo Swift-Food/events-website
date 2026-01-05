@@ -4,31 +4,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { eventsApi } from "@/services/events";
 import { EventResponseDto, EventListResponseDto, EventStatus } from "@/types/event";
+import { OrganizerProfile } from "@/types/organizer";
 import EventsTimeline from "@/components/EventsTimeline";
 import { User, Calendar } from "lucide-react";
-
-interface OrganizerProfile {
-  id: string;
-  userId: string;
-  firstName?: string;
-  lastName?: string;
-  organizationName?: string;
-  bio?: string;
-  website?: string;
-  twitterHandle?: string;
-  linkedinUrl?: string;
-  totalEventsCreated: number;
-  totalEventsAttended: number;
-  createdAt: string;
-  updatedAt: string;
-  profilePicture?: string;
-  user?: {
-    id: string;
-    email: string;
-    username?: string;
-    profilePicture?: string;
-  };
-}
 
 interface OrganizerProfileClientProps {
   initialProfile: OrganizerProfile;
