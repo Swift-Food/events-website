@@ -995,7 +995,9 @@ export default function EventPreviewModal({
                         </div>
                       )}
                       <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
-                        {event.owner.user.username || "Anonymous"}
+                        {[event.owner.firstName, event.owner.lastName].filter(Boolean).join(" ") ||
+                          event.owner.user.username ||
+                          "Anonymous"}
                       </p>
                     </Link>
                   ) : (
