@@ -1,13 +1,26 @@
 import apiClient from "@/lib/auth/apiClient";
-import { EventCategoryResponseDto } from "@/types/category";
+import {
+  EventCategoryResponseDto,
+  EventCategoryWithSubcategoriesResponseDto,
+} from "@/types/category";
 import { EventListResponseDto } from "@/types/event";
 
 export const categoriesApi = {
   /**
-   * Fetch all event categories
+   * Fetch all event categories (flat list)
    */
   findAll: async (): Promise<EventCategoryResponseDto[]> => {
     const response = await apiClient.get<EventCategoryResponseDto[]>("/events/categories");
+    return response.data;
+  },
+
+  /**
+   * Fetch categories with their subcategories grouped
+   */
+  findAllWithSubcategories: async (): Promise<EventCategoryWithSubcategoriesResponseDto[]> => {
+    const response = await apiClient.get<EventCategoryWithSubcategoriesResponseDto[]>(
+      "/events/categories?grouped=true"
+    );
     return response.data;
   },
 
