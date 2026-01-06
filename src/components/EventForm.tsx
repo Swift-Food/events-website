@@ -101,6 +101,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     setCoverName,
     selectedCategoryIds,
     setSelectedCategoryIds,
+    acceptedOrganizerTerms,
+    setAcceptedOrganizerTerms,
     clearForm,
   } = useEventCreation();
 
@@ -424,6 +426,12 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     // Check Stripe Connect for paid tickets
     if (hasPaidTickets && (!stripeConnectStatus || !stripeConnectStatus.onboardingComplete)) {
       toast.error("Please complete payment setup before creating events with paid tickets");
+      return;
+    }
+
+    // Check organiser terms acceptance (only for create mode)
+    if (mode === "create" && !acceptedOrganizerTerms) {
+      toast.error("Please accept the Organiser Terms and Conditions");
       return;
     }
 
@@ -1485,6 +1493,31 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                     : "Publish"}
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Organiser Terms Checkbox - Only shown in create mode */}
+          {mode === "create" && (
+            <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 md:p-5">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptedOrganizerTerms}
+                  onChange={(e) => setAcceptedOrganizerTerms(e.target.checked)}
+                  className="mt-1 h-5 w-5 rounded border-foreground/20 bg-card-secondary-background text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
+                />
+                <span className="text-sm text-muted-foreground">
+                  I agree to the{" "}
+                  <a
+                    href="/organizer-terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Organiser Terms and Conditions
+                  </a>
+                </span>
+              </label>
             </div>
           )}
 

@@ -89,6 +89,10 @@ interface EventCreationContextType {
   selectedCategoryIds: string[];
   setSelectedCategoryIds: Dispatch<SetStateAction<string[]>>;
 
+  // Organiser terms acceptance
+  acceptedOrganizerTerms: boolean;
+  setAcceptedOrganizerTerms: Dispatch<SetStateAction<boolean>>;
+
   // Form actions
   clearForm: () => void;
   persistEventDraft: () => void;
@@ -127,6 +131,7 @@ type EventDraft = {
   coverPreview: string | null;
   coverName: string;
   selectedCategoryIds: string[];
+  acceptedOrganizerTerms: boolean;
 };
 
 // Helper to format a Date to datetime-local input format
@@ -262,6 +267,11 @@ export function EventCreationProvider({
     storedDraft.selectedCategoryIds ?? []
   );
 
+  // Organiser terms acceptance
+  const [acceptedOrganizerTerms, setAcceptedOrganizerTerms] = useState(
+    storedDraft.acceptedOrganizerTerms ?? false
+  );
+
   // Ticket management functions
   const addTicketType = useCallback((ticket: TicketType) => {
     setTicketTypes((prev) => [...prev, ticket]);
@@ -324,6 +334,7 @@ export function EventCreationProvider({
       coverPreview,
       coverName,
       selectedCategoryIds,
+      acceptedOrganizerTerms,
     };
 
     try {
@@ -359,6 +370,7 @@ export function EventCreationProvider({
     latitude,
     longitude,
     selectedCategoryIds,
+    acceptedOrganizerTerms,
   ]);
 
   useEffect(() => {
@@ -395,6 +407,7 @@ export function EventCreationProvider({
     setCoverPreview(null);
     setCoverName("invite-cover.png");
     setSelectedCategoryIds([]);
+    setAcceptedOrganizerTerms(false);
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(STORAGE_KEY);
     }
@@ -461,6 +474,8 @@ export function EventCreationProvider({
         setCoverName,
         selectedCategoryIds,
         setSelectedCategoryIds,
+        acceptedOrganizerTerms,
+        setAcceptedOrganizerTerms,
         clearForm,
         persistEventDraft,
       }}
