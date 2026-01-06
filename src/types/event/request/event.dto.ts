@@ -34,6 +34,7 @@ export interface CreateEventDto {
   addressId?: string;
   addressData?: CreateEventAddressDto;
   cateringOrderId?: string;
+  categoryIds: string[];
   subcategoryIds?: string[];
   eventUrl?: string;
   tickets?: CreateEventTicketDto[];
@@ -59,6 +60,7 @@ export interface UpdateEventDto {
   addressId?: string;
   addressData?: CreateEventAddressDto;
   cateringOrderId?: string;
+  categoryIds?: string[];
   subcategoryIds?: string[];
   eventUrl?: string;
   tickets?: CreateEventTicketDto[];
