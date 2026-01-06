@@ -42,17 +42,24 @@ export default function OrganizerProfileClient({
   const profileImage = initialProfile.profilePicture || initialProfile.user?.profilePicture;
 
   // Filter events based on active tab
-  // Upcoming: endDateTime >= now (includes ongoing events)
-  // Past: endDateTime < now
+  // Upcoming: endDateTime >= now (includes ongoing events), sorted ascending
+  // Past: endDateTime < now, sorted descending (most recent first)
   const filteredEvents = useMemo(() => {
     const now = new Date();
-    return events.filter((event) => {
+    const filtered = events.filter((event) => {
       const endDate = new Date(event.endDateTime);
       if (activeTab === "upcoming") {
         return endDate >= now;
       } else {
         return endDate < now;
       }
+    });
+
+    // Sort: upcoming ascending (soonest first), past descending (most recent first)
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.startDateTime).getTime();
+      const dateB = new Date(b.startDateTime).getTime();
+      return activeTab === "upcoming" ? dateA - dateB : dateB - dateA;
     });
   }, [events, activeTab]);
 
