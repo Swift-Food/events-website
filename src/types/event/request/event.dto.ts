@@ -4,7 +4,6 @@
  */
 
 import { EventStatus, EventFormat } from '../status';
-import { EventCategoryType } from '../../category/types';
 import { LocationDto } from '../../address/location.dto';
 import { CreateEventTicketDto } from '../../event-ticket/request/create-ticket.dto';
 
@@ -35,7 +34,7 @@ export interface CreateEventDto {
   addressId?: string;
   addressData?: CreateEventAddressDto;
   cateringOrderId?: string;
-  categoryIds?: string[];
+  subcategoryIds?: string[];
   eventUrl?: string;
   tickets?: CreateEventTicketDto[];
   acceptingNewTickets?: boolean;
@@ -60,7 +59,7 @@ export interface UpdateEventDto {
   addressId?: string;
   addressData?: CreateEventAddressDto;
   cateringOrderId?: string;
-  categoryIds?: string[];
+  subcategoryIds?: string[];
   eventUrl?: string;
   tickets?: CreateEventTicketDto[];
   acceptingNewTickets?: boolean;
@@ -71,12 +70,13 @@ export interface UpdateEventDto {
 export interface EventQueryDto {
   search?: string;
   status?: EventStatus;
-  categoryId?: string;
-  category?: EventCategoryType;
+  category?: string;
+  subcategoryId?: string;
   startDate?: string;
   endDate?: string;
   today?: boolean;
   currentMonth?: boolean;
+  includePast?: boolean;
   isPrivate?: boolean;
   ownerId?: string;
   skip?: number;
