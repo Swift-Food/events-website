@@ -429,12 +429,6 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
       return;
     }
 
-    // Check organiser terms acceptance (only for create mode)
-    if (mode === "create" && !acceptedOrganizerTerms) {
-      toast.error("Please accept the Organiser Terms and Conditions");
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
@@ -1524,7 +1518,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={isSubmitting || (mode === "create" && !acceptedOrganizerTerms)}
             className="w-full rounded-lg bg-foreground py-2 text-center text-lg font-semibold text-black transition-all hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting

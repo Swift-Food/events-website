@@ -77,6 +77,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, any>>(
     {}
   );
+  const [acceptedTicketTerms, setAcceptedTicketTerms] = useState(false);
 
   // Calendar dropdown state
   const [showCalendarDropdown, setShowCalendarDropdown] = useState(false);
@@ -1377,11 +1378,39 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                     </div>
                   )}
 
+                  {/* Ticket Terms Checkbox - shown when user can register */}
+                  {canRegister && !blacklistStatus?.isBlacklisted && (
+                    (hasValidInvitation || (!event.isPrivate && event.eventTickets.some(t => t.isAvailable)))
+                  ) && (
+                    <div className="mt-4 pt-4 border-t border-white/10">
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={acceptedTicketTerms}
+                          onChange={(e) => setAcceptedTicketTerms(e.target.checked)}
+                          className="mt-0.5 h-5 w-5 rounded border-white/20 bg-card-secondary-background text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
+                        />
+                        <span className="text-sm text-muted-foreground">
+                          I agree to the{" "}
+                          <a
+                            href="/ticket-terms"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline font-medium"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Ticket Sales Terms and Conditions
+                          </a>
+                        </span>
+                      </label>
+                    </div>
+                  )}
+
                   {/* Accept Invitation Button (for invitation mode) */}
                   {hasValidInvitation && canRegister && (
                     <button
                       onClick={() => invitedTicketId && handleRegister(invitedTicketId)}
-                      disabled={isRegistering}
+                      disabled={isRegistering || !acceptedTicketTerms}
                       className="w-full mt-4 rounded-xl bg-emerald-500 px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {isRegistering ? (
@@ -1402,7 +1431,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   {!hasValidInvitation && !event.isPrivate && canRegister && event.eventTickets.some(t => t.isAvailable) && (
                     <button
                       onClick={() => selectedTicketId && handleRegister(selectedTicketId)}
-                      disabled={!selectedTicketId || isRegistering}
+                      disabled={!selectedTicketId || isRegistering || !acceptedTicketTerms}
                       className="w-full mt-4 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {isRegistering ? (
