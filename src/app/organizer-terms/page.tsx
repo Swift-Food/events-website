@@ -10,21 +10,21 @@ export const metadata: Metadata = {
 export default function OrganizerTermsPage() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 py-12">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 lg:py-12">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           {/* Side Navigation */}
           <nav className="lg:w-56 shrink-0">
             <div className="flex flex-row lg:flex-col gap-2 lg:sticky lg:top-24">
-              <span className="flex items-center justify-between rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white">
+              <span className="flex items-center justify-between rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white lg:px-4">
                 Organiser Terms
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="hidden lg:block h-4 w-4" />
               </span>
               <Link
                 href="/ticket-terms"
-                className="flex items-center justify-between rounded-lg bg-white/5 px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors"
+                className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors lg:px-4"
               >
                 Ticket Sales Terms
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="hidden lg:block h-4 w-4" />
               </Link>
             </div>
           </nav>
