@@ -243,7 +243,7 @@ export default function HorizontalEventCard({
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
                   <span className="truncate">
-                    {event.address.city}{" "}
+                    {event.address.city}
                     {event.address.zipcode && (", " + event.address.zipcode)}
                   </span>
                 </div>
