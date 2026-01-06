@@ -70,7 +70,7 @@ export const categoriesApi = {
   /**
    * Get events by subcategory ID
    */
-  findEventsBySubcategory: async (
+  findEventsBySubcategoryId: async (
     subcategoryId: string,
     queryParams?: {
       take?: number;
@@ -85,6 +85,28 @@ export const categoriesApi = {
   ): Promise<EventListResponseDto> => {
     const response = await apiClient.get<EventListResponseDto>("/events", {
       params: { ...queryParams, subcategoryId },
+    });
+    return response.data;
+  },
+
+  /**
+   * Get events by subcategory name
+   */
+  findEventsBySubcategoryName: async (
+    subcategoryName: string,
+    queryParams?: {
+      take?: number;
+      skip?: number;
+      startDate?: string;
+      endDate?: string;
+      today?: boolean;
+      currentMonth?: boolean;
+      includePast?: boolean;
+      search?: string;
+    }
+  ): Promise<EventListResponseDto> => {
+    const response = await apiClient.get<EventListResponseDto>("/events", {
+      params: { ...queryParams, subcategory: subcategoryName },
     });
     return response.data;
   },

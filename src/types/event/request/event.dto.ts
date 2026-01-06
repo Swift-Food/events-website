@@ -72,6 +72,7 @@ export interface EventQueryDto {
   status?: EventStatus;
   category?: string;
   subcategoryId?: string;
+  subcategory?: string;
   startDate?: string;
   endDate?: string;
   today?: boolean;
@@ -83,5 +84,4 @@ export interface EventQueryDto {
   take?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-  includePast?: boolean;
 }
