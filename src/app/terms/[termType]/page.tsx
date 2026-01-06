@@ -17,12 +17,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (termType === "organizer") {
     return {
       title: "Organiser Terms and Conditions | Prismo",
-      description: "Terms and conditions for event organisers using the Prismo platform",
+      description:
+        "Terms and conditions for event organisers using the Prismo platform",
     };
   } else if (termType === "ticket") {
     return {
       title: "Ticket Sales Terms and Conditions | Prismo",
-      description: "Terms and conditions for purchasing event tickets on the Prismo platform",
+      description:
+        "Terms and conditions for purchasing event tickets on the Prismo platform",
     };
   }
 
@@ -51,20 +53,6 @@ export default async function TermsPage({ params }: Props) {
           {/* Side Navigation */}
           <nav className="lg:w-56 shrink-0">
             <div className="flex flex-row lg:flex-col gap-2 lg:sticky lg:top-24">
-              {isOrganizer ? (
-                <span className="flex items-center justify-between rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white lg:px-4">
-                  Organiser Terms
-                  <ChevronRight className="hidden lg:block h-4 w-4" />
-                </span>
-              ) : (
-                <Link
-                  href="/terms/organizer"
-                  className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors lg:px-4"
-                >
-                  Organiser Terms
-                  <ChevronRight className="hidden lg:block h-4 w-4" />
-                </Link>
-              )}
               {!isOrganizer ? (
                 <span className="flex items-center justify-between rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white lg:px-4">
                   Ticket Sales Terms
@@ -76,6 +64,20 @@ export default async function TermsPage({ params }: Props) {
                   className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors lg:px-4"
                 >
                   Ticket Sales Terms
+                  <ChevronRight className="hidden lg:block h-4 w-4" />
+                </Link>
+              )}
+              {isOrganizer ? (
+                <span className="flex items-center justify-between rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white lg:px-4">
+                  Organiser Terms
+                  <ChevronRight className="hidden lg:block h-4 w-4" />
+                </span>
+              ) : (
+                <Link
+                  href="/terms/organizer"
+                  className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors lg:px-4"
+                >
+                  Organiser Terms
                   <ChevronRight className="hidden lg:block h-4 w-4" />
                 </Link>
               )}
