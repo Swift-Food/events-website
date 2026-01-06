@@ -1393,7 +1393,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                         <span className="text-sm text-muted-foreground">
                           I agree to the{" "}
                           <a
-                            href="/ticket-terms"
+                            href="/terms/ticket"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline font-medium"

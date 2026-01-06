@@ -1503,7 +1503,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 <span className="text-sm text-muted-foreground">
                   I agree to the{" "}
                   <a
-                    href="/organizer-terms"
+                    href="/terms/organizer"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary hover:underline font-medium"
