@@ -102,6 +102,11 @@ export default function EventPreviewModal({
   // Animation state
   const [isAnimating, setIsAnimating] = useState(false);
 
+  // Registration confirmation modal state
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [acceptedTicketTerms, setAcceptedTicketTerms] = useState(false);
+  const [pendingTicketId, setPendingTicketId] = useState<string | null>(null);
+
   useEffect(() => {
     if (isOpen) {
       setIsAnimating(true);
@@ -183,7 +188,8 @@ export default function EventPreviewModal({
     (t) => t.id === selectedTicketId
   );
 
-  const handleRegister = async (ticketId: string) => {
+  // Show confirmation modal before registration
+  const handleRegisterClick = (ticketId: string) => {
     if (!isAuthenticated) {
       toast.error("Please log in to register for this event");
       router.push("/auth");
@@ -196,14 +202,46 @@ export default function EventPreviewModal({
       return;
     }
 
+    setPendingTicketId(ticketId);
     setSelectedTicketId(ticketId);
+    setAcceptedTicketTerms(false);
+    setShowConfirmModal(true);
+  };
 
+  // Actually perform registration after confirmation
+  const handleConfirmRegistration = async () => {
+    if (!pendingTicketId || !acceptedTicketTerms) {
+      toast.error("Please accept the Ticket Sales Terms and Conditions");
+      return;
+    }
+
+    const ticket = event?.eventTickets?.find((t) => t.id === pendingTicketId);
+    if (!ticket) {
+      toast.error("Ticket not found");
+      return;
+    }
+
+    // Close confirmation modal
+    setShowConfirmModal(false);
+
+    // Check if there are questions to answer
     if (
       ticket.questionForm &&
       ticket.questionForm.length > 0 &&
       !showQuestionForm
     ) {
       setShowQuestionForm(true);
+      return;
+    }
+
+    // Proceed with registration
+    await handleRegister(pendingTicketId);
+  };
+
+  const handleRegister = async (ticketId: string) => {
+    const ticket = event?.eventTickets?.find((t) => t.id === ticketId);
+    if (!ticket) {
+      toast.error("Ticket not found");
       return;
     }
 
@@ -926,7 +964,7 @@ export default function EventPreviewModal({
                       {canRegister && event.eventTickets.some(t => t.isAvailable) && (
                         <button
                           onClick={() =>
-                            selectedTicketId && handleRegister(selectedTicketId)
+                            selectedTicketId && handleRegisterClick(selectedTicketId)
                           }
                           disabled={!selectedTicketId || isRegistering}
                           className="w-full mt-3 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
@@ -1041,6 +1079,224 @@ export default function EventPreviewModal({
           )}
         </div>
       </div>
+
+      {/* Registration Confirmation Modal */}
+      {showConfirmModal && event && pendingTicketId && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl border border-neutral-700 bg-card-background shadow-2xl overflow-hidden">
+            <div className="p-5">
+              {/* Event Image */}
+              <div className="relative aspect-square w-36 mx-auto mb-4 rounded-xl overflow-hidden bg-card-secondary-background">
+                {event.eventImage ? (
+                  <Image
+                    src={event.eventImage}
+                    alt={event.name}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div
+                    className="flex h-full items-center justify-center"
+                    style={{ backgroundColor: event.eventColor || "#3b82f6" }}
+                  >
+                    <Calendar className="h-8 w-8 text-white/30" />
+                  </div>
+                )}
+              </div>
+
+              {/* Event Name */}
+              <h3 className="text-xl font-bold text-foreground mb-4 text-center">
+                {event.name}
+              </h3>
+
+              {/* Date & Time */}
+              <div className="flex gap-3 mb-3">
+                {isSameDay(event.startDateTime, event.endDateTime) ? (
+                  <>
+                    <div className="flex flex-col items-center py-1">
+                      <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-foreground">
+                        {formatDate(event.startDateTime)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatTime(event.startDateTime)} - {formatTime(event.endDateTime)}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex flex-col items-center py-1">
+                      <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
+                      <div className="my-1 w-0.5 flex-1 rounded-full bg-primary/30"></div>
+                      <div className="h-3 w-3 rounded-full bg-primary/30 shadow-md"></div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="mb-2">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Start
+                        </p>
+                        <p className="text-sm font-medium text-foreground">
+                          {formatDate(event.startDateTime)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatTime(event.startDateTime)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          End
+                        </p>
+                        <p className="text-sm font-medium text-foreground">
+                          {formatDate(event.endDateTime)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatTime(event.endDateTime)}
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Location */}
+              <div className="flex items-start gap-3 mb-4">
+                {isVirtualEvent(event.format) ? (
+                  <>
+                    <Video className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Online Event</p>
+                      <p className="text-sm text-muted-foreground">Virtual meeting link will be provided</p>
+                    </div>
+                  </>
+                ) : isHybridEvent(event.format) ? (
+                  <>
+                    <Video className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Hybrid Event</p>
+                      {event.address ? (
+                        <p className="text-sm text-muted-foreground">
+                          {event.address.isObscured
+                            ? `${event.address.city}, ${event.address.zipcode}`
+                            : [event.address.name, event.address.city].filter(Boolean).join(", ")}
+                          {" + Online"}
+                        </p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">In-person + Online</p>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                    <div>
+                      {event.address ? (
+                        event.address.isObscured ? (
+                          <>
+                            <p className="text-sm font-medium text-foreground">
+                              {event.address.city}, {event.address.zipcode}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Full address revealed after registration
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            {event.address.name && (
+                              <p className="text-sm font-medium text-foreground">
+                                {event.address.name}
+                              </p>
+                            )}
+                            <p className="text-sm text-muted-foreground">
+                              {[event.address.addressLine1, event.address.city, event.address.zipcode]
+                                .filter(Boolean)
+                                .join(", ")}
+                            </p>
+                          </>
+                        )
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Location TBD</p>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Selected Ticket */}
+              {(() => {
+                const ticket = event.eventTickets.find(t => t.id === pendingTicketId);
+                if (!ticket) return null;
+                return (
+                  <div className="rounded-lg border border-white/10 bg-white/5 p-3 mb-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{ticket.name}</p>
+                        <p className="text-xs text-muted-foreground">Selected ticket</p>
+                      </div>
+                      <p className="text-base font-bold text-foreground">
+                        {Number(ticket.price) === 0 ? "Free" : `£${Number(ticket.price).toFixed(2)}`}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Terms Checkbox */}
+              <div className="mb-4">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTicketTerms}
+                    onChange={(e) => setAcceptedTicketTerms(e.target.checked)}
+                    className="mt-0.5 h-5 w-5 rounded border-white/20 bg-card-secondary-background text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    I agree to the{" "}
+                    <a
+                      href="/terms/ticket"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline font-medium"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Ticket Sales Terms and Conditions
+                    </a>
+                  </span>
+                </label>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowConfirmModal(false);
+                    setPendingTicketId(null);
+                    setAcceptedTicketTerms(false);
+                  }}
+                  className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-white/10"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmRegistration}
+                  disabled={!acceptedTicketTerms || isRegistering}
+                  className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isRegistering ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Confirm Registration"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Payment Modal */}
       {showPaymentModal && paymentData && (
