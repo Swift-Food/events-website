@@ -85,7 +85,7 @@ interface EventCreationContextType {
   coverName: string;
   setCoverName: Dispatch<SetStateAction<string>>;
 
-  // Categories (store category IDs)
+  // Categories
   selectedCategoryIds: string[];
   setSelectedCategoryIds: Dispatch<SetStateAction<string[]>>;
 
@@ -262,7 +262,7 @@ export function EventCreationProvider({
     storedDraft.coverName ?? "invite-cover.png"
   );
 
-  // Categories (store category IDs)
+  // Categories
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
     storedDraft.selectedCategoryIds ?? []
   );
