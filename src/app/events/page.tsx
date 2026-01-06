@@ -37,6 +37,11 @@ function EventsPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [events, setEvents] = useState<EventResponseDto[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);

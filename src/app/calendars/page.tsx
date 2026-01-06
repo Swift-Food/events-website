@@ -7,6 +7,11 @@ import { Search, Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from "
 import SquareCalendarCard from "@/components/SquareCalendarCard";
 
 export default function CalendarDiscoveryPage() {
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [calendars, setCalendars] = useState<Calendar[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
