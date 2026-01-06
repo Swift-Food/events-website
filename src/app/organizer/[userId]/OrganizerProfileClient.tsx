@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { eventsApi } from "@/services/events";
 import { EventResponseDto, EventListResponseDto, EventStatus } from "@/types/event";
 import { OrganizerProfile } from "@/types/organizer";
 import EventsTimeline from "@/components/EventsTimeline";
 import { User, Calendar } from "lucide-react";
+
+type EventTab = "upcoming" | "past";
 
 interface OrganizerProfileClientProps {
   initialProfile: OrganizerProfile;
@@ -23,6 +25,7 @@ export default function OrganizerProfileClient({
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
+  const [activeTab, setActiveTab] = useState<EventTab>("upcoming");
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const skipRef = useRef(0);
@@ -38,6 +41,31 @@ export default function OrganizerProfileClient({
 
   const profileImage = initialProfile.profilePicture || initialProfile.user?.profilePicture;
 
+  // Filter events based on active tab
+  // Upcoming: endDateTime >= now (includes ongoing events)
+  // Past: endDateTime < now
+  const filteredEvents = useMemo(() => {
+    const now = new Date();
+    return events.filter((event) => {
+      const endDate = new Date(event.endDateTime);
+      if (activeTab === "upcoming") {
+        return endDate >= now;
+      } else {
+        return endDate < now;
+      }
+    });
+  }, [events, activeTab]);
+
+  const upcomingCount = useMemo(() => {
+    const now = new Date();
+    return events.filter((event) => new Date(event.endDateTime) >= now).length;
+  }, [events]);
+
+  const pastCount = useMemo(() => {
+    const now = new Date();
+    return events.filter((event) => new Date(event.endDateTime) < now).length;
+  }, [events]);
+
   const fetchEvents = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -50,6 +78,7 @@ export default function OrganizerProfileClient({
         sortOrder: "asc",
         skip: 0,
         take: eventsPerPage,
+        includePast: true,
       });
 
       const newEvents = result.events ?? [];
@@ -79,6 +108,7 @@ export default function OrganizerProfileClient({
         sortOrder: "asc",
         skip: skipRef.current,
         take: eventsPerPage,
+        includePast: true,
       });
 
       const newEvents = result.events ?? [];
@@ -167,15 +197,32 @@ export default function OrganizerProfileClient({
 
         {/* Events Section */}
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">
-              Events by {displayName}
-            </h2>
-            {!loading && (
-              <p className="text-sm text-muted-foreground">
-                {total} event{total !== 1 ? "s" : ""}
-              </p>
-            )}
+          <h2 className="text-lg font-semibold text-foreground mb-4">
+            Events by {displayName}
+          </h2>
+
+          {/* Tabs */}
+          <div className="flex gap-2 mb-6">
+            <button
+              onClick={() => setActiveTab("upcoming")}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                activeTab === "upcoming"
+                  ? "bg-primary text-white"
+                  : "bg-white/5 text-muted-foreground hover:bg-white/10"
+              }`}
+            >
+              Upcoming{!loading && ` (${upcomingCount})`}
+            </button>
+            <button
+              onClick={() => setActiveTab("past")}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                activeTab === "past"
+                  ? "bg-primary text-white"
+                  : "bg-white/5 text-muted-foreground hover:bg-white/10"
+              }`}
+            >
+              Past{!loading && ` (${pastCount})`}
+            </button>
           </div>
 
           {/* Loading State */}
@@ -199,21 +246,29 @@ export default function OrganizerProfileClient({
           )}
 
           {/* Empty State */}
-          {!loading && !error && events.length === 0 && (
+          {!loading && !error && filteredEvents.length === 0 && (
             <div className="rounded-xl border border-white/10 bg-card-background p-12 text-center">
               <Calendar className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
               <h3 className="mb-2 text-xl font-semibold text-foreground">
-                No events yet
+                {events.length === 0
+                  ? "No events yet"
+                  : activeTab === "upcoming"
+                  ? "No upcoming events"
+                  : "No past events"}
               </h3>
               <p className="text-muted-foreground">
-                This organizer hasn&apos;t published any events yet.
+                {events.length === 0
+                  ? "This organizer hasn't published any events yet."
+                  : activeTab === "upcoming"
+                  ? "Check back later for new events."
+                  : "This organizer hasn't had any past events."}
               </p>
             </div>
           )}
 
           {/* Events Timeline */}
-          {!loading && !error && events.length > 0 && (
-            <EventsTimeline events={events} stickyTopClass="top-20"/>
+          {!loading && !error && filteredEvents.length > 0 && (
+            <EventsTimeline events={filteredEvents} stickyTopClass="top-20"/>
           )}
 
           {/* Infinite scroll sentinel */}
@@ -227,7 +282,7 @@ export default function OrganizerProfileClient({
           )}
 
           {/* End of results */}
-          {!loading && !hasMore && events.length > 0 && (
+          {!loading && !hasMore && filteredEvents.length > 0 && (
             <p className="text-center text-sm text-muted-foreground py-8">
               You&apos;ve reached the end
             </p>

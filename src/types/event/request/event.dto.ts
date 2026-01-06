@@ -83,4 +83,5 @@ export interface EventQueryDto {
   take?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  includePast?: boolean;
 }
