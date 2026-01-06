@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Ticket Sales Terms and Conditions | Prismo",
@@ -8,12 +9,30 @@ export const metadata: Metadata = {
 export default function TicketTermsPage() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12">
-        <h1 className="text-3xl font-bold text-foreground mb-8">
-          Ticket Sales Terms and Conditions
-        </h1>
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 py-12">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Side Navigation */}
+          <nav className="lg:w-48 shrink-0">
+            <div className="flex flex-row lg:flex-col gap-2 lg:sticky lg:top-24">
+              <Link
+                href="/organizer-terms"
+                className="rounded-lg bg-white/5 px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors"
+              >
+                Organiser Terms
+              </Link>
+              <span className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white">
+                Ticket Sales Terms
+              </span>
+            </div>
+          </nav>
 
-        <div className="prose prose-invert max-w-none space-y-8 text-foreground/90">
+          {/* Content */}
+          <div className="flex-1 max-w-3xl">
+            <h1 className="text-3xl font-bold text-foreground mb-8">
+              Ticket Sales Terms and Conditions
+            </h1>
+
+            <div className="prose prose-invert max-w-none space-y-8 text-foreground/90">
           <p className="text-muted-foreground">
             This website (Site) is operated by Swift Food Services Ltd (company number 16457702) (we, our or us).
             These Ticket Sales Terms and Conditions (Terms) apply to your purchase of event tickets via the Site.
@@ -351,6 +370,8 @@ export default function TicketTermsPage() {
           <div className="border-t border-foreground/10 pt-6 mt-8">
             <p className="text-sm text-muted-foreground">Last update: 15 December 2025</p>
             <p className="text-sm text-muted-foreground mt-1">&copy; LegalVision Law UK Ltd</p>
+          </div>
+            </div>
           </div>
         </div>
       </div>
