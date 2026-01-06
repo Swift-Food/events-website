@@ -7,6 +7,8 @@ import {
   CreateEventResponse,
   UpdateEventResponse,
   EventStats,
+  EventCategoryResponseDto,
+  EventCategoryWithSubcategoriesResponseDto,
 } from '@/types';
 import {
   CreateEventDto,
@@ -122,9 +124,16 @@ class EventService {
     await apiClient.delete(`${this.baseUrl}/${id}`);
   }
 
-  async getEventCategories(): Promise<string[]> {
-    const response: AxiosResponse<string[]> = await apiClient.get(
+  async getEventCategories(): Promise<EventCategoryResponseDto[]> {
+    const response: AxiosResponse<EventCategoryResponseDto[]> = await apiClient.get(
       `${this.baseUrl}/categories`
+    );
+    return response.data;
+  }
+
+  async getEventCategoriesWithSubcategories(): Promise<EventCategoryWithSubcategoriesResponseDto[]> {
+    const response: AxiosResponse<EventCategoryWithSubcategoriesResponseDto[]> = await apiClient.get(
+      `${this.baseUrl}/categories?grouped=true`
     );
     return response.data;
   }
