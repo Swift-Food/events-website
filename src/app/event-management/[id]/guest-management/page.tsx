@@ -279,9 +279,11 @@ export default function GuestManagementPage() {
   };
 
   const filteredGuests = guests.filter((guest) => {
+    // "All" filter shows everything EXCEPT cancelled (use "Cancelled" tab to see those)
     const matchesStatus =
-      filterStatus === "all" ||
-      guest.status === filterStatus;
+      filterStatus === "all"
+        ? guest.status !== GuestTicketStatus.CANCELLED
+        : guest.status === filterStatus;
 
     const matchesSearch =
       searchQuery === "" ||
