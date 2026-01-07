@@ -3,7 +3,7 @@
     "apps": [],
     "details": [
       {
-        "appID": "TEAM_ID.com.prysmo.app",
+        "appID": "TEAM_ID.com.prismo.app",
         "paths": ["/events/*", "/events/join/*"]
       }
     ]
