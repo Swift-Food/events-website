@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, Suspense, useCallback, useMemo } from "rea
 import { useSearchParams, useRouter } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
-import { EventCategoryType } from "@/types/category";
 import { Search, Calendar, X, SlidersHorizontal, Check } from "lucide-react";
 import EventsTimeline from "@/components/EventsTimeline";
 import { useCategoriesContext } from "@/lib/categories-context";
@@ -58,12 +57,8 @@ function EventsPageContent() {
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [categoryFilter, setCategoryFilter] = useState<EventCategoryType | "all">(() => {
-    const categoryParam = searchParams.get("category");
-    if (categoryParam && Object.values(EventCategoryType).includes(categoryParam as EventCategoryType)) {
-      return categoryParam as EventCategoryType;
-    }
-    return "all";
+  const [categoryFilter, setCategoryFilter] = useState<string>(() => {
+    return searchParams.get("category") || "all";
   });
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(() => {
     return searchParams.get("subcategoryId");
@@ -99,10 +94,7 @@ function EventsPageContent() {
     const categoryParam = searchParams.get("category");
     const subcategoryIdParam = searchParams.get("subcategoryId");
 
-    const newCategory =
-      categoryParam && Object.values(EventCategoryType).includes(categoryParam as EventCategoryType)
-        ? (categoryParam as EventCategoryType)
-        : "all";
+    const newCategory = categoryParam || "all";
 
     if (newCategory !== categoryFilter) {
       setCategoryFilter(newCategory);
@@ -251,7 +243,7 @@ function EventsPageContent() {
     }
   };
 
-  const handleCategoryFilterChange = (category: EventCategoryType | "all") => {
+  const handleCategoryFilterChange = (category: string) => {
     setCategoryFilter(category);
     // Clear subcategory when category changes
     setSelectedSubcategoryId(null);
@@ -279,7 +271,7 @@ function EventsPageContent() {
     router.push(`/events${params.toString() ? `?${params.toString()}` : ""}`, { scroll: false });
   };
 
-  const getCategoryLabel = (categoryName: EventCategoryType | string) => {
+  const getCategoryLabel = (categoryName: string) => {
     return categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
   };
 
@@ -411,7 +403,7 @@ function EventsPageContent() {
                     {allCategories.map((category) => (
                       <button
                         key={category.id}
-                        onClick={() => handleCategoryFilterChange(category.name as EventCategoryType)}
+                        onClick={() => handleCategoryFilterChange(category.name)}
                         className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
                       >
                         <span>{getCategoryLabel(category.name)}</span>
