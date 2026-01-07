@@ -32,10 +32,10 @@ export const GuestFilters = ({
   const filters = [
     { value: "all" as FilterStatus, label: "All" },
     { value: "pending_approval" as FilterStatus, label: "Pending", count: pendingCount },
+    { value: "waitlisted" as FilterStatus, label: "Waitlisted", count: waitlistedCount },
     { value: "pending_payment" as FilterStatus, label: "Awaiting Payment", count: pendingPaymentCount },
     { value: "active" as FilterStatus, label: "Approved", count: approvedCount },
     { value: "checked_in" as FilterStatus, label: "Checked In", count: checkedInCount },
-    { value: "waitlisted" as FilterStatus, label: "Waitlisted", count: waitlistedCount },
     { value: "cancelled" as FilterStatus, label: "Cancelled", count: cancelledCount },
     { value: "blacklisted" as FilterStatus, label: "Blacklisted", count: blacklistedCount, icon: Ban, isDanger: true },
   ];
