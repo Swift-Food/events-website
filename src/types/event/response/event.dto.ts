@@ -33,6 +33,7 @@ export interface EventResponseDto {
   requiresApproval: boolean;
   format: EventFormat;
   virtualMeetingUrl: string | null;
+  isTrustedMeetingUrl: boolean;
   virtualCapacity: number | null;
   eventUrl: string | null;
   viewCount: number;

@@ -35,6 +35,7 @@ import Image from "next/image";
 import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
 import PaymentModal, { PaymentSuccessModal } from "@/components/payments/PaymentModal";
+import ExternalLinkConfirmModal from "@/components/ExternalLinkConfirmModal";
 import { getTicketStatusText, getTicketStatusBadgeClasses, isTicketUsable } from "@/utils/ticket-status";
 import {
   generateGoogleCalendarUrl,
@@ -67,6 +68,9 @@ export default function EventPreviewModal({
   // Calendar dropdown state
   const [showCalendarDropdown, setShowCalendarDropdown] = useState(false);
   const calendarDropdownRef = useRef<HTMLDivElement>(null);
+
+  // External link confirmation modal state
+  const [showExternalLinkModal, setShowExternalLinkModal] = useState(false);
 
   // Close calendar dropdown when clicking outside
   useEffect(() => {
@@ -714,15 +718,25 @@ export default function EventPreviewModal({
                     </div>
                     {event.virtualMeetingUrl ? (
                       canJoinVirtualMeeting() ? (
-                        <a
-                          href={formatExternalUrl(event.virtualMeetingUrl)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-sm text-primary hover:underline"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                          Join Virtual Meeting
-                        </a>
+                        event.isTrustedMeetingUrl ? (
+                          <a
+                            href={formatExternalUrl(event.virtualMeetingUrl)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-sm text-primary hover:underline"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            Join Virtual Meeting
+                          </a>
+                        ) : (
+                          <button
+                            onClick={() => setShowExternalLinkModal(true)}
+                            className="flex items-center gap-2 text-sm text-primary hover:underline"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            Join Virtual Meeting
+                          </button>
+                        )
                       ) : (
                         <p className="text-sm text-muted-foreground">
                           Meeting link available 10 minutes before event
@@ -1504,6 +1518,14 @@ export default function EventPreviewModal({
           isOpen={showSuccessModal}
           onClose={handleSuccessClose}
           ticketDetails={successTicketDetails}
+        />
+      )}
+
+      {/* External Link Confirmation Modal */}
+      {showExternalLinkModal && event?.virtualMeetingUrl && (
+        <ExternalLinkConfirmModal
+          url={formatExternalUrl(event.virtualMeetingUrl)}
+          onClose={() => setShowExternalLinkModal(false)}
         />
       )}
 
