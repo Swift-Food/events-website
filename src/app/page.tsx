@@ -115,7 +115,7 @@ export default function DiscoveryPage() {
                       )}
                     </div>
                     <span className="text-xs font-medium text-foreground text-center whitespace-nowrap">
-                      {getCategoryLabel(category.name)}
+                      {getCategoryLabel(category.name as EventCategoryType)}
                     </span>
                   </Link>
                 ))}

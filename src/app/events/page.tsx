@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense, useCallback } from "react";
+import { useState, useEffect, useRef, Suspense, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { eventsApi } from "@/services/events";
-import { categoriesApi } from "@/services/categories";
 import { EventListResponseDto, EventResponseDto } from "@/types/event";
-import { EventCategoryType, EventCategoryResponseDto } from "@/types/category";
+import { EventCategoryType } from "@/types/category";
 import { Search, Calendar, X, SlidersHorizontal, Check } from "lucide-react";
 import EventsTimeline from "@/components/EventsTimeline";
+import { useCategoriesContext } from "@/lib/categories-context";
 
 export default function EventsPage() {
   return (
@@ -49,8 +49,8 @@ function EventsPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
 
-  // Categories
-  const [allCategories, setAllCategories] = useState<EventCategoryResponseDto[]>([]);
+  // Get categories from context
+  const { categories: allCategories } = useCategoriesContext();
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -65,6 +65,9 @@ function EventsPageContent() {
     }
     return "all";
   });
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(() => {
+    return searchParams.get("subcategoryId");
+  });
   const [showFilters, setShowFilters] = useState(false);
 
   // Refs
@@ -74,30 +77,41 @@ function EventsPageContent() {
 
   const eventsPerPage = 12;
 
-  // Sync category filter when URL params change (e.g., browser back/forward)
+  // Get subcategories for the selected category
+  const filteredSubcategories = useMemo(() => {
+    if (categoryFilter === "all") {
+      return [];
+    }
+
+    const category = allCategories.find(
+      (cat) => cat.name.toLowerCase() === categoryFilter.toLowerCase()
+    );
+
+    if (!category) {
+      return [];
+    }
+
+    return category.subcategories || [];
+  }, [allCategories, categoryFilter]);
+
+  // Sync category and subcategory filter when URL params change (e.g., browser back/forward)
   useEffect(() => {
     const categoryParam = searchParams.get("category");
+    const subcategoryIdParam = searchParams.get("subcategoryId");
+
     const newCategory =
       categoryParam && Object.values(EventCategoryType).includes(categoryParam as EventCategoryType)
         ? (categoryParam as EventCategoryType)
         : "all";
+
     if (newCategory !== categoryFilter) {
       setCategoryFilter(newCategory);
     }
-  }, [searchParams, categoryFilter]);
 
-  // Fetch all categories
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const categories = await categoriesApi.findAll();
-        setAllCategories(categories);
-      } catch (err) {
-        console.error("Failed to fetch categories:", err);
-      }
-    };
-    fetchCategories();
-  }, []);
+    if (subcategoryIdParam !== selectedSubcategoryId) {
+      setSelectedSubcategoryId(subcategoryIdParam);
+    }
+  }, [searchParams, categoryFilter, selectedSubcategoryId]);
 
   // Close filter dropdown when clicking outside
   useEffect(() => {
@@ -147,10 +161,11 @@ function EventsPageContent() {
       today,
       currentMonth,
       category: categoryFilter !== "all" ? categoryFilter : undefined,
+      subcategoryId: selectedSubcategoryId || undefined,
       sortBy: "startDateTime" as const,
       sortOrder,
     };
-  }, [searchTerm, dateFilter, customStartDate, customEndDate, categoryFilter, sortOrder]);
+  }, [searchTerm, dateFilter, customStartDate, customEndDate, categoryFilter, selectedSubcategoryId, sortOrder]);
 
   // Initial fetch
   const fetchEvents = useCallback(async () => {
@@ -238,6 +253,8 @@ function EventsPageContent() {
 
   const handleCategoryFilterChange = (category: EventCategoryType | "all") => {
     setCategoryFilter(category);
+    // Clear subcategory when category changes
+    setSelectedSubcategoryId(null);
     // Update URL without full page reload
     const params = new URLSearchParams(searchParams.toString());
     if (category === "all") {
@@ -245,15 +262,29 @@ function EventsPageContent() {
     } else {
       params.set("category", category);
     }
+    // Always clear subcategoryId when category changes
+    params.delete("subcategoryId");
     router.push(`/events${params.toString() ? `?${params.toString()}` : ""}`, { scroll: false });
   };
 
-  const getCategoryLabel = (categoryName: EventCategoryType) => {
+  const handleSubcategoryChange = (subcategoryId: string | null) => {
+    setSelectedSubcategoryId(subcategoryId);
+    // Update URL without full page reload
+    const params = new URLSearchParams(searchParams.toString());
+    if (subcategoryId) {
+      params.set("subcategoryId", subcategoryId);
+    } else {
+      params.delete("subcategoryId");
+    }
+    router.push(`/events${params.toString() ? `?${params.toString()}` : ""}`, { scroll: false });
+  };
+
+  const getCategoryLabel = (categoryName: EventCategoryType | string) => {
     return categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
   };
 
   const hasActiveSearch = !!searchTerm;
-  const hasActiveFilters = dateFilter !== "all" || sortOrder !== "asc" || categoryFilter !== "all";
+  const hasActiveFilters = dateFilter !== "all" || sortOrder !== "asc" || categoryFilter !== "all" || selectedSubcategoryId !== null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -380,7 +411,7 @@ function EventsPageContent() {
                     {allCategories.map((category) => (
                       <button
                         key={category.id}
-                        onClick={() => handleCategoryFilterChange(category.name)}
+                        onClick={() => handleCategoryFilterChange(category.name as EventCategoryType)}
                         className="flex w-full items-center justify-between px-2 py-1.5 rounded-lg text-sm text-foreground hover:bg-white/5 transition-colors"
                       >
                         <span>{getCategoryLabel(category.name)}</span>
@@ -416,6 +447,37 @@ function EventsPageContent() {
             )}
           </div>
         </div>
+
+        {/* Subcategory Filter Chips - only show when a category is selected and has subcategories */}
+        {filteredSubcategories.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {selectedSubcategoryId && (
+              <button
+                onClick={() => handleSubcategoryChange(null)}
+                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors border border-red-400/30 bg-red-500/10 text-red-400 hover:bg-red-500/20"
+              >
+                <X className="h-3.5 w-3.5" />
+                Clear
+              </button>
+            )}
+            {filteredSubcategories.map((subcategory) => {
+              const isSelected = selectedSubcategoryId === subcategory.id;
+              return (
+                <button
+                  key={subcategory.id}
+                  onClick={() => handleSubcategoryChange(isSelected ? null : subcategory.id)}
+                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                    isSelected
+                      ? "bg-primary text-white border border-primary"
+                      : "border border-white/10 bg-card-background text-muted-foreground hover:border-white/20 hover:text-foreground"
+                  }`}
+                >
+                  {getCategoryLabel(subcategory.name)}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Results Count */}
         <div className="mb-6">

@@ -748,15 +748,25 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                         {category.name}
                       </Link>
                     ))}
-                    {event.subcategories?.map((subcategory) => (
-                      <Link
-                        key={subcategory.id}
-                        href={`/events?subcategory=${subcategory.name}`}
-                        className="rounded-full border border-purple-400/30 bg-purple-500/10 px-4 py-1.5 text-sm font-medium text-purple-400 transition-colors hover:border-purple-400/50 hover:bg-purple-500/20"
-                      >
-                        {subcategory.name}
-                      </Link>
-                    ))}
+                    {event.subcategories?.map((subcategory) => {
+                      // Find parent category for the subcategory to include in URL
+                      const parentCategory = event.categories?.find(cat =>
+                        cat.id === subcategory.categoryId ||
+                        cat.id === (subcategory as any).category?.id
+                      );
+                      const href = parentCategory
+                        ? `/events?category=${parentCategory.name}&subcategoryId=${subcategory.id}`
+                        : `/events?subcategoryId=${subcategory.id}`;
+                      return (
+                        <Link
+                          key={subcategory.id}
+                          href={href}
+                          className="rounded-full border border-purple-400/30 bg-purple-500/10 px-4 py-1.5 text-sm font-medium text-purple-400 transition-colors hover:border-purple-400/50 hover:bg-purple-500/20"
+                        >
+                          {subcategory.name}
+                        </Link>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -1172,15 +1182,25 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       {category.name}
                     </Link>
                   ))}
-                  {event.subcategories?.map((subcategory) => (
-                    <Link
-                      key={subcategory.id}
-                      href={`/events?subcategory=${subcategory.name}`}
-                      className="rounded-full border border-purple-400/30 bg-purple-500/10 px-4 py-1.5 text-sm font-medium text-purple-400 transition-colors hover:border-purple-400/50 hover:bg-purple-500/20"
-                    >
-                      {subcategory.name}
-                    </Link>
-                  ))}
+                  {event.subcategories?.map((subcategory) => {
+                    // Find parent category for the subcategory to include in URL
+                    const parentCategory = event.categories?.find(cat =>
+                      cat.id === subcategory.categoryId ||
+                      cat.id === (subcategory as any).category?.id
+                    );
+                    const href = parentCategory
+                      ? `/events?category=${parentCategory.name}&subcategoryId=${subcategory.id}`
+                      : `/events?subcategoryId=${subcategory.id}`;
+                    return (
+                      <Link
+                        key={subcategory.id}
+                        href={href}
+                        className="rounded-full border border-purple-400/30 bg-purple-500/10 px-4 py-1.5 text-sm font-medium text-purple-400 transition-colors hover:border-purple-400/50 hover:bg-purple-500/20"
+                      >
+                        {subcategory.name}
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -1524,7 +1544,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
 
       {/* Registration Confirmation Modal */}
       {showConfirmModal && event && pendingTicketId && (() => {
-        const pendingTicket = event.eventTickets.find(t => t.id === pendingTicketId);
+        const pendingTicket = event.eventTickets?.find(t => t.id === pendingTicketId);
         const hasQuestions = !inviteToken && pendingTicket?.questionForm && pendingTicket.questionForm.length > 0;
 
         return (

@@ -88,6 +88,8 @@ interface EventCreationContextType {
   // Categories
   selectedCategoryIds: string[];
   setSelectedCategoryIds: Dispatch<SetStateAction<string[]>>;
+  selectedSubcategoryIds: string[];
+  setSelectedSubcategoryIds: Dispatch<SetStateAction<string[]>>;
 
   // Organiser terms acceptance
   acceptedOrganizerTerms: boolean;
@@ -131,6 +133,7 @@ type EventDraft = {
   coverPreview: string | null;
   coverName: string;
   selectedCategoryIds: string[];
+  selectedSubcategoryIds: string[];
   acceptedOrganizerTerms: boolean;
 };
 
@@ -266,6 +269,9 @@ export function EventCreationProvider({
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
     storedDraft.selectedCategoryIds ?? []
   );
+  const [selectedSubcategoryIds, setSelectedSubcategoryIds] = useState<string[]>(
+    storedDraft.selectedSubcategoryIds ?? []
+  );
 
   // Organiser terms acceptance
   const [acceptedOrganizerTerms, setAcceptedOrganizerTerms] = useState(
@@ -334,6 +340,7 @@ export function EventCreationProvider({
       coverPreview,
       coverName,
       selectedCategoryIds,
+      selectedSubcategoryIds,
       acceptedOrganizerTerms,
     };
 
@@ -370,6 +377,7 @@ export function EventCreationProvider({
     latitude,
     longitude,
     selectedCategoryIds,
+    selectedSubcategoryIds,
     acceptedOrganizerTerms,
   ]);
 
@@ -407,6 +415,7 @@ export function EventCreationProvider({
     setCoverPreview(null);
     setCoverName("invite-cover.png");
     setSelectedCategoryIds([]);
+    setSelectedSubcategoryIds([]);
     setAcceptedOrganizerTerms(false);
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(STORAGE_KEY);
@@ -474,6 +483,8 @@ export function EventCreationProvider({
         setCoverName,
         selectedCategoryIds,
         setSelectedCategoryIds,
+        selectedSubcategoryIds,
+        setSelectedSubcategoryIds,
         acceptedOrganizerTerms,
         setAcceptedOrganizerTerms,
         clearForm,

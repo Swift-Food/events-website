@@ -20,6 +20,7 @@ import {
   VerifyEmailResponse,
 } from "@/types/user";
 import { authApi } from "./authApi";
+import { clearCategoriesCache } from "@/lib/categories-context";
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginDto) => Promise<LoginResponse>;
@@ -73,6 +74,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
     localStorage.removeItem(USER_STORAGE_KEY);
+
+    // Clear categories cache on logout
+    clearCategoriesCache();
 
     setState({
       user: null,

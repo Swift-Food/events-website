@@ -101,6 +101,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     setCoverName,
     selectedCategoryIds,
     setSelectedCategoryIds,
+    selectedSubcategoryIds,
+    setSelectedSubcategoryIds,
     acceptedOrganizerTerms,
     setAcceptedOrganizerTerms,
     clearForm,
@@ -212,6 +214,12 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
       if (initialData.categories && initialData.categories.length > 0) {
         const categoryIds = initialData.categories.map((cat: any) => cat.id as string);
         setSelectedCategoryIds(categoryIds);
+      }
+
+      // Load subcategories (store subcategory IDs)
+      if (initialData.subcategories && initialData.subcategories.length > 0) {
+        const subcategoryIds = initialData.subcategories.map((sub: any) => sub.id as string);
+        setSelectedSubcategoryIds(subcategoryIds);
       }
 
       // Load tickets with their questions
@@ -405,8 +413,13 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
     // Validate location for in-person/hybrid events
     if (eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH) {
-      if (!addressLine1 || !city || !postcode) {
-        toast.error("Please complete the event location");
+      const missingFields: string[] = [];
+      if (!addressLine1) missingFields.push("address");
+      if (!city) missingFields.push("city");
+      if (!postcode) missingFields.push("postcode");
+
+      if (missingFields.length > 0) {
+        toast.error(`Please complete the event location: missing ${missingFields.join(", ")}`);
         return;
       }
 
@@ -478,6 +491,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             }
           : undefined,
         categoryIds: selectedCategoryIds,
+        subcategoryIds: selectedSubcategoryIds,
         eventUrl: undefined,
         tickets: ticketsPayload,
       };
@@ -977,10 +991,11 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                         <span className="text-sm text-muted-foreground">Loading...</span>
                       </div>
                     </>
-                  ) : selectedCategoryIds.length > 0 ? (
+                  ) : selectedCategoryIds.length > 0 || selectedSubcategoryIds.length > 0 ? (
                     <>
                       <p className="text-base font-semibold text-foreground">
-                        {selectedCategoryIds.length} {selectedCategoryIds.length === 1 ? 'Category' : 'Categories'} Selected
+                        {selectedCategoryIds.length} {selectedCategoryIds.length === 1 ? 'Category' : 'Categories'}
+                        {selectedSubcategoryIds.length > 0 && `, ${selectedSubcategoryIds.length} ${selectedSubcategoryIds.length === 1 ? 'Subcategory' : 'Subcategories'}`}
                       </p>
                       <p className="text-sm text-muted-foreground line-clamp-1">
                         {availableCategories
@@ -1000,12 +1015,13 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                     </>
                   )}
                 </div>
-                {selectedCategoryIds.length > 0 ? (
+                {selectedCategoryIds.length > 0 || selectedSubcategoryIds.length > 0 ? (
                   <div
                     role="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedCategoryIds([]);
+                      setSelectedSubcategoryIds([]);
                     }}
                     className="p-1 rounded-full hover:bg-white/10 transition-all"
                   >
@@ -1023,6 +1039,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 availableCategories={availableCategories}
                 selectedCategoryIds={selectedCategoryIds}
                 setSelectedCategoryIds={setSelectedCategoryIds}
+                selectedSubcategoryIds={selectedSubcategoryIds}
+                setSelectedSubcategoryIds={setSelectedSubcategoryIds}
               />
             </div>
           </div>

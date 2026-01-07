@@ -5,6 +5,7 @@ import "@/styles/globals.css";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { AuthProvider } from "@/lib/auth/authContext";
+import { CategoriesProvider } from "@/lib/categories-context";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -126,11 +127,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          <CategoriesProvider>
+            <div className="flex min-h-screen flex-col">
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+          </CategoriesProvider>
         </AuthProvider>
         <Toaster
           position="top-right"

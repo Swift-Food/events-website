@@ -44,7 +44,7 @@ export interface EventResponseDto {
   owner: EventOwnerResponseDto;
   address: EventAddressResponseDto;
   categories: EventCategoryResponseDto[];
-  subcategories: EventSubcategoryResponseDto[];
+  subcategories?: EventSubcategoryResponseDto[];
   eventTickets?: EventTicketResponseDto[];
   ticketsSoldCount?: number;
   attendeesCount?: number;
