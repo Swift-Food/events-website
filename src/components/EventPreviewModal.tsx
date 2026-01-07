@@ -387,7 +387,6 @@ export default function EventPreviewModal({
       onClose();
       setEvent(null);
       setSelectedTicketId(null);
-      setShowQuestionForm(false);
       setQuestionAnswers({});
     }, 300);
   };
@@ -539,10 +538,10 @@ export default function EventPreviewModal({
                 {event.name}
               </h1>
 
-              {/* Categories */}
-              {event.categories && event.categories.length > 0 && (
+              {/* Categories & Subcategories */}
+              {((event.categories && event.categories.length > 0) || (event.subcategories && event.subcategories.length > 0)) && (
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {event.categories.map((category) => (
+                  {event.categories?.map((category) => (
                     <Link
                       key={category.id}
                       href={`/events?category=${category.name}`}
@@ -550,6 +549,16 @@ export default function EventPreviewModal({
                       className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-medium text-foreground transition-colors hover:border-primary/50 hover:bg-primary/10"
                     >
                       {category.name}
+                    </Link>
+                  ))}
+                  {event.subcategories?.map((subcategory) => (
+                    <Link
+                      key={subcategory.id}
+                      href={`/events?subcategory=${subcategory.name}`}
+                      onClick={handleClose}
+                      className="rounded-full border border-purple-400/30 bg-purple-500/10 px-3 py-1 text-sm font-medium text-purple-400 transition-colors hover:border-purple-400/50 hover:bg-purple-500/20"
+                    >
+                      {subcategory.name}
                     </Link>
                   ))}
                 </div>
