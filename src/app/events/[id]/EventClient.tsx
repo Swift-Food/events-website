@@ -1236,27 +1236,53 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
 
             {/* Invitation Banner */}
             {inviteToken && invitationPreview?.success && (
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20">
-                    <Gift className="h-5 w-5 text-emerald-400" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-emerald-400">
-                      You&apos;ve been invited!
-                    </h3>
-                    <p className="text-sm text-emerald-300/80">
-                      You have an invitation for the <span className="font-medium">{invitationPreview.ticket?.name}</span> ticket
-                      {invitationPreview.ticket?.bypassPayment && invitationPreview.ticket?.isPaid && (
-                        <span className="ml-1">(payment waived)</span>
-                      )}
-                      {invitationPreview.bypassApproval && (
-                        <span className="ml-1">(no approval required)</span>
-                      )}
-                    </p>
+              event.userTicket ? (
+                // User already has a ticket - show info banner instead
+                <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20">
+                      <Ticket className="h-5 w-5 text-blue-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-blue-400">
+                        You already have a ticket
+                      </h3>
+                      <p className="text-sm text-blue-300/80">
+                        You already have a ticket for this event. View it in your tickets.
+                      </p>
+                    </div>
+                    <Link
+                      href="/my-tickets"
+                      className="shrink-0 rounded-lg bg-blue-500/20 px-4 py-2 text-sm font-medium text-blue-300 transition-colors hover:bg-blue-500/30"
+                    >
+                      View My Tickets
+                    </Link>
                   </div>
                 </div>
-              </div>
+              ) : (
+                // Show invitation banner
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20">
+                      <Gift className="h-5 w-5 text-emerald-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-emerald-400">
+                        You&apos;ve been invited!
+                      </h3>
+                      <p className="text-sm text-emerald-300/80">
+                        You have an invitation for the <span className="font-medium">{invitationPreview.ticket?.name}</span> ticket
+                        {invitationPreview.ticket?.bypassPayment && invitationPreview.ticket?.isPaid && (
+                          <span className="ml-1">(payment waived)</span>
+                        )}
+                        {invitationPreview.bypassApproval && (
+                          <span className="ml-1">(no approval required)</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )
             )}
 
             {/* Invitation Error Banner */}
