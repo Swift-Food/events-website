@@ -22,7 +22,7 @@ import { InvitationsSection } from "@/components/event-management/InvitationsSec
 import { BlacklistModal, BlacklistSection } from "@/components/blacklist";
 import { toast } from "sonner";
 
-type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in" | "blacklisted";
+type FilterStatus = "all" | "active" | "pending_approval" | "pending_payment" | "waitlisted" | "cancelled" | "checked_in" | "blacklisted";
 
 /**
  * Extract guest display name with proper fallbacks (for search filtering)
@@ -378,6 +378,7 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           pendingCount={guests.filter((g) => g.status === GuestTicketStatus.PENDING_APPROVAL).length}
+          pendingPaymentCount={guests.filter((g) => g.status === GuestTicketStatus.PENDING_PAYMENT).length}
           approvedCount={guests.filter((g) => g.status === GuestTicketStatus.ACTIVE).length}
           waitlistedCount={guests.filter((g) => g.status === GuestTicketStatus.WAITLISTED).length}
           cancelledCount={guests.filter((g) => g.status === GuestTicketStatus.CANCELLED).length}

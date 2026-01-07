@@ -1,6 +1,6 @@
 import { Search, Ban } from "lucide-react";
 
-type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in" | "blacklisted";
+type FilterStatus = "all" | "active" | "pending_approval" | "pending_payment" | "waitlisted" | "cancelled" | "checked_in" | "blacklisted";
 
 interface GuestFiltersProps {
   filterStatus: FilterStatus;
@@ -8,6 +8,7 @@ interface GuestFiltersProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   pendingCount: number;
+  pendingPaymentCount: number;
   approvedCount: number;
   waitlistedCount: number;
   cancelledCount: number;
@@ -21,6 +22,7 @@ export const GuestFilters = ({
   searchQuery,
   onSearchChange,
   pendingCount,
+  pendingPaymentCount,
   approvedCount,
   waitlistedCount,
   cancelledCount,
@@ -30,6 +32,7 @@ export const GuestFilters = ({
   const filters = [
     { value: "all" as FilterStatus, label: "All" },
     { value: "pending_approval" as FilterStatus, label: "Pending", count: pendingCount },
+    { value: "pending_payment" as FilterStatus, label: "Awaiting Payment", count: pendingPaymentCount },
     { value: "active" as FilterStatus, label: "Approved", count: approvedCount },
     { value: "checked_in" as FilterStatus, label: "Checked In", count: checkedInCount },
     { value: "waitlisted" as FilterStatus, label: "Waitlisted", count: waitlistedCount },

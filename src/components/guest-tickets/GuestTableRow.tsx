@@ -95,8 +95,8 @@ export const GuestTableRow = ({
 
   const getStatusBadge = () => {
     const statusConfig = {
-      checked_in: {  // ← Add this
-        label: "Active",  // Show as "Active" since they're checked in
+      checked_in: {
+        label: "Checked In",
         icon: CheckCircle2,
         className: "bg-green-100 text-green-700",
       },
@@ -110,16 +110,26 @@ export const GuestTableRow = ({
         icon: Clock,
         className: "bg-amber-100 text-amber-700",
       },
+      pending_payment: {
+        label: "Awaiting Payment",
+        icon: Clock,
+        className: "bg-blue-100 text-blue-700",
+      },
       waitlisted: {
         label: "Waitlisted",
         icon: Clock,
         className: "bg-orange-100 text-orange-700",
       },
-      // rejected: {
-      //   label: "Rejected",
-      //   icon: XCircle,
-      //   className: "bg-red-100 text-red-700",
-      // },
+      refunded: {
+        label: "Refunded",
+        icon: XCircle,
+        className: "bg-purple-100 text-purple-700",
+      },
+      expired: {
+        label: "Expired",
+        icon: XCircle,
+        className: "bg-neutral-100 text-neutral-700",
+      },
       cancelled: {
         label: "Cancelled",
         icon: XCircle,
