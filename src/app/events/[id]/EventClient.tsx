@@ -360,6 +360,14 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
           }
         } else {
           toast.error(result.message || "Failed to accept invitation");
+          setShowConfirmModal(false);
+          // Redirect to my-tickets if user already has a ticket, otherwise stay on event page
+          if (result.message?.includes('already')) {
+            router.push("/my-tickets");
+          } else {
+            // Remove inviteToken from URL to prevent retry loop
+            router.replace(`/events/${eventId}`);
+          }
         }
       } else {
         // Normal registration flow
@@ -426,9 +434,16 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
       }
     } catch (error: any) {
       console.error("Registration failed:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to register for event"
-      );
+      const errorMessage = error.response?.data?.message || "Failed to register for event";
+      toast.error(errorMessage);
+      setShowConfirmModal(false);
+      // If user already has a ticket, redirect to my-tickets
+      if (errorMessage.toLowerCase().includes('already')) {
+        router.push("/my-tickets");
+      } else if (inviteToken) {
+        // Remove inviteToken from URL on other errors
+        router.replace(`/events/${eventId}`);
+      }
     } finally {
       setIsRegistering(false);
     }
