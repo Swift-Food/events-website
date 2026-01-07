@@ -285,10 +285,19 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
     setShowInviteGuestsModal(true);
   };
 
+  // Statuses that can be selected for bulk actions (approve/reject)
+  const BULK_ACTIONABLE_STATUSES = [
+    GuestTicketStatus.PENDING_APPROVAL,
+    GuestTicketStatus.WAITLISTED,
+    GuestTicketStatus.PENDING_PAYMENT,
+  ];
+
   const filteredGuests = guests.filter((guest) => {
+    // "all" filter excludes cancelled tickets
     const matchesStatus =
-      filterStatus === "all" ||
-      guest.status === filterStatus;
+      filterStatus === "all"
+        ? guest.status !== GuestTicketStatus.CANCELLED
+        : guest.status === filterStatus;
 
     const matchesSearch =
       searchQuery === "" ||
@@ -311,10 +320,15 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
   };
 
   const toggleSelectAll = () => {
-    if (selectedGuests.size === filteredGuests.length) {
+    // Only select guests with bulk-actionable statuses
+    const actionableGuests = filteredGuests.filter((g) =>
+      BULK_ACTIONABLE_STATUSES.includes(g.status as GuestTicketStatus)
+    );
+
+    if (selectedGuests.size === actionableGuests.length && actionableGuests.length > 0) {
       setSelectedGuests(new Set());
     } else {
-      setSelectedGuests(new Set(filteredGuests.map((g) => g.id)));
+      setSelectedGuests(new Set(actionableGuests.map((g) => g.id)));
     }
   };
 
