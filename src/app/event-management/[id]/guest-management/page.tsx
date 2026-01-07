@@ -408,7 +408,7 @@ export default function GuestManagementPage() {
                           {ticket.name}
                         </div>
                         <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                          {parseFloat(ticket.price) > 0 ? `$${ticket.price}` : "Free"} • {ticket.quantityLeft} of {ticket.quantityTotal} available
+                          {parseFloat(ticket.price) > 0 ? `£${ticket.price}` : "Free"} • {ticket.quantityLeft} of {ticket.quantityTotal} available
                         </div>
                       </button>
                     ))}
