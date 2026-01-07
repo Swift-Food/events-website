@@ -286,10 +286,10 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
   };
 
   // Statuses that can be selected for bulk actions (approve/reject)
+  // Note: PENDING_PAYMENT is excluded because those tickets are already approved and waiting for payment
   const BULK_ACTIONABLE_STATUSES = [
     GuestTicketStatus.PENDING_APPROVAL,
     GuestTicketStatus.WAITLISTED,
-    GuestTicketStatus.PENDING_PAYMENT,
   ];
 
   const filteredGuests = guests.filter((guest) => {
