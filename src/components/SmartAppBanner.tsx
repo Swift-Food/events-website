@@ -15,7 +15,7 @@ export default function SmartAppBanner({
   currentPath,
   appScheme = "eventsapp",
   appStoreUrl = "https://apps.apple.com/app/prismo", // Update with actual App Store URL
-  playStoreUrl = "https://play.google.com/store/apps/details?id=com.prismo.app", // Update with actual Play Store URL
+  playStoreUrl = "https://play.google.com/store/apps/details?id=com.prysmo.app", // Update with actual Play Store URL
 }: SmartAppBannerProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
