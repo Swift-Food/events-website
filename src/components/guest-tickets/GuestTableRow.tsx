@@ -69,6 +69,13 @@ interface GuestTableRowProps {
   onRowClick?: (guest: GuestTicketResponseDto) => void;
 }
 
+// Statuses that can be selected for bulk actions (approve/reject)
+const BULK_ACTIONABLE_STATUSES = [
+  GuestTicketStatus.PENDING_APPROVAL,
+  GuestTicketStatus.WAITLISTED,
+  GuestTicketStatus.PENDING_PAYMENT,
+];
+
 export const GuestTableRow = ({
   guest,
   isSelected,
@@ -82,6 +89,10 @@ export const GuestTableRow = ({
   onRowClick,
 }: GuestTableRowProps) => {
   const [showMenu, setShowMenu] = useState(false);
+
+  // Only allow selection for bulk-actionable statuses
+  const canSelect = BULK_ACTIONABLE_STATUSES.includes(guest.status as GuestTicketStatus);
+
   const getStatusBadge = () => {
     const statusConfig = {
       checked_in: {  // ← Add this
@@ -152,9 +163,12 @@ export const GuestTableRow = ({
       <td className="p-3 md:p-4">
         <input
           type="checkbox"
-          checked={isSelected}
-          onChange={() => onToggleSelect(guest.id)}
-          className="h-4 w-4 rounded border-neutral-700 bg-input-background text-primary focus:ring-2 focus:ring-primary"
+          checked={isSelected && canSelect}
+          onChange={() => canSelect && onToggleSelect(guest.id)}
+          disabled={!canSelect}
+          className={`h-4 w-4 rounded border-neutral-700 bg-input-background text-primary focus:ring-2 focus:ring-primary ${
+            !canSelect ? "opacity-30 cursor-not-allowed" : ""
+          }`}
         />
       </td>
       <td className="p-3 md:p-4">

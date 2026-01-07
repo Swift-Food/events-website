@@ -17,6 +17,13 @@ import { Loader, Link as LinkIcon, Copy, Check } from "lucide-react";
 
 type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in" | "blacklisted";
 
+// Statuses that can be selected for bulk actions (approve/reject)
+const BULK_ACTIONABLE_STATUSES = [
+  GuestTicketStatus.PENDING_APPROVAL,
+  GuestTicketStatus.WAITLISTED,
+  GuestTicketStatus.PENDING_PAYMENT,
+];
+
 /**
  * Extract guest display name with proper fallbacks
  */
@@ -295,10 +302,15 @@ export default function GuestManagementPage() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedGuests.size === filteredGuests.length) {
+    // Only select guests with actionable statuses
+    const actionableGuests = filteredGuests.filter((g) =>
+      BULK_ACTIONABLE_STATUSES.includes(g.status as GuestTicketStatus)
+    );
+
+    if (selectedGuests.size === actionableGuests.length && actionableGuests.length > 0) {
       setSelectedGuests(new Set());
     } else {
-      setSelectedGuests(new Set(filteredGuests.map((g) => g.id)));
+      setSelectedGuests(new Set(actionableGuests.map((g) => g.id)));
     }
   };
 
