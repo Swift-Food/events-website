@@ -306,7 +306,6 @@ function GradientEditor({
     });
   };
 
-  const sortedStops = [...gradient.stops].sort((a, b) => a.position - b.position);
   const previewGradient = generateGradientCSS({ ...gradient, enabled: true });
 
   return (
@@ -431,7 +430,7 @@ function GradientEditor({
             </div>
 
             <div className="space-y-1.5 max-h-40 overflow-y-auto">
-              {sortedStops.map((stop) => {
+              {gradient.stops.map((stop) => {
                 const { r, g, b, a } = parseColor(stop.color);
                 const hexColor = rgbaToHex(r, g, b);
 
