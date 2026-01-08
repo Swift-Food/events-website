@@ -5,9 +5,7 @@ import {
   XCircle,
   Clock,
   MoreHorizontal,
-  UserCheck,
   ArrowUpCircle,
-  Mail,
   Eye,
   ChevronRight,
 } from "lucide-react";
@@ -255,6 +253,7 @@ export const GuestTableRow = ({
                 onCheckIn={onCheckIn}
                 onPromote={onPromote}
                 onBlacklist={onBlacklist}
+                onViewDetails={onRowClick}
               />
             )}
           </div>

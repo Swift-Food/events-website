@@ -2,12 +2,12 @@ import { GuestTicketResponseDto, GuestTicketStatus } from "@/types/guest-ticket"
 import {
   CheckCircle2,
   XCircle,
-  Mail,
   QrCode,
   ArrowUpCircle,
   UserCheck,
   Download,
   Ban,
+  Eye,
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 
@@ -19,6 +19,7 @@ interface GuestActionMenuProps {
   onCheckIn: (qrCode: string) => void;
   onPromote: (ticketId: string) => void;
   onBlacklist: (guest: GuestTicketResponseDto) => void;
+  onViewDetails?: (guest: GuestTicketResponseDto) => void;
 }
 
 export const GuestActionMenu = ({
@@ -29,6 +30,7 @@ export const GuestActionMenu = ({
   onCheckIn,
   onPromote,
   onBlacklist,
+  onViewDetails,
 }: GuestActionMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
   console.log("guest in action menu,", guest)
@@ -94,6 +96,18 @@ export const GuestActionMenu = ({
   }
 
   // Common actions
+  if (onViewDetails) {
+    menuItems.push({
+      label: "View Details",
+      icon: Eye,
+      onClick: () => {
+        onViewDetails(guest);
+        onClose();
+      },
+      color: "text-foreground",
+    });
+  }
+
   menuItems.push(
     {
       label: "View QR Code",

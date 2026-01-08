@@ -163,7 +163,7 @@ export function ReviewGuestModal({
                       {question}
                     </p>
                     <p className="text-foreground">
-                      {typeof answer === "object" ? JSON.stringify(answer) : String(answer)}
+                      {Array.isArray(answer) ? answer.join(", ") : String(answer)}
                     </p>
                   </div>
                 ))}

@@ -10,7 +10,7 @@ import {
   Mail,
   Calendar,
   Ticket,
-  User,
+  ClipboardList,
 } from "lucide-react";
 
 /**
@@ -125,9 +125,9 @@ export const GuestDetailsModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-card-background border border-white/10 shadow-xl">
+      <div className="w-full max-w-md max-h-[90vh] rounded-2xl bg-card-background border border-white/10 shadow-xl flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 p-4">
+        <div className="flex items-center justify-between border-b border-white/10 p-4 shrink-0">
           <h3 className="text-lg font-semibold text-foreground">Guest Details</h3>
           <button
             onClick={onClose}
@@ -138,7 +138,7 @@ export const GuestDetailsModal = ({
         </div>
 
         {/* Content */}
-        <div className="p-4 space-y-6">
+        <div className="p-4 space-y-6 overflow-y-auto">
           {/* Guest Info */}
           <div className="flex items-center gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-xl font-semibold text-primary">
@@ -188,10 +188,35 @@ export const GuestDetailsModal = ({
               </div>
             </div>
           </div>
+
+          {/* Registration Questions */}
+          {guest.questionAnswers && Object.keys(guest.questionAnswers).length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="h-4 w-4 text-muted-foreground" />
+                <h4 className="text-sm font-medium text-foreground">Registration Answers</h4>
+              </div>
+              <div className="space-y-2">
+                {Object.entries(guest.questionAnswers).map(([question, answer]) => (
+                  <div
+                    key={question}
+                    className="rounded-xl bg-card-secondary-background p-3"
+                  >
+                    <p className="text-xs font-medium text-muted-foreground mb-1">
+                      {question}
+                    </p>
+                    <p className="text-sm text-foreground">
+                      {Array.isArray(answer) ? answer.join(", ") : String(answer)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Actions */}
-        <div className="border-t border-white/10 p-4">
+        <div className="border-t border-white/10 p-4 shrink-0">
           <div className="flex flex-wrap gap-2">
             {guest.status === GuestTicketStatus.PENDING_APPROVAL && onReview && (
               <button
