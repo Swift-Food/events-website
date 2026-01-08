@@ -6,7 +6,7 @@ import { eventsApi } from "@/services/events";
 import { EventResponseDto, EventListResponseDto, EventStatus } from "@/types/event";
 import { OrganizerProfile } from "@/types/organizer";
 import EventsTimeline from "@/components/EventsTimeline";
-import { User, Calendar } from "lucide-react";
+import { User, Calendar, Globe, Twitter, Linkedin, Instagram } from "lucide-react";
 
 type EventTab = "upcoming" | "past";
 
@@ -197,6 +197,54 @@ export default function OrganizerProfileClient({
                     events created
                   </span>
                 </div>
+              </div>
+
+              {/* Social Links */}
+              <div className="flex items-center gap-3 mt-3">
+                {initialProfile.website && (
+                  <a
+                    href={initialProfile.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Website"
+                  >
+                    <Globe  size={16} />
+                  </a>
+                )}
+                {initialProfile.twitterHandle && (
+                  <a
+                    href={`https://twitter.com/${initialProfile.twitterHandle.replace('@', '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Twitter"
+                  >
+                    <Twitter  size={16} />
+                  </a>
+                )}
+                {initialProfile.linkedinUrl && (
+                  <a
+                    href={initialProfile.linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="LinkedIn"
+                  >
+                    <Linkedin size={16} />
+                  </a>
+                )}
+                {initialProfile.instagramUrl && (
+                  <a
+                    href={initialProfile.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Instagram"
+                  >
+                    <Instagram size={16} />
+                  </a>
+                )}
               </div>
             </div>
           </div>

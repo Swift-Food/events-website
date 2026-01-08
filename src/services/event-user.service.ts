@@ -26,7 +26,7 @@ export interface EventUserProfile {
     lastName: string | null;
   };
   stats?: EventUserStats;
-  
+
   // Socials
   twitterHandle: string;
   linkedinUrl: string;
@@ -42,6 +42,7 @@ export interface UpdateEventUserDto {
   website?: string;
   twitterHandle?: string;
   linkedinUrl?: string;
+  instagramUrl?: string;
 }
 
 export interface EventUserResponse {

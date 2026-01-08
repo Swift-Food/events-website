@@ -8,6 +8,7 @@ export interface OrganizerProfile {
   website?: string;
   twitterHandle?: string;
   linkedinUrl?: string;
+  instagramUrl?: string;
   totalEventsCreated: number;
   totalEventsAttended: number;
   createdAt: string;

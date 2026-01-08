@@ -21,6 +21,7 @@ export default function EditProfilePage() {
     website: "",
     twitterHandle: "",
     linkedinUrl: "",
+    instagramUrl: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -44,6 +45,7 @@ export default function EditProfilePage() {
         website: eventUser.website || "",
         twitterHandle: eventUser.twitterHandle || "",
         linkedinUrl: eventUser.linkedinUrl || "",
+        instagramUrl: eventUser.instagramUrl || "",
       });
     }
   }, [user, eventUser]);
@@ -70,6 +72,7 @@ export default function EditProfilePage() {
         website: formData.website.trim() || undefined,
         twitterHandle: formData.twitterHandle.trim() || undefined,
         linkedinUrl: formData.linkedinUrl.trim() || undefined,
+        instagramUrl: formData.instagramUrl.trim() || undefined,
       };
 
       // Remove undefined values for cleaner payload
@@ -303,6 +306,20 @@ export default function EditProfilePage() {
                 value={formData.linkedinUrl}
                 onChange={handleChange}
                 placeholder="https://linkedin.com/in/yourprofile"
+                className="w-full rounded-xl border border-white/10 bg-input-background px-4 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Instagram URL
+              </label>
+              <input
+                type="url"
+                name="instagramUrl"
+                value={formData.instagramUrl}
+                onChange={handleChange}
+                placeholder="https://instagram.com/yourprofile"
                 className="w-full rounded-xl border border-white/10 bg-input-background px-4 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
               />
             </div>
