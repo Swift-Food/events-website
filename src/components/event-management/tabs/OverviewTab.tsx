@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { EventResponseDto, EventStatus } from "@/types";
-import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, EyeOff, AlertTriangle, Loader2, CreditCard, Video, UserPlus } from "lucide-react";
+import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, EyeOff, AlertTriangle, Loader2, CreditCard, Video, UserPlus, Link2, Copy, Check, Pencil, X } from "lucide-react";
 import { isVirtualEvent, isHybridEvent } from "@/types/event/status";
 import { GuestTicketResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
 import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
@@ -12,6 +12,7 @@ import { InvitationsSection } from "@/components/event-management/InvitationsSec
 import { GuestOverviewCard } from "@/components/event-management/GuestOverviewCard";
 import Image from "next/image";
 import { guestTicketService } from "@/services/guest-ticket.service";
+import { eventService } from "@/services/event.service";
 import { toast } from "sonner";
 
 type UserRole = "owner" | "admin" | "scanner" | null;
@@ -27,9 +28,10 @@ interface OverviewTabProps {
   userRole?: UserRole;
   onPublishToggle?: () => void;
   isPublishLoading?: boolean;
+  onEventUpdate?: () => void;
 }
 
-export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, onGuestsClick, onDeleteClick, isDeleting, userRole, onPublishToggle, isPublishLoading }: OverviewTabProps) {
+export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, onGuestsClick, onDeleteClick, isDeleting, userRole, onPublishToggle, isPublishLoading, onEventUpdate }: OverviewTabProps) {
   // Scanner can only scan, not edit or delete
   const canEdit = userRole === "owner" || userRole === "admin";
   const canDelete = userRole === "owner" || userRole === "admin";
@@ -58,6 +60,70 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
     percentageCheckedIn: 0,
   });
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  // URL state
+  const [urlCopied, setUrlCopied] = useState(false);
+  const [baseUrl, setBaseUrl] = useState("");
+  const [isEditingUrl, setIsEditingUrl] = useState(false);
+  const [editedUrl, setEditedUrl] = useState(eventData.eventUrl || "");
+  const [isSavingUrl, setIsSavingUrl] = useState(false);
+
+  // Get base URL on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setBaseUrl(window.location.origin);
+    }
+  }, []);
+
+  // Update editedUrl when eventData changes
+  useEffect(() => {
+    setEditedUrl(eventData.eventUrl || "");
+  }, [eventData.eventUrl]);
+
+  const fullEventUrl = baseUrl && eventData.eventUrl ? `${baseUrl}/events/${eventData.eventUrl}` : "";
+
+  const handleCopyUrl = async () => {
+    if (!fullEventUrl) return;
+    try {
+      await navigator.clipboard.writeText(fullEventUrl);
+      setUrlCopied(true);
+      toast.success("Event URL copied to clipboard");
+      setTimeout(() => setUrlCopied(false), 2000);
+    } catch {
+      toast.error("Failed to copy URL");
+    }
+  };
+
+  const handleSaveUrl = async () => {
+    if (!editedUrl.trim()) {
+      toast.error("URL cannot be empty");
+      return;
+    }
+
+    // Basic URL slug validation
+    const urlSlug = editedUrl.trim().toLowerCase().replace(/\s+/g, "-");
+    if (!/^[a-z0-9-]+$/.test(urlSlug)) {
+      toast.error("URL can only contain letters, numbers, and hyphens");
+      return;
+    }
+
+    setIsSavingUrl(true);
+    try {
+      await eventService.updateEvent(eventData.id, { eventUrl: urlSlug });
+      toast.success("Event URL updated");
+      setIsEditingUrl(false);
+      onEventUpdate?.();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to update URL");
+    } finally {
+      setIsSavingUrl(false);
+    }
+  };
+
+  const handleCancelEditUrl = () => {
+    setEditedUrl(eventData.eventUrl || "");
+    setIsEditingUrl(false);
+  };
 
   // Fetch guest stats
   useEffect(() => {
@@ -218,15 +284,90 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
                     {eventData.name}
                   </h2>
 
-                  {/* Categories inline */}
-                  {eventData.categories && eventData.categories.length > 0 && (
+                  {/* Event URL */}
+                  {baseUrl && (
+                    <div className="mt-1.5">
+                      {isEditingUrl ? (
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-1.5">
+                            <Link2 className="h-3 w-3 text-muted-foreground shrink-0" />
+                            <span className="text-xs text-muted-foreground truncate">{baseUrl}/events/</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              value={editedUrl}
+                              onChange={(e) => setEditedUrl(e.target.value)}
+                              className="text-xs bg-white/5 border border-white/10 rounded px-2 py-1.5 text-foreground focus:outline-none focus:border-primary flex-1 min-w-0"
+                              placeholder="event-url"
+                              autoFocus
+                            />
+                            <button
+                              onClick={handleSaveUrl}
+                              disabled={isSavingUrl}
+                              className="p-1.5 rounded hover:bg-white/10 text-green-400 disabled:opacity-50 shrink-0"
+                            >
+                              {isSavingUrl ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Check className="h-4 w-4" />
+                              )}
+                            </button>
+                            <button
+                              onClick={handleCancelEditUrl}
+                              disabled={isSavingUrl}
+                              className="p-1.5 rounded hover:bg-white/10 text-red-400 disabled:opacity-50 shrink-0"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5">
+                          <Link2 className="h-3 w-3 text-muted-foreground shrink-0" />
+                          <span className="text-xs text-muted-foreground truncate min-w-0">
+                            {fullEventUrl || `${baseUrl}/events/`}
+                          </span>
+                          <button
+                            onClick={handleCopyUrl}
+                            className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                          >
+                            {urlCopied ? (
+                              <Check className="h-3 w-3 text-green-400" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                          </button>
+                          {canEdit && (
+                            <button
+                              onClick={() => setIsEditingUrl(true)}
+                              className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Categories & Subcategories inline */}
+                  {((eventData.categories && eventData.categories.length > 0) || (eventData.subcategories && eventData.subcategories.length > 0)) && (
                     <div className="flex flex-wrap gap-1.5 mt-2">
-                      {eventData.categories.map((category) => (
+                      {eventData.categories?.map((category) => (
                         <span
                           key={category.id}
-                          className="rounded-full bg-white/5 px-2.5 py-0.5 text-xs text-muted-foreground"
+                          className="rounded-md border border-white/20 bg-transparent px-2.5 py-0.5 text-xs text-muted-foreground"
                         >
                           {category.name}
+                        </span>
+                      ))}
+                      {eventData.subcategories?.map((subcategory) => (
+                        <span
+                          key={subcategory.id}
+                          className="rounded-md border border-purple-400/30 bg-purple-500/10 px-2.5 py-0.5 text-xs text-purple-400"
+                        >
+                          {subcategory.name}
                         </span>
                       ))}
                     </div>

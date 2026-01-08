@@ -442,32 +442,34 @@ function EventsPageContent() {
 
         {/* Subcategory Filter Chips - only show when a category is selected and has subcategories */}
         {filteredSubcategories.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {selectedSubcategoryId && (
-              <button
-                onClick={() => handleSubcategoryChange(null)}
-                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors border border-red-400/30 bg-red-500/10 text-red-400 hover:bg-red-500/20"
-              >
-                <X className="h-3.5 w-3.5" />
-                Clear
-              </button>
-            )}
-            {filteredSubcategories.map((subcategory) => {
-              const isSelected = selectedSubcategoryId === subcategory.id;
-              return (
+          <div className="sticky top-[136px] z-30 -mx-4 px-4 sm:-mx-6 sm:px-6 pb-3 bg-gradient-to-b from-background via-background to-transparent">
+            <div className="flex flex-wrap gap-2">
+              {selectedSubcategoryId && (
                 <button
-                  key={subcategory.id}
-                  onClick={() => handleSubcategoryChange(isSelected ? null : subcategory.id)}
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                    isSelected
-                      ? "bg-primary text-white border border-primary"
-                      : "border border-white/10 bg-card-background text-muted-foreground hover:border-white/20 hover:text-foreground"
-                  }`}
+                  onClick={() => handleSubcategoryChange(null)}
+                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors border border-red-400/30 bg-red-500/10 text-red-400 hover:bg-red-500/20"
                 >
-                  {getCategoryLabel(subcategory.name)}
+                  <X className="h-3.5 w-3.5" />
+                  Clear
                 </button>
-              );
-            })}
+              )}
+              {filteredSubcategories.map((subcategory) => {
+                const isSelected = selectedSubcategoryId === subcategory.id;
+                return (
+                  <button
+                    key={subcategory.id}
+                    onClick={() => handleSubcategoryChange(isSelected ? null : subcategory.id)}
+                    className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                      isSelected
+                        ? "bg-primary text-white border border-primary"
+                        : "border border-white/10 bg-card-background text-muted-foreground hover:border-white/20 hover:text-foreground"
+                    }`}
+                  >
+                    {getCategoryLabel(subcategory.name)}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -518,7 +520,13 @@ function EventsPageContent() {
         )}
 
         {/* Events Timeline */}
-        {!loading && !error && events.length > 0 && <EventsTimeline events={events} />}
+        {!loading && !error && events.length > 0 && (
+          <EventsTimeline
+            events={events}
+            stickyTopClass={filteredSubcategories.length > 0 ? "top-[180px]" : "top-[136px]"}
+            observerRootMargin={filteredSubcategories.length > 0 ? "-188px 0px 0px 0px" : "-144px 0px 0px 0px"}
+          />
+        )}
 
         {/* Infinite scroll sentinel */}
         <div ref={sentinelRef} className="h-4" />

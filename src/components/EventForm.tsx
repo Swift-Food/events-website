@@ -549,7 +549,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
         isPrivate: isPrivate,
         requiresApproval: requireApproval,
         hideFullAddress: hideFullAddress,
-        format: eventFormat || undefined,
+        format: eventFormat ?? undefined,
         virtualMeetingUrl: virtualMeetingUrl || undefined,
         addressData: (eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH)
           ? {
@@ -834,6 +834,21 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     if (!ticket) return;
 
     const currentQuestions = ticket.questionForm || [];
+
+    // Check for duplicate question (case-insensitive comparison)
+    const normalizedNewQuestion = field.question.trim().toLowerCase();
+    const isDuplicate = currentQuestions.some((q, idx) => {
+      // If editing, exclude the current question from duplicate check
+      if (editingQuestionIndex !== null && idx === editingQuestionIndex) {
+        return false;
+      }
+      return q.question.trim().toLowerCase() === normalizedNewQuestion;
+    });
+
+    if (isDuplicate) {
+      toast.error("This question already exists for this ticket");
+      return;
+    }
 
     let updatedQuestions: FormField[];
     if (editingQuestionIndex !== null) {

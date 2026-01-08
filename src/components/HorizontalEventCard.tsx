@@ -271,7 +271,7 @@ export default function HorizontalEventCard({
                 ? "text-red-400"
                 : minPrice === 0
                 ? "text-green-400"
-                : "text-orange-400"
+                : "text-warning"
             }`}
           >
             <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
