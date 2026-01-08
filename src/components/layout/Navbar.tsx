@@ -66,7 +66,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-background">
+      <header className="sticky top-0 z-50  bg-background">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-1 text-lg font-semibold tracking-tight hover:scale-105 hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-transform duration-200">
