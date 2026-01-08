@@ -323,6 +323,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
             const guestTicketId = result.paymentUrl.split('/').pop();
 
             if (!guestTicketId) {
+              setShowConfirmModal(false);
               toast.error("Failed to process payment. Please try again from My Tickets.");
               router.push("/my-tickets");
               return;
@@ -343,18 +344,22 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   },
                   guestTicketId: guestTicketId,
                 });
+                // Close confirm modal and open payment modal together
+                setShowConfirmModal(false);
                 setShowPaymentModal(true);
               } else {
                 throw new Error(paymentResponse.error || 'Failed to create payment');
               }
             } catch (paymentError: any) {
               console.error("Payment setup failed:", paymentError);
+              setShowConfirmModal(false);
               toast.error(
                 paymentError.response?.data?.message || "Failed to setup payment. Please try again from My Tickets."
               );
               router.push("/my-tickets");
             }
           } else {
+            setShowConfirmModal(false);
             toast.success(result.message || "Invitation accepted successfully!");
             router.push("/my-tickets");
           }
@@ -378,11 +383,11 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
         });
 
         if (result.success) {
-          setShowConfirmModal(false);
           setQuestionAnswers({});
 
           // Check if user was added to waitlist
           if (result.isWaitlisted) {
+            setShowConfirmModal(false);
             toast.success(
               result.message || `Added to waitlist at position #${result.waitlistPosition}!`,
               { duration: 5000 }
@@ -411,6 +416,8 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   },
                   guestTicketId: result.guestTicket.id,
                 });
+                // Close confirm modal and open payment modal together
+                setShowConfirmModal(false);
                 setShowPaymentModal(true);
                 setShowTicketSelector(false);
                 setSelectedTicketId(null);
@@ -419,12 +426,14 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
               }
             } catch (paymentError: any) {
               console.error("Payment setup failed:", paymentError);
+              setShowConfirmModal(false);
               toast.error(
                 paymentError.response?.data?.message || "Failed to setup payment. Please try again from My Tickets."
               );
               router.push("/my-tickets");
             }
           } else {
+            setShowConfirmModal(false);
             toast.success(result.message || "Successfully registered for event!");
             setShowTicketSelector(false);
             setSelectedTicketId(null);
