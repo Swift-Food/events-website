@@ -170,6 +170,18 @@ const isValidFutureDate = (dateStr: string | undefined): boolean => {
   return date > new Date();
 };
 
+// Default ticket for new events
+const getDefaultTicket = (): TicketType => ({
+  id: `ticket-${Date.now()}`,
+  name: "General Admission",
+  description: "",
+  isFree: true,
+  price: 0,
+  isSingleUse: true,
+  quantity: 100,
+  questionForm: [],
+});
+
 export function EventCreationProvider({
   children,
   disablePersistence = false
@@ -234,7 +246,9 @@ export function EventCreationProvider({
 
   // Ticketing
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>(
-    storedDraft.ticketTypes ?? []
+    storedDraft.ticketTypes && storedDraft.ticketTypes.length > 0
+      ? storedDraft.ticketTypes
+      : [getDefaultTicket()]
   );
   const [requireApproval, setRequireApproval] = useState(
     storedDraft.requireApproval ?? false
@@ -405,7 +419,7 @@ export function EventCreationProvider({
     setPostcode("");
     setLatitude(null);
     setLongitude(null);
-    setTicketTypes([]);
+    setTicketTypes([getDefaultTicket()]);
     setRequireApproval(false);
     setCapacity("Unlimited");
     setIsUnlimitedCapacity(true);
