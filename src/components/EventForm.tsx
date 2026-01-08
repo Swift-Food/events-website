@@ -23,6 +23,7 @@ import { eventService } from "@/services/event.service";
 import { imageService } from "@/services/image.service";
 import { paymentService } from "@/services/payment.service";
 import { categoriesApi } from "@/services/categories";
+import { useCategoriesContext } from "@/lib/categories-context";
 import { CreateEventDto, QuestionType, CreateEventTicketDto } from "@/types";
 import type { EventTicketResponseDto, QuestionBlock } from "@/types/event-ticket/response/ticket.dto";
 import type { StripeConnectStatus } from "@/types/payment";
@@ -150,6 +151,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   const organizerTermsRef = useRef<HTMLDivElement | null>(null);
 
   const { user, eventUser, isAuthenticated } = useAuth();
+  const { categories: categoriesWithSubs } = useCategoriesContext();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -1125,9 +1127,18 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                         {selectedSubcategoryIds.length > 0 && `, ${selectedSubcategoryIds.length} ${selectedSubcategoryIds.length === 1 ? 'Subcategory' : 'Subcategories'}`}
                       </p>
                       <p className="text-sm text-muted-foreground line-clamp-1">
-                        {availableCategories
+                        {categoriesWithSubs
                           .filter((cat) => selectedCategoryIds.includes(cat.id))
-                          .map((cat) => cat.name.charAt(0).toUpperCase() + cat.name.slice(1).toLowerCase())
+                          .map((cat) => {
+                            const categoryName = cat.name.charAt(0).toUpperCase() + cat.name.slice(1).toLowerCase();
+                            const selectedSubs = (cat.subcategories || [])
+                              .filter((sub) => selectedSubcategoryIds.includes(sub.id))
+                              .map((sub) => sub.name.charAt(0).toUpperCase() + sub.name.slice(1).toLowerCase());
+                            if (selectedSubs.length > 0) {
+                              return `${categoryName} (${selectedSubs.join(', ')})`;
+                            }
+                            return categoryName;
+                          })
                           .join(', ')}
                       </p>
                     </>
