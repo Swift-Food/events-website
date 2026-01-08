@@ -195,6 +195,7 @@ export interface BulkActionResponseDto {
   success: boolean;
   message?: string;
   approved?: number;
+  waitlisted?: number;
   rejected?: number;
   checkedIn?: number;
   failed?: number;
