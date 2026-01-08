@@ -218,15 +218,23 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
                     {eventData.name}
                   </h2>
 
-                  {/* Categories inline */}
-                  {eventData.categories && eventData.categories.length > 0 && (
+                  {/* Categories & Subcategories inline */}
+                  {((eventData.categories && eventData.categories.length > 0) || (eventData.subcategories && eventData.subcategories.length > 0)) && (
                     <div className="flex flex-wrap gap-1.5 mt-2">
-                      {eventData.categories.map((category) => (
+                      {eventData.categories?.map((category) => (
                         <span
                           key={category.id}
-                          className="rounded-full bg-white/5 px-2.5 py-0.5 text-xs text-muted-foreground"
+                          className="rounded-md border border-white/20 bg-transparent px-2.5 py-0.5 text-xs text-muted-foreground"
                         >
                           {category.name}
+                        </span>
+                      ))}
+                      {eventData.subcategories?.map((subcategory) => (
+                        <span
+                          key={subcategory.id}
+                          className="rounded-md border border-purple-400/30 bg-purple-500/10 px-2.5 py-0.5 text-xs text-purple-400"
+                        >
+                          {subcategory.name}
                         </span>
                       ))}
                     </div>
