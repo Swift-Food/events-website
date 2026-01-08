@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Calendar,
   CalendarPlus,
@@ -17,9 +17,63 @@ import {
   ChartNoAxesGantt,
   Plus,
   Trash2,
-  GripVertical,
   Repeat,
+  HelpCircle,
 } from "lucide-react";
+
+// Help icon component with click to show tooltip
+function HelpIcon({ tooltip }: { tooltip: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [openLeft, setOpenLeft] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      // Check if tooltip would go off right edge (tooltip is 192px wide)
+      setOpenLeft(rect.left + 192 > window.innerWidth - 16);
+    }
+    setIsOpen(!isOpen);
+  };
+
+  return (
+    <div className="relative inline-flex">
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={handleClick}
+        className="text-white/30 hover:text-white/60 transition-colors"
+      >
+        <HelpCircle className="h-2.5 w-2.5" />
+      </button>
+      {isOpen && (
+        <>
+          <div
+            className="fixed inset-0"
+            style={{ zIndex: 9998 }}
+            onClick={() => setIsOpen(false)}
+          />
+          <div
+            className={`absolute bottom-full mb-2 w-48 p-2 text-[10px] text-white bg-zinc-900 border border-white/20 rounded-lg shadow-xl whitespace-normal ${
+              openLeft ? "right-0" : "left-0"
+            }`}
+            style={{ zIndex: 9999 }}
+          >
+            {tooltip}
+            <div
+              className={`absolute top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-zinc-900 ${
+                openLeft ? "right-2" : "left-2"
+              }`}
+            />
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 // Types for gradient settings
 interface GradientStop {
@@ -209,8 +263,6 @@ function GradientEditor({
   gradient: GradientSettings;
   onChange: (gradient: GradientSettings) => void;
 }) {
-  const [draggedStop, setDraggedStop] = useState<string | null>(null);
-
   const updateGradient = (updates: Partial<GradientSettings>) => {
     onChange({ ...gradient, ...updates });
   };
@@ -254,34 +306,6 @@ function GradientEditor({
     });
   };
 
-  const moveStop = (fromIndex: number, toIndex: number) => {
-    const newStops = [...gradient.stops];
-    const [removed] = newStops.splice(fromIndex, 1);
-    newStops.splice(toIndex, 0, removed);
-    updateGradient({ stops: newStops });
-  };
-
-  const handleDragStart = (e: React.DragEvent, stopId: string) => {
-    setDraggedStop(stopId);
-    e.dataTransfer.effectAllowed = "move";
-  };
-
-  const handleDragOver = (e: React.DragEvent, targetId: string) => {
-    e.preventDefault();
-    if (!draggedStop || draggedStop === targetId) return;
-
-    const fromIndex = gradient.stops.findIndex(s => s.id === draggedStop);
-    const toIndex = gradient.stops.findIndex(s => s.id === targetId);
-
-    if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
-      moveStop(fromIndex, toIndex);
-    }
-  };
-
-  const handleDragEnd = () => {
-    setDraggedStop(null);
-  };
-
   const sortedStops = [...gradient.stops].sort((a, b) => a.position - b.position);
   const previewGradient = generateGradientCSS({ ...gradient, enabled: true });
 
@@ -309,6 +333,7 @@ function GradientEditor({
               />
               <Repeat className="h-3 w-3 text-white/50" />
               <span className="text-[10px] text-white/50">Repeating</span>
+              <HelpIcon tooltip="Repeats the gradient pattern continuously. Useful with color stops that don't span 0-100%." />
             </label>
             <label className="flex items-center gap-1.5 cursor-pointer">
               <input
@@ -318,6 +343,7 @@ function GradientEditor({
                 className="h-3 w-3 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
               />
               <span className="text-[10px] text-white/50">Fixed</span>
+              <HelpIcon tooltip="Keeps the gradient fixed in place while content scrolls over it (parallax effect)." />
             </label>
           </div>
         )}
@@ -342,6 +368,7 @@ function GradientEditor({
                   className="h-3 w-3 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
                 />
                 <span className="text-[10px] text-white/50">Use Preset Direction</span>
+                <HelpIcon tooltip="Choose from preset directions (e.g., 'to right') instead of a custom angle." />
               </label>
             </div>
 
@@ -359,7 +386,10 @@ function GradientEditor({
               </select>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-white/50 w-10">Angle</span>
+                <span className="text-[10px] text-white/50 flex items-center gap-1">
+                  Angle
+                  <HelpIcon tooltip="Direction of the gradient in degrees (0° = up, 90° = right, 180° = down, 270° = left)." />
+                </span>
                 <input
                   type="range"
                   min="0"
@@ -384,7 +414,13 @@ function GradientEditor({
           {/* Color Stops */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-white/70">Color Stops</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-medium text-white/70 flex items-center gap-1">
+                  Color Stops
+                  <HelpIcon tooltip="Colors that make up the gradient. Each stop has a color and a position (0-100%) that determines where it appears along the gradient." />
+                </span>
+                <span className="text-[9px] text-white/40 italic">% = position, not opacity</span>
+              </div>
               <button
                 onClick={addStop}
                 className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] text-white/50 transition-colors hover:bg-white/10 hover:text-white"
@@ -402,20 +438,8 @@ function GradientEditor({
                 return (
                   <div
                     key={stop.id}
-                    onDragOver={(e) => handleDragOver(e, stop.id)}
-                    className={`flex items-center gap-1.5 rounded px-1.5 py-1 transition-colors ${
-                      draggedStop === stop.id ? "bg-white/20" : "bg-white/5 hover:bg-white/10"
-                    }`}
+                    className="flex items-center gap-1.5 rounded px-1.5 py-1 bg-white/5 hover:bg-white/10 transition-colors"
                   >
-                    <div
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, stop.id)}
-                      onDragEnd={handleDragEnd}
-                      className="cursor-grab active:cursor-grabbing shrink-0 p-0.5 -m-0.5 hover:bg-white/10 rounded"
-                    >
-                      <GripVertical className="h-3 w-3 text-white/30" />
-                    </div>
-
                     <input
                       type="color"
                       value={hexColor}
@@ -451,14 +475,18 @@ function GradientEditor({
                       value={stop.position}
                       onChange={(e) => updateStop(stop.id, { position: parseInt(e.target.value) })}
                       className="w-12 accent-blue-500"
+                      title="Position: Where this color appears in the gradient (0% = start, 100% = end)"
                     />
 
-                    <span className="w-7 text-[9px] text-white/50 text-right">{stop.position}%</span>
+                    <span className="w-7 text-[9px] text-white/50 text-right">
+                      {stop.position}%
+                    </span>
 
                     <button
                       onClick={() => removeStop(stop.id)}
                       disabled={gradient.stops.length <= 2}
                       className="p-0.5 text-white/30 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                      title={gradient.stops.length <= 2 ? "Minimum 2 colors required" : "Remove this color stop"}
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>
