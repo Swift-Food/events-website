@@ -15,11 +15,33 @@ import {
   RotateCcw,
   Ticket,
   ChartNoAxesGantt,
+  Plus,
+  Trash2,
+  GripVertical,
+  Repeat,
 } from "lucide-react";
+
+// Types for gradient settings
+interface GradientStop {
+  id: string;
+  color: string;
+  position: number; // 0-100 percentage
+}
+
+interface GradientSettings {
+  enabled: boolean;
+  type: "linear" | "radial";
+  angle: number; // 0-360 degrees
+  useKeyword: boolean; // use keyword direction instead of angle
+  keyword: "to top" | "to right" | "to bottom" | "to left" | "to top right" | "to top left" | "to bottom right" | "to bottom left";
+  repeating: boolean;
+  stops: GradientStop[];
+}
 
 // Types for theme settings
 interface ThemeSettings {
   pageBackground: string;
+  pageBackgroundGradient: GradientSettings;
   cardBackground: string;
   cardSecondaryBackground: string;
   mainTextColor: string;
@@ -29,8 +51,22 @@ interface ThemeSettings {
   primaryColor: string;
 }
 
+const defaultGradient: GradientSettings = {
+  enabled: false,
+  type: "linear",
+  angle: 180,
+  useKeyword: false,
+  keyword: "to bottom",
+  repeating: false,
+  stops: [
+    { id: "stop-1", color: "rgba(34, 34, 34, 1)", position: 0 },
+    { id: "stop-2", color: "rgba(51, 51, 51, 1)", position: 100 },
+  ],
+};
+
 const defaultTheme: ThemeSettings = {
   pageBackground: "rgba(34, 34, 34, 1)",
+  pageBackgroundGradient: defaultGradient,
   cardBackground: "rgba(42, 42, 42, 1)",
   cardSecondaryBackground: "rgba(51, 51, 51, 1)",
   mainTextColor: "rgba(237, 237, 237, 1)",
@@ -138,6 +174,292 @@ function ColorInput({
   );
 }
 
+// Helper to generate CSS gradient string
+function generateGradientCSS(gradient: GradientSettings): string {
+  if (!gradient.enabled || gradient.stops.length < 2) return "";
+
+  const sortedStops = [...gradient.stops].sort((a, b) => a.position - b.position);
+  const stopsCSS = sortedStops.map(stop => `${stop.color} ${stop.position}%`).join(", ");
+
+  const direction = gradient.useKeyword ? gradient.keyword : `${gradient.angle}deg`;
+  const prefix = gradient.repeating ? "repeating-" : "";
+
+  return `${prefix}linear-gradient(${direction}, ${stopsCSS})`;
+}
+
+// Direction keywords for linear gradient
+const directionKeywords = [
+  { value: "to top", label: "To Top", angle: 0 },
+  { value: "to top right", label: "To Top Right", angle: 45 },
+  { value: "to right", label: "To Right", angle: 90 },
+  { value: "to bottom right", label: "To Bottom Right", angle: 135 },
+  { value: "to bottom", label: "To Bottom", angle: 180 },
+  { value: "to bottom left", label: "To Bottom Left", angle: 225 },
+  { value: "to left", label: "To Left", angle: 270 },
+  { value: "to top left", label: "To Top Left", angle: 315 },
+] as const;
+
+// Gradient Editor Component
+function GradientEditor({
+  gradient,
+  onChange,
+}: {
+  gradient: GradientSettings;
+  onChange: (gradient: GradientSettings) => void;
+}) {
+  const [draggedStop, setDraggedStop] = useState<string | null>(null);
+
+  const updateGradient = (updates: Partial<GradientSettings>) => {
+    onChange({ ...gradient, ...updates });
+  };
+
+  const addStop = () => {
+    const newId = `stop-${Date.now()}`;
+    // Find a position between existing stops
+    const positions = gradient.stops.map(s => s.position).sort((a, b) => a - b);
+    let newPosition = 50;
+    if (positions.length >= 2) {
+      // Find the largest gap
+      let maxGap = 0;
+      let gapStart = 0;
+      for (let i = 0; i < positions.length - 1; i++) {
+        const gap = positions[i + 1] - positions[i];
+        if (gap > maxGap) {
+          maxGap = gap;
+          gapStart = positions[i];
+        }
+      }
+      newPosition = gapStart + maxGap / 2;
+    }
+
+    updateGradient({
+      stops: [...gradient.stops, { id: newId, color: "rgba(128, 128, 128, 1)", position: newPosition }],
+    });
+  };
+
+  const removeStop = (id: string) => {
+    if (gradient.stops.length <= 2) return; // Need at least 2 stops
+    updateGradient({
+      stops: gradient.stops.filter(stop => stop.id !== id),
+    });
+  };
+
+  const updateStop = (id: string, updates: Partial<GradientStop>) => {
+    updateGradient({
+      stops: gradient.stops.map(stop =>
+        stop.id === id ? { ...stop, ...updates } : stop
+      ),
+    });
+  };
+
+  const moveStop = (fromIndex: number, toIndex: number) => {
+    const newStops = [...gradient.stops];
+    const [removed] = newStops.splice(fromIndex, 1);
+    newStops.splice(toIndex, 0, removed);
+    updateGradient({ stops: newStops });
+  };
+
+  const handleDragStart = (e: React.DragEvent, stopId: string) => {
+    setDraggedStop(stopId);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggedStop || draggedStop === targetId) return;
+
+    const fromIndex = gradient.stops.findIndex(s => s.id === draggedStop);
+    const toIndex = gradient.stops.findIndex(s => s.id === targetId);
+
+    if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
+      moveStop(fromIndex, toIndex);
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedStop(null);
+  };
+
+  const sortedStops = [...gradient.stops].sort((a, b) => a.position - b.position);
+  const previewGradient = generateGradientCSS({ ...gradient, enabled: true });
+
+  return (
+    <div className="space-y-3">
+      {/* Enable Toggle */}
+      <div className="flex items-center justify-between">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={gradient.enabled}
+            onChange={(e) => updateGradient({ enabled: e.target.checked })}
+            className="h-4 w-4 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
+          />
+          <span className="text-xs font-medium text-white/70">Enable Gradient</span>
+        </label>
+        {gradient.enabled && (
+          <label className="flex items-center gap-1.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={gradient.repeating}
+              onChange={(e) => updateGradient({ repeating: e.target.checked })}
+              className="h-3 w-3 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
+            />
+            <Repeat className="h-3 w-3 text-white/50" />
+            <span className="text-[10px] text-white/50">Repeating</span>
+          </label>
+        )}
+      </div>
+
+      {gradient.enabled && (
+        <>
+          {/* Gradient Preview */}
+          <div
+            className="h-8 w-full rounded-lg border border-white/20"
+            style={{ background: previewGradient }}
+          />
+
+          {/* Direction Controls */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={gradient.useKeyword}
+                  onChange={(e) => updateGradient({ useKeyword: e.target.checked })}
+                  className="h-3 w-3 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
+                />
+                <span className="text-[10px] text-white/50">Use Preset Direction</span>
+              </label>
+            </div>
+
+            {gradient.useKeyword ? (
+              <select
+                value={gradient.keyword}
+                onChange={(e) => updateGradient({ keyword: e.target.value as GradientSettings["keyword"] })}
+                className="w-full rounded border border-white/20 bg-white/5 px-2 py-1 text-xs text-white focus:border-white/40 focus:outline-none"
+              >
+                {directionKeywords.map(dir => (
+                  <option key={dir.value} value={dir.value} className="bg-zinc-800">
+                    {dir.label}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-white/50 w-10">Angle</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="360"
+                  value={gradient.angle}
+                  onChange={(e) => updateGradient({ angle: parseInt(e.target.value) })}
+                  className="flex-1 accent-blue-500"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  max="360"
+                  value={gradient.angle}
+                  onChange={(e) => updateGradient({ angle: parseInt(e.target.value) || 0 })}
+                  className="w-14 rounded border border-white/20 bg-white/5 px-1.5 py-0.5 text-[10px] text-white text-center focus:border-white/40 focus:outline-none"
+                />
+                <span className="text-[10px] text-white/50">deg</span>
+              </div>
+            )}
+          </div>
+
+          {/* Color Stops */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-medium text-white/70">Color Stops</span>
+              <button
+                onClick={addStop}
+                className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                <Plus className="h-3 w-3" />
+                Add
+              </button>
+            </div>
+
+            <div className="space-y-1.5 max-h-40 overflow-y-auto">
+              {sortedStops.map((stop) => {
+                const { r, g, b, a } = parseColor(stop.color);
+                const hexColor = rgbaToHex(r, g, b);
+
+                return (
+                  <div
+                    key={stop.id}
+                    onDragOver={(e) => handleDragOver(e, stop.id)}
+                    className={`flex items-center gap-1.5 rounded px-1.5 py-1 transition-colors ${
+                      draggedStop === stop.id ? "bg-white/20" : "bg-white/5 hover:bg-white/10"
+                    }`}
+                  >
+                    <div
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, stop.id)}
+                      onDragEnd={handleDragEnd}
+                      className="cursor-grab active:cursor-grabbing shrink-0 p-0.5 -m-0.5 hover:bg-white/10 rounded"
+                    >
+                      <GripVertical className="h-3 w-3 text-white/30" />
+                    </div>
+
+                    <input
+                      type="color"
+                      value={hexColor}
+                      onChange={(e) => {
+                        const parsed = parseColor(e.target.value);
+                        updateStop(stop.id, {
+                          color: `rgba(${parsed.r}, ${parsed.g}, ${parsed.b}, ${a})`,
+                        });
+                      }}
+                      className="h-5 w-6 cursor-pointer rounded border border-white/20 bg-transparent shrink-0"
+                    />
+
+                    <input
+                      type="text"
+                      defaultValue={hexColor}
+                      key={`${stop.id}-${hexColor}`}
+                      onBlur={(e) => {
+                        const cleanHex = e.target.value.startsWith("#") ? e.target.value : `#${e.target.value}`;
+                        if (cleanHex.length === 7) {
+                          const parsed = parseColor(cleanHex);
+                          updateStop(stop.id, {
+                            color: `rgba(${parsed.r}, ${parsed.g}, ${parsed.b}, ${a})`,
+                          });
+                        }
+                      }}
+                      className="w-16 rounded border border-white/20 bg-white/5 px-1 py-0.5 text-[9px] text-white font-mono focus:border-white/40 focus:outline-none"
+                    />
+
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={stop.position}
+                      onChange={(e) => updateStop(stop.id, { position: parseInt(e.target.value) })}
+                      className="w-12 accent-blue-500"
+                    />
+
+                    <span className="w-7 text-[9px] text-white/50 text-right">{stop.position}%</span>
+
+                    <button
+                      onClick={() => removeStop(stop.id)}
+                      disabled={gradient.stops.length <= 2}
+                      className="p-0.5 text-white/30 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // Mock event data
 const mockEvent = {
   name: "Summer Music Festival 2025",
@@ -231,8 +553,12 @@ export default function ThemeTestPage() {
   const [isEditorOpen, setIsEditorOpen] = useState(true);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
 
-  const updateTheme = (key: keyof ThemeSettings, value: string | boolean) => {
+  const updateTheme = (key: keyof ThemeSettings, value: string | boolean | GradientSettings) => {
     setTheme((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const updateGradient = (gradient: GradientSettings) => {
+    setTheme((prev) => ({ ...prev, pageBackgroundGradient: gradient }));
   };
 
   const resetTheme = () => {
@@ -270,17 +596,21 @@ export default function ThemeTestPage() {
 
   const pageBgParsed = parseColor(theme.pageBackground);
 
+  // Generate background style (gradient or solid color)
+  const pageBackgroundStyle = theme.pageBackgroundGradient.enabled
+    ? { background: generateGradientCSS(theme.pageBackgroundGradient) }
+    : { backgroundColor: theme.pageBackground };
+
   return (
     <div
       className="min-h-screen pb-32 transition-colors duration-200"
-      style={{ backgroundColor: theme.pageBackground }}
+      style={pageBackgroundStyle}
     >
       {/* Mock Navbar - matches real Navbar exactly */}
       <header
         className="sticky top-0 z-40 transition-colors duration-200"
         style={{
           backgroundColor: `rgb(${pageBgParsed.r}, ${pageBgParsed.g}, ${pageBgParsed.b})`,
-          borderBottom: theme.borderEnabled ? `1px solid ${theme.borderColor}` : "none",
         }}
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
@@ -918,11 +1248,13 @@ export default function ThemeTestPage() {
 
             {/* Color Controls Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
-              <ColorInput
-                label="Page Background"
-                value={theme.pageBackground}
-                onChange={(v) => updateTheme("pageBackground", v)}
-              />
+              <div className={theme.pageBackgroundGradient.enabled ? "opacity-50 pointer-events-none" : ""}>
+                <ColorInput
+                  label="Page Background"
+                  value={theme.pageBackground}
+                  onChange={(v) => updateTheme("pageBackground", v)}
+                />
+              </div>
 
               <ColorInput
                 label="Card Background"
@@ -975,6 +1307,15 @@ export default function ThemeTestPage() {
                   />
                 )}
               </div>
+            </div>
+
+            {/* Page Background Gradient */}
+            <div className="mt-4 pt-4 border-t border-white/10">
+              <h4 className="text-xs font-medium text-white/70 mb-2">Page Background Gradient</h4>
+              <GradientEditor
+                gradient={theme.pageBackgroundGradient}
+                onChange={updateGradient}
+              />
             </div>
           </div>
         </div>
