@@ -705,9 +705,7 @@ export default function ThemeTestPage() {
                         isSoldOut ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
                       }`}
                       style={{
-                        backgroundColor: isSelected
-                          ? primaryWithAlpha(0.15)
-                          : theme.cardSecondaryBackground,
+                        backgroundColor: theme.cardSecondaryBackground,
                         border: isSelected
                           ? `2px solid ${theme.primaryColor}`
                           : borderStyle,
