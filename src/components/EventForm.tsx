@@ -549,7 +549,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
         isPrivate: isPrivate,
         requiresApproval: requireApproval,
         hideFullAddress: hideFullAddress,
-        format: eventFormat,
+        format: eventFormat ?? undefined,
         virtualMeetingUrl: virtualMeetingUrl || undefined,
         addressData: (eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH)
           ? {
