@@ -127,6 +127,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   const [isTicketTypeModalOpen, setIsTicketTypeModalOpen] = useState(false);
   const [ticketToEdit, setTicketToEdit] = useState<TicketType | null>(null);
   const [isTicketListExpanded, setIsTicketListExpanded] = useState(true);
+  const [collapsedTickets, setCollapsedTickets] = useState<Set<string>>(new Set());
   const [isFormFieldModalOpen, setIsFormFieldModalOpen] = useState(false);
   const [fieldToEdit, setFieldToEdit] = useState<FormField | null>(null);
   const [activeTicketIdForQuestions, setActiveTicketIdForQuestions] = useState<string | null>(null);
@@ -764,6 +765,18 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     }
   };
 
+  const toggleTicketCollapse = (ticketId: string) => {
+    setCollapsedTickets(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(ticketId)) {
+        newSet.delete(ticketId);
+      } else {
+        newSet.add(ticketId);
+      }
+      return newSet;
+    });
+  };
+
   // Question type helpers
   const getQuestionTypeIcon = (type: string) => {
     switch (type) {
@@ -1336,6 +1349,14 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   >
                     {/* Ticket Header */}
                     <div className="flex items-start justify-between gap-3 p-4">
+                      <button
+                        type="button"
+                        onClick={() => toggleTicketCollapse(ticket.id)}
+                        className="p-1 rounded-md hover:bg-white/10 transition-colors mt-0.5"
+                        aria-label={collapsedTickets.has(ticket.id) ? "Expand ticket" : "Collapse ticket"}
+                      >
+                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${collapsedTickets.has(ticket.id) ? "-rotate-90" : ""}`} />
+                      </button>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <p className="text-base font-semibold text-foreground">
@@ -1362,6 +1383,14 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                           <p className="text-sm text-muted-foreground">
                             {ticket.quantity.toLocaleString()} available
                           </p>
+                          {collapsedTickets.has(ticket.id) && ticket.questionForm && ticket.questionForm.length > 0 && (
+                            <>
+                              <span className="text-muted-foreground">•</span>
+                              <p className="text-sm text-muted-foreground">
+                                {ticket.questionForm.length} question{ticket.questionForm.length > 1 ? "s" : ""}
+                              </p>
+                            </>
+                          )}
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -1384,7 +1413,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                       </div>
                     </div>
 
-                    {/* Registration Questions */}
+                    {/* Registration Questions - hidden when collapsed */}
+                    {!collapsedTickets.has(ticket.id) && (
                     <div className="border-t border-foreground/10 bg-card-background/50 px-2 py-2 md:px-4 md:py-3">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
@@ -1500,6 +1530,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                         </p>
                       )}
                     </div>
+                    )}
                   </div>
                 ))}
               </div>
