@@ -35,6 +35,7 @@ interface GradientSettings {
   useKeyword: boolean; // use keyword direction instead of angle
   keyword: "to top" | "to right" | "to bottom" | "to left" | "to top right" | "to top left" | "to bottom right" | "to bottom left";
   repeating: boolean;
+  fixed: boolean; // background-attachment: fixed (gradient stays in place while scrolling)
   stops: GradientStop[];
 }
 
@@ -58,6 +59,7 @@ const defaultGradient: GradientSettings = {
   useKeyword: false,
   keyword: "to bottom",
   repeating: false,
+  fixed: false,
   stops: [
     { id: "stop-1", color: "rgba(34, 34, 34, 1)", position: 0 },
     { id: "stop-2", color: "rgba(51, 51, 51, 1)", position: 100 },
@@ -297,16 +299,27 @@ function GradientEditor({
           <span className="text-xs font-medium text-white/70">Enable Gradient</span>
         </label>
         {gradient.enabled && (
-          <label className="flex items-center gap-1.5 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={gradient.repeating}
-              onChange={(e) => updateGradient({ repeating: e.target.checked })}
-              className="h-3 w-3 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
-            />
-            <Repeat className="h-3 w-3 text-white/50" />
-            <span className="text-[10px] text-white/50">Repeating</span>
-          </label>
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={gradient.repeating}
+                onChange={(e) => updateGradient({ repeating: e.target.checked })}
+                className="h-3 w-3 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
+              />
+              <Repeat className="h-3 w-3 text-white/50" />
+              <span className="text-[10px] text-white/50">Repeating</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={gradient.fixed}
+                onChange={(e) => updateGradient({ fixed: e.target.checked })}
+                className="h-3 w-3 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
+              />
+              <span className="text-[10px] text-white/50">Fixed</span>
+            </label>
+          </div>
         )}
       </div>
 
@@ -598,7 +611,10 @@ export default function ThemeTestPage() {
 
   // Generate background style (gradient or solid color)
   const pageBackgroundStyle = theme.pageBackgroundGradient.enabled
-    ? { background: generateGradientCSS(theme.pageBackgroundGradient) }
+    ? {
+        background: generateGradientCSS(theme.pageBackgroundGradient),
+        backgroundAttachment: theme.pageBackgroundGradient.fixed ? "fixed" : "scroll",
+      } as React.CSSProperties
     : { backgroundColor: theme.pageBackground };
 
   return (
@@ -1225,9 +1241,9 @@ export default function ThemeTestPage() {
 
         {/* Editor Panel */}
         <div
-          className="rounded-t-xl shadow-2xl max-h-[40vh] overflow-y-auto backdrop-blur-xl"
+          className="rounded-t-xl shadow-2xl max-h-[40vh] overflow-y-auto backdrop-blur-sm"
           style={{
-            backgroundColor: "rgba(15, 15, 15, 0.85)",
+            backgroundColor: "rgba(0, 0, 0, 0.35)",
             borderTop: "1px solid rgba(255,255,255,0.1)",
           }}
         >
