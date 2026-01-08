@@ -782,28 +782,62 @@ export default function ThemeTestPage() {
               >
                 About this event
               </h2>
-              <div
-                className="prose prose-invert max-w-none"
-                style={
-                  {
-                    "--tw-prose-body": theme.mainTextColor,
-                    "--tw-prose-headings": theme.mainTextColor,
-                    "--tw-prose-lead": theme.subTextColor,
-                    "--tw-prose-links": theme.primaryColor,
-                    "--tw-prose-bold": theme.mainTextColor,
-                    "--tw-prose-counters": theme.subTextColor,
-                    "--tw-prose-bullets": theme.subTextColor,
-                    "--tw-prose-hr": theme.borderColor,
-                    "--tw-prose-quotes": theme.mainTextColor,
-                    "--tw-prose-quote-borders": theme.primaryColor,
-                    "--tw-prose-captions": theme.subTextColor,
-                    "--tw-prose-code": theme.mainTextColor,
-                    "--tw-prose-pre-code": theme.mainTextColor,
-                    "--tw-prose-pre-bg": theme.cardBackground,
-                    "--tw-prose-th-borders": theme.borderColor,
-                    "--tw-prose-td-borders": theme.borderColor,
-                  } as React.CSSProperties
+              <style>{`
+                .theme-description h1,
+                .theme-description h2,
+                .theme-description h3 {
+                  color: ${theme.mainTextColor};
+                  font-weight: 600;
+                  margin-top: 1rem;
+                  margin-bottom: 0.5rem;
                 }
+                .theme-description h1 { font-size: 1.5rem; }
+                .theme-description h2 { font-size: 1.25rem; }
+                .theme-description h3 { font-size: 1.125rem; }
+                .theme-description p,
+                .theme-description li {
+                  color: ${theme.mainTextColor};
+                  opacity: 0.9;
+                  font-size: 0.875rem;
+                  line-height: 1.5rem;
+                  margin: 0.375rem 0;
+                }
+                .theme-description ul {
+                  list-style-type: disc;
+                  padding-left: 1.25rem;
+                  margin: 0.375rem 0;
+                }
+                .theme-description ol {
+                  list-style-type: decimal;
+                  padding-left: 1.25rem;
+                  margin: 0.375rem 0;
+                }
+                .theme-description blockquote {
+                  border-left: 4px solid ${theme.borderColor};
+                  padding-left: 0.875rem;
+                  margin: 0.75rem 0;
+                  font-style: italic;
+                  color: ${theme.subTextColor};
+                }
+                .theme-description hr {
+                  border: none;
+                  border-top: 2px solid ${theme.borderColor};
+                  margin: 1.25rem 0;
+                }
+                .theme-description a {
+                  color: ${theme.primaryColor};
+                  text-decoration: underline;
+                }
+                .theme-description code {
+                  background-color: ${theme.cardSecondaryBackground};
+                  padding: 0.125rem 0.25rem;
+                  border-radius: 0.25rem;
+                  font-family: monospace;
+                  font-size: 0.8125rem;
+                }
+              `}</style>
+              <div
+                className="theme-description"
                 dangerouslySetInnerHTML={{ __html: mockEvent.description }}
               />
             </div>
