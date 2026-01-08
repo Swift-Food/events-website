@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { X, Eye, Pencil } from "lucide-react";
+import { X, Eye, Pencil, AlertTriangle } from "lucide-react";
 import Tiptap from "@/components/Tiptap";
 import { useEventCreation } from "@/context/EventCreationContext";
 
@@ -20,6 +20,7 @@ export default function EventDescriptionModal({
   const [isVisible, setIsVisible] = useState(false);
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const [viewportOffset, setViewportOffset] = useState(0);
+  const [showDiscardModal, setShowDiscardModal] = useState(false);
 
   // Update localDescription whenever the modal opens or description changes
   useEffect(() => {
@@ -92,13 +93,21 @@ export default function EventDescriptionModal({
 
   const handleCancel = () => {
     if (hasUnsavedChanges) {
-      const confirmed = window.confirm(
-        "You have unsaved changes. Are you sure you want to close without saving?"
-      );
-      if (!confirmed) return;
+      setShowDiscardModal(true);
+      return;
     }
     setLocalDescription(description); // Reset to saved value
     onClose();
+  };
+
+  const handleDiscardConfirm = () => {
+    setShowDiscardModal(false);
+    setLocalDescription(description); // Reset to saved value
+    onClose();
+  };
+
+  const handleDiscardCancel = () => {
+    setShowDiscardModal(false);
   };
 
   // Only apply dynamic positioning on mobile (below sm breakpoint)
@@ -177,6 +186,41 @@ export default function EventDescriptionModal({
           </button>
         </div>
       </div>
+
+      {/* Discard Changes Confirmation Modal */}
+      {showDiscardModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-sm mx-4 rounded-xl bg-zinc-900 shadow-2xl">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-amber-500/10">
+                  <AlertTriangle className="h-5 w-5 text-amber-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">Discard Changes?</h3>
+              </div>
+              <p className="text-sm text-zinc-400 mb-6">
+                You have unsaved changes. Are you sure you want to close without saving? Your changes will be lost.
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={handleDiscardCancel}
+                  className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white transition-colors"
+                >
+                  Keep Editing
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDiscardConfirm}
+                  className="px-4 py-2 text-sm font-medium bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Discard
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
