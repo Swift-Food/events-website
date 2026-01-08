@@ -13,6 +13,8 @@ import {
   ChevronDown,
   Palette,
   RotateCcw,
+  Ticket,
+  ChartNoAxesGantt,
 } from "lucide-react";
 
 // Types for theme settings
@@ -250,7 +252,7 @@ export default function ThemeTestPage() {
       className="min-h-screen pb-32 transition-colors duration-200"
       style={{ backgroundColor: theme.pageBackground }}
     >
-      {/* Mock Navbar */}
+      {/* Mock Navbar - matches real Navbar exactly */}
       <header
         className="sticky top-0 z-40 transition-colors duration-200"
         style={{
@@ -260,11 +262,20 @@ export default function ThemeTestPage() {
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1 text-lg font-semibold tracking-tight">
-              <div
-                className="h-6 w-6 rounded"
-                style={{ backgroundColor: theme.mainTextColor }}
-              />
+            <div className="flex items-center gap-1 text-lg font-semibold tracking-tight cursor-pointer hover:scale-105 transition-transform duration-200">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 100 100"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ color: theme.mainTextColor }}
+              >
+                <path
+                  d="M50 0L93.3 25V75L50 100L6.7 75V25L50 0Z"
+                  fill="currentColor"
+                />
+              </svg>
               <span
                 className="hidden sm:inline font-normal"
                 style={{ color: theme.mainTextColor }}
@@ -272,6 +283,22 @@ export default function ThemeTestPage() {
                 PRISMO
               </span>
             </div>
+
+            {/* Mobile Icon Navigation */}
+            <nav className="flex gap-1 sm:hidden">
+              <button
+                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+                style={{ color: theme.subTextColor }}
+              >
+                <Ticket className="h-5 w-5" />
+              </button>
+              <button
+                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+                style={{ color: theme.subTextColor }}
+              >
+                <ChartNoAxesGantt className="h-5 w-5" />
+              </button>
+            </nav>
 
             {/* Desktop Navigation */}
             <nav className="ml-8 hidden gap-6 text-sm font-medium sm:flex">
@@ -289,7 +316,7 @@ export default function ThemeTestPage() {
 
           <div className="flex items-center gap-2 sm:gap-3">
             <button
-              className="rounded-full px-3 py-1.5 text-xs font-semibold transition-colors sm:px-5 sm:py-2 sm:text-sm"
+              className="rounded-full px-3 py-1.5 text-xs font-semibold transition-colors hover:opacity-90 sm:px-5 sm:py-2 sm:text-sm"
               style={{
                 backgroundColor: theme.mainTextColor,
                 color: theme.pageBackground,
@@ -298,7 +325,7 @@ export default function ThemeTestPage() {
               Create Event
             </button>
             <button
-              className="rounded-full px-3 py-1.5 text-xs font-semibold transition-colors sm:px-5 sm:py-2 sm:text-sm"
+              className="rounded-full px-3 py-1.5 text-xs font-semibold transition-colors hover:opacity-80 sm:px-5 sm:py-2 sm:text-sm"
               style={{
                 border: `1px solid ${mainTextWithAlpha(0.2)}`,
                 color: theme.subTextColor,

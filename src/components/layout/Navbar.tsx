@@ -77,7 +77,7 @@ export default function Navbar() {
                 height={24}
                 className="invert"
               />
-              <span className="hidden sm:inline font-normal">PRISMO</span>
+              <span className="hidden sm:inline font-normal text-foreground">PRISMO</span>
             </Link>
 
             {/* Mobile Icon Navigation */}
@@ -101,7 +101,7 @@ export default function Navbar() {
             </nav>
 
             {/* Desktop Navigation */}
-            <nav className="ml-8 hidden gap-6 text-sm font-medium text-zinc-300 sm:flex">
+            <nav className="ml-8 hidden gap-6 text-sm font-medium text-zinc-foreground sm:flex">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -148,7 +148,7 @@ export default function Navbar() {
                     {/* Menu Items */}
                     <div className="py-2">
                       <button
-                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/5 hover:text-white"
+                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-white/5 hover:text-white"
                         onClick={() => {
                           router.push("/profile");
                           setIsUserMenuOpen(false);
