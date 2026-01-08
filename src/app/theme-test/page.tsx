@@ -287,14 +287,14 @@ export default function ThemeTestPage() {
             {/* Mobile Icon Navigation */}
             <nav className="flex gap-1 sm:hidden">
               <button
-                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors"
-                style={{ color: theme.subTextColor }}
+                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:opacity-80"
+                style={{ color: theme.mainTextColor }}
               >
                 <Ticket className="h-5 w-5" />
               </button>
               <button
-                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors"
-                style={{ color: theme.subTextColor }}
+                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:opacity-80"
+                style={{ color: theme.mainTextColor }}
               >
                 <ChartNoAxesGantt className="h-5 w-5" />
               </button>
@@ -306,7 +306,7 @@ export default function ThemeTestPage() {
                 <span
                   key={link}
                   className="cursor-pointer transition-colors hover:opacity-80"
-                  style={{ color: theme.subTextColor }}
+                  style={{ color: theme.mainTextColor }}
                 >
                   {link}
                 </span>
@@ -328,7 +328,7 @@ export default function ThemeTestPage() {
               className="rounded-full px-3 py-1.5 text-xs font-semibold transition-colors hover:opacity-80 sm:px-5 sm:py-2 sm:text-sm"
               style={{
                 border: `1px solid ${mainTextWithAlpha(0.2)}`,
-                color: theme.subTextColor,
+                color: theme.mainTextColor,
               }}
             >
               Sign In
