@@ -89,8 +89,19 @@ export default function CategoryModal({
           setSelectedSubcategoryIds(selectedSubcategoryIds.filter(id => !subcategoryIdsToRemove.includes(id)));
         }
       }
+      // Collapse when unchecking
+      setExpandedCategories(prev => {
+        const next = new Set(prev);
+        next.delete(categoryId);
+        return next;
+      });
     } else {
       setSelectedCategoryIds([...selectedCategoryIds, categoryId]);
+      // Expand when checking (if has subcategories)
+      const category = categories.find(c => c.id === categoryId);
+      if (category?.subcategories && category.subcategories.length > 0 && setSelectedSubcategoryIds) {
+        setExpandedCategories(prev => new Set(prev).add(categoryId));
+      }
     }
   };
 
@@ -215,7 +226,7 @@ export default function CategoryModal({
                           )}
                         </div>
                         {selectedSubcategoriesInCategory > 0 && (
-                          <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full">
+                          <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
                             +{selectedSubcategoriesInCategory}
                           </span>
                         )}
@@ -245,22 +256,18 @@ export default function CategoryModal({
                               key={subcategory.id}
                               type="button"
                               onClick={() => toggleSubcategory(subcategory.id, category.id)}
-                              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all ${
-                                isSubSelected
-                                  ? "bg-purple-500/20 border border-purple-500/30"
-                                  : "hover:bg-white/5 border border-transparent"
-                              }`}
+                              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all hover:bg-white/5"
                             >
                               <div
                                 className={`h-4 w-4 rounded flex items-center justify-center border transition-all ${
                                   isSubSelected
-                                    ? "bg-purple-500 border-purple-500"
+                                    ? "bg-primary border-primary"
                                     : "border-white/20 bg-transparent"
                                 }`}
                               >
                                 {isSubSelected && <Check className="h-2.5 w-2.5 text-white" />}
                               </div>
-                              <span className={`text-sm ${isSubSelected ? "text-purple-400" : "text-muted-foreground"}`}>
+                              <span className="text-sm text-muted-foreground">
                                 {getCategoryLabel(subcategory.name)}
                               </span>
                             </button>
