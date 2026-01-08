@@ -39,6 +39,20 @@ const validateUKPostcode = (postcode: string): boolean => {
   return UK_POSTCODE_REGEX.test(postcode.trim());
 };
 
+// Validation errors interface
+interface ValidationErrors {
+  eventName?: string;
+  startTime?: string;
+  endTime?: string;
+  eventFormat?: string;
+  virtualMeetingUrl?: string;
+  addressLine1?: string;
+  city?: string;
+  postcode?: string;
+  stripeConnect?: string;
+  organizerTerms?: string;
+}
+
 interface EventFormProps {
   mode: "create" | "edit";
   eventId?: string;
@@ -125,6 +139,15 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Refs for validation scroll
+  const eventNameRef = useRef<HTMLInputElement | null>(null);
+  const startTimeRef = useRef<HTMLDivElement | null>(null);
+  const endTimeRef = useRef<HTMLDivElement | null>(null);
+  const locationRef = useRef<HTMLDivElement | null>(null);
+  const stripeConnectRef = useRef<HTMLDivElement | null>(null);
+  const organizerTermsRef = useRef<HTMLDivElement | null>(null);
+
   const { user, eventUser, isAuthenticated } = useAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -137,6 +160,9 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   // Categories state
   const [availableCategories, setAvailableCategories] = useState<EventCategoryResponseDto[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+
+  // Validation errors state
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
 
   console.log("Ticket Types: ", ticketTypes);
 
@@ -380,26 +406,32 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   };
 
   const handleSubmit = async () => {
-    // Validation
+    // Collect all validation errors
+    const errors: ValidationErrors = {};
+
+    // Validate event name
     if (!eventName.trim()) {
-      toast.error("Please enter an event name");
-      return;
+      errors.eventName = "Event name is required";
     }
 
-    if (!start || !end) {
-      toast.error("Please select start and end times");
-      return;
+    // Validate start time
+    if (!start) {
+      errors.startTime = "Start time is required";
     }
 
-    if (new Date(start) >= new Date(end)) {
-      toast.error("End time must be after start time");
-      return;
+    // Validate end time
+    if (!end) {
+      errors.endTime = "End time is required";
+    }
+
+    // Validate end time is after start time
+    if (start && end && new Date(start) >= new Date(end)) {
+      errors.endTime = "End time must be after start time";
     }
 
     // Validate event format is selected
     if (eventFormat === null) {
-      toast.error("Please select an event format (location)");
-      return;
+      errors.eventFormat = "Event format is required";
     }
 
     // Validate virtual meeting URL for virtual/hybrid events
@@ -407,38 +439,79 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
       (eventFormat === EventFormat.VIRTUAL || eventFormat === EventFormat.BOTH) &&
       !virtualMeetingUrl.trim()
     ) {
-      toast.error("Please enter a virtual meeting URL");
-      return;
+      errors.virtualMeetingUrl = "Virtual meeting URL is required";
     }
 
     // Validate location for in-person/hybrid events
     if (eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH) {
-      const missingFields: string[] = [];
-      if (!addressLine1) missingFields.push("address");
-      if (!city) missingFields.push("city");
-      if (!postcode) missingFields.push("postcode");
-
-      if (missingFields.length > 0) {
-        toast.error(`Please complete the event location: missing ${missingFields.join(", ")}`);
-        return;
+      if (!addressLine1) {
+        errors.addressLine1 = "Address is required";
       }
-
-      if (!validateUKPostcode(postcode)) {
-        toast.error("Please enter a valid UK postcode");
-        return;
+      if (!city) {
+        errors.city = "City is required";
       }
+      if (!postcode) {
+        errors.postcode = "Postcode is required";
+      } else if (!validateUKPostcode(postcode)) {
+        errors.postcode = "Please enter a valid UK postcode";
+      }
+    }
+
+    // Check Stripe Connect for paid tickets
+    if (hasPaidTickets && (!stripeConnectStatus || !stripeConnectStatus.onboardingComplete)) {
+      errors.stripeConnect = "Payment setup required for paid tickets";
+    }
+
+    // Check organizer terms (create mode only)
+    if (mode === "create" && !acceptedOrganizerTerms) {
+      errors.organizerTerms = "You must accept the organizer terms";
+    }
+
+    // Set validation errors state
+    setValidationErrors(errors);
+
+    // If there are validation errors, show summary and return
+    if (Object.keys(errors).length > 0) {
+      const errorMessages: string[] = [];
+      if (errors.eventName) errorMessages.push("Event Name");
+      if (errors.startTime) errorMessages.push("Start Time");
+      if (errors.endTime) errorMessages.push("End Time");
+      if (errors.eventFormat) errorMessages.push("Event Format/Location");
+      if (errors.virtualMeetingUrl) errorMessages.push("Virtual Meeting URL");
+      if (errors.addressLine1) errorMessages.push("Address");
+      if (errors.city) errorMessages.push("City");
+      if (errors.postcode) errorMessages.push("Postcode");
+      if (errors.stripeConnect) errorMessages.push("Payment Setup");
+      if (errors.organizerTerms) errorMessages.push("Organizer Terms");
+
+      toast.error(`Please complete the following: ${errorMessages.join(", ")}`);
+
+      // Scroll to the first field with an error
+      const scrollToFirstError = () => {
+        if (errors.eventName && eventNameRef.current) {
+          eventNameRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else if (errors.startTime && startTimeRef.current) {
+          startTimeRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else if (errors.endTime && endTimeRef.current) {
+          endTimeRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else if ((errors.eventFormat || errors.virtualMeetingUrl || errors.addressLine1 || errors.city || errors.postcode) && locationRef.current) {
+          locationRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else if (errors.stripeConnect && stripeConnectRef.current) {
+          stripeConnectRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else if (errors.organizerTerms && organizerTermsRef.current) {
+          organizerTermsRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      };
+
+      // Small delay to ensure DOM has updated with error styles
+      setTimeout(scrollToFirstError, 100);
+      return;
     }
 
     // Check authentication using auth context
     if (!isAuthenticated || !eventUser) {
       toast.error("Please log in to create an event");
       router.push("/auth");
-      return;
-    }
-
-    // Check Stripe Connect for paid tickets
-    if (hasPaidTickets && (!stripeConnectStatus || !stripeConnectStatus.onboardingComplete)) {
-      toast.error("Please complete payment setup before creating events with paid tickets");
       return;
     }
 
@@ -899,15 +972,21 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-1">
               <input
+                ref={eventNameRef}
                 type="text"
                 value={eventName}
-                onChange={(e) => setEventName(e.target.value.slice(0, 80))}
+                onChange={(e) => {
+                  setEventName(e.target.value.slice(0, 80));
+                  if (validationErrors.eventName) {
+                    setValidationErrors(prev => ({ ...prev, eventName: undefined }));
+                  }
+                }}
                 placeholder="Event Name"
                 maxLength={80}
-                className="w-full bg-transparent text-3xl md:text-5xl font-bold text-foreground outline-none placeholder:text-muted-foreground/40"
+                className={`w-full bg-transparent text-3xl md:text-5xl font-bold text-foreground outline-none placeholder:text-muted-foreground/40 ${validationErrors.eventName ? "text-red-400 placeholder:text-red-400/40" : ""}`}
               />
-              <div className={`text-xs ${eventName.length >= 80 ? "text-amber-400" : "text-muted-foreground"}`}>
-                {eventName.length}/80 characters
+              <div className={`text-xs ${validationErrors.eventName ? "text-red-400" : eventName.length >= 80 ? "text-amber-400" : "text-muted-foreground"}`}>
+                {validationErrors.eventName || `${eventName.length}/80 characters`}
               </div>
             </div>
             {mode === "create" && (
@@ -932,29 +1011,49 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               </div>
 
               <div className="flex flex-1 flex-col gap-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <label className="text-sm font-medium text-muted-foreground sm:w-14">
+                <div ref={startTimeRef} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <label className={`text-sm font-medium sm:w-14 ${validationErrors.startTime ? "text-red-400" : "text-muted-foreground"}`}>
                     Start
                   </label>
-                  <input
-                    type="datetime-local"
-                    value={start}
-                    min={new Date().toISOString().slice(0, 16)}
-                    onChange={(e) => setStart(e.target.value)}
-                    className="flex-1 rounded-xl bg-card-background px-4 py-3.5 text-foreground outline-none"
-                  />
+                  <div className="flex-1">
+                    <input
+                      type="datetime-local"
+                      value={start}
+                      min={new Date().toISOString().slice(0, 16)}
+                      onChange={(e) => {
+                        setStart(e.target.value);
+                        if (validationErrors.startTime) {
+                          setValidationErrors(prev => ({ ...prev, startTime: undefined }));
+                        }
+                      }}
+                      className={`w-full rounded-xl bg-card-background px-4 py-3.5 text-foreground outline-none ${validationErrors.startTime ? "ring-2 ring-red-400/50" : ""}`}
+                    />
+                    {validationErrors.startTime && (
+                      <p className="text-xs text-red-400 mt-1">{validationErrors.startTime}</p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <label className="text-sm font-medium text-muted-foreground sm:w-14">
+                <div ref={endTimeRef} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <label className={`text-sm font-medium sm:w-14 ${validationErrors.endTime ? "text-red-400" : "text-muted-foreground"}`}>
                     End
                   </label>
-                  <input
-                    type="datetime-local"
-                    value={end}
-                    onChange={(e) => setEnd(e.target.value)}
-                    className="flex-1 rounded-xl bg-card-background px-4 py-3.5 text-foreground outline-none"
-                  />
+                  <div className="flex-1">
+                    <input
+                      type="datetime-local"
+                      value={end}
+                      onChange={(e) => {
+                        setEnd(e.target.value);
+                        if (validationErrors.endTime) {
+                          setValidationErrors(prev => ({ ...prev, endTime: undefined }));
+                        }
+                      }}
+                      className={`w-full rounded-xl bg-card-background px-4 py-3.5 text-foreground outline-none ${validationErrors.endTime ? "ring-2 ring-red-400/50" : ""}`}
+                    />
+                    {validationErrors.endTime && (
+                      <p className="text-xs text-red-400 mt-1">{validationErrors.endTime}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1046,20 +1145,46 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           </div>
 
           {/* Event Location & Format */}
-          <div className="space-y-4">
+          <div ref={locationRef} className="space-y-4">
             <div className="relative">
+              {/* Location validation errors indicator */}
+              {(validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode) && (
+                <div className="mb-2 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                  <p className="text-sm text-red-400 font-medium">Please complete the location details:</p>
+                  <ul className="text-xs text-red-400/80 mt-1 list-disc list-inside">
+                    {validationErrors.eventFormat && <li>{validationErrors.eventFormat}</li>}
+                    {validationErrors.virtualMeetingUrl && <li>{validationErrors.virtualMeetingUrl}</li>}
+                    {validationErrors.addressLine1 && <li>{validationErrors.addressLine1}</li>}
+                    {validationErrors.city && <li>{validationErrors.city}</li>}
+                    {validationErrors.postcode && <li>{validationErrors.postcode}</li>}
+                  </ul>
+                </div>
+              )}
               <button
                 type="button"
                 data-location-trigger
-                onClick={() => setIsLocationModalOpen(!isLocationModalOpen)}
-                className="flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer"
+                onClick={() => {
+                  setIsLocationModalOpen(!isLocationModalOpen);
+                  // Clear location-related errors when user opens the modal
+                  if (validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode) {
+                    setValidationErrors(prev => ({
+                      ...prev,
+                      eventFormat: undefined,
+                      virtualMeetingUrl: undefined,
+                      addressLine1: undefined,
+                      city: undefined,
+                      postcode: undefined,
+                    }));
+                  }
+                }}
+                className={`flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer ${(validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode) ? "ring-2 ring-red-400/50" : ""}`}
               >
-                <MapPin className="h-5 w-5 text-muted-foreground" />
+                <MapPin className={`h-5 w-5 ${(validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode) ? "text-red-400" : "text-muted-foreground"}`} />
                 <div className="flex-1 text-left">
                   {eventFormat === null ? (
                     <>
-                      <p className="text-base font-semibold text-foreground">Location</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className={`text-base font-semibold ${validationErrors.eventFormat ? "text-red-400" : "text-foreground"}`}>Location</p>
+                      <p className={`text-sm ${validationErrors.eventFormat ? "text-red-400/80" : "text-muted-foreground"}`}>
                         Add venue location or virtual link
                       </p>
                     </>
@@ -1161,11 +1286,11 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
             {/* Stripe Connect Warning for Paid Tickets */}
             {hasPaidTickets && stripeConnectStatus && !stripeConnectStatus.onboardingComplete && (
-              <div className="rounded-2xl bg-amber-500/10 border border-amber-500/30 p-4">
+              <div ref={stripeConnectRef} className={`rounded-2xl p-4 ${validationErrors.stripeConnect ? "bg-red-500/10 border border-red-500/30" : "bg-amber-500/10 border border-amber-500/30"}`}>
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${validationErrors.stripeConnect ? "text-red-400" : "text-amber-400"}`} />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-amber-400">
+                    <p className={`text-sm font-medium ${validationErrors.stripeConnect ? "text-red-400" : "text-amber-400"}`}>
                       Payment Setup Required
                     </p>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -1510,15 +1635,20 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
           {/* Organiser Terms Checkbox - Only shown in create mode */}
           {mode === "create" && (
-            <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 md:p-5">
+            <div ref={organizerTermsRef} className={`rounded-xl backdrop-blur-xl p-4 md:p-5 ${validationErrors.organizerTerms ? "bg-red-500/10 border border-red-500/30" : "bg-card-background"}`}>
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={acceptedOrganizerTerms}
-                  onChange={(e) => setAcceptedOrganizerTerms(e.target.checked)}
-                  className="mt-1 h-5 w-5 rounded border-foreground/20 bg-card-secondary-background text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
+                  onChange={(e) => {
+                    setAcceptedOrganizerTerms(e.target.checked);
+                    if (validationErrors.organizerTerms) {
+                      setValidationErrors(prev => ({ ...prev, organizerTerms: undefined }));
+                    }
+                  }}
+                  className={`mt-1 h-5 w-5 rounded bg-card-secondary-background text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer ${validationErrors.organizerTerms ? "border-red-400" : "border-foreground/20"}`}
                 />
-                <span className="text-sm text-muted-foreground">
+                <span className={`text-sm ${validationErrors.organizerTerms ? "text-red-400" : "text-muted-foreground"}`}>
                   I agree to the{" "}
                   <a
                     href="/terms/organizer"
@@ -1528,6 +1658,9 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   >
                     Organiser Terms and Conditions
                   </a>
+                  {validationErrors.organizerTerms && (
+                    <span className="block mt-1 text-red-400 text-xs">{validationErrors.organizerTerms}</span>
+                  )}
                 </span>
               </label>
             </div>
@@ -1536,7 +1669,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isSubmitting || (mode === "create" && !acceptedOrganizerTerms)}
+            disabled={isSubmitting}
             className="w-full rounded-lg bg-foreground py-2 text-center text-lg font-semibold text-black transition-all hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting
