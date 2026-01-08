@@ -70,8 +70,9 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
         onChange(editor.getHTML());
       }
     },
-    onSelectionUpdate: () => {
-      // Force re-render when selection changes to update toolbar button states
+    onTransaction: () => {
+      // Force re-render on every transaction to update toolbar button states
+      // This catches storedMarks changes (when clicking bold/italic/underline without selection)
       setForceUpdate((prev) => prev + 1);
     },
   });
@@ -93,6 +94,25 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
   if (!editor) {
     return null;
   }
+
+  // Helper to check if a mark is active, including stored marks (for when cursor is at end of line)
+  const isMarkActive = (markName: string): boolean => {
+    // First check the standard isActive
+    if (editor.isActive(markName)) {
+      return true;
+    }
+
+    // Also check storedMarks - these are marks that will be applied on next keystroke
+    const { storedMarks } = editor.state;
+    if (storedMarks) {
+      const markType = editor.schema.marks[markName];
+      if (markType && storedMarks.some(mark => mark.type === markType)) {
+        return true;
+      }
+    }
+
+    return false;
+  };
 
   const toggleLink = () => {
     if (!editor) return;
@@ -138,6 +158,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
     <button
       type="button"
       onClick={onClick}
+      onMouseDown={(e) => e.preventDefault()} // Prevent button from stealing focus from editor
       title={title}
       className={`rounded-md p-1.5 sm:p-2 transition ${
         isActive
@@ -153,7 +174,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
     <div className="h-5 sm:h-6 w-px bg-zinc-700 mx-1 sm:mx-2" />
   );
 
-  const isLinkActive = editor.isActive("link");
+  const isLinkActive = isMarkActive("link");
 
   return (
     <div className="flex h-full flex-col space-y-3">
@@ -203,7 +224,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
           {/* Text formatting group */}
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleBold().run()}
-            isActive={editor.isActive("bold")}
+            isActive={isMarkActive("bold")}
             title="Bold"
           >
             <Bold className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -211,7 +232,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
 
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleItalic().run()}
-            isActive={editor.isActive("italic")}
+            isActive={isMarkActive("italic")}
             title="Italic"
           >
             <Italic className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -219,7 +240,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
 
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleUnderline().run()}
-            isActive={editor.isActive("underline")}
+            isActive={isMarkActive("underline")}
             title="Underline"
           >
             <UnderlineIcon className="h-4 w-4 sm:h-5 sm:w-5" />
