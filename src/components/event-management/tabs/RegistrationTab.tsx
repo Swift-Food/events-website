@@ -233,6 +233,21 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
     const ticket = tickets.find((t) => t.id === activeTicketId);
     if (!ticket) return;
 
+    // Check for duplicate question (case-insensitive comparison)
+    const normalizedNewQuestion = field.question.trim().toLowerCase();
+    const isDuplicate = (ticket.questionForm || []).some((q, idx) => {
+      // If editing, exclude the current question from duplicate check
+      if (editingQuestionIndex !== null && idx === editingQuestionIndex) {
+        return false;
+      }
+      return q.question.trim().toLowerCase() === normalizedNewQuestion;
+    });
+
+    if (isDuplicate) {
+      toast.error("This question already exists for this ticket");
+      return;
+    }
+
     // Build updated question form - convert existing questions to proper DTO format
     const currentQuestions = (ticket.questionForm || []).map((q) => ({
       question: q.question,
