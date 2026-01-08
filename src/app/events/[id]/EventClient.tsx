@@ -286,10 +286,8 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
       return;
     }
 
-    // For invitation flow, skip question form (invitation already has ticket selected)
-    // Check if ticket has questions that need answering (only for non-invite flow)
+    // Check if ticket has questions that need answering
     if (
-      !inviteToken &&
       ticket.questionForm &&
       ticket.questionForm.length > 0 &&
       confirmModalStep === 'summary'
@@ -314,7 +312,10 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
 
       // If we have an invite token, use the accept invitation API
       if (inviteToken && invitationPreview?.success) {
-        const result = await guestTicketService.acceptTicketInvite(inviteToken);
+        const result = await guestTicketService.acceptTicketInvite(
+          inviteToken,
+          Object.keys(questionAnswers).length > 0 ? questionAnswers : undefined
+        );
 
         if (result.success) {
           // Check if payment is required
@@ -1609,7 +1610,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
       {/* Registration Confirmation Modal */}
       {showConfirmModal && event && pendingTicketId && (() => {
         const pendingTicket = event.eventTickets?.find(t => t.id === pendingTicketId);
-        const hasQuestions = !inviteToken && pendingTicket?.questionForm && pendingTicket.questionForm.length > 0;
+        const hasQuestions = pendingTicket?.questionForm && pendingTicket.questionForm.length > 0;
 
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">

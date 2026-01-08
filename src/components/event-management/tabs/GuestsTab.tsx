@@ -102,6 +102,11 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
     }
   }, [initialFilter]);
 
+  // Clear selection when filter changes to avoid stale selections
+  useEffect(() => {
+    setSelectedGuests(new Set());
+  }, [filterStatus]);
+
   const fetchGuestData = async () => {
     try {
       setIsLoading(true);
@@ -186,11 +191,25 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
     try {
       const ticketIds = Array.from(selectedGuests);
       const result = await guestTicketService.bulkApproveTickets(ticketIds);
-      toast.success(`Approved ${result.approved || ""} guests`);
+
+      // Build success message based on results
+      const approved = result.approved || 0;
+      const waitlisted = result.waitlisted || 0;
+
+      if (approved > 0 && waitlisted > 0) {
+        toast.success(`Approved ${approved} guest${approved > 1 ? 's' : ''}, ${waitlisted} added to waitlist`);
+      } else if (approved > 0) {
+        toast.success(`Approved ${approved} guest${approved > 1 ? 's' : ''}`);
+      } else if (waitlisted > 0) {
+        toast.info(`No capacity available. ${waitlisted} guest${waitlisted > 1 ? 's' : ''} added to waitlist`);
+      }
+
       setSelectedGuests(new Set());
       await fetchGuestData();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to approve guests");
+      setSelectedGuests(new Set());
+      await fetchGuestData();
     }
   };
 
@@ -203,6 +222,8 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
       await fetchGuestData();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to reject guests");
+      setSelectedGuests(new Set());
+      await fetchGuestData();
     }
   };
 
