@@ -306,7 +306,14 @@ function GradientEditor({
     });
   };
 
-  const previewGradient = generateGradientCSS({ ...gradient, enabled: true });
+  // Preview always goes left-to-right so colors are visible regardless of actual direction
+  const previewGradient = generateGradientCSS({
+    ...gradient,
+    enabled: true,
+    angle: 90,
+    useKeyword: false,
+    repeating: false
+  });
 
   return (
     <div className="space-y-3">
