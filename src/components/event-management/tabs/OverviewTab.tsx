@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { EventResponseDto, EventStatus } from "@/types";
-import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, EyeOff, AlertTriangle, Loader2, CreditCard, Video, UserPlus } from "lucide-react";
+import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, EyeOff, AlertTriangle, Loader2, CreditCard, Video, UserPlus, Link2, Copy, Check } from "lucide-react";
 import { isVirtualEvent, isHybridEvent } from "@/types/event/status";
 import { GuestTicketResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
 import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
@@ -58,6 +58,31 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
     percentageCheckedIn: 0,
   });
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  // URL copy state
+  const [urlCopied, setUrlCopied] = useState(false);
+  const [baseUrl, setBaseUrl] = useState("");
+
+  // Get base URL on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setBaseUrl(window.location.origin);
+    }
+  }, []);
+
+  const fullEventUrl = baseUrl && eventData.eventUrl ? `${baseUrl}/events/${eventData.eventUrl}` : "";
+
+  const handleCopyUrl = async () => {
+    if (!fullEventUrl) return;
+    try {
+      await navigator.clipboard.writeText(fullEventUrl);
+      setUrlCopied(true);
+      toast.success("Event URL copied to clipboard");
+      setTimeout(() => setUrlCopied(false), 2000);
+    } catch {
+      toast.error("Failed to copy URL");
+    }
+  };
 
   // Fetch guest stats
   useEffect(() => {
@@ -217,6 +242,22 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
                   <h2 className="text-lg sm:text-xl font-bold text-foreground leading-tight">
                     {eventData.name}
                   </h2>
+
+                  {/* Event URL */}
+                  {fullEventUrl && (
+                    <button
+                      onClick={handleCopyUrl}
+                      className="flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors group"
+                    >
+                      <Link2 className="h-3 w-3" />
+                      <span className="truncate max-w-[200px] sm:max-w-[280px]">{fullEventUrl}</span>
+                      {urlCopied ? (
+                        <Check className="h-3 w-3 text-green-400" />
+                      ) : (
+                        <Copy className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      )}
+                    </button>
+                  )}
 
                   {/* Categories & Subcategories inline */}
                   {((eventData.categories && eventData.categories.length > 0) || (eventData.subcategories && eventData.subcategories.length > 0)) && (
