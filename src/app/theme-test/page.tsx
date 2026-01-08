@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import {
   Calendar,
   CalendarPlus,
@@ -263,19 +264,13 @@ export default function ThemeTestPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1 text-lg font-semibold tracking-tight cursor-pointer hover:scale-105 transition-transform duration-200">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 100 100"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                style={{ color: theme.mainTextColor }}
-              >
-                <path
-                  d="M50 0L93.3 25V75L50 100L6.7 75V25L50 0Z"
-                  fill="currentColor"
-                />
-              </svg>
+              <Image
+                src="/logo.svg"
+                alt="Prismo logo"
+                width={24}
+                height={24}
+                className="invert"
+              />
               <span
                 className="hidden sm:inline font-normal"
                 style={{ color: theme.mainTextColor }}
