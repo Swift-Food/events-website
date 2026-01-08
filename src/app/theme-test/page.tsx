@@ -250,6 +250,66 @@ export default function ThemeTestPage() {
       className="min-h-screen pb-32 transition-colors duration-200"
       style={{ backgroundColor: theme.pageBackground }}
     >
+      {/* Mock Navbar */}
+      <header
+        className="sticky top-0 z-40 transition-colors duration-200"
+        style={{
+          backgroundColor: theme.pageBackground,
+          borderBottom: theme.borderEnabled ? `1px solid ${theme.borderColor}` : "none",
+        }}
+      >
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1 text-lg font-semibold tracking-tight">
+              <div
+                className="h-6 w-6 rounded"
+                style={{ backgroundColor: theme.mainTextColor }}
+              />
+              <span
+                className="hidden sm:inline font-normal"
+                style={{ color: theme.mainTextColor }}
+              >
+                PRISMO
+              </span>
+            </div>
+
+            {/* Desktop Navigation */}
+            <nav className="ml-8 hidden gap-6 text-sm font-medium sm:flex">
+              {["Discover", "Tickets", "Manage"].map((link) => (
+                <span
+                  key={link}
+                  className="cursor-pointer transition-colors hover:opacity-80"
+                  style={{ color: theme.subTextColor }}
+                >
+                  {link}
+                </span>
+              ))}
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              className="rounded-full px-3 py-1.5 text-xs font-semibold transition-colors sm:px-5 sm:py-2 sm:text-sm"
+              style={{
+                backgroundColor: theme.mainTextColor,
+                color: theme.pageBackground,
+              }}
+            >
+              Create Event
+            </button>
+            <button
+              className="rounded-full px-3 py-1.5 text-xs font-semibold transition-colors sm:px-5 sm:py-2 sm:text-sm"
+              style={{
+                border: `1px solid ${mainTextWithAlpha(0.2)}`,
+                color: theme.subTextColor,
+              }}
+            >
+              Sign In
+            </button>
+          </div>
+        </div>
+      </header>
+
       <div className="mx-auto max-w-6xl px-6 py-8">
         {/* Back Button */}
         <div className="mb-6 flex items-center justify-between gap-4">
@@ -759,9 +819,9 @@ export default function ThemeTestPage() {
               />
 
               <div className="space-y-1">
-                <label className="block text-xs font-medium text-white/70">Border</label>
-                <div className="flex items-center gap-1.5">
-                  <label className="flex items-center gap-1.5 cursor-pointer">
+                <div className="flex items-center gap-2">
+                  <label className="block text-xs font-medium text-white/70">Border</label>
+                  <label className="flex items-center gap-1 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={theme.borderEnabled}
@@ -770,33 +830,14 @@ export default function ThemeTestPage() {
                     />
                     <span className="text-[10px] text-white/50">On</span>
                   </label>
-                  {theme.borderEnabled && (
-                    <>
-                      <input
-                        type="color"
-                        value={theme.borderColor.startsWith("rgba") ? rgbaToHex(...Object.values(parseColor(theme.borderColor)).slice(0, 3) as [number, number, number]) : theme.borderColor}
-                        onChange={(e) => {
-                          const parsed = parseColor(e.target.value);
-                          const currentAlpha = parseColor(theme.borderColor).a;
-                          updateTheme("borderColor", `rgba(${parsed.r}, ${parsed.g}, ${parsed.b}, ${currentAlpha})`);
-                        }}
-                        className="h-5 w-7 cursor-pointer rounded border border-white/20 bg-transparent"
-                      />
-                      <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        value={parseColor(theme.borderColor).a}
-                        onChange={(e) => {
-                          const { r, g, b } = parseColor(theme.borderColor);
-                          updateTheme("borderColor", `rgba(${r}, ${g}, ${b}, ${parseFloat(e.target.value)})`);
-                        }}
-                        className="w-10 accent-blue-500"
-                      />
-                    </>
-                  )}
                 </div>
+                {theme.borderEnabled && (
+                  <ColorInput
+                    label=""
+                    value={theme.borderColor}
+                    onChange={(v) => updateTheme("borderColor", v)}
+                  />
+                )}
               </div>
             </div>
           </div>
