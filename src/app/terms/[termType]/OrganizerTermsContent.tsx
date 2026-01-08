@@ -192,7 +192,16 @@ export default function OrganizerTermsContent() {
           <p className="text-muted-foreground">
             Where we process Attendee personal data on your behalf (for example, when collecting registration
             information through the Site), we act as your data processor. We will process such data in accordance
-            with our Privacy Policy, our Data Processing Agreement and applicable data protection laws. We may use
+            with our Privacy Policy, our{" "}
+            <a
+              href="/legal/data-processing-addendum.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Data Processing Agreement
+            </a>{" "}
+            and applicable data protection laws. We may use
             Attendee data for our own purposes (such as platform analytics and improvement) in accordance with our
             Privacy Policy, in which case we act as a separate data controller.
           </p>
