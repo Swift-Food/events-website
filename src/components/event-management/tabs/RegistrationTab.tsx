@@ -6,6 +6,7 @@ import { EventTicketResponseDto, QuestionBlock } from "@/types/event-ticket/resp
 import { Ticket, Plus, Edit, Lock, Unlock, Trash2, MessageSquare, AlignLeft, CircleDot, CheckSquare, HelpCircle, ScanLine, ChevronUp, ChevronDown } from "lucide-react";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import FormFieldModal from "@/components/event-edit/FormFieldModal";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import { eventTicketService } from "@/services/event-ticket.service";
 import { toast } from "sonner";
 
@@ -20,6 +21,7 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ticketToEdit, setTicketToEdit] = useState<TicketType | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [ticketToDelete, setTicketToDelete] = useState<EventTicketResponseDto | null>(null);
 
   // Form field modal state for editing questions
   const [isFormFieldModalOpen, setIsFormFieldModalOpen] = useState(false);
@@ -98,26 +100,27 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
     }
   };
 
-  const handleDeleteTicket = async (ticketId: string) => {
+  const handleDeleteTicket = (ticketId: string) => {
     const ticket = tickets.find((t) => t.id === ticketId);
     if (!ticket) return;
+    setTicketToDelete(ticket);
+  };
 
-    const confirmed = confirm(
-      `Are you sure you want to delete "${ticket.name}"? This action cannot be undone.`
-    );
-    if (!confirmed) return;
+  const confirmDeleteTicket = async () => {
+    if (!ticketToDelete) return;
 
-    setIsDeleting(ticketId);
+    setIsDeleting(ticketToDelete.id);
     try {
-      await eventTicketService.deleteTicket(ticketId);
-      setTickets((prev) => prev.filter((t) => t.id !== ticketId));
-      toast.success(`"${ticket.name}" deleted successfully`);
+      await eventTicketService.deleteTicket(ticketToDelete.id);
+      setTickets((prev) => prev.filter((t) => t.id !== ticketToDelete.id));
+      toast.success(`"${ticketToDelete.name}" deleted successfully`);
       onRefresh?.();
     } catch (error: any) {
       console.error("Failed to delete ticket:", error);
-      toast.error(error.response?.data?.message || `Failed to delete "${ticket.name}"`);
+      toast.error(error.response?.data?.message || `Failed to delete "${ticketToDelete.name}"`);
     } finally {
       setIsDeleting(null);
+      setTicketToDelete(null);
     }
   };
 
@@ -595,6 +598,18 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
         }}
         onSave={handleSaveQuestion}
         fieldToEdit={fieldToEdit}
+      />
+
+      <ConfirmModal
+        isOpen={ticketToDelete !== null}
+        onClose={() => setTicketToDelete(null)}
+        onConfirm={confirmDeleteTicket}
+        title="Delete Ticket"
+        message={`Are you sure you want to delete "${ticketToDelete?.name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        isLoading={isDeleting !== null}
+        variant="danger"
       />
     </div>
   );
