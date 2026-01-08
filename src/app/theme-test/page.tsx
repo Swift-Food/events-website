@@ -145,16 +145,35 @@ const mockEvent = {
   eventColor: "#8b5cf6",
   startDateTime: new Date("2025-07-15T18:00:00"),
   endDateTime: new Date("2025-07-17T23:00:00"), // Multi-day event
-  description: `<h2>Join us for an unforgettable night!</h2>
-    <p>Experience the best live music performances under the summer sky. This year's festival features amazing artists from around the world.</p>
-    <h3>What to expect:</h3>
+  description: `<h1>Summer Music Festival 2025</h1>
+    <p>Experience the <strong>best live music performances</strong> under the summer sky. This year's festival features <em>amazing artists</em> from around the world.</p>
+
+    <h2>Event Highlights</h2>
+    <p>Join us for three days of non-stop entertainment. Whether you're a fan of <strong>rock, pop, or electronic music</strong>, we have something for everyone.</p>
+
+    <h3>What's Included</h3>
     <ul>
-      <li>Live performances from top artists</li>
-      <li>Food trucks and refreshments</li>
+      <li>Live performances from <strong>top international artists</strong></li>
+      <li>Food trucks and <em>craft beverages</em></li>
       <li>VIP lounge access for premium tickets</li>
       <li>Meet and greet opportunities</li>
     </ul>
-    <p>Don't miss out on this incredible event!</p>`,
+
+    <h3>Schedule Overview</h3>
+    <ol>
+      <li><strong>Day 1:</strong> Opening ceremony and indie bands</li>
+      <li><strong>Day 2:</strong> Main stage headliners</li>
+      <li><strong>Day 3:</strong> Closing party with special guests</li>
+    </ol>
+
+    <hr>
+
+    <blockquote>This festival changed my life. The energy, the music, the people - absolutely incredible!</blockquote>
+
+    <h3>Important Information</h3>
+    <p>Please bring your ticket confirmation with code <code>SUMMER2025</code> to the entrance. For more details, visit our <a href="#">official website</a> or contact us at <a href="#">support@festival.com</a>.</p>
+
+    <p><em>Note: This is a rain or shine event. No refunds will be issued for weather-related cancellations.</em></p>`,
   categories: [
     { id: "1", name: "Music" },
     { id: "2", name: "Festival" },
@@ -834,6 +853,13 @@ export default function ThemeTestPage() {
                   border-radius: 0.25rem;
                   font-family: monospace;
                   font-size: 0.8125rem;
+                }
+                .theme-description strong {
+                  font-weight: 700;
+                  color: ${theme.mainTextColor};
+                }
+                .theme-description em {
+                  font-style: italic;
                 }
               `}</style>
               <div
