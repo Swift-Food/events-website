@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import {
   Calendar,
   CalendarPlus,
@@ -22,6 +21,7 @@ import {
 interface ThemeSettings {
   pageBackground: string;
   cardBackground: string;
+  cardSecondaryBackground: string;
   mainTextColor: string;
   subTextColor: string;
   borderColor: string;
@@ -32,6 +32,7 @@ interface ThemeSettings {
 const defaultTheme: ThemeSettings = {
   pageBackground: "rgba(34, 34, 34, 1)",
   cardBackground: "rgba(42, 42, 42, 1)",
+  cardSecondaryBackground: "rgba(51, 51, 51, 1)",
   mainTextColor: "rgba(237, 237, 237, 1)",
   subTextColor: "rgba(153, 153, 153, 1)",
   borderColor: "rgba(64, 64, 64, 1)",
@@ -143,7 +144,7 @@ const mockEvent = {
   eventImage: null,
   eventColor: "#8b5cf6",
   startDateTime: new Date("2025-07-15T18:00:00"),
-  endDateTime: new Date("2025-07-15T23:00:00"),
+  endDateTime: new Date("2025-07-17T23:00:00"), // Multi-day event
   description: `<h2>Join us for an unforgettable night!</h2>
     <p>Experience the best live music performances under the summer sky. This year's festival features amazing artists from around the world.</p>
     <h3>What to expect:</h3>
@@ -239,7 +240,7 @@ export default function ThemeTestPage() {
     ? `1px solid ${theme.borderColor}`
     : "none";
 
-  // Parse primary color for creating tinted backgrounds
+  // Parse colors for creating tinted backgrounds
   const primaryParsed = parseColor(theme.primaryColor);
   const primaryWithAlpha = (alpha: number) =>
     `rgba(${primaryParsed.r}, ${primaryParsed.g}, ${primaryParsed.b}, ${alpha})`;
@@ -247,6 +248,8 @@ export default function ThemeTestPage() {
   const mainTextParsed = parseColor(theme.mainTextColor);
   const mainTextWithAlpha = (alpha: number) =>
     `rgba(${mainTextParsed.r}, ${mainTextParsed.g}, ${mainTextParsed.b}, ${alpha})`;
+
+  const pageBgParsed = parseColor(theme.pageBackground);
 
   return (
     <div
@@ -257,20 +260,26 @@ export default function ThemeTestPage() {
       <header
         className="sticky top-0 z-40 transition-colors duration-200"
         style={{
-          backgroundColor: theme.pageBackground,
+          backgroundColor: `rgb(${pageBgParsed.r}, ${pageBgParsed.g}, ${pageBgParsed.b})`,
           borderBottom: theme.borderEnabled ? `1px solid ${theme.borderColor}` : "none",
         }}
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1 text-lg font-semibold tracking-tight cursor-pointer hover:scale-105 transition-transform duration-200">
-              <Image
-                src="/logo.svg"
-                alt="Prismo logo"
-                width={24}
-                height={24}
-                className="invert"
-              />
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 100 100"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ color: theme.mainTextColor }}
+              >
+                <path
+                  d="M50 0L93.3 25V75L50 100L6.7 75V25L50 0Z"
+                  fill="currentColor"
+                />
+              </svg>
               <span
                 className="hidden sm:inline font-normal"
                 style={{ color: theme.mainTextColor }}
@@ -414,7 +423,7 @@ export default function ThemeTestPage() {
                 </div>
               </div>
 
-              {/* Date & Time Card */}
+              {/* Date & Time Card - Multi-day timeline view */}
               <div
                 className="rounded-xl p-4 sm:p-6"
                 style={{
@@ -430,6 +439,7 @@ export default function ThemeTestPage() {
                 </h3>
                 <div className="flex gap-4">
                   <div className="flex flex-col items-center py-1">
+                    {/* Start dot */}
                     <div
                       className="h-3 w-3 rounded-full shadow-lg"
                       style={{
@@ -437,18 +447,54 @@ export default function ThemeTestPage() {
                         boxShadow: `0 0 10px ${primaryWithAlpha(0.5)}`,
                       }}
                     />
+                    {/* Connecting line */}
+                    <div
+                      className="my-1 w-0.5 flex-1 rounded-full"
+                      style={{ backgroundColor: primaryWithAlpha(0.3) }}
+                    />
+                    {/* End dot */}
+                    <div
+                      className="h-3 w-3 rounded-full shadow-md"
+                      style={{ backgroundColor: primaryWithAlpha(0.3) }}
+                    />
                   </div>
                   <div className="flex-1">
-                    <p
-                      className="font-medium"
-                      style={{ color: theme.mainTextColor }}
-                    >
-                      {formatDate(mockEvent.startDateTime)}
-                    </p>
-                    <p className="text-sm" style={{ color: theme.subTextColor }}>
-                      {formatTime(mockEvent.startDateTime)} -{" "}
-                      {formatTime(mockEvent.endDateTime)}
-                    </p>
+                    {/* Start date */}
+                    <div className="mb-3">
+                      <p
+                        className="text-xs font-semibold uppercase tracking-wide"
+                        style={{ color: theme.subTextColor }}
+                      >
+                        Start
+                      </p>
+                      <p
+                        className="font-medium"
+                        style={{ color: theme.mainTextColor }}
+                      >
+                        {formatDate(mockEvent.startDateTime)}
+                      </p>
+                      <p className="text-sm" style={{ color: theme.subTextColor }}>
+                        {formatTime(mockEvent.startDateTime)}
+                      </p>
+                    </div>
+                    {/* End date */}
+                    <div>
+                      <p
+                        className="text-xs font-semibold uppercase tracking-wide"
+                        style={{ color: theme.subTextColor }}
+                      >
+                        End
+                      </p>
+                      <p
+                        className="font-medium"
+                        style={{ color: theme.mainTextColor }}
+                      >
+                        {formatDate(mockEvent.endDateTime)}
+                      </p>
+                      <p className="text-sm" style={{ color: theme.subTextColor }}>
+                        {formatTime(mockEvent.endDateTime)}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -456,8 +502,9 @@ export default function ThemeTestPage() {
                   <button
                     className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
                     style={{
-                      backgroundColor: mainTextWithAlpha(0.08),
+                      backgroundColor: theme.cardSecondaryBackground,
                       color: theme.mainTextColor,
+                      border: borderStyle,
                     }}
                   >
                     <CalendarPlus className="h-4 w-4" />
@@ -476,14 +523,17 @@ export default function ThemeTestPage() {
               >
                 <div
                   className="h-40 w-full flex flex-col items-center justify-center gap-2"
-                  style={{ backgroundColor: theme.cardBackground }}
+                  style={{
+                    backgroundColor: theme.cardSecondaryBackground,
+                    borderBottom: borderStyle,
+                  }}
                 >
                   <MapPin
                     className="h-5 w-5"
                     style={{ color: theme.subTextColor }}
                   />
                   <span className="text-sm" style={{ color: theme.subTextColor }}>
-                    Map Preview
+                    Map Preview (Secondary)
                   </span>
                 </div>
                 <div className="p-4">
@@ -657,10 +707,10 @@ export default function ThemeTestPage() {
                       style={{
                         backgroundColor: isSelected
                           ? primaryWithAlpha(0.15)
-                          : mainTextWithAlpha(0.05),
+                          : theme.cardSecondaryBackground,
                         border: isSelected
                           ? `2px solid ${theme.primaryColor}`
-                          : `1px solid ${mainTextWithAlpha(0.15)}`,
+                          : borderStyle,
                       }}
                     >
                       <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
@@ -670,7 +720,7 @@ export default function ThemeTestPage() {
                             style={{
                               borderColor: isSelected
                                 ? theme.primaryColor
-                                : mainTextWithAlpha(0.4),
+                                : theme.borderColor,
                             }}
                           >
                             {isSelected && (
@@ -767,7 +817,7 @@ export default function ThemeTestPage() {
       <div
         className="fixed bottom-0 left-0 right-0 z-50 transition-transform duration-300"
         style={{
-          transform: isEditorOpen ? "translateY(0)" : "translateY(calc(100% - 36px))",
+          transform: isEditorOpen ? "translateY(0)" : "translateY(100%)",
         }}
       >
         {/* Toggle Button */}
@@ -809,7 +859,7 @@ export default function ThemeTestPage() {
             </div>
 
             {/* Color Controls Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
               <ColorInput
                 label="Page Background"
                 value={theme.pageBackground}
@@ -820,6 +870,12 @@ export default function ThemeTestPage() {
                 label="Card Background"
                 value={theme.cardBackground}
                 onChange={(v) => updateTheme("cardBackground", v)}
+              />
+
+              <ColorInput
+                label="Card Secondary"
+                value={theme.cardSecondaryBackground}
+                onChange={(v) => updateTheme("cardSecondaryBackground", v)}
               />
 
               <ColorInput
