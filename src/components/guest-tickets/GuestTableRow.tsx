@@ -237,6 +237,13 @@ export const GuestTableRow = ({
               Check In
             </button>
           )}
+          <button
+            onClick={() => onRowClick?.(guest)}
+            className="rounded-lg bg-card-secondary-background p-2 transition-colors hover:bg-white/15"
+            title="View details"
+          >
+            <Eye className="h-4 w-4 text-foreground" />
+          </button>
           <div className="relative">
             <button
               onClick={() => setShowMenu(!showMenu)}

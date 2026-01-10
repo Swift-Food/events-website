@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Instagram, Youtube } from "lucide-react";
+import { Instagram, Youtube, Linkedin } from "lucide-react";
 
 // TikTok icon component (not available in lucide)
 const TikTokIcon = ({ className }: { className?: string }) => (
@@ -50,6 +50,15 @@ export default function Footer() {
           {/* Social Media Links */}
           <div className="flex justify-center items-center gap-4">
             <a
+              href="https://www.linkedin.com/company/prismolive/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zinc-400 transition-colors hover:text-white"
+              aria-label="LinkedIn"
+            >
+              <Linkedin className="h-5 w-5" />
+            </a>
+            <a
               href="https://www.instagram.com/prismo.live/"
               target="_blank"
               rel="noopener noreferrer"
@@ -59,22 +68,22 @@ export default function Footer() {
               <Instagram className="h-5 w-5" />
             </a>
             <a
-              href="https://www.youtube.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-zinc-400 transition-colors hover:text-white"
-              aria-label="YouTube"
-            >
-              <Youtube className="h-5 w-5" />
-            </a>
-            <a
-              href="https://www.tiktok.com"
+              href="https://www.tiktok.com/@prismo.live"
               target="_blank"
               rel="noopener noreferrer"
               className="text-zinc-400 transition-colors hover:text-white"
               aria-label="TikTok"
             >
               <TikTokIcon className="h-5 w-5" />
+            </a>
+            <a
+              href="https://www.youtube.com/@prismolive"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zinc-400 transition-colors hover:text-white"
+              aria-label="YouTube"
+            >
+              <Youtube className="h-5 w-5" />
             </a>
           </div>
         </div>
