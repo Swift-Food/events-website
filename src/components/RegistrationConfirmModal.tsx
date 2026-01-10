@@ -329,7 +329,7 @@ export default function RegistrationConfirmModal({
 
               {/* Questions Form */}
               {ticket?.questionForm && (
-                <div className="flex-1 overflow-y-auto px-5 space-y-4">
+                <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
                   {ticket.questionForm.map((q: QuestionBlock, index: number) => (
                     <div key={index} className="space-y-2">
                       <label className="block text-sm font-medium text-foreground">
