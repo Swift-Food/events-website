@@ -21,6 +21,7 @@ import { InviteLinkModal } from "@/components/event-management/InviteLinkModal";
 import { InvitationsSection } from "@/components/event-management/InvitationsSection";
 import { BlacklistModal, BlacklistSection } from "@/components/blacklist";
 import { toast } from "sonner";
+import { downloadGuestListPDF, getExportSummary } from "@/utils/guestListExport";
 
 type FilterStatus = "all" | "active" | "pending_approval" | "pending_payment" | "waitlisted" | "cancelled" | "checked_in" | "blacklisted";
 
@@ -47,10 +48,11 @@ function getGuestDisplayName(guest: GuestTicketResponseDto['guest'] | undefined)
 
 interface GuestsTabProps {
   eventId: string;
+  eventName?: string;
   initialFilter?: FilterStatus;
 }
 
-export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
+export function GuestsTab({ eventId, eventName, initialFilter = "all" }: GuestsTabProps) {
   const [guests, setGuests] = useState<GuestTicketResponseDto[]>([]);
   const [pendingGuests, setPendingGuests] = useState<AdminTicketResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -90,6 +92,9 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
 
   // Blacklist count for filter badge
   const [blacklistedCount, setBlacklistedCount] = useState(0);
+
+  // Download state
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     fetchGuestData();
@@ -306,6 +311,28 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
     setShowInviteGuestsModal(true);
   };
 
+  // Handle guest list download
+  const handleDownloadGuestList = async () => {
+    if (filteredGuests.length === 0) {
+      toast.error("No guests to export");
+      return;
+    }
+
+    // Get event name from props or first guest's eventName
+    const resolvedEventName = eventName || guests[0]?.eventName || "Event";
+
+    try {
+      setIsDownloading(true);
+      await downloadGuestListPDF(filteredGuests, resolvedEventName, filterStatus);
+      toast.success(getExportSummary(filteredGuests));
+    } catch (error) {
+      console.error("Error exporting guest list:", error);
+      toast.error("Failed to export guest list");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   // Statuses that can be selected for bulk actions (approve/reject)
   // Note: PENDING_PAYMENT is excluded because those tickets are already approved and waiting for payment
   const BULK_ACTIONABLE_STATUSES = [
@@ -405,6 +432,9 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
           cancelledCount={guests.filter((g) => g.status === GuestTicketStatus.CANCELLED).length}
           checkedInCount={guests.filter((g) => g.status === GuestTicketStatus.CHECKED_IN).length}
           blacklistedCount={blacklistedCount}
+          onDownload={handleDownloadGuestList}
+          isDownloading={isDownloading}
+          totalFilteredCount={filteredGuests.length}
         />
 
         {filterStatus === "blacklisted" ? (
