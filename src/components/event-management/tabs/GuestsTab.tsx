@@ -121,6 +121,7 @@ export function GuestsTab({ eventId, eventName, initialFilter = "all" }: GuestsT
         guestTicketService.getCheckInStats(eventId),
       ]);
 
+      console.log("Guest ticket responses:", attendees);
       setGuests(attendees);
       setPendingGuests(pending.pending || []);
       setCheckInStats(stats);

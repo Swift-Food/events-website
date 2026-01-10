@@ -74,6 +74,10 @@ export interface GuestTicketResponseDto {
   claimDeadline?: Date | null;
   /** Whether this ticket was originally on the waitlist */
   wasWaitlisted?: boolean;
+  /** ID of the organizer who cancelled/rejected the ticket (null if cancelled by user) */
+  cancelledByEventUserId?: string | null;
+  /** Reason for cancellation/rejection */
+  cancelledReason?: string | null;
 }
 
 /**

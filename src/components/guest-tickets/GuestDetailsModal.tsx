@@ -11,6 +11,7 @@ import {
   Calendar,
   Ticket,
   ClipboardList,
+  Ban,
 } from "lucide-react";
 
 /**
@@ -187,6 +188,21 @@ export const GuestDetailsModal = ({
                 </p>
               </div>
             </div>
+
+            {/* Show rejection reason if populated */}
+            {guest.cancelledReason && (
+              <div className="flex items-center gap-3 rounded-xl bg-card-secondary-background p-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/10">
+                  <Ban className="h-5 w-5 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Rejection Reason</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {guest.cancelledReason}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Registration Questions */}
