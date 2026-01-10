@@ -33,7 +33,6 @@ export const GuestActionMenu = ({
   onViewDetails,
 }: GuestActionMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
-  console.log("guest in action menu,", guest)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -108,28 +107,28 @@ export const GuestActionMenu = ({
     });
   }
 
-  menuItems.push(
-    {
-      label: "View QR Code",
-      icon: QrCode,
-      onClick: () => {
-        // TODO: Implement QR code modal
-        console.log("View QR code:", guest.qrCode);
-        onClose();
-      },
-      color: "text-foreground",
-    },
-    {
-      label: "Download Ticket",
-      icon: Download,
-      onClick: () => {
-        // TODO: Implement ticket download
-        console.log("Download ticket:", guest.id);
-        onClose();
-      },
-      color: "text-foreground",
-    }
-  );
+  // menuItems.push(
+  //   {
+  //     label: "View QR Code",
+  //     icon: QrCode,
+  //     onClick: () => {
+  //       // TODO: Implement QR code modal
+  //       console.log("View QR code:", guest.qrCode);
+  //       onClose();
+  //     },
+  //     color: "text-foreground",
+  //   },
+  //   {
+  //     label: "Download Ticket",
+  //     icon: Download,
+  //     onClick: () => {
+  //       // TODO: Implement ticket download
+  //       console.log("Download ticket:", guest.id);
+  //       onClose();
+  //     },
+  //     color: "text-foreground",
+  //   }
+  // );
 
   // Dangerous actions (blacklist)
   // Only show if ticket is not already cancelled/refunded
