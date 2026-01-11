@@ -64,7 +64,7 @@ export function ExistingOrderView({ order: initialOrder }: ExistingOrderViewProp
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Header - Enhanced */}
-      <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-6 sm:p-8 shadow-xl">
+      <div className="rounded-2xl border border-white/10 bg-card-background p-6 sm:p-8 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
@@ -85,13 +85,13 @@ export function ExistingOrderView({ order: initialOrder }: ExistingOrderViewProp
               Order Total
             </p>
             <p className="text-3xl sm:text-4xl font-bold text-primary">
-              ${(order.finalTotal || order.estimatedTotal || 0)}
+              £{(order.finalTotal || order.estimatedTotal || 0)}
             </p>
           </div>
         </div>
 
         {/* Order Status Timeline */}
-        <div className="rounded-xl bg-gradient-to-br from-card-secondary-background to-card-background border border-white/5 p-6 sm:p-8">
+        <div className="rounded-xl bg-card-secondary-background border border-white/5 p-6 sm:p-8">
           <div className="flex items-center gap-3 mb-8">
             <div className="rounded-lg bg-primary/10 p-2">
               <Truck className="h-5 w-5 text-primary" />
@@ -104,7 +104,7 @@ export function ExistingOrderView({ order: initialOrder }: ExistingOrderViewProp
 
       {/* Customer & Delivery Information - Enhanced */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-6 sm:p-8 shadow-lg hover:shadow-xl transition-shadow">
+        <div className="rounded-2xl border border-white/10 bg-card-background p-6 sm:p-8 shadow-lg hover:shadow-xl transition-shadow">
           <div className="flex items-center gap-3 mb-6">
             <div className="rounded-xl bg-primary/10 p-2.5">
               <Phone className="h-5 w-5 text-primary" />
@@ -139,7 +139,7 @@ export function ExistingOrderView({ order: initialOrder }: ExistingOrderViewProp
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-6 sm:p-8 shadow-lg hover:shadow-xl transition-shadow">
+        <div className="rounded-2xl border border-white/10 bg-card-background p-6 sm:p-8 shadow-lg hover:shadow-xl transition-shadow">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="rounded-xl bg-primary/10 p-2.5">
@@ -169,7 +169,7 @@ export function ExistingOrderView({ order: initialOrder }: ExistingOrderViewProp
 
             {/* Pickup Contact Information */}
             {(order.pickupContactName || order.pickupContactPhone || order.pickupContactEmail) && (
-              <div className="rounded-lg bg-gradient-to-br from-primary/5 to-transparent border border-primary/20 p-4">
+              <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
                 <div className="flex items-start gap-2 mb-3">
                   <div className="rounded-lg bg-primary/10 p-1.5">
                     <Phone className="h-4 w-4 text-primary" />
@@ -238,10 +238,10 @@ export function ExistingOrderView({ order: initialOrder }: ExistingOrderViewProp
           {order.mealSessions.map((session, index) => (
             <div
               key={index}
-              className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background overflow-hidden shadow-lg hover:shadow-xl transition-all"
+              className="rounded-2xl border border-white/10 bg-card-background overflow-hidden shadow-lg hover:shadow-xl transition-all"
             >
               {/* Session Header - Enhanced */}
-              <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-b border-white/10 p-5 sm:p-8">
+              <div className="bg-primary/10 border-b border-white/10 p-5 sm:p-8">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
@@ -420,7 +420,7 @@ export function ExistingOrderView({ order: initialOrder }: ExistingOrderViewProp
 
       {/* Payment Status - Enhanced */}
       {order.paymentStatus && (
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-card-background to-card-secondary-background p-6 sm:p-8 shadow-lg">
+        <div className="rounded-2xl border border-white/10 bg-card-background p-6 sm:p-8 shadow-lg">
           <div className="flex items-center gap-3 mb-6">
             <div className="rounded-xl bg-primary/10 p-2.5">
               <CheckCircle2 className="h-5 w-5 text-primary" />
