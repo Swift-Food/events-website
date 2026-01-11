@@ -540,6 +540,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
       }));
 
       // Prepare event data WITH tickets
+      // Only send location fields relevant to the selected format
       const eventData: CreateEventDto | UpdateEventDto = {
         name: eventName,
         description: description || "",
@@ -550,9 +551,16 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
         endDateTime: end,
         isPrivate: isPrivate,
         requiresApproval: requireApproval,
-        hideFullAddress: hideFullAddress,
+        // Only include hideFullAddress for in-person/hybrid events
+        hideFullAddress: (eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH)
+          ? hideFullAddress
+          : undefined,
         format: eventFormat ?? undefined,
-        virtualMeetingUrl: virtualMeetingUrl || undefined,
+        // Only include virtualMeetingUrl for virtual/hybrid events
+        virtualMeetingUrl: (eventFormat === EventFormat.VIRTUAL || eventFormat === EventFormat.BOTH)
+          ? (virtualMeetingUrl || undefined)
+          : undefined,
+        // Only include addressData for in-person/hybrid events
         addressData: (eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH)
           ? {
               name: venueName || undefined,

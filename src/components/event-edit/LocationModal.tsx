@@ -286,37 +286,31 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
       }
     }
 
-    // Save event format and virtual URL to context
+    // Save event format to context
     setEventFormat(localEventFormat);
+
+    // Always save virtual URL to context (preserves value when switching formats)
     setVirtualMeetingUrl(localVirtualMeetingUrl);
 
-    // Save address to context (only if in-person or both)
-    if (localEventFormat === EventFormat.IN_PERSON || localEventFormat === EventFormat.BOTH) {
-      setVenueName(localVenueName);
-      setAddressLine1(localAddressLine1);
-      setAddressLine2(localAddressLine2);
-      setCity(localCity);
-      setPostcode(localPostcode);
-      setLatitude(localLatitude);
-      setLongitude(localLongitude);
-      setHideFullAddress(localHideFullAddress);
+    // Always save address fields to context (preserves values when switching formats)
+    // The submission logic in EventForm will determine what to send to the API
+    setVenueName(localVenueName);
+    setAddressLine1(localAddressLine1);
+    setAddressLine2(localAddressLine2);
+    setCity(localCity);
+    setPostcode(localPostcode);
+    setLatitude(localLatitude);
+    setLongitude(localLongitude);
+    setHideFullAddress(localHideFullAddress);
 
-      // Update the full location string
+    // Update the full location string for display purposes
+    if (localEventFormat === EventFormat.IN_PERSON || localEventFormat === EventFormat.BOTH) {
       const fullAddress = [localAddressLine1, localAddressLine2, localCity, localPostcode]
         .filter(Boolean)
         .join(", ");
       setLocation(fullAddress);
     } else {
-      // Clear address fields for virtual-only events
-      setVenueName("");
-      setAddressLine1("");
-      setAddressLine2("");
-      setCity("");
-      setPostcode("");
-      setLatitude(null);
-      setLongitude(null);
       setLocation("");
-      setHideFullAddress(false);
     }
 
     onClose();
