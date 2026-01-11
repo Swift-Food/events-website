@@ -180,6 +180,14 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
         toast.success(`Refunded ${result.totalRefunded} tickets (£${result.totalAmount.toFixed(2)})`);
         setRefundComplete(true);
         setRefundableInfo({ count: 0, totalAmount: 0 });
+        // Refresh guest stats after refunding
+        const [attendees, stats] = await Promise.all([
+          guestTicketService.getEventAttendees(eventData.id),
+          guestTicketService.getCheckInStats(eventData.id),
+        ]);
+        setGuests(attendees);
+        setCheckInStats(stats);
+        onEventUpdate?.();
       } else {
         toast.error(`Refunded ${result.totalRefunded}, but ${result.failed} failed`);
       }
