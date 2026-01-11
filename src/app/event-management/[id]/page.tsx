@@ -55,6 +55,7 @@ export default function EventManagementPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPublishLoading, setIsPublishLoading] = useState(false);
   const [showUnpublishConfirm, setShowUnpublishConfirm] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const setTab = (tab: TabType, filter?: string) => {
     const url = filter
@@ -405,11 +406,12 @@ export default function EventManagementPage() {
             userRole={userRole}
             onPublishToggle={handlePublishToggle}
             isPublishLoading={isPublishLoading}
+            refreshKey={refreshKey}
           />
         )}
 
         {currentTab === "guests" && (
-          <GuestsTab eventId={eventId} eventName={eventData.name} initialFilter={guestFilter as any} onRefresh={() => fetchEvent(false)} />
+          <GuestsTab eventId={eventId} eventName={eventData.name} initialFilter={guestFilter as any} onRefresh={() => { fetchEvent(false); setRefreshKey(k => k + 1); }} />
         )}
 
         {currentTab === "registration" && (

@@ -29,9 +29,10 @@ interface OverviewTabProps {
   onPublishToggle?: () => void;
   isPublishLoading?: boolean;
   onEventUpdate?: () => void;
+  refreshKey?: number;
 }
 
-export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, onGuestsClick, onDeleteClick, isDeleting, userRole, onPublishToggle, isPublishLoading, onEventUpdate }: OverviewTabProps) {
+export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, onGuestsClick, onDeleteClick, isDeleting, userRole, onPublishToggle, isPublishLoading, onEventUpdate, refreshKey }: OverviewTabProps) {
   // Scanner can only scan, not edit or delete
   const canEdit = userRole === "owner" || userRole === "admin";
   const canDelete = userRole === "owner" || userRole === "admin";
@@ -125,7 +126,7 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
     setIsEditingUrl(false);
   };
 
-  // Fetch guest stats
+  // Fetch guest stats (refreshKey triggers refresh after guest operations in other tabs)
   useEffect(() => {
     const fetchGuestStats = async () => {
       try {
@@ -143,7 +144,7 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
       }
     };
     fetchGuestStats();
-  }, [eventData.id]);
+  }, [eventData.id, refreshKey]);
 
   // Computed stats
   const pendingApprovalCount = guests.filter((g) => g.status === GuestTicketStatus.PENDING_APPROVAL).length;
