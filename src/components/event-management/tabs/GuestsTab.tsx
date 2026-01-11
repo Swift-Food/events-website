@@ -50,9 +50,10 @@ interface GuestsTabProps {
   eventId: string;
   eventName?: string;
   initialFilter?: FilterStatus;
+  onRefresh?: () => void;
 }
 
-export function GuestsTab({ eventId, eventName, initialFilter = "all" }: GuestsTabProps) {
+export function GuestsTab({ eventId, eventName, initialFilter = "all", onRefresh }: GuestsTabProps) {
   const [guests, setGuests] = useState<GuestTicketResponseDto[]>([]);
   const [pendingGuests, setPendingGuests] = useState<AdminTicketResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -141,6 +142,7 @@ export function GuestsTab({ eventId, eventName, initialFilter = "all" }: GuestsT
       setShowReviewModal(false);
       setReviewGuest(null);
       await fetchGuestData();
+      onRefresh?.();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to approve guest");
     } finally {
@@ -156,6 +158,7 @@ export function GuestsTab({ eventId, eventName, initialFilter = "all" }: GuestsT
       setShowReviewModal(false);
       setReviewGuest(null);
       await fetchGuestData();
+      onRefresh?.();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to reject guest");
     } finally {
@@ -212,6 +215,7 @@ export function GuestsTab({ eventId, eventName, initialFilter = "all" }: GuestsT
 
       setSelectedGuests(new Set());
       await fetchGuestData();
+      onRefresh?.();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to approve guests");
       setSelectedGuests(new Set());
@@ -226,6 +230,7 @@ export function GuestsTab({ eventId, eventName, initialFilter = "all" }: GuestsT
       toast.success(`Rejected ${result.rejected || ""} guests`);
       setSelectedGuests(new Set());
       await fetchGuestData();
+      onRefresh?.();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to reject guests");
       setSelectedGuests(new Set());
@@ -238,6 +243,7 @@ export function GuestsTab({ eventId, eventName, initialFilter = "all" }: GuestsT
       await guestTicketService.promoteFromWaitlist(ticketId);
       toast.success("Guest promoted from waitlist");
       await fetchGuestData();
+      onRefresh?.();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to promote guest");
     }
@@ -271,6 +277,7 @@ export function GuestsTab({ eventId, eventName, initialFilter = "all" }: GuestsT
         }
         handleCloseBlacklist();
         await fetchGuestData();
+        onRefresh?.();
       } else {
         throw new Error(result.message || "Failed to blacklist user");
       }

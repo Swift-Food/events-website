@@ -409,7 +409,7 @@ export default function EventManagementPage() {
         )}
 
         {currentTab === "guests" && (
-          <GuestsTab eventId={eventId} eventName={eventData.name} initialFilter={guestFilter as any} />
+          <GuestsTab eventId={eventId} eventName={eventData.name} initialFilter={guestFilter as any} onRefresh={() => fetchEvent(false)} />
         )}
 
         {currentTab === "registration" && (
