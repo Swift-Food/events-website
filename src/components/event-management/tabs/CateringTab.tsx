@@ -514,7 +514,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
                     </div>
                     <div className="flex-shrink-0">
                       <p className="text-base font-semibold text-primary">
-                        ${total}
+                        £{total}
                       </p>
                     </div>
                   </div>
@@ -527,7 +527,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
             <div>
               <p className="text-xs text-muted-foreground mb-1">Total Amount</p>
               <p className="text-xl font-semibold text-foreground">
-                ${calculateGrandTotal()}
+                £{calculateGrandTotal()}
               </p>
             </div>
             <button
