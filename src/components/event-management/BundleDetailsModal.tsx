@@ -262,7 +262,7 @@ export function BundleDetailsModal({
 
           <button
             onClick={() => {
-              window.location.href = `https://swiftfood.uk/event-order?eventId=${eventId}&bundleId=${bundle.id}`;
+              window.open(`https://swiftfood.uk/event-order?eventId=${eventId}&bundleId=${bundle.id}`, '_blank');
             }}
             className="w-full rounded-lg px-6 py-3 font-semibold text-sm transition-all flex items-center justify-center gap-2 bg-card-secondary-background text-foreground border border-white/10 hover:bg-white/5 hover:border-primary/30"
           >

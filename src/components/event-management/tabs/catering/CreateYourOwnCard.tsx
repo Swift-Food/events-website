@@ -10,7 +10,7 @@ export function CreateYourOwnCard({ eventId }: CreateYourOwnCardProps) {
   return (
     <div
       onClick={() => {
-        window.location.href = `https://swiftfood.uk/event-order?eventId=${eventId}`;
+        window.open(`https://swiftfood.uk/event-order?eventId=${eventId}`, '_blank');
       }}
       className="group cursor-pointer rounded-xl border-2 border-dashed border-primary/40 bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/15 transition-all hover:shadow-xl hover:scale-[1.02] overflow-hidden"
     >
