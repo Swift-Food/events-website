@@ -94,13 +94,9 @@ export default function RegistrationConfirmModal({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-md max-h-[80vh] rounded-2xl border border-neutral-700 bg-card-background shadow-2xl overflow-hidden flex flex-col">
-        <div className="overflow-hidden flex-1 min-h-0">
-          <div
-            className="flex items-start transition-transform duration-300 ease-out"
-            style={{ transform: step === 'questions' ? 'translateX(-50%)' : 'translateX(0)', width: '200%' }}
-          >
-            {/* Summary Panel */}
-            <div className="w-1/2 p-5 shrink-0">
+        {step === 'summary' ? (
+          /* Summary Panel */
+          <div className="p-5">
               {/* Event Image */}
               <div className="relative aspect-square w-36 mx-auto mb-4 rounded-xl overflow-hidden bg-card-secondary-background">
                 {event.eventImage ? (
@@ -301,10 +297,10 @@ export default function RegistrationConfirmModal({
                   )}
                 </button>
               </div>
-            </div>
-
-            {/* Questions Panel */}
-            <div className="w-1/2 shrink-0 flex flex-col">
+          </div>
+        ) : (
+          /* Questions Panel */
+          <div className="flex flex-col max-h-[80vh]">
               {/* Header with back button */}
               <div className="p-5 pb-3">
                 <div className="flex items-center gap-3">
@@ -458,9 +454,8 @@ export default function RegistrationConfirmModal({
                   </button>
                 </div>
               </div>
-            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
