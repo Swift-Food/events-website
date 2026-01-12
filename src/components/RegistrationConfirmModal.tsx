@@ -93,10 +93,10 @@ export default function RegistrationConfirmModal({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl border border-neutral-700 bg-card-background shadow-2xl overflow-hidden">
-        <div className="overflow-hidden">
+      <div className="w-full max-w-md max-h-[80vh] rounded-2xl border border-neutral-700 bg-card-background shadow-2xl overflow-hidden flex flex-col">
+        <div className="overflow-hidden flex-1 min-h-0">
           <div
-            className="flex transition-transform duration-300 ease-out"
+            className="flex items-start transition-transform duration-300 ease-out"
             style={{ transform: step === 'questions' ? 'translateX(-50%)' : 'translateX(0)', width: '200%' }}
           >
             {/* Summary Panel */}
@@ -126,10 +126,10 @@ export default function RegistrationConfirmModal({
               </h3>
 
               {/* Date & Time */}
-              <div className="flex gap-3 mb-3">
+              <div className="flex items-start gap-3 mb-3">
                 {isSameDay(event.startDateTime, event.endDateTime) ? (
                   <>
-                    <div className="flex flex-col items-center py-1">
+                    <div className="flex flex-col items-center py-1 w-5 shrink-0">
                       <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
                     </div>
                     <div className="flex-1">
@@ -143,7 +143,7 @@ export default function RegistrationConfirmModal({
                   </>
                 ) : (
                   <>
-                    <div className="flex flex-col items-center py-1">
+                    <div className="flex flex-col items-center py-1 w-5 shrink-0 self-stretch">
                       <div className="h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50"></div>
                       <div className="my-1 w-0.5 flex-1 rounded-full bg-primary/30"></div>
                       <div className="h-3 w-3 rounded-full bg-primary/30 shadow-md"></div>
@@ -304,7 +304,7 @@ export default function RegistrationConfirmModal({
             </div>
 
             {/* Questions Panel */}
-            <div className="w-1/2 shrink-0 flex flex-col max-h-[80vh]">
+            <div className="w-1/2 shrink-0 flex flex-col">
               {/* Header with back button */}
               <div className="p-5 pb-3">
                 <div className="flex items-center gap-3">
