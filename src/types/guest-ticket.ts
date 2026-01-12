@@ -78,6 +78,12 @@ export interface GuestTicketResponseDto {
   cancelledByEventUserId?: string | null;
   /** Reason for cancellation/rejection */
   cancelledReason?: string | null;
+  /** Who initiated the refund (userId) */
+  refundedByUserId?: string | null;
+  /** When the ticket was refunded */
+  refundedAt?: Date | null;
+  /** Reason for refund */
+  refundReason?: string | null;
 }
 
 /**
