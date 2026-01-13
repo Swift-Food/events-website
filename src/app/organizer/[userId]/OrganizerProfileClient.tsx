@@ -3,10 +3,22 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { eventsApi } from "@/services/events";
-import { EventResponseDto, EventListResponseDto, EventStatus } from "@/types/event";
+import {
+  EventResponseDto,
+  EventListResponseDto,
+  EventStatus,
+} from "@/types/event";
 import { OrganizerProfile } from "@/types/organizer";
 import EventsTimeline from "@/components/EventsTimeline";
-import { User, Calendar, Globe, Twitter, Linkedin, Instagram, Clock } from "lucide-react";
+import {
+  User,
+  Calendar,
+  Globe,
+  Twitter,
+  Linkedin,
+  Instagram,
+  Clock,
+} from "lucide-react";
 
 type EventTab = "upcoming" | "past";
 
@@ -39,7 +51,8 @@ export default function OrganizerProfileClient({
     initialProfile.user?.username ||
     "Organizer";
 
-  const profileImage = initialProfile.profilePicture || initialProfile.user?.profilePicture;
+  const profileImage =
+    initialProfile.profilePicture || initialProfile.user?.profilePicture;
 
   const formatMemberSince = (dateString: string) => {
     const date = new Date(dateString);
@@ -49,6 +62,17 @@ export default function OrganizerProfileClient({
       year: "numeric",
     });
   };
+
+  const formatJoinedDateParts = (dateString: string) => {
+    const date = new Date(dateString);
+    return {
+      day: date.getDate().toString(),
+      month: date.toLocaleDateString("en-GB", { month: "short" }),
+      year: date.getFullYear().toString(),
+    };
+  };
+
+  const joinedParts = formatJoinedDateParts(initialProfile.createdAt);
 
   // Filter events based on active tab
   // Upcoming: endDateTime >= now (includes ongoing events), sorted ascending
@@ -88,14 +112,17 @@ export default function OrganizerProfileClient({
     skipRef.current = 0;
 
     try {
-      const result: EventListResponseDto = await eventsApi.findByOwnerId(userId, {
-        status: EventStatus.PUBLISHED,
-        sortBy: "startDateTime",
-        sortOrder: "asc",
-        skip: 0,
-        take: eventsPerPage,
-        includePast: true,
-      });
+      const result: EventListResponseDto = await eventsApi.findByOwnerId(
+        userId,
+        {
+          status: EventStatus.PUBLISHED,
+          sortBy: "startDateTime",
+          sortOrder: "asc",
+          skip: 0,
+          take: eventsPerPage,
+          includePast: true,
+        }
+      );
 
       const newEvents = result.events ?? [];
       setEvents(newEvents);
@@ -118,14 +145,17 @@ export default function OrganizerProfileClient({
 
     setLoadingMore(true);
     try {
-      const result: EventListResponseDto = await eventsApi.findByOwnerId(userId, {
-        status: EventStatus.PUBLISHED,
-        sortBy: "startDateTime",
-        sortOrder: "asc",
-        skip: skipRef.current,
-        take: eventsPerPage,
-        includePast: true,
-      });
+      const result: EventListResponseDto = await eventsApi.findByOwnerId(
+        userId,
+        {
+          status: EventStatus.PUBLISHED,
+          sortBy: "startDateTime",
+          sortOrder: "asc",
+          skip: skipRef.current,
+          take: eventsPerPage,
+          includePast: true,
+        }
+      );
 
       const newEvents = result.events ?? [];
       setEvents((prev) => [...prev, ...newEvents]);
@@ -165,9 +195,96 @@ export default function OrganizerProfileClient({
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
-        {/* Profile Header */}
-        <div className="mb-8">
-          <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4">
+        {/* Profile Header - Mobile */}
+        <div className="mb-8 sm:hidden">
+          <div className="flex flex-col items-center text-center">
+            {/* Avatar */}
+            {profileImage ? (
+              <Image
+                src={profileImage}
+                alt={displayName}
+                width={144}
+                height={144}
+                className="rounded-full object-cover h-32 w-32"
+              />
+            ) : (
+              <div className="flex h-32 w-32 items-center justify-center rounded-full bg-primary/10">
+                <User className="h-14 w-14 text-primary" />
+              </div>
+            )}
+
+            {/* Name */}
+            <h1 className="text-[32px] !font-light text-white mt-6">
+              {displayName}
+            </h1>
+
+            {/* Social Links */}
+            <div className="flex items-center justify-center gap-5 mt-4">
+              {initialProfile.website && (
+                <a
+                  href={initialProfile.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-zinc-500 hover:text-white transition-colors"
+                  aria-label="Website"
+                >
+                  <Globe size={18} />
+                </a>
+              )}
+              {initialProfile.twitterHandle && (
+                <a
+                  href={`https://twitter.com/${initialProfile.twitterHandle.replace("@", "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-zinc-500 hover:text-white transition-colors"
+                  aria-label="Twitter"
+                >
+                  <Twitter size={18} />
+                </a>
+              )}
+              {initialProfile.linkedinUrl && (
+                <a
+                  href={initialProfile.linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-zinc-500 hover:text-white transition-colors"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin size={18} />
+                </a>
+              )}
+              {initialProfile.instagramUrl && (
+                <a
+                  href={initialProfile.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-zinc-500 hover:text-white transition-colors"
+                  aria-label="Instagram"
+                >
+                  <Instagram size={18} />
+                </a>
+              )}
+            </div>
+
+            {/* Bio */}
+            {initialProfile.bio && (
+              <p className="text-[15px] text-zinc-400 leading-relaxed mt-8 px-2">
+                {initialProfile.bio}
+              </p>
+            )}
+
+            {/* Stats */}
+            <div className="flex items-center gap-3 text-xs text-zinc-600 uppercase tracking-widest mt-6">
+              <span>{initialProfile.totalEventsCreated} Events Created</span>
+              <span>·</span>
+              <span>Joined {joinedParts.month} {joinedParts.year}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Profile Header - Desktop */}
+        <div className="mb-8 hidden sm:block">
+          <div className="flex items-start gap-4">
             {/* Avatar */}
             {profileImage ? (
               <Image
@@ -175,7 +292,7 @@ export default function OrganizerProfileClient({
                 alt={displayName}
                 width={80}
                 height={80}
-                className="rounded-full object-cover shrink-0"
+                className="rounded-full object-cover shrink-0 h-20 w-20"
               />
             ) : (
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 shrink-0">
@@ -184,7 +301,7 @@ export default function OrganizerProfileClient({
             )}
 
             {/* Info */}
-            <div className="flex-1 min-w-0 text-center sm:text-left space-y-2">
+            <div className="flex-1 min-w-0 space-y-2">
               <h1 className="text-2xl font-bold text-foreground truncate">
                 {displayName}
               </h1>
@@ -196,10 +313,13 @@ export default function OrganizerProfileClient({
                 )}
 
               {/* Stats */}
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <Calendar className="h-4 w-4" />
-                  <span className="font-semibold text-foreground">{initialProfile.totalEventsCreated}</span> events hosted
+                  <span className="font-semibold text-foreground">
+                    {initialProfile.totalEventsCreated}
+                  </span>{" "}
+                  events hosted
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Clock className="h-4 w-4" />
@@ -208,7 +328,7 @@ export default function OrganizerProfileClient({
               </div>
 
               {/* Social Links */}
-              <div className="flex items-center justify-center sm:justify-start gap-4">
+              <div className="flex items-center gap-4">
                 {initialProfile.website && (
                   <a
                     href={initialProfile.website}
@@ -217,18 +337,18 @@ export default function OrganizerProfileClient({
                     className="text-muted-foreground hover:text-foreground transition-colors"
                     aria-label="Website"
                   >
-                    <Globe  size={16} />
+                    <Globe size={16} />
                   </a>
                 )}
                 {initialProfile.twitterHandle && (
                   <a
-                    href={`https://twitter.com/${initialProfile.twitterHandle.replace('@', '')}`}
+                    href={`https://twitter.com/${initialProfile.twitterHandle.replace("@", "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-muted-foreground hover:text-foreground transition-colors"
                     aria-label="Twitter"
                   >
-                    <Twitter  size={16} />
+                    <Twitter size={16} />
                   </a>
                 )}
                 {initialProfile.linkedinUrl && (
@@ -338,7 +458,7 @@ export default function OrganizerProfileClient({
 
           {/* Events Timeline */}
           {!loading && !error && filteredEvents.length > 0 && (
-            <EventsTimeline events={filteredEvents} stickyTopClass="top-20"/>
+            <EventsTimeline events={filteredEvents} stickyTopClass="top-20" />
           )}
 
           {/* Infinite scroll sentinel */}
