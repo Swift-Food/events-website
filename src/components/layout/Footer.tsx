@@ -26,7 +26,12 @@ export default function Footer() {
               height={20}
               className="invert"
             />
-            <span className="font-normal text-zinc-400">PRISMO</span>
+            <span
+              className="font-normal text-zinc-400"
+              style={{ fontFamily: "var(--font-satoshi), sans-serif" }}
+            >
+              PRISMO
+            </span>
           </Link>
 
           {/* Links */}
@@ -38,7 +43,7 @@ export default function Footer() {
               href="/event-creation"
               className="transition-colors hover:text-white"
             >
-              Create 
+              Create
             </Link>
             <Link
               href="/terms/ticket"
