@@ -13,11 +13,11 @@ export default function Footer() {
   return (
     <footer className="border-t border-white/10 bg-background">
       <div className="mx-auto max-w-6xl px-6 py-8">
-        <div className="flex flex-row items-center gap-6 sm:flex-row sm:justify-between">
+        <div className="flex flex-row items-center">
           {/* Logo and Brand */}
           <Link
             href="/"
-            className="flex items-center gap-1 text-lg font-semibold tracking-tight"
+            className="flex flex-1 items-center gap-1 text-lg font-semibold tracking-tight"
           >
             <Image
               src="/logo.svg"
@@ -53,7 +53,7 @@ export default function Footer() {
             </Link>
           </nav>
           {/* Social Media Links */}
-          <div className="flex justify-center items-center gap-4">
+          <div className="flex flex-1 justify-end items-center gap-4">
             <a
               href="https://www.linkedin.com/company/prismolive/"
               target="_blank"
