@@ -77,7 +77,7 @@ export default function Navbar() {
                 height={24}
                 className="invert"
               />
-              <span className="hidden sm:inline font-normal text-foreground">PRISMO</span>
+              <span className="hidden sm:inline font-normal text-foreground" style={{ fontFamily: 'var(--font-satoshi), sans-serif' }}>PRISMO</span>
             </Link>
 
             {/* Mobile Icon Navigation */}
