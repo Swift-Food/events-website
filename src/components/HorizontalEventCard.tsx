@@ -296,7 +296,7 @@ export default function HorizontalEventCard({
                     : "border-white/20 bg-transparent text-muted-foreground"
                 } ${index >= visibleCount ? "hidden" : ""}`}
               >
-                {tag.name.toLowerCase()}
+                {tag.name}
               </span>
             ))}
             {allTags.length > visibleCount && (
@@ -308,7 +308,7 @@ export default function HorizontalEventCard({
                 <span className="pointer-events-none absolute top-full left-1/2 z-50 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover/tooltip:opacity-100">
                   {allTags
                     .slice(visibleCount)
-                    .map((t) => t.name.toLowerCase())
+                    .map((t) => t.name)
                     .join(", ")}
                 </span>
               </span>
