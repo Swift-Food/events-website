@@ -167,7 +167,7 @@ export default function OrganizerProfileClient({
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
         {/* Profile Header */}
         <div className="mb-8">
-          <div className="flex items-start gap-4">
+          <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4">
             {/* Avatar */}
             {profileImage ? (
               <Image
@@ -175,16 +175,16 @@ export default function OrganizerProfileClient({
                 alt={displayName}
                 width={80}
                 height={80}
-                className="rounded-full object-cover"
+                className="rounded-full object-cover shrink-0"
               />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 shrink-0">
                 <User className="h-10 w-10 text-primary" />
               </div>
             )}
 
             {/* Info */}
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 text-center sm:text-left space-y-2">
               <h1 className="text-2xl font-bold text-foreground truncate">
                 {displayName}
               </h1>
@@ -195,32 +195,20 @@ export default function OrganizerProfileClient({
                   </p>
                 )}
 
-              {/* Bio */}
-              {initialProfile.bio && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  {initialProfile.bio}
-                </p>
-              )}
-
               {/* Stats */}
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-3">
-                <Calendar className="h-4 w-4" />
-                <span>
-                  <span className="font-semibold text-foreground">
-                    {initialProfile.totalEventsCreated}
-                  </span>{" "}
-                  events created
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4" />
+                  <span className="font-semibold text-foreground">{initialProfile.totalEventsCreated}</span> events hosted
                 </span>
-              </div>
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1.5">
-                <Clock className="h-4 w-4" />
-                <span>
+                <span className="flex items-center gap-1.5">
+                  <Clock className="h-4 w-4" />
                   Joined {formatMemberSince(initialProfile.createdAt)}
                 </span>
               </div>
 
               {/* Social Links */}
-              <div className="flex items-center gap-3 mt-3">
+              <div className="flex items-center justify-center sm:justify-start gap-4">
                 {initialProfile.website && (
                   <a
                     href={initialProfile.website}
@@ -266,6 +254,13 @@ export default function OrganizerProfileClient({
                   </a>
                 )}
               </div>
+
+              {/* Bio */}
+              {initialProfile.bio && (
+                <p className="text-sm text-muted-foreground">
+                  {initialProfile.bio}
+                </p>
+              )}
             </div>
           </div>
         </div>
