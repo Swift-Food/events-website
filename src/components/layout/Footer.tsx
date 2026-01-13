@@ -13,47 +13,38 @@ export default function Footer() {
   return (
     <footer className="border-t border-white/10 bg-background">
       <div className="mx-auto max-w-6xl px-6 py-8">
-        <div className="flex flex-row items-center">
-          {/* Logo and Brand */}
-          <Link
-            href="/"
-            className="flex flex-1 items-center gap-1 text-lg font-semibold tracking-tight"
-          >
-            <Image
-              src="/logo.svg"
-              alt="Prismo logo"
-              width={20}
-              height={20}
-              className="invert"
-            />
-            <span
-              className="font-normal text-zinc-400"
-              style={{ fontFamily: "var(--font-satoshi), sans-serif" }}
-            >
-              PRISMO
-            </span>
-          </Link>
-
-          {/* Links */}
-          <nav className="flex flex-wrap justify-center gap-6 text-sm text-zinc-400">
-            <Link href="/" className="transition-colors hover:text-white">
-              Discover
+        <div className="flex items-center justify-between">
+          {/* Logo and Links */}
+          <div className="flex items-center gap-6">
+            <Link href="/">
+              <Image
+                src="/logo.svg"
+                alt="Prismo logo"
+                width={20}
+                height={20}
+                className="invert"
+              />
             </Link>
-            <Link
-              href="/event-creation"
-              className="transition-colors hover:text-white"
-            >
-              Create
-            </Link>
-            <Link
-              href="/terms/ticket"
-              className="transition-colors hover:text-white"
-            >
-              Terms
-            </Link>
-          </nav>
+            <nav className="flex items-center gap-6 text-sm text-zinc-400">
+              <Link href="/" className="transition-colors hover:text-white">
+                Discover
+              </Link>
+              <Link
+                href="/event-creation"
+                className="transition-colors hover:text-white"
+              >
+                Create
+              </Link>
+              <Link
+                href="/terms/ticket"
+                className="transition-colors hover:text-white"
+              >
+                Terms
+              </Link>
+            </nav>
+          </div>
           {/* Social Media Links */}
-          <div className="flex flex-1 justify-end items-center gap-4">
+          <div className="flex items-center gap-4">
             <a
               href="https://www.linkedin.com/company/prismolive/"
               target="_blank"
