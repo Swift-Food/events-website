@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import PaymentModal, { PaymentSuccessModal } from "@/components/payments/PaymentModal";
 import ExternalLinkConfirmModal from "@/components/ExternalLinkConfirmModal";
 import RegistrationConfirmModal from "@/components/RegistrationConfirmModal";
+import SaveToCalendarModal from "@/components/SaveToCalendarModal";
 import { getTicketStatusText, getTicketStatusBadgeClasses, isTicketUsable } from "@/utils/ticket-status";
 import {
   generateGoogleCalendarUrl,
@@ -68,6 +69,9 @@ export default function EventPreviewModal({
 
   // External link confirmation modal state
   const [showExternalLinkModal, setShowExternalLinkModal] = useState(false);
+
+  // Save to calendar modal state
+  const [showSaveToCalendarModal, setShowSaveToCalendarModal] = useState(false);
 
   // Close calendar dropdown when clicking outside
   useEffect(() => {
@@ -666,6 +670,24 @@ export default function EventPreviewModal({
                           <p className="text-xs text-muted-foreground">Open to add to your calendar app</p>
                         </div>
                       </button>
+                      {isAuthenticated && (
+                        <>
+                          <div className="h-px bg-white/10" />
+                          <button
+                            onClick={() => {
+                              setShowCalendarDropdown(false);
+                              setShowSaveToCalendarModal(true);
+                            }}
+                            className="flex w-full items-start gap-3 px-4 py-3 text-sm text-foreground transition-colors hover:bg-white/5"
+                          >
+                            <Calendar className="h-4 w-4 mt-0.5 shrink-0" />
+                            <div className="text-left">
+                              <p>Save to My Calendars</p>
+                              <p className="text-xs text-muted-foreground">Add to your platform calendars</p>
+                            </div>
+                          </button>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1122,6 +1144,15 @@ export default function EventPreviewModal({
         <ExternalLinkConfirmModal
           url={formatExternalUrl(event.virtualMeetingUrl)}
           onClose={() => setShowExternalLinkModal(false)}
+        />
+      )}
+
+      {/* Save to Calendar Modal */}
+      {showSaveToCalendarModal && event && (
+        <SaveToCalendarModal
+          eventId={event.id}
+          eventName={event.name}
+          onClose={() => setShowSaveToCalendarModal(false)}
         />
       )}
 
