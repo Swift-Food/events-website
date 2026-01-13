@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { EventResponseDto, EventStatus } from "@/types";
-import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, EyeOff, AlertTriangle, Loader2, CreditCard, Video, UserPlus, Link2, Copy, Check, Pencil, X } from "lucide-react";
+import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, EyeOff, AlertTriangle, Loader2, CreditCard, Video, UserPlus, Link2, Copy, Check, Pencil, X, CalendarPlus } from "lucide-react";
 import { isVirtualEvent, isHybridEvent } from "@/types/event/status";
 import { GuestTicketResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
 import { CsvUploadModal } from "@/components/event-management/CsvUploadModal";
@@ -14,6 +14,7 @@ import Image from "next/image";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { eventService } from "@/services/event.service";
 import { toast } from "sonner";
+import SaveToCalendarModal from "@/components/SaveToCalendarModal";
 
 type UserRole = "owner" | "admin" | "scanner" | null;
 
@@ -51,6 +52,9 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
   // Invite guests modal state
   const [showInviteGuestsModal, setShowInviteGuestsModal] = useState(false);
   const [showInviteLinkModal, setShowInviteLinkModal] = useState(false);
+
+  // Save to calendar modal state
+  const [showSaveToCalendarModal, setShowSaveToCalendarModal] = useState(false);
 
   // Guest stats state
   const [guests, setGuests] = useState<GuestTicketResponseDto[]>([]);
@@ -498,13 +502,22 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
                 <span className="hidden xs:inline">Scan Tickets</span>
             </button>
             {canEdit && (
-              <button
-                onClick={onTeamClick}
-                className="flex items-center gap-2 rounded-xl bg-white/5 px-3 sm:px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
-              >
-                <UserPlus className="h-4 w-4" />
-                <span className="hidden sm:inline">Add Scanners</span>
+              <>
+                <button
+                  onClick={onTeamClick}
+                  className="flex items-center gap-2 rounded-xl bg-white/5 px-3 sm:px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  <span className="hidden sm:inline">Add Scanners</span>
                 </button>
+                <button
+                  onClick={() => setShowSaveToCalendarModal(true)}
+                  className="flex items-center gap-2 rounded-xl bg-white/5 px-3 sm:px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
+                >
+                  <CalendarPlus className="h-4 w-4" />
+                  <span className="hidden sm:inline">Add to Calendar</span>
+                </button>
+              </>
             )}
           </div>
           </div>
@@ -708,6 +721,15 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
         eventId={eventData.id}
         tickets={eventData.eventTickets || []}
       />
+
+      {/* Save to Calendar Modal */}
+      {showSaveToCalendarModal && (
+        <SaveToCalendarModal
+          eventId={eventData.id}
+          eventName={eventData.name}
+          onClose={() => setShowSaveToCalendarModal(false)}
+        />
+      )}
     </div>
   );
 }
