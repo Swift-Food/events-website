@@ -308,6 +308,15 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
                               type="text"
                               value={editedUrl}
                               onChange={(e) => setEditedUrl(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handleSaveUrl();
+                                } else if (e.key === "Escape") {
+                                  e.preventDefault();
+                                  handleCancelEditUrl();
+                                }
+                              }}
                               className="text-xs bg-white/5 border border-white/10 rounded px-2 py-1.5 text-foreground focus:outline-none focus:border-primary flex-1 min-w-0"
                               placeholder="event-url"
                               autoFocus
