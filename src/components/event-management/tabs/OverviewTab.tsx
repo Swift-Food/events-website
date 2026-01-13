@@ -81,7 +81,7 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
     setEditedUrl(eventData.eventUrl || "");
   }, [eventData.eventUrl]);
 
-  const fullEventUrl = baseUrl && eventData.eventUrl ? `${baseUrl}/events/${eventData.eventUrl}` : "";
+  const fullEventUrl = baseUrl && editedUrl ? `${baseUrl}/events/${editedUrl}` : "";
 
   const handleCopyUrl = async () => {
     if (!fullEventUrl) return;
@@ -112,6 +112,7 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
     try {
       await eventService.updateEvent(eventData.id, { eventUrl: urlSlug });
       toast.success("Event URL updated");
+      setEditedUrl(urlSlug);
       setIsEditingUrl(false);
       onEventUpdate?.();
     } catch (error: any) {
