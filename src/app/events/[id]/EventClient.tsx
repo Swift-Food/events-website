@@ -53,6 +53,7 @@ import {
 import SmartAppBanner from "@/components/SmartAppBanner";
 import ExternalLinkConfirmModal from "@/components/ExternalLinkConfirmModal";
 import RegistrationConfirmModal from "@/components/RegistrationConfirmModal";
+import SaveToCalendarModal from "@/components/SaveToCalendarModal";
 import { usePathname } from "next/navigation";
 
 interface EventClientProps {
@@ -85,6 +86,9 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
   // Calendar dropdown state
   const [showCalendarDropdown, setShowCalendarDropdown] = useState(false);
   const calendarDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Save to calendar modal state
+  const [showSaveToCalendarModal, setShowSaveToCalendarModal] = useState(false);
 
   // External link confirmation modal state
   const [showExternalLinkModal, setShowExternalLinkModal] = useState(false);
@@ -895,6 +899,24 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                           <p className="text-xs text-muted-foreground">Open to add to your calendar app</p>
                         </div>
                       </button>
+                      {isAuthenticated && (
+                        <>
+                          <div className="h-px bg-white/10" />
+                          <button
+                            onClick={() => {
+                              setShowCalendarDropdown(false);
+                              setShowSaveToCalendarModal(true);
+                            }}
+                            className="flex w-full items-start gap-3 px-4 py-3 text-sm text-foreground transition-colors hover:bg-white/5"
+                          >
+                            <Calendar className="h-4 w-4 mt-0.5 shrink-0" />
+                            <div className="text-left">
+                              <p>Save to My Calendars</p>
+                              <p className="text-xs text-muted-foreground">Add to your platform calendars</p>
+                            </div>
+                          </button>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1669,6 +1691,15 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
         <ExternalLinkConfirmModal
           url={formatExternalUrl(event.virtualMeetingUrl)}
           onClose={() => setShowExternalLinkModal(false)}
+        />
+      )}
+
+      {/* Save to Calendar Modal */}
+      {showSaveToCalendarModal && (
+        <SaveToCalendarModal
+          eventId={event.id}
+          eventName={event.name}
+          onClose={() => setShowSaveToCalendarModal(false)}
         />
       )}
 

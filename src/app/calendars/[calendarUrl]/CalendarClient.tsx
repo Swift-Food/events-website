@@ -20,12 +20,14 @@ import {
   Crown,
   Shield,
   Edit3,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
+import AddEventsToCalendarModal from "@/components/AddEventsToCalendarModal";
 
 interface CalendarClientProps {
   initialCalendar: Calendar;
@@ -48,6 +50,9 @@ export default function CalendarClient({
   // Check if user can manage this calendar and their role
   type UserRole = "owner" | "admin" | "contributor" | null;
   const [userRole, setUserRole] = useState<UserRole>(null);
+
+  // Add events modal state
+  const [showAddEventsModal, setShowAddEventsModal] = useState(false);
 
   // Re-fetch calendar data when user is authenticated
   useEffect(() => {
@@ -203,8 +208,17 @@ export default function CalendarClient({
     }
   };
 
-  const handleEventClick = (e: React.MouseEvent, event: EventResponseDto) => {
+  const handleEventClick = (_e: React.MouseEvent, event: EventResponseDto) => {
     router.push(`/events/${event.id}`);
+  };
+
+  const refreshEvents = async () => {
+    try {
+      const calendarEvents = await calendarService.getCalendarEvents(calendar.id);
+      setEvents(calendarEvents);
+    } catch (err) {
+      console.error("Failed to refresh calendar events:", err);
+    }
   };
 
   const canManage = userRole === "owner" || userRole === "admin";
@@ -483,9 +497,16 @@ export default function CalendarClient({
             {/* Management Buttons (Owner/Admin) */}
             {canManage && (
               <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={() => setShowAddEventsModal(true)}
+                  className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 font-semibold text-white transition-all hover:bg-primary/80"
+                >
+                  <Plus className="h-5 w-5" />
+                  Add Events
+                </button>
                 <Link
                   href={`/calendars/${calendar.calendarUrl}/edit`}
-                  className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 font-semibold text-white transition-all hover:bg-primary/80"
+                  className="flex items-center gap-2 rounded-lg border border-white/10 bg-card-background px-6 py-2.5 font-semibold text-foreground transition-all hover:bg-white/5"
                 >
                   <Edit3 className="h-5 w-5" />
                   Edit Calendar
@@ -539,6 +560,17 @@ export default function CalendarClient({
           </section>
         </div>
       </div>
+
+      {/* Add Events Modal */}
+      {showAddEventsModal && (
+        <AddEventsToCalendarModal
+          calendarId={calendar.id}
+          calendarName={calendar.name}
+          existingEventIds={events.map((e) => e.id)}
+          onClose={() => setShowAddEventsModal(false)}
+          onEventsAdded={refreshEvents}
+        />
+      )}
     </div>
   );
 }
