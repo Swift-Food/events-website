@@ -6,7 +6,7 @@ import { eventsApi } from "@/services/events";
 import { EventResponseDto, EventListResponseDto, EventStatus } from "@/types/event";
 import { OrganizerProfile } from "@/types/organizer";
 import EventsTimeline from "@/components/EventsTimeline";
-import { User, Calendar, Globe, Twitter, Linkedin, Instagram } from "lucide-react";
+import { User, Calendar, Globe, Twitter, Linkedin, Instagram, Clock } from "lucide-react";
 
 type EventTab = "upcoming" | "past";
 
@@ -40,6 +40,15 @@ export default function OrganizerProfileClient({
     "Organizer";
 
   const profileImage = initialProfile.profilePicture || initialProfile.user?.profilePicture;
+
+  const formatMemberSince = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
 
   // Filter events based on active tab
   // Upcoming: endDateTime >= now (includes ongoing events), sorted ascending
@@ -186,17 +195,28 @@ export default function OrganizerProfileClient({
                   </p>
                 )}
 
+              {/* Bio */}
+              {initialProfile.bio && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  {initialProfile.bio}
+                </p>
+              )}
+
               {/* Stats */}
-              <div className="flex items-center gap-4 mt-3">
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4" />
-                  <span>
-                    <span className="font-semibold text-foreground">
-                      {initialProfile.totalEventsCreated}
-                    </span>{" "}
-                    events created
-                  </span>
-                </div>
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-3">
+                <Calendar className="h-4 w-4" />
+                <span>
+                  <span className="font-semibold text-foreground">
+                    {initialProfile.totalEventsCreated}
+                  </span>{" "}
+                  events created
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1.5">
+                <Clock className="h-4 w-4" />
+                <span>
+                  Joined {formatMemberSince(initialProfile.createdAt)}
+                </span>
               </div>
 
               {/* Social Links */}
