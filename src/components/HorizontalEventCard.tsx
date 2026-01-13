@@ -24,7 +24,6 @@ export default function HorizontalEventCard({
   showCategories = true,
   onClick,
 }: HorizontalEventCardProps) {
-  console.log("Event: ", event)
   const formatTime = (date: string | Date) => {
     return new Date(date).toLocaleTimeString("en-US", {
       hour: "numeric",

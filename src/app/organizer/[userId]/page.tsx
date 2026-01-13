@@ -69,7 +69,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function OrganizerProfilePage({ params }: PageProps) {
   const { userId } = await params;
   const profile = await getOrganizerProfile(userId);
-  console.log("Organizer profile: ", profile)
 
   if (!profile) {
     notFound();
