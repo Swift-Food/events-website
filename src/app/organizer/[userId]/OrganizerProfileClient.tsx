@@ -209,7 +209,7 @@ export default function OrganizerProfileClient({
                 className="rounded-full object-cover h-16 w-16"
               />
             ) : (
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
                 <User className="h-8 w-8 text-primary" />
               </div>
             )}
