@@ -285,8 +285,8 @@ export default function OrganizerProfileClient({
 
 
         {/* Profile Header - Desktop */}
-        <div className="mb-8 hidden sm:block">
-          <div className="flex items-start gap-4">
+        <div className="mb-8 hidden sm:block space-y-4">
+          <div className="flex items-center gap-4">
             {/* Avatar */}
             {profileImage ? (
               <Image
@@ -376,15 +376,15 @@ export default function OrganizerProfileClient({
                   </a>
                 )}
               </div>
-
-              {/* Bio */}
-              {initialProfile.bio && (
-                <p className="text-sm text-muted-foreground">
-                  {initialProfile.bio}
-                </p>
-              )}
             </div>
           </div>
+
+          {/* Bio - outside the centered flex container, aligned with text content */}
+          {initialProfile.bio && (
+            <p className="text-sm text-muted-foreground ml-24">
+              {initialProfile.bio}
+            </p>
+          )}
         </div>
 
         {/* Events Section */}
