@@ -72,6 +72,7 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
     setLongitude,
     setCoverPreview,
     setEventFormat,
+    setTicketTypes,
     clearForm,
   } = useEventCreation();
 
@@ -154,8 +155,10 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
   const applyImportedData = () => {
     if (!importedData) return;
 
-    // Clear the form first to remove any existing data (including default tickets)
+    // Clear the form first to remove any existing data
     clearForm();
+    // Remove default ticket that clearForm adds back
+    setTicketTypes([]);
 
     if (importedData.name) {
       setEventName(importedData.name);
