@@ -284,12 +284,6 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
         setAddressValidationError("Please enter a valid UK postcode");
         return;
       }
-
-      // Require latitude/longitude to ensure address was selected from Google autocomplete
-      if (localLatitude === null || localLongitude === null) {
-        setAddressValidationError("Please select an address from the search suggestions to ensure accurate location");
-        return;
-      }
     }
 
     // Save event format to context
@@ -533,14 +527,8 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
                     )}
                   </div>
                 )}
-                {localAddressLine1 && (
-                  <div>
-                    {localLatitude !== null && localLongitude !== null ? (
-                      <p className="text-xs text-green-400">Location verified via Google</p>
-                    ) : (
-                      <p className="text-xs text-amber-400">Please select an address from the search suggestions above</p>
-                    )}
-                  </div>
+                {localAddressLine1 && localLatitude !== null && localLongitude !== null && (
+                  <p className="text-xs text-green-400">Location coordinates set</p>
                 )}
               </div>
 
