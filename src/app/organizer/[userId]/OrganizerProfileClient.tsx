@@ -195,61 +195,41 @@ export default function OrganizerProfileClient({
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
+        
         {/* Profile Header - Mobile */}
         <div className="mb-8 sm:hidden">
-          {/* Top Section */}
-          <div className="space-y-4">
+          <div className="flex flex-col items-center text-center">
             {/* Avatar */}
             {profileImage ? (
               <Image
                 src={profileImage}
                 alt={displayName}
-                width={64}
-                height={64}
-                className="rounded-full object-cover h-16 w-16"
+                width={144}
+                height={144}
+                className="rounded-full object-cover h-32 w-32"
               />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-                <User className="h-8 w-8 text-primary" />
+              <div className="flex h-32 w-32 items-center justify-center rounded-full bg-primary/10">
+                <User className="h-14 w-14 text-primary" />
               </div>
             )}
 
             {/* Name */}
-            <h1 className="text-[28px] font-bold text-white leading-tight">
-              {displayName.split(" ").map((word, i) => (
-                <span key={i} className="block">{word}</span>
-              ))}
+            <h1 className="text-[32px] !font-light text-white mt-6">
+              {displayName}
             </h1>
 
-            {/* Stats */}
-            <p className="text-sm text-zinc-500">
-              {initialProfile.totalEventsCreated} Events Hosted
-              <span className="mx-2 text-zinc-600">·</span>
-              Joined {joinedParts.month} {joinedParts.year}
-            </p>
-
             {/* Social Links */}
-            <div className="flex items-center gap-5">
-              {initialProfile.instagramUrl && (
+            <div className="flex items-center justify-center gap-5 mt-4">
+              {initialProfile.website && (
                 <a
-                  href={initialProfile.instagramUrl}
+                  href={initialProfile.website}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-zinc-500 hover:text-white transition-colors"
-                  aria-label="Instagram"
+                  aria-label="Website"
                 >
-                  <Instagram size={18} />
-                </a>
-              )}
-              {initialProfile.linkedinUrl && (
-                <a
-                  href={initialProfile.linkedinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-zinc-500 hover:text-white transition-colors"
-                  aria-label="LinkedIn"
-                >
-                  <Linkedin size={18} />
+                  <Globe size={18} />
                 </a>
               )}
               {initialProfile.twitterHandle && (
@@ -263,30 +243,46 @@ export default function OrganizerProfileClient({
                   <Twitter size={18} />
                 </a>
               )}
-              {initialProfile.website && (
+              {initialProfile.linkedinUrl && (
                 <a
-                  href={initialProfile.website}
+                  href={initialProfile.linkedinUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-zinc-500 hover:text-white transition-colors"
-                  aria-label="Website"
+                  aria-label="LinkedIn"
                 >
-                  <Globe size={18} />
+                  <Linkedin size={18} />
+                </a>
+              )}
+              {initialProfile.instagramUrl && (
+                <a
+                  href={initialProfile.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-zinc-500 hover:text-white transition-colors"
+                  aria-label="Instagram"
+                >
+                  <Instagram size={18} />
                 </a>
               )}
             </div>
+
+            {/* Bio */}
+            {initialProfile.bio && (
+              <p className="text-[15px] text-zinc-400 leading-relaxed mt-8 px-2">
+                {initialProfile.bio}
+              </p>
+            )}
+
+            {/* Stats */}
+            <div className="flex items-center gap-3 text-xs text-zinc-600 uppercase tracking-widest mt-6">
+              <span>{initialProfile.totalEventsCreated} Events Created</span>
+              <span>·</span>
+              <span>Joined {joinedParts.month} {joinedParts.year}</span>
+            </div>
           </div>
-
-          {/* Divider */}
-          <div className="w-12 h-px bg-zinc-700 my-6" />
-
-          {/* Bio */}
-          {initialProfile.bio && (
-            <p className="text-[15px] text-zinc-400 leading-relaxed">
-              {initialProfile.bio}
-            </p>
-          )}
         </div>
+
 
         {/* Profile Header - Desktop */}
         <div className="mb-8 hidden sm:block">
