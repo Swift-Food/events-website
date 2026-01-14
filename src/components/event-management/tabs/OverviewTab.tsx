@@ -475,9 +475,13 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
                 <Users className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground">
-                  {ticketStats.totalSold} registered
-                </p>
+                {eventData.externalEventUrl ? (
+                  <p className="text-sm font-medium text-foreground">External ticketing</p>
+                ) : (
+                  <p className="text-sm font-medium text-foreground">
+                    {ticketStats.totalSold} registered
+                  </p>
+                )}
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Eye className="h-3 w-3" />
                   {eventData.viewCount || 0} views
