@@ -31,6 +31,25 @@ interface ImportedEventData {
   eventFormat?: "IN_PERSON" | "VIRTUAL" | "BOTH";
 }
 
+// UK Postcode regex pattern
+const UK_POSTCODE_REGEX = /\b([A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2})\b/i;
+
+// Extract postcode from address string and return cleaned address + postcode
+function extractPostcode(address: string): { cleanedAddress: string; postcode: string | null } {
+  const match = address.match(UK_POSTCODE_REGEX);
+  if (match) {
+    const postcode = match[1].toUpperCase();
+    // Remove the postcode and any trailing comma/spaces from the address
+    const cleanedAddress = address
+      .replace(UK_POSTCODE_REGEX, "")
+      .replace(/,\s*$/, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    return { cleanedAddress, postcode };
+  }
+  return { cleanedAddress: address, postcode: null };
+}
+
 export default function ImportEventModal({ isOpen, onClose }: ImportEventModalProps) {
   const [url, setUrl] = useState("");
   const [status, setStatus] = useState<ImportStatus>("idle");
@@ -162,14 +181,36 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
       if (importedData.location.name) {
         setVenueName(importedData.location.name);
       }
-      if (importedData.location.address) {
-        setAddressLine1(importedData.location.address);
+
+      // Handle address and try to extract postcode if not provided
+      let addressToSet = importedData.location.address || "";
+      let postcodeToSet = importedData.location.postalCode || "";
+
+      // If no postcode but we have an address, try to extract postcode from it
+      if (!postcodeToSet && addressToSet) {
+        const { cleanedAddress, postcode } = extractPostcode(addressToSet);
+        if (postcode) {
+          addressToSet = cleanedAddress;
+          postcodeToSet = postcode;
+        }
+      }
+
+      // Also check venue name for postcode if still not found
+      if (!postcodeToSet && importedData.location.name) {
+        const { postcode } = extractPostcode(importedData.location.name);
+        if (postcode) {
+          postcodeToSet = postcode;
+        }
+      }
+
+      if (addressToSet) {
+        setAddressLine1(addressToSet);
       }
       if (importedData.location.city) {
         setCity(importedData.location.city);
       }
-      if (importedData.location.postalCode) {
-        setPostcode(importedData.location.postalCode);
+      if (postcodeToSet) {
+        setPostcode(postcodeToSet);
       }
       if (importedData.location.latitude && importedData.location.longitude) {
         setLatitude(importedData.location.latitude);
