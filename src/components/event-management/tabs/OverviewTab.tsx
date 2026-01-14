@@ -10,6 +10,7 @@ import { InviteGuestsModal } from "@/components/event-management/InviteGuestsMod
 import { InviteLinkModal } from "@/components/event-management/InviteLinkModal";
 import { InvitationsSection } from "@/components/event-management/InvitationsSection";
 import { GuestOverviewCard } from "@/components/event-management/GuestOverviewCard";
+import { ViewAnalyticsCard } from "@/components/event-management/ViewAnalyticsCard";
 import Image from "next/image";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { eventService } from "@/services/event.service";
@@ -566,6 +567,10 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
         onPendingClick={() => onGuestsClick("pending_approval")}
         onWaitlistedClick={() => onGuestsClick("waitlisted")}
       />
+
+      {canViewStats && (
+        <ViewAnalyticsCard eventId={eventData.id} />
+      )}
 
       {canViewStats && (
         <InvitationsSection onInviteClick={() => setShowInviteGuestsModal(true)} />

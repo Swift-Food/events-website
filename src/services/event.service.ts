@@ -9,6 +9,7 @@ import {
   EventStats,
   EventCategoryResponseDto,
   EventCategoryWithSubcategoriesResponseDto,
+  ViewAnalyticsResponse,
 } from '@/types';
 import {
   CreateEventDto,
@@ -134,6 +135,14 @@ class EventService {
   async getEventCategoriesWithSubcategories(): Promise<EventCategoryWithSubcategoriesResponseDto[]> {
     const response: AxiosResponse<EventCategoryWithSubcategoriesResponseDto[]> = await apiClient.get(
       `${this.baseUrl}/categories?grouped=true`
+    );
+    return response.data;
+  }
+
+  async getViewAnalytics(eventId: string, days: number = 30): Promise<ViewAnalyticsResponse> {
+    const response: AxiosResponse<ViewAnalyticsResponse> = await apiClient.get(
+      `${this.baseUrl}/${eventId}/analytics/views`,
+      { params: { days } }
     );
     return response.data;
   }
