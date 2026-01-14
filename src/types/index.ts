@@ -29,3 +29,12 @@ export * from './user';
 
 // Catering types
 export * from './catering';
+
+// Follower types
+export * from './follower';
+
+// Notification types
+export * from './notification';
+
+// Search types
+export * from './search';
