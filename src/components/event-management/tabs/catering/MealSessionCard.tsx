@@ -20,7 +20,7 @@ interface MealSessionFormData {
   eventTime: string;
   collectionTime: string;
   specialRequirements: string;
-  selectedBundleIds: string[];
+  bundleQuantities: Record<string, number>;
   expanded: boolean;
 }
 
@@ -170,12 +170,13 @@ export function MealSessionCard({
                 <CreateYourOwnCard eventId={eventId} />
 
                 {bundles.map((bundle) => {
-                  const isSelected = session.selectedBundleIds.includes(bundle.id);
+                  const quantity = session.bundleQuantities[bundle.id] || 0;
                   return (
                     <BundleCard
                       key={bundle.id}
                       bundle={bundle}
-                      isSelected={isSelected}
+                      isSelected={quantity > 0}
+                      quantity={quantity}
                       onClick={() => onOpenBundleModal(session.id, bundle)}
                     />
                   );

@@ -284,6 +284,12 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
         setAddressValidationError("Please enter a valid UK postcode");
         return;
       }
+
+      // Require latitude/longitude to ensure address was selected from Google autocomplete
+      if (localLatitude === null || localLongitude === null) {
+        setAddressValidationError("Please select an address from the search suggestions to ensure accurate location");
+        return;
+      }
     }
 
     // Save event format and virtual URL to context
@@ -459,7 +465,12 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
                 <input
                   type="text"
                   value={localAddressLine1}
-                  onChange={(e) => setLocalAddressLine1(e.target.value)}
+                  onChange={(e) => {
+                    setLocalAddressLine1(e.target.value);
+                    // Clear lat/lng when manually editing - requires re-selection from autocomplete
+                    setLocalLatitude(null);
+                    setLocalLongitude(null);
+                  }}
                   placeholder="Street address"
                   className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
                 />
@@ -488,7 +499,12 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
                   <input
                     type="text"
                     value={localCity}
-                    onChange={(e) => setLocalCity(e.target.value)}
+                    onChange={(e) => {
+                      setLocalCity(e.target.value);
+                      // Clear lat/lng when manually editing - requires re-selection from autocomplete
+                      setLocalLatitude(null);
+                      setLocalLongitude(null);
+                    }}
                     placeholder="City"
                     className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
                   />
@@ -500,23 +516,39 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
                   <input
                     type="text"
                     value={localPostcode}
-                    onChange={(e) => setLocalPostcode(e.target.value.toUpperCase())}
+                    onChange={(e) => {
+                      setLocalPostcode(e.target.value.toUpperCase());
+                      // Clear lat/lng when manually editing - requires re-selection from autocomplete
+                      setLocalLatitude(null);
+                      setLocalLongitude(null);
+                    }}
                     placeholder="e.g., SW1A 1AA"
                     className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
                   />
                 </div>
               </div>
 
-              {/* Postcode validation feedback */}
-              {localPostcode && (
-                <div>
-                  {validateUKPostcode(localPostcode) ? (
-                    <p className="text-xs text-green-400">Valid UK postcode</p>
-                  ) : (
-                    <p className="text-xs text-red-400">Please enter a valid UK postcode</p>
-                  )}
-                </div>
-              )}
+              {/* Validation feedback */}
+              <div className="space-y-1">
+                {localPostcode && (
+                  <div>
+                    {validateUKPostcode(localPostcode) ? (
+                      <p className="text-xs text-green-400">Valid UK postcode</p>
+                    ) : (
+                      <p className="text-xs text-red-400">Please enter a valid UK postcode</p>
+                    )}
+                  </div>
+                )}
+                {localAddressLine1 && (
+                  <div>
+                    {localLatitude !== null && localLongitude !== null ? (
+                      <p className="text-xs text-green-400">Location verified via Google</p>
+                    ) : (
+                      <p className="text-xs text-amber-400">Please select an address from the search suggestions above</p>
+                    )}
+                  </div>
+                )}
+              </div>
 
               {/* Hide Full Address Toggle */}
               <div className="flex items-center justify-between pt-3 border-t border-white/10">

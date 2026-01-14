@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, Check, Settings } from "lucide-react";
+import { X, Check, Settings, Plus, Minus } from "lucide-react";
 import Image from "next/image";
 import { CateringBundle } from "@/types/catering";
 
@@ -9,9 +9,11 @@ interface BundleDetailsModalProps {
   bundle: CateringBundle | null;
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (bundleId: string) => void;
-  isSelected: boolean;
+  onAdd: (bundleId: string, quantity: number) => void;
+  currentQuantity: number;
   eventId: string;
+  sessionDate?: string;
+  sessionTime?: string;
 }
 
 export function BundleDetailsModal({
@@ -19,17 +21,21 @@ export function BundleDetailsModal({
   isOpen,
   onClose,
   onAdd,
-  isSelected,
+  currentQuantity,
   eventId,
+  sessionDate,
+  sessionTime,
 }: BundleDetailsModalProps) {
   const [isAnimating, setIsAnimating] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
-  // Handle animation state
+  // Handle animation state and reset quantity when modal opens
   useEffect(() => {
     if (isOpen) {
       setIsAnimating(true);
+      setQuantity(currentQuantity > 0 ? currentQuantity : 1);
     }
-  }, [isOpen]);
+  }, [isOpen, currentQuantity]);
 
   // Close on Escape key
   useEffect(() => {
@@ -230,45 +236,81 @@ export function BundleDetailsModal({
           </div>
         </div>
 
-        {/* Footer - Add Button */}
-        <div className="flex-shrink-0 border-t border-white/10 p-6 bg-card-background space-y-3">
-          <button
-            onClick={() => {
-              onAdd(bundle.id);
-              handleClose();
-            }}
-            className={`
-              w-full rounded-lg px-6 py-3 font-semibold text-sm
-              transition-all
-              flex items-center justify-center gap-2
-              ${
-                isSelected
-                  ? "bg-primary/10 text-primary border-2 border-primary"
-                  : "bg-primary text-primary-foreground hover:bg-primary/90"
-              }
-            `}
-          >
-            {isSelected ? (
-              <>
-                <Check className="h-5 w-5" />
-                Selected
-              </>
-            ) : (
-              <>
-                Add to Session
-              </>
-            )}
-          </button>
+        {/* Footer - Compact Layout */}
+        <div className="flex-shrink-0 border-t border-white/10 p-4 bg-card-background space-y-3">
+          {/* Quantity & Total Row */}
+          <div className="flex items-center justify-between gap-4">
+            {/* Quantity Selector */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setQuantity(Math.max(0, quantity - 1))}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-card-secondary-background text-foreground transition-colors hover:bg-white/5 hover:border-primary/30"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+              <span className="w-6 text-center text-base font-semibold text-foreground">
+                {quantity}
+              </span>
+              <button
+                onClick={() => setQuantity(quantity + 1)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-card-secondary-background text-foreground transition-colors hover:bg-white/5 hover:border-primary/30"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+              <span className="text-xs text-muted-foreground ml-1">
+                ({bundle.baseGuestCount * quantity} ppl)
+              </span>
+            </div>
+            {/* Total */}
+            <span className="text-xl font-bold text-primary">
+              ${bundleFixedPrice * quantity}
+            </span>
+          </div>
 
-          <button
-            onClick={() => {
-              window.location.href = `https://swiftfood.uk/event-order?eventId=${eventId}&bundleId=${bundle.id}`;
-            }}
-            className="w-full rounded-lg px-6 py-3 font-semibold text-sm transition-all flex items-center justify-center gap-2 bg-card-secondary-background text-foreground border border-white/10 hover:bg-white/5 hover:border-primary/30"
-          >
-            <Settings className="h-5 w-5" />
-            Customize Bundle
-          </button>
+          {/* Buttons Row */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                onAdd(bundle.id, quantity);
+                handleClose();
+              }}
+              className={`
+                flex-1 rounded-lg px-4 py-2.5 font-semibold text-sm
+                transition-all flex items-center justify-center gap-2
+                ${
+                  currentQuantity > 0
+                    ? "bg-primary/10 text-primary border-2 border-primary"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90"
+                }
+              `}
+            >
+              {currentQuantity > 0 ? (
+                quantity === 0 ? "Remove" : (
+                  <>
+                    <Check className="h-4 w-4" />
+                    Update
+                  </>
+                )
+              ) : (
+                "Add to Session"
+              )}
+            </button>
+            <button
+              onClick={() => {
+                const params = new URLSearchParams({
+                  eventId,
+                  bundleId: bundle.id,
+                  ...(sessionDate && { sessionDate }),
+                  ...(sessionTime && { sessionTime }),
+                });
+                window.location.href = `https://swiftfood.uk/event-order?${params.toString()}`;
+              }}
+              className="rounded-lg px-4 py-2.5 font-semibold text-sm transition-all flex items-center justify-center gap-2 bg-card-secondary-background text-foreground border border-white/10 hover:bg-white/5 hover:border-primary/30"
+            >
+              <Settings className="h-4 w-4" />
+              Customize
+            </button>
+          </div>
         </div>
       </div>
     </>

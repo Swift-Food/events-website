@@ -5,6 +5,8 @@ import {
   CreateCateringOrderDto,
   CateringOrder,
   UpdatePickupContactDto,
+  CateringPricingRequest,
+  CateringPricingResult,
 } from '@/types/catering';
 
 class CateringService {
@@ -70,6 +72,19 @@ class CateringService {
     const response: AxiosResponse<CateringOrder> = await apiClient.patch(
       `${this.ordersBaseUrl}/pickup-contact`,
       data
+    );
+    return response.data;
+  }
+
+  /**
+   * Calculate catering pricing including delivery fee
+   */
+  async calculatePricing(
+    request: CateringPricingRequest
+  ): Promise<CateringPricingResult> {
+    const response: AxiosResponse<CateringPricingResult> = await apiClient.post(
+      '/pricing/catering-verify-cart',
+      request
     );
     return response.data;
   }

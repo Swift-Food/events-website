@@ -7,10 +7,11 @@ import Image from "next/image";
 interface BundleCardProps {
   bundle: CateringBundle;
   isSelected: boolean;
+  quantity?: number;
   onClick: () => void;
 }
 
-export function BundleCard({ bundle, isSelected, onClick }: BundleCardProps) {
+export function BundleCard({ bundle, isSelected, quantity = 0, onClick }: BundleCardProps) {
   const bundleFixedPrice = bundle.pricePerPerson * bundle.baseGuestCount;
 
   return (
@@ -30,21 +31,9 @@ export function BundleCard({ bundle, isSelected, onClick }: BundleCardProps) {
             fill
             className="object-cover group-hover:scale-110 transition-transform duration-300"
           />
-          {isSelected && (
-            <div className="absolute top-3 right-3 h-8 w-8 rounded-full bg-primary shadow-lg flex items-center justify-center animate-in zoom-in">
-              <svg
-                className="h-5 w-5 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={3}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
+          {isSelected && quantity > 0 && (
+            <div className="absolute top-3 right-3 h-8 min-w-8 px-2 rounded-full bg-primary shadow-lg flex items-center justify-center animate-in zoom-in">
+              <span className="text-sm font-bold text-white">{quantity}×</span>
             </div>
           )}
         </div>
@@ -54,21 +43,9 @@ export function BundleCard({ bundle, isSelected, onClick }: BundleCardProps) {
           <h5 className="font-bold text-foreground text-base leading-tight flex-1">
             {bundle.name}
           </h5>
-          {isSelected && !bundle.imageUrl && (
-            <div className="flex-shrink-0 h-6 w-6 rounded-full bg-primary flex items-center justify-center">
-              <svg
-                className="h-4 w-4 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={3}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
+          {isSelected && quantity > 0 && !bundle.imageUrl && (
+            <div className="flex-shrink-0 h-6 min-w-6 px-1.5 rounded-full bg-primary flex items-center justify-center">
+              <span className="text-xs font-bold text-white">{quantity}×</span>
             </div>
           )}
         </div>

@@ -134,3 +134,57 @@ export interface UpdatePickupContactDto {
   userId?: string;
   accessToken?: string;
 }
+
+/**
+ * Catering Pricing Types
+ */
+export interface CateringMenuItemRequest {
+  menuItemId: string;
+  quantity: number;
+  selectedAddons?: { name: string; quantity: number; groupTitle?: string }[];
+  groupTitle?: string;
+}
+
+export interface CateringRestaurantOrderRequest {
+  restaurantId: string;
+  menuItems: CateringMenuItemRequest[];
+  specialInstructions?: string;
+}
+
+export interface MealSessionRequest {
+  sessionName: string;
+  sessionDate: string;
+  eventTime: string;
+  guestCount?: number;
+  specialRequirements?: string;
+  orderItems: CateringRestaurantOrderRequest[];
+}
+
+export interface CateringPricingRequest {
+  mealSessions: MealSessionRequest[];
+  promoCodes?: string[];
+  deliveryLocation?: { latitude: number; longitude: number };
+}
+
+export interface DeliveryFeeBreakdown {
+  baseFee: number;
+  portionFee: number;
+  drinksFee: number;
+  subtotal: number;
+  distanceMultiplier: number;
+  finalDeliveryFee: number;
+  requiresCustomQuote: boolean;
+}
+
+export interface CateringPricingResult {
+  isValid: boolean;
+  subtotal: number;
+  deliveryFee: number;
+  restaurantPromotionDiscount?: number;
+  totalDiscount?: number;
+  promoDiscount?: number;
+  total: number;
+  error?: string;
+  distanceInMiles?: number;
+  deliveryFeeBreakdown?: DeliveryFeeBreakdown;
+}

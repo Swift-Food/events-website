@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { EventResponseDto } from "@/types";
 import { cateringService } from "@/services/catering.service";
 import {
@@ -10,6 +10,8 @@ import {
   MinimalMenuItem,
   CreateCateringOrderDto,
   CateringOrder,
+  CateringPricingResult,
+  MealSessionRequest,
 } from "@/types/catering";
 import { toast } from "sonner";
 import {
@@ -37,7 +39,7 @@ interface MealSessionFormData {
   eventTime: string;
   collectionTime: string;
   specialRequirements: string;
-  selectedBundleIds: string[];
+  bundleQuantities: Record<string, number>;
   expanded: boolean;
 }
 
@@ -52,6 +54,8 @@ export function CateringTab({ eventData }: CateringTabProps) {
   const [customerPhone, setCustomerPhone] = useState("");
   const [existingOrder, setExistingOrder] = useState<CateringOrder | null>(null);
   const [isLoadingOrder, setIsLoadingOrder] = useState(true);
+  const [pricing, setPricing] = useState<CateringPricingResult | null>(null);
+  const [isLoadingPricing, setIsLoadingPricing] = useState(false);
 
   // Fetch bundles on mount
   useEffect(() => {
@@ -91,6 +95,26 @@ export function CateringTab({ eventData }: CateringTabProps) {
     fetchExistingOrder();
   }, [eventData.id]);
 
+  // Auto-add a meal session when there are no sessions and no existing order
+  useEffect(() => {
+    if (!isLoadingBundles && !isLoadingOrder && !existingOrder && sessions.length === 0) {
+      const eventStartDate = new Date(eventData.startDateTime);
+      const formattedDate = eventStartDate.toISOString().split("T")[0];
+
+      const newSession: MealSessionFormData = {
+        id: `session-${Date.now()}`,
+        sessionName: eventData.name,
+        sessionDate: formattedDate,
+        eventTime: "",
+        collectionTime: "",
+        specialRequirements: "",
+        bundleQuantities: {},
+        expanded: true,
+      };
+      setSessions([newSession]);
+    }
+  }, [isLoadingBundles, isLoadingOrder, existingOrder, eventData.startDateTime, eventData.name]);
+
   const addMealSession = () => {
     const newSession: MealSessionFormData = {
       id: `session-${Date.now()}`,
@@ -99,7 +123,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
       eventTime: "",
       collectionTime: "",
       specialRequirements: "",
-      selectedBundleIds: [],
+      bundleQuantities: {},
       expanded: true,
     };
     setSessions([...sessions, newSession]);
@@ -117,16 +141,18 @@ export function CateringTab({ eventData }: CateringTabProps) {
     setSessions(sessions.map((s) => (s.id === sessionId ? { ...s, expanded: !s.expanded } : s)));
   };
 
-  const toggleBundleSelection = (sessionId: string, bundleId: string) => {
+  const updateBundleQuantity = (sessionId: string, bundleId: string, quantity: number) => {
     const session = sessions.find((s) => s.id === sessionId);
     if (!session) return;
 
-    const isSelected = session.selectedBundleIds.includes(bundleId);
-    const updatedBundleIds = isSelected
-      ? session.selectedBundleIds.filter((id) => id !== bundleId)
-      : [...session.selectedBundleIds, bundleId];
+    const updatedQuantities = { ...session.bundleQuantities };
+    if (quantity <= 0) {
+      delete updatedQuantities[bundleId];
+    } else {
+      updatedQuantities[bundleId] = quantity;
+    }
 
-    updateSession(sessionId, { selectedBundleIds: updatedBundleIds });
+    updateSession(sessionId, { bundleQuantities: updatedQuantities });
   };
 
   const openBundleModal = (sessionId: string, bundle: CateringBundle) => {
@@ -141,29 +167,123 @@ export function CateringTab({ eventData }: CateringTabProps) {
     setCurrentSessionId(null);
   };
 
-  const handleAddBundle = (bundleId: string) => {
+  const handleAddBundle = (bundleId: string, quantity: number) => {
     if (currentSessionId) {
-      toggleBundleSelection(currentSessionId, bundleId);
+      updateBundleQuantity(currentSessionId, bundleId, quantity);
     }
   };
 
   const calculateSessionTotal = (session: MealSessionFormData): number => {
-    const selectedBundles = bundles.filter((b) => session.selectedBundleIds.includes(b.id));
-    return selectedBundles.reduce(
-      (sum, bundle) => sum + bundle.pricePerPerson * bundle.baseGuestCount,
-      0
-    );
+    return Object.entries(session.bundleQuantities).reduce((sum, [bundleId, quantity]) => {
+      const bundle = bundles.find((b) => b.id === bundleId);
+      if (!bundle) return sum;
+      return sum + bundle.pricePerPerson * bundle.baseGuestCount * quantity;
+    }, 0);
   };
 
   const calculateGrandTotal = (): number => {
     return sessions.reduce((total, session) => total + calculateSessionTotal(session), 0);
   };
 
+  // Transform session to pricing API request format
+  const transformSessionToPricingRequest = useCallback(
+    (session: MealSessionFormData): MealSessionRequest | null => {
+      if (Object.keys(session.bundleQuantities).length === 0) return null;
+
+      const restaurantMap = new Map<string, { restaurantId: string; menuItems: { menuItemId: string; quantity: number; selectedAddons?: { name: string; quantity: number; groupTitle?: string }[] }[] }>();
+
+      Object.entries(session.bundleQuantities).forEach(([bundleId, bundleQuantity]) => {
+        const bundle = bundles.find((b) => b.id === bundleId);
+        if (!bundle) return;
+
+        bundle.items.forEach((item) => {
+          if (!restaurantMap.has(item.restaurantId)) {
+            restaurantMap.set(item.restaurantId, {
+              restaurantId: item.restaurantId,
+              menuItems: [],
+            });
+          }
+
+          const restaurant = restaurantMap.get(item.restaurantId)!;
+          restaurant.menuItems.push({
+            menuItemId: item.menuItemId,
+            quantity: item.quantity * bundleQuantity,
+            selectedAddons: item.selectedAddons?.map((addon) => ({
+              name: addon.name,
+              quantity: addon.quantity,
+            })),
+          });
+        });
+      });
+
+      return {
+        sessionName: session.sessionName || "Meal Session",
+        sessionDate: session.sessionDate || new Date().toISOString().split("T")[0],
+        eventTime: session.eventTime || "12:00",
+        specialRequirements: session.specialRequirements || undefined,
+        orderItems: Array.from(restaurantMap.values()),
+      };
+    },
+    [bundles]
+  );
+
+  // Fetch pricing when sessions or bundles change
+  useEffect(() => {
+    const fetchPricing = async () => {
+      // Only fetch if there are sessions with bundles selected
+      const hasSelectedBundles = sessions.some(
+        (s) => Object.keys(s.bundleQuantities).length > 0
+      );
+
+      if (!hasSelectedBundles) {
+        setPricing(null);
+        return;
+      }
+
+      const mealSessions = sessions
+        .map(transformSessionToPricingRequest)
+        .filter((s): s is MealSessionRequest => s !== null);
+
+      if (mealSessions.length === 0) {
+        setPricing(null);
+        return;
+      }
+
+      // Get delivery location from event address if available
+      const deliveryLocation = eventData.address?.location?.latitude && eventData.address?.location?.longitude
+        ? { latitude: eventData.address.location.latitude, longitude: eventData.address.location.longitude }
+        : undefined;
+
+      try {
+        setIsLoadingPricing(true);
+        const result = await cateringService.calculatePricing({
+          mealSessions,
+          deliveryLocation,
+        });
+        console.log("result is", JSON.stringify(result))
+        console.log("result is", JSON.stringify(result.totalDiscount))
+        console.log("the type is", typeof(pricing?.totalDiscount))
+        setPricing(result);
+      } catch (error) {
+        console.error("Error fetching pricing:", error);
+        setPricing(null);
+      } finally {
+        setIsLoadingPricing(false);
+      }
+    };
+
+    // Debounce the pricing fetch
+    const timeoutId = setTimeout(fetchPricing, 500);
+    return () => clearTimeout(timeoutId);
+  }, [sessions, bundles, eventData.address, transformSessionToPricingRequest]);
+
   const transformSessionToMealSession = (session: MealSessionFormData): MealSession => {
-    const selectedBundles = bundles.filter((b) => session.selectedBundleIds.includes(b.id));
     const restaurantMap = new Map<string, MinimalRestaurantOrder>();
 
-    selectedBundles.forEach((bundle) => {
+    Object.entries(session.bundleQuantities).forEach(([bundleId, bundleQuantity]) => {
+      const bundle = bundles.find((b) => b.id === bundleId);
+      if (!bundle) return;
+
       bundle.items.forEach((item) => {
         if (!restaurantMap.has(item.restaurantId)) {
           restaurantMap.set(item.restaurantId, {
@@ -176,7 +296,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
         const restaurant = restaurantMap.get(item.restaurantId)!;
         const menuItem: MinimalMenuItem = {
           menuItemId: item.menuItemId,
-          quantity: item.quantity,
+          quantity: item.quantity * bundleQuantity,
           selectedAddons: item.selectedAddons,
           menuItemName: item.menuItemName,
         };
@@ -216,7 +336,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
         toast.error(`Please set a time for ${session.sessionName}`);
         return;
       }
-      if (session.selectedBundleIds.length === 0) {
+      if (Object.keys(session.bundleQuantities).length === 0) {
         toast.error(`Please select at least one bundle for ${session.sessionName}`);
         return;
       }
@@ -474,9 +594,12 @@ export function CateringTab({ eventData }: CateringTabProps) {
           <div className="space-y-2 mb-4">
             {sessions.map((session) => {
               const total = calculateSessionTotal(session);
-              const selectedBundles = bundles.filter((b) =>
-                session.selectedBundleIds.includes(b.id)
-              );
+              const selectedBundlesWithQuantity = Object.entries(session.bundleQuantities)
+                .map(([bundleId, quantity]) => ({
+                  bundle: bundles.find((b) => b.id === bundleId),
+                  quantity,
+                }))
+                .filter((item) => item.bundle);
 
               return (
                 <div
@@ -502,12 +625,12 @@ export function CateringTab({ eventData }: CateringTabProps) {
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-1">
-                        {selectedBundles.map((b) => (
+                        {selectedBundlesWithQuantity.map(({ bundle, quantity }) => (
                           <span
-                            key={b.id}
+                            key={bundle!.id}
                             className="inline-flex items-center gap-1 rounded bg-primary/10 px-1.5 py-0.5 text-xs text-primary"
                           >
-                            {b.name} ({b.baseGuestCount} ppl)
+                            {quantity}× {bundle!.name} ({bundle!.baseGuestCount * quantity} ppl)
                           </span>
                         ))}
                       </div>
@@ -523,17 +646,48 @@ export function CateringTab({ eventData }: CateringTabProps) {
             })}
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-white/10 pt-4">
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Total Amount</p>
-              <p className="text-xl font-semibold text-foreground">
-                ${calculateGrandTotal()}
-              </p>
+          {/* Pricing Breakdown */}
+          <div className="border-t border-white/10 pt-4 space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Subtotal</span>
+              <span className="text-foreground">
+                ${pricing?.subtotal ?? calculateGrandTotal()}
+              </span>
             </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Delivery Fee</span>
+              {isLoadingPricing ? (
+                <span className="text-muted-foreground">Calculating...</span>
+              ) : pricing?.deliveryFee !== undefined ? (
+                <span className="text-foreground">${pricing.deliveryFee.toFixed(2)}</span>
+              ) : (
+                <span className="text-muted-foreground">--</span>
+              )}
+            </div>
+            {pricing &&(pricing.totalDiscount ?? 0) > 0 && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-green-400">Discount</span>
+                <span className="text-green-400">-${pricing.totalDiscount}</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between pt-2 border-t border-white/5">
+              <span className="font-semibold text-foreground">Total</span>
+              {isLoadingPricing ? (
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+              ) : (
+                <span className="text-xl font-bold text-primary">
+                  ${pricing?.total ?? calculateGrandTotal()}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="pt-4">
             <button
               onClick={handleSubmitOrder}
-              disabled={isSubmitting}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+              disabled={isSubmitting || isLoadingPricing}
+              className="w-full sm:w-auto rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
@@ -557,14 +711,14 @@ export function CateringTab({ eventData }: CateringTabProps) {
         isOpen={isModalOpen}
         onClose={closeBundleModal}
         onAdd={handleAddBundle}
-        isSelected={
+        currentQuantity={
           selectedBundle && currentSessionId
-            ? sessions.find((s) => s.id === currentSessionId)?.selectedBundleIds.includes(
-                selectedBundle.id
-              ) || false
-            : false
+            ? sessions.find((s) => s.id === currentSessionId)?.bundleQuantities[selectedBundle.id] || 0
+            : 0
         }
         eventId={eventData.id}
+        sessionDate={currentSessionId ? sessions.find((s) => s.id === currentSessionId)?.sessionDate : undefined}
+        sessionTime={currentSessionId ? sessions.find((s) => s.id === currentSessionId)?.eventTime : undefined}
       />
     </div>
   );
