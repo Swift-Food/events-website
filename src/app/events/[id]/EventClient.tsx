@@ -1386,8 +1386,11 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   <div className="space-y-2 sm:space-y-3">
                     {event.eventTickets.map((ticket) => {
                       const remaining = ticket.quantityLeft ?? 0;
+                      const total = ticket.quantityTotal ?? 0;
                       const isSelected = selectedTicketId === ticket.id;
                       const isSoldOut = remaining <= 0;
+                      const nearlySoldOutThreshold = Math.max(10, 0.1 * total);
+                      const isNearlySoldOut = !isSoldOut && total > 0 && remaining < nearlySoldOutThreshold;
                       const isManuallyUnavailable = !ticket.isAvailable; // Organizer disabled this ticket
                       const isOwnedTicket = event.userTicket?.ticketName === ticket.name;
                       const isActiveTicket = isOwnedTicket && isTicketUsable(event.userTicket!.status as GuestTicketStatus);
@@ -1436,7 +1439,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                                 )}
                               </div>
                             )}
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <h3 className={`text-sm sm:text-base font-semibold break-words ${isInvitedTicket ? "text-emerald-400" : "text-foreground"}`}>
                                 {ticket.name}
                                 {isInvitedTicket && (
@@ -1452,27 +1455,34 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                                   )
                                 ) : isInvitedTicket ? (
                                   <span className="text-emerald-300/80">
-                                    {invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid ? "Free with invitation" : `${remaining} left`}
+                                    {invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid ? "Free with invitation" : (ticket.description || null)}
                                   </span>
                                 ) : isManuallyUnavailable ? (
                                   <span className="text-gray-400">Unavailable</span>
                                 ) : isSoldOut ? (
                                   <span className="text-amber-400">Sold out - Join waitlist</span>
-                                ) : (
-                                  `${remaining} left`
-                                )}
+                                ) : ticket.description ? (
+                                  <span className="line-clamp-2">{ticket.description}</span>
+                                ) : null}
                               </p>
                             </div>
                           </div>
-                          <div className="text-right shrink-0">
-                            <p className={`text-base sm:text-xl font-bold ${isInvitedTicket && invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid ? "text-emerald-400 line-through decoration-emerald-400/50" : "text-foreground"}`}>
-                              {Number(ticket.price) === 0
-                                ? "Free"
-                                : `£${Number(ticket.price).toFixed(2)}`}
-                            </p>
-                            {isInvitedTicket && invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid && (
-                              <p className="text-sm font-semibold text-emerald-400">Free</p>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {isNearlySoldOut && !isOwnedTicket && !isManuallyUnavailable && !isInvitedTicket && (
+                              <span className="rounded-full bg-orange-500/20 border border-orange-500/30 px-2 py-0.5 text-[10px] font-semibold text-orange-400 uppercase tracking-wide">
+                                Almost gone
+                              </span>
                             )}
+                            <div className="text-right">
+                              <p className={`text-base sm:text-xl font-bold ${isInvitedTicket && invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid ? "text-emerald-400 line-through decoration-emerald-400/50" : "text-foreground"}`}>
+                                {Number(ticket.price) === 0
+                                  ? "Free"
+                                  : `£${Number(ticket.price).toFixed(2)}`}
+                              </p>
+                              {isInvitedTicket && invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid && (
+                                <p className="text-sm font-semibold text-emerald-400">Free</p>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
