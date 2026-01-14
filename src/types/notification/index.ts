@@ -58,6 +58,7 @@ export interface EventNotificationResponse {
   relatedEventId: string | null;
   relatedUserId: string | null;
   relatedTicketId: string | null;
+  relatedCollaboratorId: string | null;
   relatedUser?: RelatedUser;
   relatedEvent?: RelatedEvent;
   readAt: string | null;
