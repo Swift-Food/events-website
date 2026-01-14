@@ -44,7 +44,7 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
       isFree: price === 0,
       price: price,
       isSingleUse: ticket.isSingleUse ?? true,
-      quantity: ticket.quantityTotal,
+      quantity: ticket.quantityTotal ?? 0,
     };
   };
 

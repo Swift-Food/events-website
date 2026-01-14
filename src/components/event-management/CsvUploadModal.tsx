@@ -4,18 +4,13 @@ import { useState } from "react";
 import { X, Upload, FileSpreadsheet, Loader2, ArrowLeft } from "lucide-react";
 import { eventTicketService } from "@/services/event-ticket.service";
 import { toast } from "sonner";
-
-interface TicketOption {
-  id: string;
-  name: string;
-  quantityLeft: number;
-}
+import { EventTicketResponseDto } from "@/types";
 
 interface CsvUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   onBack?: () => void;
-  tickets: TicketOption[];
+  tickets: EventTicketResponseDto[];
 }
 
 export function CsvUploadModal({ isOpen, onClose, onBack, tickets }: CsvUploadModalProps) {
@@ -124,7 +119,7 @@ export function CsvUploadModal({ isOpen, onClose, onBack, tickets }: CsvUploadMo
               <option value="" className="bg-neutral-800 text-neutral-400">Choose a ticket type...</option>
               {tickets.map((ticket) => (
                 <option key={ticket.id} value={ticket.id} className="bg-neutral-800 text-white">
-                  {ticket.name} ({ticket.quantityLeft} available)
+                  {ticket.name} ({ticket.quantityLeft ?? 0} available)
                 </option>
               ))}
             </select>

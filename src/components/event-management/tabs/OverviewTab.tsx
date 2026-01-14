@@ -233,8 +233,8 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
     }
     return eventData.eventTickets.reduce(
       (acc, ticket) => ({
-        totalSold: acc.totalSold + ticket.quantitySold,
-        totalLeft: acc.totalLeft + ticket.quantityLeft,
+        totalSold: acc.totalSold + (ticket.quantitySold ?? 0),
+        totalLeft: acc.totalLeft + (ticket.quantityLeft ?? 0),
       }),
       { totalSold: 0, totalLeft: 0 }
     );
