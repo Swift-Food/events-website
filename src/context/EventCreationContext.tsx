@@ -167,12 +167,15 @@ const getDefaultTimes = () => {
   };
 };
 
-// Check if a date string is valid and in the future
-const isValidFutureDate = (dateStr: string | undefined): boolean => {
+// Check if a date string is valid and optionally in the future
+const isValidDate = (dateStr: string | undefined, requireFuture: boolean = true): boolean => {
   if (!dateStr) return false;
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return false;
-  return date > new Date();
+  if (requireFuture) {
+    return date > new Date();
+  }
+  return true;
 };
 
 // Default ticket for new events
@@ -214,12 +217,13 @@ export function EventCreationProvider({
 
   // Event details
   const [eventName, setEventName] = useState(storedDraft.eventName ?? "");
-  // Only use stored dates if they're valid and in the future, otherwise use defaults
+  // Allow past dates only if this is an imported event (has externalEventUrl)
+  const isImportedEvent = !!storedDraft.externalEventUrl;
   const [start, setStart] = useState(
-    isValidFutureDate(storedDraft.start) ? storedDraft.start! : defaultTimes.start
+    isValidDate(storedDraft.start, !isImportedEvent) ? storedDraft.start! : defaultTimes.start
   );
   const [end, setEnd] = useState(
-    isValidFutureDate(storedDraft.end) ? storedDraft.end! : defaultTimes.end
+    isValidDate(storedDraft.end, !isImportedEvent) ? storedDraft.end! : defaultTimes.end
   );
   const [location, setLocation] = useState(storedDraft.location ?? "");
   const [description, setDescription] = useState(storedDraft.description ?? "");

@@ -423,6 +423,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     // Validate start time
     if (!start) {
       errors.startTime = "Start time is required";
+    } else if (!externalEventUrl && new Date(start) < new Date()) {
+      errors.startTime = "Start time must be in the future";
     }
 
     // Validate end time
@@ -1070,7 +1072,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                     <input
                       type="datetime-local"
                       value={start}
-                      min={new Date().toISOString().slice(0, 16)}
+                      min={externalEventUrl ? undefined : new Date().toISOString().slice(0, 16)}
                       onChange={(e) => {
                         setStart(e.target.value);
                         if (validationErrors.startTime) {
