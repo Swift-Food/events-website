@@ -1440,12 +1440,23 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                               </div>
                             )}
                             <div className="min-w-0 flex-1">
-                              <h3 className={`text-sm sm:text-base font-semibold break-words ${isInvitedTicket ? "text-emerald-400" : "text-foreground"}`}>
-                                {ticket.name}
-                                {isInvitedTicket && (
-                                  <span className="ml-2 text-xs font-normal text-emerald-300/80">(Invited)</span>
+                              <div className="flex items-center gap-4 flex-wrap">
+                                <h3 className={`text-sm sm:text-base font-semibold break-words ${isInvitedTicket ? "text-emerald-400" : "text-foreground"}`}>
+                                  {ticket.name}
+                                  {isInvitedTicket && (
+                                    <span className="ml-2 text-xs font-normal text-emerald-300/80">(Invited)</span>
+                                  )}
+                                </h3>
+                                {isNearlySoldOut && !isOwnedTicket && !isManuallyUnavailable && !isInvitedTicket && (
+                                  <span className="shrink-0 flex items-center gap-1.5 text-[10px] font-semibold text-orange-500 uppercase tracking-wide">
+                                    <span className="relative flex h-1.5 w-1.5">
+                                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-500 opacity-75" />
+                                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-orange-500" />
+                                    </span>
+                                    Selling fast
+                                  </span>
                                 )}
-                              </h3>
+                              </div>
                               <p className="text-xs sm:text-sm text-muted-foreground">
                                 {isOwnedTicket ? (
                                   isTicketUsable(event.userTicket!.status as GuestTicketStatus) ? (
@@ -1468,11 +1479,6 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                             </div>
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
-                            {isNearlySoldOut && !isOwnedTicket && !isManuallyUnavailable && !isInvitedTicket && (
-                              <span className="rounded-full bg-orange-500/20 border border-orange-500/30 px-2 py-0.5 text-[10px] font-semibold text-orange-400 uppercase tracking-wide">
-                                Almost gone
-                              </span>
-                            )}
                             <div className="text-right">
                               <p className={`text-base sm:text-xl font-bold ${isInvitedTicket && invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid ? "text-emerald-400 line-through decoration-emerald-400/50" : "text-foreground"}`}>
                                 {Number(ticket.price) === 0

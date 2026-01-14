@@ -924,9 +924,20 @@ export default function EventPreviewModal({
                                   </div>
                                 )}
                                 <div className="min-w-0 flex-1">
-                                  <h3 className="text-sm font-semibold text-foreground truncate">
-                                    {ticket.name}
-                                  </h3>
+                                  <div className="flex items-center gap-4">
+                                    <h3 className="text-sm font-semibold text-foreground truncate">
+                                      {ticket.name}
+                                    </h3>
+                                    {isNearlySoldOut && !isOwnedTicket && !isManuallyUnavailable && (
+                                      <span className="shrink-0 flex items-center gap-1.5 text-[10px] font-semibold text-orange-500 uppercase tracking-wide">
+                                        <span className="relative flex h-1.5 w-1.5">
+                                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-500 opacity-75" />
+                                          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-orange-500" />
+                                        </span>
+                                        Selling fast
+                                      </span>
+                                    )}
+                                  </div>
                                   <p className="text-xs text-muted-foreground">
                                     {isOwnedTicket ? (
                                       isTicketUsable(event.userTicket!.status as GuestTicketStatus) ? (
@@ -945,11 +956,6 @@ export default function EventPreviewModal({
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 shrink-0">
-                                {isNearlySoldOut && !isOwnedTicket && !isManuallyUnavailable && (
-                                  <span className="rounded-full bg-orange-500/20 border border-orange-500/30 px-2 py-0.5 text-[10px] font-semibold text-orange-400 uppercase tracking-wide">
-                                    Almost gone
-                                  </span>
-                                )}
                                 <p className="text-base font-bold text-foreground">
                                   {Number(ticket.price) === 0
                                     ? "Free"
