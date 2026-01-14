@@ -36,6 +36,7 @@ export interface EventResponseDto {
   isTrustedMeetingUrl: boolean;
   virtualCapacity: number | null;
   eventUrl: string | null;
+  externalEventUrl: string | null;
   viewCount: number;
   acceptingNewTickets: boolean;
   stopAcceptingOnStart: boolean;
