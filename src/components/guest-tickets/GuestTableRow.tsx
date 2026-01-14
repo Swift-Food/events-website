@@ -5,9 +5,7 @@ import {
   XCircle,
   Clock,
   MoreHorizontal,
-  UserCheck,
   ArrowUpCircle,
-  Mail,
   Eye,
   ChevronRight,
 } from "lucide-react";
@@ -69,6 +67,13 @@ interface GuestTableRowProps {
   onRowClick?: (guest: GuestTicketResponseDto) => void;
 }
 
+// Statuses that can be selected for bulk actions (approve/reject)
+// Note: PENDING_PAYMENT is excluded because those tickets are already approved and waiting for payment
+const BULK_ACTIONABLE_STATUSES = [
+  GuestTicketStatus.PENDING_APPROVAL,
+  GuestTicketStatus.WAITLISTED,
+];
+
 export const GuestTableRow = ({
   guest,
   isSelected,
@@ -82,10 +87,14 @@ export const GuestTableRow = ({
   onRowClick,
 }: GuestTableRowProps) => {
   const [showMenu, setShowMenu] = useState(false);
+
+  // Only allow selection for bulk-actionable statuses
+  const canSelect = BULK_ACTIONABLE_STATUSES.includes(guest.status as GuestTicketStatus);
+
   const getStatusBadge = () => {
     const statusConfig = {
-      checked_in: {  // ← Add this
-        label: "Active",  // Show as "Active" since they're checked in
+      checked_in: {
+        label: "Checked In",
         icon: CheckCircle2,
         className: "bg-green-100 text-green-700",
       },
@@ -99,16 +108,26 @@ export const GuestTableRow = ({
         icon: Clock,
         className: "bg-amber-100 text-amber-700",
       },
+      pending_payment: {
+        label: "Awaiting Payment",
+        icon: Clock,
+        className: "bg-blue-100 text-blue-700",
+      },
       waitlisted: {
         label: "Waitlisted",
         icon: Clock,
         className: "bg-orange-100 text-orange-700",
       },
-      // rejected: {
-      //   label: "Rejected",
-      //   icon: XCircle,
-      //   className: "bg-red-100 text-red-700",
-      // },
+      refunded: {
+        label: "Refunded",
+        icon: XCircle,
+        className: "bg-purple-100 text-purple-700",
+      },
+      expired: {
+        label: "Expired",
+        icon: XCircle,
+        className: "bg-neutral-100 text-neutral-700",
+      },
       cancelled: {
         label: "Cancelled",
         icon: XCircle,
@@ -152,9 +171,12 @@ export const GuestTableRow = ({
       <td className="p-3 md:p-4">
         <input
           type="checkbox"
-          checked={isSelected}
-          onChange={() => onToggleSelect(guest.id)}
-          className="h-4 w-4 rounded border-neutral-700 bg-input-background text-primary focus:ring-2 focus:ring-primary"
+          checked={isSelected && canSelect}
+          onChange={() => canSelect && onToggleSelect(guest.id)}
+          disabled={!canSelect}
+          className={`h-4 w-4 rounded border-neutral-700 bg-input-background text-primary focus:ring-2 focus:ring-primary ${
+            !canSelect ? "opacity-30 cursor-not-allowed" : ""
+          }`}
         />
       </td>
       <td className="p-3 md:p-4">
@@ -215,6 +237,13 @@ export const GuestTableRow = ({
               Check In
             </button>
           )}
+          <button
+            onClick={() => onRowClick?.(guest)}
+            className="rounded-lg bg-card-secondary-background p-2 transition-colors hover:bg-white/15"
+            title="View details"
+          >
+            <Eye className="h-4 w-4 text-foreground" />
+          </button>
           <div className="relative">
             <button
               onClick={() => setShowMenu(!showMenu)}
@@ -231,6 +260,7 @@ export const GuestTableRow = ({
                 onCheckIn={onCheckIn}
                 onPromote={onPromote}
                 onBlacklist={onBlacklist}
+                onViewDetails={onRowClick}
               />
             )}
           </div>

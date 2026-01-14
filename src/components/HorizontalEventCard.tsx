@@ -3,7 +3,11 @@ import Image from "next/image";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Calendar, Clock, MapPin, Ticket, Video, Lock } from "lucide-react";
 import { EventResponseDto } from "@/types/event";
-import { isVirtualEvent, isHybridEvent, hasOnlineComponent } from "@/types/event/status";
+import {
+  isVirtualEvent,
+  isHybridEvent,
+  hasOnlineComponent,
+} from "@/types/event/status";
 
 interface HorizontalEventCardProps {
   event: EventResponseDto;
@@ -46,7 +50,8 @@ export default function HorizontalEventCard({
   // Get minimum price from available public tickets
   const getMinPrice = () => {
     const availableTickets = event.eventTickets?.filter(
-      (ticket) => !ticket.isPrivate && ticket.isAvailable && ticket.quantityLeft > 0
+      (ticket) =>
+        !ticket.isPrivate && ticket.isAvailable && ticket.quantityLeft > 0
     );
     if (!availableTickets || availableTickets.length === 0) return null;
 
@@ -63,12 +68,10 @@ export default function HorizontalEventCard({
     return `From £${minPrice.toFixed(2)}`;
   };
 
-
   // Check if event is currently ongoing
   const now = new Date();
   const isOngoing =
-    new Date(event.startDateTime) <= now &&
-    new Date(event.endDateTime) > now;
+    new Date(event.startDateTime) <= now && new Date(event.endDateTime) > now;
 
   const handleClick = (e: React.MouseEvent) => {
     if (onClick) {
@@ -77,14 +80,21 @@ export default function HorizontalEventCard({
     }
   };
 
-  // Auto-overflow categories
+  // Auto-overflow categories and subcategories
   const categoriesContainerRef = useRef<HTMLDivElement>(null);
   const categoryWidthsRef = useRef<number[]>([]);
-  const [visibleCount, setVisibleCount] = useState(event.categories?.length ?? 0);
+
+  // Combine categories and subcategories for display
+  const allTags = [
+    ...(event.categories?.map(c => ({ ...c, type: 'category' as const })) ?? []),
+    ...(event.subcategories?.map(s => ({ ...s, type: 'subcategory' as const })) ?? []),
+  ];
+
+  const [visibleCount, setVisibleCount] = useState(allTags.length);
 
   const calculateVisibleCategories = useCallback(() => {
     const container = categoriesContainerRef.current;
-    if (!container || !event.categories?.length) return;
+    if (!container || !allTags.length) return;
 
     const children = Array.from(container.children) as HTMLElement[];
     const containerWidth = container.offsetWidth;
@@ -92,10 +102,10 @@ export default function HorizontalEventCard({
     const overflowBadgeWidth = 40; // approximate width for "+N" badge
 
     // Measure and store widths on first run (when all items are visible)
-    if (categoryWidthsRef.current.length !== event.categories.length) {
+    if (categoryWidthsRef.current.length !== allTags.length) {
       categoryWidthsRef.current = children
-        .filter(child => !child.dataset.overflow)
-        .map(child => child.offsetWidth);
+        .filter((child) => !child.dataset.overflow)
+        .map((child) => child.offsetWidth);
     }
 
     const widths = categoryWidthsRef.current;
@@ -107,9 +117,11 @@ export default function HorizontalEventCard({
       const widthWithGap = totalWidth + childWidth + (count > 0 ? gap : 0);
 
       // Check if we need space for overflow badge
-      const remainingItems = event.categories.length - (count + 1);
+      const remainingItems = allTags.length - (count + 1);
       const needsOverflowBadge = remainingItems > 0;
-      const requiredWidth = needsOverflowBadge ? widthWithGap + gap + overflowBadgeWidth : widthWithGap;
+      const requiredWidth = needsOverflowBadge
+        ? widthWithGap + gap + overflowBadgeWidth
+        : widthWithGap;
 
       if (requiredWidth <= containerWidth) {
         totalWidth = widthWithGap;
@@ -120,13 +132,13 @@ export default function HorizontalEventCard({
     }
 
     setVisibleCount(Math.max(1, count)); // show at least 1
-  }, [event.categories?.length]);
+  }, [allTags.length]);
 
   useEffect(() => {
-    // Reset stored widths when categories change
+    // Reset stored widths when categories/subcategories change
     categoryWidthsRef.current = [];
-    setVisibleCount(event.categories?.length ?? 0);
-  }, [event.categories]);
+    setVisibleCount(allTags.length);
+  }, [event.categories, event.subcategories, allTags.length]);
 
   useEffect(() => {
     // Small delay to ensure DOM is ready for measurement
@@ -148,7 +160,11 @@ export default function HorizontalEventCard({
 
   return (
     <Link
-      href={linkToManagement ? `/event-management/${event.id}` : `/events/${event.id}`}
+      href={
+        linkToManagement
+          ? `/event-management/${event.id}`
+          : `/events/${event.id}`
+      }
       onClick={handleClick}
       className="group relative flex gap-4 rounded-2xl transition-all py-4 pl-2"
     >
@@ -225,14 +241,17 @@ export default function HorizontalEventCard({
           </div>
         ) : (
           <div className="flex items-center gap-3">
-            {event.address && event.address.city && event.address.city !== "TBD" && (
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className="truncate">
-                  {event.address.city}, {event.address.zipcode}
-                </span>
-              </div>
-            )}
+            {event.address &&
+              event.address.city &&
+              event.address.city !== "TBD" && (
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className="truncate">
+                    {event.address.city}
+                    {event.address.zipcode && (", " + event.address.zipcode)}
+                  </span>
+                </div>
+              )}
             {isHybridEvent(event.format) && (
               <span className="flex items-center gap-1 rounded-md border border-white/20 bg-white/5 px-2 py-0.5 text-xs text-muted-foreground flex-shrink-0">
                 <span>+</span>
@@ -245,35 +264,51 @@ export default function HorizontalEventCard({
 
         {/* Row 2: Price */}
         {formatPrice() && (
-          <div className={`mt-1 flex items-center gap-1.5 text-sm ${
-            isSoldOut ? "text-red-400" : minPrice === 0 ? "text-green-400" : "text-orange-400"
-          }`}>
+          <div
+            className={`mt-1 flex items-center gap-1.5 text-sm ${
+              isSoldOut
+                ? "text-red-400"
+                : minPrice === 0
+                ? "text-green-400"
+                : "text-warning"
+            }`}
+          >
             <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
-            <span className={isSoldOut ? "font-medium" : ""}>{formatPrice()}</span>
+            <span className={isSoldOut ? "font-medium" : ""}>
+              {formatPrice()}
+            </span>
           </div>
         )}
 
-        {/* Row 3: Categories */}
-        {showCategories && event.categories && event.categories.length > 0 && (
-          <div ref={categoriesContainerRef} className="mt-1.5 flex items-center gap-1.5">
-            {event.categories.map((category, index) => (
+        {/* Row 3: Categories & Subcategories */}
+        {showCategories && allTags.length > 0 && (
+          <div
+            ref={categoriesContainerRef}
+            className="mt-1.5 flex items-center gap-1.5"
+          >
+            {allTags.map((tag, index) => (
               <span
-                key={category.id}
-                className={`rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground ${
-                  index >= visibleCount ? "hidden" : ""
-                }`}
+                key={tag.id}
+                className={`rounded-md border px-2 py-0.5 text-xs ${
+                  tag.type === 'subcategory'
+                    ? "border-purple-400/30 bg-purple-500/10 text-purple-400"
+                    : "border-white/20 bg-transparent text-muted-foreground"
+                } ${index >= visibleCount ? "hidden" : ""}`}
               >
-                {category.name.toLowerCase()}
+                {tag.name}
               </span>
             ))}
-            {event.categories.length > visibleCount && (
+            {allTags.length > visibleCount && (
               <span
                 data-overflow="true"
                 className="group/tooltip relative rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground cursor-default"
               >
-                +{event.categories.length - visibleCount}
+                +{allTags.length - visibleCount}
                 <span className="pointer-events-none absolute top-full left-1/2 z-50 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover/tooltip:opacity-100">
-                  {event.categories.slice(visibleCount).map(c => c.name.toLowerCase()).join(', ')}
+                  {allTags
+                    .slice(visibleCount)
+                    .map((t) => t.name)
+                    .join(", ")}
                 </span>
               </span>
             )}

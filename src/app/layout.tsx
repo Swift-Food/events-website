@@ -1,19 +1,46 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Inter } from "next/font/google";
+// import { Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import Script from "next/script";
 import "@/styles/globals.css";
 import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
 import { AuthProvider } from "@/lib/auth/authContext";
+import { CategoriesProvider } from "@/lib/categories-context";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// const geistMono = Geist_Mono({
+//   variable: "--font-geist-mono",
+//   subsets: ["latin"],
+// });
+
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  weight: ["400"],
+});
+
+const satoshi = localFont({
+  src: [
+    {
+      path: "../styles/Satoshi_Complete/Fonts/WEB/fonts/Satoshi-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../styles/Satoshi_Complete/Fonts/WEB/fonts/Satoshi-Bold.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-satoshi",
 });
 
 export const metadata: Metadata = {
@@ -122,13 +149,16 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${geistSans.variable} ${satoshi.variable} antialiased`}
       >
         <AuthProvider>
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
-            <main className="flex-1">{children}</main>
-          </div>
+          <CategoriesProvider>
+            <div className="flex min-h-screen flex-col">
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+          </CategoriesProvider>
         </AuthProvider>
         <Toaster
           position="top-right"

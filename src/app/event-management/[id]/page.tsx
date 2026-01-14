@@ -9,7 +9,15 @@ import { EventResponseDto, EventStatus } from "@/types";
 import { CollaboratorRole } from "@/types/event-collaborator";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";
-import { Eye, X, Crown, Shield, Scan, AlertTriangle, EyeOff } from "lucide-react";
+import {
+  Eye,
+  X,
+  Crown,
+  Shield,
+  Scan,
+  AlertTriangle,
+  EyeOff,
+} from "lucide-react";
 
 // Tab components
 import {
@@ -47,6 +55,7 @@ export default function EventManagementPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPublishLoading, setIsPublishLoading] = useState(false);
   const [showUnpublishConfirm, setShowUnpublishConfirm] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const setTab = (tab: TabType, filter?: string) => {
     const url = filter
@@ -70,7 +79,8 @@ export default function EventManagementPage() {
       setError(null);
     } catch (err: any) {
       console.error("Error fetching event:", err);
-      const errorMessage = err.response?.data?.message || "Failed to load event";
+      const errorMessage =
+        err.response?.data?.message || "Failed to load event";
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -87,7 +97,8 @@ export default function EventManagementPage() {
       router.push("/event-management");
     } catch (err: any) {
       console.error("Error deleting event:", err);
-      const errorMessage = err.response?.data?.message || "Failed to delete event";
+      const errorMessage =
+        err.response?.data?.message || "Failed to delete event";
       toast.error(errorMessage);
     } finally {
       setIsDeleting(false);
@@ -167,11 +178,11 @@ export default function EventManagementPage() {
 
       // Check if user is a collaborator
       try {
-        const collaboratorsData = await eventCollaboratorService.getCollaborators(eventId);
+        const collaboratorsData =
+          await eventCollaboratorService.getCollaborators(eventId);
         const collaborator = collaboratorsData.collaborators.find(
           (collab) =>
-            collab.inviteAccepted &&
-            collab.eventUser?.id === user.eventUser?.id
+            collab.inviteAccepted && collab.eventUser?.id === user.eventUser?.id
         );
 
         if (collaborator) {
@@ -216,8 +227,12 @@ export default function EventManagementPage() {
       <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background px-6">
         <div className="text-center max-w-md">
           <div className="mb-4 text-6xl">🔒</div>
-          <h1 className="mb-2 text-2xl font-bold text-foreground">Authentication Required</h1>
-          <p className="mb-6 text-muted-foreground">You must be logged in to manage events.</p>
+          <h1 className="mb-2 text-2xl font-bold text-foreground">
+            Authentication Required
+          </h1>
+          <p className="mb-6 text-muted-foreground">
+            You must be logged in to manage events.
+          </p>
           <button
             onClick={() => router.push("/auth")}
             className="rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground transition-all hover:bg-primary/90"
@@ -235,7 +250,9 @@ export default function EventManagementPage() {
       <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background px-6">
         <div className="text-center max-w-md">
           <div className="mb-4 text-6xl">🚫</div>
-          <h1 className="mb-2 text-2xl font-bold text-foreground">Unauthorized Access</h1>
+          <h1 className="mb-2 text-2xl font-bold text-foreground">
+            Unauthorized Access
+          </h1>
           <p className="mb-6 text-muted-foreground">
             You do not have permission to manage this event.
           </p>
@@ -258,7 +275,9 @@ export default function EventManagementPage() {
       <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background px-6">
         <div className="text-center max-w-md">
           <div className="mb-4 text-6xl">⚠️</div>
-          <h1 className="mb-2 text-2xl font-bold text-foreground">Failed to Load Event</h1>
+          <h1 className="mb-2 text-2xl font-bold text-foreground">
+            Failed to Load Event
+          </h1>
           <p className="mb-6 text-muted-foreground">
             {error || "The event could not be found or loaded."}
           </p>
@@ -282,9 +301,10 @@ export default function EventManagementPage() {
   ];
 
   // Scanner role can only see overview tab
-  const tabs = userRole === "scanner"
-    ? allTabs.filter(tab => tab.id === "overview")
-    : allTabs;
+  const tabs =
+    userRole === "scanner"
+      ? allTabs.filter((tab) => tab.id === "overview")
+      : allTabs;
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -310,7 +330,9 @@ export default function EventManagementPage() {
           {/* Event Title & Role Badge */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <h1 className="text-lg sm:text-2xl font-bold text-foreground">{eventData.name}</h1>
+              <h1 className="text-lg sm:text-2xl font-bold text-foreground">
+                {eventData.name}
+              </h1>
               {/* Role Badge */}
               {userRole && (
                 <span
@@ -325,7 +347,11 @@ export default function EventManagementPage() {
                   {userRole === "owner" && <Crown className="h-3 w-3" />}
                   {userRole === "admin" && <Shield className="h-3 w-3" />}
                   {userRole === "scanner" && <Scan className="h-3 w-3" />}
-                  {userRole === "owner" ? "Owner" : userRole === "admin" ? "Admin" : "Scanner"}
+                  {userRole === "owner"
+                    ? "Owner"
+                    : userRole === "admin"
+                    ? "Admin"
+                    : "Scanner"}
                 </span>
               )}
             </div>
@@ -335,7 +361,7 @@ export default function EventManagementPage() {
               className="hidden sm:flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-sm font-semibold text-purple-400 transition-colors hover:bg-purple-500/20"
             >
               <Eye className="h-4 w-4" />
-              Preview Event
+              Preview
             </button>
           </div>
 
@@ -370,7 +396,9 @@ export default function EventManagementPage() {
           <OverviewTab
             eventData={eventData}
             onEditClick={() => setShowEditModal(true)}
-            onScanClick={() => router.push(`/event-management/${eventId}/scanner`)}
+            onScanClick={() =>
+              router.push(`/event-management/${eventId}/scanner`)
+            }
             onTeamClick={() => setTab("team")}
             onGuestsClick={(filter) => setTab("guests", filter)}
             onDeleteClick={handleDeleteEvent}
@@ -378,21 +406,21 @@ export default function EventManagementPage() {
             userRole={userRole}
             onPublishToggle={handlePublishToggle}
             isPublishLoading={isPublishLoading}
+            refreshKey={refreshKey}
           />
         )}
 
         {currentTab === "guests" && (
-          <GuestsTab
-            eventId={eventId}
-            initialFilter={guestFilter as any}
-          />
+          <GuestsTab eventId={eventId} eventName={eventData.name} initialFilter={guestFilter as any} onRefresh={() => { fetchEvent(false); setRefreshKey(k => k + 1); }} />
         )}
 
         {currentTab === "registration" && (
           <RegistrationTab
             eventData={eventData}
             onRefresh={() => fetchEvent(false)}
-            onScanClick={() => router.push(`/event-management/${eventId}/scanner`)}
+            onScanClick={() =>
+              router.push(`/event-management/${eventId}/scanner`)
+            }
           />
         )}
 
@@ -453,12 +481,18 @@ export default function EventManagementPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/20">
                 <AlertTriangle className="h-5 w-5 text-amber-400" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground">Unpublish Event</h3>
+              <h3 className="text-lg font-semibold text-foreground">
+                Unpublish Event
+              </h3>
             </div>
 
             <p className="text-sm text-muted-foreground mb-4">
-              This will hide the event from public view. Are you sure you want to unpublish{" "}
-              <span className="font-medium text-foreground">{eventData.name}</span>?
+              This will hide the event from public view. Are you sure you want
+              to unpublish{" "}
+              <span className="font-medium text-foreground">
+                {eventData.name}
+              </span>
+              ?
             </p>
 
             <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-4 mb-4">
@@ -466,7 +500,8 @@ export default function EventManagementPage() {
                 <EyeOff className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
                 <div className="text-sm">
                   <p className="text-amber-400/80">
-                    The event will only be visible to you and your team. Public users will not be able to find or register for it.
+                    The event will only be visible to you and your team. Public
+                    users will not be able to find or register for it.
                   </p>
                 </div>
               </div>

@@ -166,10 +166,10 @@ export function BundleDetailsModal({
           <div className="flex items-baseline justify-between">
             <div>
               <p className="text-3xl font-bold text-primary">
-                ${bundleFixedPrice}
+                £{bundleFixedPrice}
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                ${bundle.pricePerPerson}/person • Serves {bundle.baseGuestCount} people
+                £{bundle.pricePerPerson}/person • Serves {bundle.baseGuestCount} people
               </p>
             </div>
  

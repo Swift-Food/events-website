@@ -85,9 +85,15 @@ interface EventCreationContextType {
   coverName: string;
   setCoverName: Dispatch<SetStateAction<string>>;
 
-  // Categories (store category IDs)
+  // Categories
   selectedCategoryIds: string[];
   setSelectedCategoryIds: Dispatch<SetStateAction<string[]>>;
+  selectedSubcategoryIds: string[];
+  setSelectedSubcategoryIds: Dispatch<SetStateAction<string[]>>;
+
+  // Organiser terms acceptance
+  acceptedOrganizerTerms: boolean;
+  setAcceptedOrganizerTerms: Dispatch<SetStateAction<boolean>>;
 
   // Form actions
   clearForm: () => void;
@@ -127,6 +133,8 @@ type EventDraft = {
   coverPreview: string | null;
   coverName: string;
   selectedCategoryIds: string[];
+  selectedSubcategoryIds: string[];
+  acceptedOrganizerTerms: boolean;
 };
 
 // Helper to format a Date to datetime-local input format
@@ -161,6 +169,18 @@ const isValidFutureDate = (dateStr: string | undefined): boolean => {
   if (isNaN(date.getTime())) return false;
   return date > new Date();
 };
+
+// Default ticket for new events
+const getDefaultTicket = (): TicketType => ({
+  id: `ticket-${Date.now()}`,
+  name: "General Admission",
+  description: "",
+  isFree: true,
+  price: 0,
+  isSingleUse: true,
+  quantity: 100,
+  questionForm: [],
+});
 
 export function EventCreationProvider({
   children,
@@ -226,7 +246,9 @@ export function EventCreationProvider({
 
   // Ticketing
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>(
-    storedDraft.ticketTypes ?? []
+    storedDraft.ticketTypes && storedDraft.ticketTypes.length > 0
+      ? storedDraft.ticketTypes
+      : [getDefaultTicket()]
   );
   const [requireApproval, setRequireApproval] = useState(
     storedDraft.requireApproval ?? false
@@ -257,9 +279,17 @@ export function EventCreationProvider({
     storedDraft.coverName ?? "invite-cover.png"
   );
 
-  // Categories (store category IDs)
+  // Categories
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
     storedDraft.selectedCategoryIds ?? []
+  );
+  const [selectedSubcategoryIds, setSelectedSubcategoryIds] = useState<string[]>(
+    storedDraft.selectedSubcategoryIds ?? []
+  );
+
+  // Organiser terms acceptance
+  const [acceptedOrganizerTerms, setAcceptedOrganizerTerms] = useState(
+    storedDraft.acceptedOrganizerTerms ?? false
   );
 
   // Ticket management functions
@@ -324,6 +354,8 @@ export function EventCreationProvider({
       coverPreview,
       coverName,
       selectedCategoryIds,
+      selectedSubcategoryIds,
+      acceptedOrganizerTerms,
     };
 
     try {
@@ -359,6 +391,8 @@ export function EventCreationProvider({
     latitude,
     longitude,
     selectedCategoryIds,
+    selectedSubcategoryIds,
+    acceptedOrganizerTerms,
   ]);
 
   useEffect(() => {
@@ -385,7 +419,7 @@ export function EventCreationProvider({
     setPostcode("");
     setLatitude(null);
     setLongitude(null);
-    setTicketTypes([]);
+    setTicketTypes([getDefaultTicket()]);
     setRequireApproval(false);
     setCapacity("Unlimited");
     setIsUnlimitedCapacity(true);
@@ -395,6 +429,8 @@ export function EventCreationProvider({
     setCoverPreview(null);
     setCoverName("invite-cover.png");
     setSelectedCategoryIds([]);
+    setSelectedSubcategoryIds([]);
+    setAcceptedOrganizerTerms(false);
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(STORAGE_KEY);
     }
@@ -461,6 +497,10 @@ export function EventCreationProvider({
         setCoverName,
         selectedCategoryIds,
         setSelectedCategoryIds,
+        selectedSubcategoryIds,
+        setSelectedSubcategoryIds,
+        acceptedOrganizerTerms,
+        setAcceptedOrganizerTerms,
         clearForm,
         persistEventDraft,
       }}

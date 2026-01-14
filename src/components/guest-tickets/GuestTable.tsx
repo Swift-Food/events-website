@@ -46,8 +46,8 @@ export const GuestTable = ({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-card-background">
-      <div className="overflow-x-auto">
+    <div className="rounded-2xl bg-card-background">
+      <div>
         <table className="w-full">
           <thead>
             <tr className="border-b border-neutral-700">

@@ -21,8 +21,9 @@ import { InviteLinkModal } from "@/components/event-management/InviteLinkModal";
 import { InvitationsSection } from "@/components/event-management/InvitationsSection";
 import { BlacklistModal, BlacklistSection } from "@/components/blacklist";
 import { toast } from "sonner";
+import { downloadGuestListPDF, getExportSummary } from "@/utils/guestListExport";
 
-type FilterStatus = "all" | "active" | "pending_approval" | "waitlisted" | "cancelled" | "checked_in" | "blacklisted";
+type FilterStatus = "all" | "active" | "pending_approval" | "pending_payment" | "waitlisted" | "cancelled" | "checked_in" | "blacklisted";
 
 /**
  * Extract guest display name with proper fallbacks (for search filtering)
@@ -47,10 +48,12 @@ function getGuestDisplayName(guest: GuestTicketResponseDto['guest'] | undefined)
 
 interface GuestsTabProps {
   eventId: string;
+  eventName?: string;
   initialFilter?: FilterStatus;
+  onRefresh?: () => void;
 }
 
-export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
+export function GuestsTab({ eventId, eventName, initialFilter = "all", onRefresh }: GuestsTabProps) {
   const [guests, setGuests] = useState<GuestTicketResponseDto[]>([]);
   const [pendingGuests, setPendingGuests] = useState<AdminTicketResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -91,6 +94,9 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
   // Blacklist count for filter badge
   const [blacklistedCount, setBlacklistedCount] = useState(0);
 
+  // Download state
+  const [isDownloading, setIsDownloading] = useState(false);
+
   useEffect(() => {
     fetchGuestData();
   }, [eventId]);
@@ -102,6 +108,11 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
     }
   }, [initialFilter]);
 
+  // Clear selection when filter changes to avoid stale selections
+  useEffect(() => {
+    setSelectedGuests(new Set());
+  }, [filterStatus]);
+
   const fetchGuestData = async () => {
     try {
       setIsLoading(true);
@@ -111,6 +122,7 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
         guestTicketService.getCheckInStats(eventId),
       ]);
 
+      console.log("Guest ticket responses:", attendees);
       setGuests(attendees);
       setPendingGuests(pending.pending || []);
       setCheckInStats(stats);
@@ -130,6 +142,7 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
       setShowReviewModal(false);
       setReviewGuest(null);
       await fetchGuestData();
+      onRefresh?.();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to approve guest");
     } finally {
@@ -145,6 +158,7 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
       setShowReviewModal(false);
       setReviewGuest(null);
       await fetchGuestData();
+      onRefresh?.();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to reject guest");
     } finally {
@@ -186,11 +200,26 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
     try {
       const ticketIds = Array.from(selectedGuests);
       const result = await guestTicketService.bulkApproveTickets(ticketIds);
-      toast.success(`Approved ${result.approved || ""} guests`);
+
+      // Build success message based on results
+      const approved = result.approved || 0;
+      const waitlisted = result.waitlisted || 0;
+
+      if (approved > 0 && waitlisted > 0) {
+        toast.success(`Approved ${approved} guest${approved > 1 ? 's' : ''}, ${waitlisted} added to waitlist`);
+      } else if (approved > 0) {
+        toast.success(`Approved ${approved} guest${approved > 1 ? 's' : ''}`);
+      } else if (waitlisted > 0) {
+        toast.info(`No capacity available. ${waitlisted} guest${waitlisted > 1 ? 's' : ''} added to waitlist`);
+      }
+
       setSelectedGuests(new Set());
       await fetchGuestData();
+      onRefresh?.();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to approve guests");
+      setSelectedGuests(new Set());
+      await fetchGuestData();
     }
   };
 
@@ -201,8 +230,11 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
       toast.success(`Rejected ${result.rejected || ""} guests`);
       setSelectedGuests(new Set());
       await fetchGuestData();
+      onRefresh?.();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to reject guests");
+      setSelectedGuests(new Set());
+      await fetchGuestData();
     }
   };
 
@@ -211,6 +243,7 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
       await guestTicketService.promoteFromWaitlist(ticketId);
       toast.success("Guest promoted from waitlist");
       await fetchGuestData();
+      onRefresh?.();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to promote guest");
     }
@@ -244,6 +277,7 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
         }
         handleCloseBlacklist();
         await fetchGuestData();
+        onRefresh?.();
       } else {
         throw new Error(result.message || "Failed to blacklist user");
       }
@@ -285,10 +319,41 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
     setShowInviteGuestsModal(true);
   };
 
+  // Handle guest list download
+  const handleDownloadGuestList = async () => {
+    if (filteredGuests.length === 0) {
+      toast.error("No guests to export");
+      return;
+    }
+
+    // Get event name from props or first guest's eventName
+    const resolvedEventName = eventName || guests[0]?.eventName || "Event";
+
+    try {
+      setIsDownloading(true);
+      await downloadGuestListPDF(filteredGuests, resolvedEventName, filterStatus);
+      toast.success(getExportSummary(filteredGuests));
+    } catch (error) {
+      console.error("Error exporting guest list:", error);
+      toast.error("Failed to export guest list");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  // Statuses that can be selected for bulk actions (approve/reject)
+  // Note: PENDING_PAYMENT is excluded because those tickets are already approved and waiting for payment
+  const BULK_ACTIONABLE_STATUSES = [
+    GuestTicketStatus.PENDING_APPROVAL,
+    GuestTicketStatus.WAITLISTED,
+  ];
+
   const filteredGuests = guests.filter((guest) => {
+    // "all" filter excludes cancelled tickets
     const matchesStatus =
-      filterStatus === "all" ||
-      guest.status === filterStatus;
+      filterStatus === "all"
+        ? guest.status !== GuestTicketStatus.CANCELLED
+        : guest.status === filterStatus;
 
     const matchesSearch =
       searchQuery === "" ||
@@ -311,10 +376,15 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
   };
 
   const toggleSelectAll = () => {
-    if (selectedGuests.size === filteredGuests.length) {
+    // Only select guests with bulk-actionable statuses
+    const actionableGuests = filteredGuests.filter((g) =>
+      BULK_ACTIONABLE_STATUSES.includes(g.status as GuestTicketStatus)
+    );
+
+    if (selectedGuests.size === actionableGuests.length && actionableGuests.length > 0) {
       setSelectedGuests(new Set());
     } else {
-      setSelectedGuests(new Set(filteredGuests.map((g) => g.id)));
+      setSelectedGuests(new Set(actionableGuests.map((g) => g.id)));
     }
   };
 
@@ -364,11 +434,15 @@ export function GuestsTab({ eventId, initialFilter = "all" }: GuestsTabProps) {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           pendingCount={guests.filter((g) => g.status === GuestTicketStatus.PENDING_APPROVAL).length}
+          pendingPaymentCount={guests.filter((g) => g.status === GuestTicketStatus.PENDING_PAYMENT).length}
           approvedCount={guests.filter((g) => g.status === GuestTicketStatus.ACTIVE).length}
           waitlistedCount={guests.filter((g) => g.status === GuestTicketStatus.WAITLISTED).length}
           cancelledCount={guests.filter((g) => g.status === GuestTicketStatus.CANCELLED).length}
           checkedInCount={guests.filter((g) => g.status === GuestTicketStatus.CHECKED_IN).length}
           blacklistedCount={blacklistedCount}
+          onDownload={handleDownloadGuestList}
+          isDownloading={isDownloading}
+          totalFilteredCount={filteredGuests.length}
         />
 
         {filterStatus === "blacklisted" ? (

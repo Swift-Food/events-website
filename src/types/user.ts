@@ -16,6 +16,7 @@ export interface EventUser {
   bio: string | null;
   createdAt: string;
   linkedinUrl: string | null;
+  instagramUrl: string | null;
   organizationName: string | null;
   stripeAccountId: string | null;
   stripeOnboardingComplete: boolean;

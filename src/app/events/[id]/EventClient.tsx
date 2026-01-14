@@ -43,7 +43,6 @@ import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
 import PaymentModal, { PaymentSuccessModal } from "@/components/payments/PaymentModal";
 import { AppealModal } from "@/components/blacklist";
-import RegistrationQuestionsModal from "@/components/RegistrationQuestionsModal";
 import { getTicketStatusText, getTicketStatusBadgeClasses, isTicketUsable } from "@/utils/ticket-status";
 import {
   generateGoogleCalendarUrl,
@@ -52,6 +51,9 @@ import {
   buildLocationString,
 } from "@/utils/calendar";
 import SmartAppBanner from "@/components/SmartAppBanner";
+import ExternalLinkConfirmModal from "@/components/ExternalLinkConfirmModal";
+import RegistrationConfirmModal from "@/components/RegistrationConfirmModal";
+import SaveToCalendarModal from "@/components/SaveToCalendarModal";
 import { usePathname } from "next/navigation";
 
 interface EventClientProps {
@@ -73,14 +75,23 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
   const [showTicketSelector, setShowTicketSelector] = useState(false);
-  const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, any>>(
     {}
   );
 
+  // Registration confirmation modal state
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingTicketId, setPendingTicketId] = useState<string | null>(null);
+
   // Calendar dropdown state
   const [showCalendarDropdown, setShowCalendarDropdown] = useState(false);
   const calendarDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Save to calendar modal state
+  const [showSaveToCalendarModal, setShowSaveToCalendarModal] = useState(false);
+
+  // External link confirmation modal state
+  const [showExternalLinkModal, setShowExternalLinkModal] = useState(false);
 
   // Close calendar dropdown when clicking outside
   useEffect(() => {
@@ -235,11 +246,8 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
     checkUserRole();
   }, [event, user, authLoading, eventId]);
 
-  const selectedTicket = event?.eventTickets?.find(
-    (t) => t.id === selectedTicketId
-  );
-
-  const handleRegister = async (ticketId: string) => {
+  // Show confirmation modal before registration
+  const handleRegisterClick = (ticketId: string) => {
     // Build the redirect URL with inviteToken if present
     const currentUrl = `/events/${eventId}${inviteToken ? `?inviteToken=${inviteToken}` : ''}`;
 
@@ -255,27 +263,36 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
       return;
     }
 
-    // Set the selected ticket for the question form
+    setPendingTicketId(ticketId);
     setSelectedTicketId(ticketId);
+    setShowConfirmModal(true);
+  };
 
-    // For invitation flow, skip question form (invitation already has ticket selected)
-    // Check if ticket has questions that need answering (only for non-invite flow)
-    if (
-      !inviteToken &&
-      ticket.questionForm &&
-      ticket.questionForm.length > 0 &&
-      !showQuestionForm
-    ) {
-      setShowQuestionForm(true);
+  // Called when user confirms registration from the confirmation modal
+  const handleConfirmRegistration = async (questionAnswersFromModal: Record<string, any>) => {
+    if (!pendingTicketId) return;
+    setQuestionAnswers(questionAnswersFromModal);
+    await handleRegister(pendingTicketId, questionAnswersFromModal);
+  };
+
+  const handleRegister = async (ticketId: string, answers?: Record<string, any>) => {
+    const ticket = event?.eventTickets?.find((t) => t.id === ticketId);
+    if (!ticket) {
+      toast.error("Ticket not found");
       return;
     }
+
+    const answersToUse = answers || questionAnswers;
 
     try {
       setIsRegistering(true);
 
       // If we have an invite token, use the accept invitation API
       if (inviteToken && invitationPreview?.success) {
-        const result = await guestTicketService.acceptTicketInvite(inviteToken);
+        const result = await guestTicketService.acceptTicketInvite(
+          inviteToken,
+          Object.keys(answersToUse).length > 0 ? answersToUse : undefined
+        );
 
         if (result.success) {
           // Check if payment is required
@@ -284,6 +301,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
             const guestTicketId = result.paymentUrl.split('/').pop();
 
             if (!guestTicketId) {
+              setShowConfirmModal(false);
               toast.error("Failed to process payment. Please try again from My Tickets.");
               router.push("/my-tickets");
               return;
@@ -304,38 +322,50 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   },
                   guestTicketId: guestTicketId,
                 });
+                // Close confirm modal and open payment modal together
+                setShowConfirmModal(false);
                 setShowPaymentModal(true);
               } else {
                 throw new Error(paymentResponse.error || 'Failed to create payment');
               }
             } catch (paymentError: any) {
               console.error("Payment setup failed:", paymentError);
+              setShowConfirmModal(false);
               toast.error(
                 paymentError.response?.data?.message || "Failed to setup payment. Please try again from My Tickets."
               );
               router.push("/my-tickets");
             }
           } else {
+            setShowConfirmModal(false);
             toast.success(result.message || "Invitation accepted successfully!");
             router.push("/my-tickets");
           }
         } else {
           toast.error(result.message || "Failed to accept invitation");
+          setShowConfirmModal(false);
+          // Redirect to my-tickets if user already has a ticket, otherwise stay on event page
+          if (result.message?.includes('already')) {
+            router.push("/my-tickets");
+          } else {
+            // Remove inviteToken from URL to prevent retry loop
+            router.replace(`/events/${eventId}`);
+          }
         }
       } else {
         // Normal registration flow
         const result = await guestTicketService.registerForTicket({
           eventTicketId: ticketId,
           questionAnswers:
-            Object.keys(questionAnswers).length > 0 ? questionAnswers : undefined,
+            Object.keys(answersToUse).length > 0 ? answersToUse : undefined,
         });
 
         if (result.success) {
-          setShowQuestionForm(false);
           setQuestionAnswers({});
 
           // Check if user was added to waitlist
           if (result.isWaitlisted) {
+            setShowConfirmModal(false);
             toast.success(
               result.message || `Added to waitlist at position #${result.waitlistPosition}!`,
               { duration: 5000 }
@@ -364,6 +394,8 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   },
                   guestTicketId: result.guestTicket.id,
                 });
+                // Close confirm modal and open payment modal together
+                setShowConfirmModal(false);
                 setShowPaymentModal(true);
                 setShowTicketSelector(false);
                 setSelectedTicketId(null);
@@ -372,12 +404,14 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
               }
             } catch (paymentError: any) {
               console.error("Payment setup failed:", paymentError);
+              setShowConfirmModal(false);
               toast.error(
                 paymentError.response?.data?.message || "Failed to setup payment. Please try again from My Tickets."
               );
               router.push("/my-tickets");
             }
           } else {
+            setShowConfirmModal(false);
             toast.success(result.message || "Successfully registered for event!");
             setShowTicketSelector(false);
             setSelectedTicketId(null);
@@ -387,9 +421,16 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
       }
     } catch (error: any) {
       console.error("Registration failed:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to register for event"
-      );
+      const errorMessage = error.response?.data?.message || "Failed to register for event";
+      toast.error(errorMessage);
+      setShowConfirmModal(false);
+      // If user already has a ticket, redirect to my-tickets
+      if (errorMessage.toLowerCase().includes('already')) {
+        router.push("/my-tickets");
+      } else if (inviteToken) {
+        // Remove inviteToken from URL on other errors
+        router.replace(`/events/${eventId}`);
+      }
     } finally {
       setIsRegistering(false);
     }
@@ -425,13 +466,6 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
     setShowSuccessModal(false);
     setSuccessTicketDetails(null);
     router.push("/my-tickets");
-  };
-
-  const handleQuestionChange = (question: string, value: any) => {
-    setQuestionAnswers((prev) => ({
-      ...prev,
-      [question]: value,
-    }));
   };
 
   const handleReportEvent = async () => {
@@ -701,10 +735,10 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   {event.name}
                 </h1>
 
-                {/* Categories */}
-                {event.categories && event.categories.length > 0 && (
+                {/* Categories & Subcategories */}
+                {((event.categories && event.categories.length > 0) || (event.subcategories && event.subcategories.length > 0)) && (
                   <div className="flex flex-wrap gap-2 sm:justify-center">
-                    {event.categories.map((category) => (
+                    {event.categories?.map((category) => (
                       <Link
                         key={category.id}
                         href={`/events?category=${category.name}`}
@@ -713,6 +747,25 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                         {category.name}
                       </Link>
                     ))}
+                    {event.subcategories?.map((subcategory) => {
+                      // Find parent category for the subcategory to include in URL
+                      const parentCategory = event.categories?.find(cat =>
+                        cat.id === subcategory.categoryId ||
+                        cat.id === (subcategory as any).category?.id
+                      );
+                      const href = parentCategory
+                        ? `/events?category=${parentCategory.name}&subcategoryId=${subcategory.id}`
+                        : `/events?subcategoryId=${subcategory.id}`;
+                      return (
+                        <Link
+                          key={subcategory.id}
+                          href={href}
+                          className="rounded-full border border-purple-400/30 bg-purple-500/10 px-4 py-1.5 text-sm font-medium text-purple-400 transition-colors hover:border-purple-400/50 hover:bg-purple-500/20"
+                        >
+                          {subcategory.name}
+                        </Link>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -846,6 +899,24 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                           <p className="text-xs text-muted-foreground">Open to add to your calendar app</p>
                         </div>
                       </button>
+                      {isAuthenticated && (
+                        <>
+                          <div className="h-px bg-white/10" />
+                          <button
+                            onClick={() => {
+                              setShowCalendarDropdown(false);
+                              setShowSaveToCalendarModal(true);
+                            }}
+                            className="flex w-full items-start gap-3 px-4 py-3 text-sm text-foreground transition-colors hover:bg-white/5"
+                          >
+                            <Calendar className="h-4 w-4 mt-0.5 shrink-0" />
+                            <div className="text-left">
+                              <p>Save to My Calendars</p>
+                              <p className="text-xs text-muted-foreground">Add to your platform calendars</p>
+                            </div>
+                          </button>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
@@ -861,15 +932,25 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                     </div>
                     {event.virtualMeetingUrl ? (
                       canJoinVirtualMeeting() ? (
-                        <a
-                          href={formatExternalUrl(event.virtualMeetingUrl)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-sm text-primary hover:underline"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                          Join Virtual Meeting
-                        </a>
+                        event.isTrustedMeetingUrl ? (
+                          <a
+                            href={formatExternalUrl(event.virtualMeetingUrl)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-sm text-primary hover:underline"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            Join Virtual Meeting
+                          </a>
+                        ) : (
+                          <button
+                            onClick={() => setShowExternalLinkModal(true)}
+                            className="flex items-center gap-2 text-sm text-primary hover:underline"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            Join Virtual Meeting
+                          </button>
+                        )
                       ) : (
                         <p className="text-sm text-muted-foreground">
                           Meeting link available 10 minutes before event
@@ -1027,7 +1108,10 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   )}
                 </div>
                 {event.owner?.user ? (
-                  <div className="flex items-center gap-3">
+                  <Link
+                    href={`/organizer/${event.owner.id}`}
+                    className="flex items-center gap-3 group"
+                  >
                     {event.owner.user.profilePicture ? (
                       <Image
                         src={event.owner.user.profilePicture}
@@ -1044,14 +1128,14 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       </div>
                     )}
                     <div>
-                      <p className="font-medium text-foreground">
+                      <p className="font-medium text-foreground group-hover:text-primary transition-colors">
                         {(event.owner.firstName || event.owner.lastName)
                           ? [event.owner.firstName, event.owner.lastName].filter(Boolean).join(' ')
                           : event.owner.user.username || "Anonymous"}
                       </p>
                       <p className="text-sm text-muted-foreground">Organizer</p>
                     </div>
-                  </div>
+                  </Link>
                 ) : (
                   <div className="flex items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
@@ -1113,10 +1197,10 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                 {event.name}
               </h1>
 
-              {/* Categories */}
-              {event.categories && event.categories.length > 0 && (
+              {/* Categories & Subcategories */}
+              {((event.categories && event.categories.length > 0) || (event.subcategories && event.subcategories.length > 0)) && (
                 <div className="flex flex-wrap gap-2">
-                  {event.categories.map((category) => (
+                  {event.categories?.map((category) => (
                     <Link
                       key={category.id}
                       href={`/events?category=${category.name}`}
@@ -1125,33 +1209,78 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                       {category.name}
                     </Link>
                   ))}
+                  {event.subcategories?.map((subcategory) => {
+                    // Find parent category for the subcategory to include in URL
+                    const parentCategory = event.categories?.find(cat =>
+                      cat.id === subcategory.categoryId ||
+                      cat.id === (subcategory as any).category?.id
+                    );
+                    const href = parentCategory
+                      ? `/events?category=${parentCategory.name}&subcategoryId=${subcategory.id}`
+                      : `/events?subcategoryId=${subcategory.id}`;
+                    return (
+                      <Link
+                        key={subcategory.id}
+                        href={href}
+                        className="rounded-full border border-purple-400/30 bg-purple-500/10 px-4 py-1.5 text-sm font-medium text-purple-400 transition-colors hover:border-purple-400/50 hover:bg-purple-500/20"
+                      >
+                        {subcategory.name}
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </div>
 
             {/* Invitation Banner */}
             {inviteToken && invitationPreview?.success && (
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20">
-                    <Gift className="h-5 w-5 text-emerald-400" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-emerald-400">
-                      You&apos;ve been invited!
-                    </h3>
-                    <p className="text-sm text-emerald-300/80">
-                      You have an invitation for the <span className="font-medium">{invitationPreview.ticket?.name}</span> ticket
-                      {invitationPreview.ticket?.bypassPayment && invitationPreview.ticket?.isPaid && (
-                        <span className="ml-1">(payment waived)</span>
-                      )}
-                      {invitationPreview.bypassApproval && (
-                        <span className="ml-1">(no approval required)</span>
-                      )}
-                    </p>
+              event.userTicket ? (
+                // User already has a ticket - show info banner instead
+                <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20">
+                      <Ticket className="h-5 w-5 text-blue-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-blue-400">
+                        You already have a ticket
+                      </h3>
+                      <p className="text-sm text-blue-300/80">
+                        You already have a ticket for this event. View it in your tickets.
+                      </p>
+                    </div>
+                    <Link
+                      href="/my-tickets"
+                      className="shrink-0 rounded-lg bg-blue-500/20 px-4 py-2 text-sm font-medium text-blue-300 transition-colors hover:bg-blue-500/30"
+                    >
+                      View My Tickets
+                    </Link>
                   </div>
                 </div>
-              </div>
+              ) : (
+                // Show invitation banner
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20">
+                      <Gift className="h-5 w-5 text-emerald-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-emerald-400">
+                        You&apos;ve been invited!
+                      </h3>
+                      <p className="text-sm text-emerald-300/80">
+                        You have an invitation for the <span className="font-medium">{invitationPreview.ticket?.name}</span> ticket
+                        {invitationPreview.ticket?.bypassPayment && invitationPreview.ticket?.isPaid && (
+                          <span className="ml-1">(payment waived)</span>
+                        )}
+                        {invitationPreview.bypassApproval && (
+                          <span className="ml-1">(no approval required)</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )
             )}
 
             {/* Invitation Error Banner */}
@@ -1257,8 +1386,11 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   <div className="space-y-2 sm:space-y-3">
                     {event.eventTickets.map((ticket) => {
                       const remaining = ticket.quantityLeft ?? 0;
+                      const total = ticket.quantityTotal ?? 0;
                       const isSelected = selectedTicketId === ticket.id;
                       const isSoldOut = remaining <= 0;
+                      const nearlySoldOutThreshold = Math.max(10, 0.1 * total);
+                      const isNearlySoldOut = !isSoldOut && total > 0 && remaining < nearlySoldOutThreshold;
                       const isManuallyUnavailable = !ticket.isAvailable; // Organizer disabled this ticket
                       const isOwnedTicket = event.userTicket?.ticketName === ticket.name;
                       const isActiveTicket = isOwnedTicket && isTicketUsable(event.userTicket!.status as GuestTicketStatus);
@@ -1307,13 +1439,24 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                                 )}
                               </div>
                             )}
-                            <div className="min-w-0">
-                              <h3 className={`text-sm sm:text-base font-semibold break-words ${isInvitedTicket ? "text-emerald-400" : "text-foreground"}`}>
-                                {ticket.name}
-                                {isInvitedTicket && (
-                                  <span className="ml-2 text-xs font-normal text-emerald-300/80">(Invited)</span>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-4 flex-wrap">
+                                <h3 className={`text-sm sm:text-base font-semibold break-words ${isInvitedTicket ? "text-emerald-400" : "text-foreground"}`}>
+                                  {ticket.name}
+                                  {isInvitedTicket && (
+                                    <span className="ml-2 text-xs font-normal text-emerald-300/80">(Invited)</span>
+                                  )}
+                                </h3>
+                                {isNearlySoldOut && !isOwnedTicket && !isManuallyUnavailable && !isInvitedTicket && (
+                                  <span className="shrink-0 flex items-center gap-1.5 text-[10px] font-semibold text-orange-500 uppercase tracking-wide">
+                                    <span className="relative flex h-1.5 w-1.5">
+                                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-500 opacity-75" />
+                                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-orange-500" />
+                                    </span>
+                                    Selling fast
+                                  </span>
                                 )}
-                              </h3>
+                              </div>
                               <p className="text-xs sm:text-sm text-muted-foreground">
                                 {isOwnedTicket ? (
                                   isTicketUsable(event.userTicket!.status as GuestTicketStatus) ? (
@@ -1323,27 +1466,29 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                                   )
                                 ) : isInvitedTicket ? (
                                   <span className="text-emerald-300/80">
-                                    {invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid ? "Free with invitation" : `${remaining} left`}
+                                    {invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid ? "Free with invitation" : (ticket.description || null)}
                                   </span>
                                 ) : isManuallyUnavailable ? (
                                   <span className="text-gray-400">Unavailable</span>
                                 ) : isSoldOut ? (
                                   <span className="text-amber-400">Sold out - Join waitlist</span>
-                                ) : (
-                                  `${remaining} left`
-                                )}
+                                ) : ticket.description ? (
+                                  <span className="line-clamp-2">{ticket.description}</span>
+                                ) : null}
                               </p>
                             </div>
                           </div>
-                          <div className="text-right shrink-0">
-                            <p className={`text-base sm:text-xl font-bold ${isInvitedTicket && invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid ? "text-emerald-400 line-through decoration-emerald-400/50" : "text-foreground"}`}>
-                              {Number(ticket.price) === 0
-                                ? "Free"
-                                : `£${Number(ticket.price).toFixed(2)}`}
-                            </p>
-                            {isInvitedTicket && invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid && (
-                              <p className="text-sm font-semibold text-emerald-400">Free</p>
-                            )}
+                          <div className="flex items-center gap-2 shrink-0">
+                            <div className="text-right">
+                              <p className={`text-base sm:text-xl font-bold ${isInvitedTicket && invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid ? "text-emerald-400 line-through decoration-emerald-400/50" : "text-foreground"}`}>
+                                {Number(ticket.price) === 0
+                                  ? "Free"
+                                  : `£${Number(ticket.price).toFixed(2)}`}
+                              </p>
+                              {isInvitedTicket && invitationPreview?.ticket?.bypassPayment && invitationPreview?.ticket?.isPaid && (
+                                <p className="text-sm font-semibold text-emerald-400">Free</p>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -1377,7 +1522,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   {/* Accept Invitation Button (for invitation mode) */}
                   {hasValidInvitation && canRegister && (
                     <button
-                      onClick={() => invitedTicketId && handleRegister(invitedTicketId)}
+                      onClick={() => invitedTicketId && handleRegisterClick(invitedTicketId)}
                       disabled={isRegistering}
                       className="w-full mt-4 rounded-xl bg-emerald-500 px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
@@ -1398,7 +1543,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                   {/* Register/Join Waitlist Button (for normal mode - hidden for private events without invite) */}
                   {!hasValidInvitation && !event.isPrivate && canRegister && event.eventTickets.some(t => t.isAvailable) && (
                     <button
-                      onClick={() => selectedTicketId && handleRegister(selectedTicketId)}
+                      onClick={() => selectedTicketId && handleRegisterClick(selectedTicketId)}
                       disabled={!selectedTicketId || isRegistering}
                       className="w-full mt-4 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
@@ -1466,21 +1611,26 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
         />
       )}
 
-      {/* Question Form Modal */}
-      {selectedTicket?.questionForm && (
-        <RegistrationQuestionsModal
-          isOpen={showQuestionForm}
-          questionForm={selectedTicket.questionForm}
-          questionAnswers={questionAnswers}
-          onQuestionChange={handleQuestionChange}
-          onCancel={() => {
-            setShowQuestionForm(false);
-            setQuestionAnswers({});
-          }}
-          onSubmit={() => selectedTicketId && handleRegister(selectedTicketId)}
-          isSubmitting={isRegistering}
-        />
-      )}
+      {/* Registration Confirmation Modal */}
+      {showConfirmModal && event && pendingTicketId && (() => {
+        const pendingTicket = event.eventTickets?.find(t => t.id === pendingTicketId);
+        if (!pendingTicket) return null;
+
+        return (
+          <RegistrationConfirmModal
+            isOpen={showConfirmModal}
+            event={event}
+            ticket={pendingTicket}
+            isRegistering={isRegistering}
+            onClose={() => {
+              setShowConfirmModal(false);
+              setPendingTicketId(null);
+            }}
+            onConfirm={handleConfirmRegistration}
+          />
+        );
+      })()}
+
 
       {/* Report Event Modal */}
       {showReportModal && (
@@ -1551,6 +1701,23 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
         onSubmit={handleSubmitAppeal}
         reason={blacklistStatus?.reason || ""}
       />
+
+      {/* External Link Confirmation Modal */}
+      {showExternalLinkModal && event.virtualMeetingUrl && (
+        <ExternalLinkConfirmModal
+          url={formatExternalUrl(event.virtualMeetingUrl)}
+          onClose={() => setShowExternalLinkModal(false)}
+        />
+      )}
+
+      {/* Save to Calendar Modal */}
+      {showSaveToCalendarModal && (
+        <SaveToCalendarModal
+          eventId={event.id}
+          eventName={event.name}
+          onClose={() => setShowSaveToCalendarModal(false)}
+        />
+      )}
 
       </div>
     </>

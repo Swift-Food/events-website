@@ -6,7 +6,7 @@
 import { EventStatus, EventFormat } from '../status';
 import { EventOwnerResponseDto } from './owner.dto';
 import { EventAddressResponseDto } from '../../address/response.dto';
-import { EventCategoryResponseDto } from '../../category/response.dto';
+import { EventCategoryResponseDto, EventSubcategoryResponseDto } from '../../category/response.dto';
 import { EventTicketResponseDto } from '../../event-ticket/response/ticket.dto';
 
 export interface UserTicketDto {
@@ -33,6 +33,7 @@ export interface EventResponseDto {
   requiresApproval: boolean;
   format: EventFormat;
   virtualMeetingUrl: string | null;
+  isTrustedMeetingUrl: boolean;
   virtualCapacity: number | null;
   eventUrl: string | null;
   viewCount: number;
@@ -44,6 +45,7 @@ export interface EventResponseDto {
   owner: EventOwnerResponseDto;
   address: EventAddressResponseDto;
   categories: EventCategoryResponseDto[];
+  subcategories?: EventSubcategoryResponseDto[];
   eventTickets?: EventTicketResponseDto[];
   ticketsSoldCount?: number;
   attendeesCount?: number;

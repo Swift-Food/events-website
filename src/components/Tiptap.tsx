@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -20,6 +20,7 @@ import {
   Link2,
   Unlink,
   Underline as UnderlineIcon,
+  X,
 } from "lucide-react";
 
 interface TiptapProps {
@@ -30,6 +31,9 @@ interface TiptapProps {
 
 const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
   const [, setForceUpdate] = useState(0);
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("https://");
+  const linkInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
     extensions: [
@@ -70,8 +74,9 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
         onChange(editor.getHTML());
       }
     },
-    onSelectionUpdate: () => {
-      // Force re-render when selection changes to update toolbar button states
+    onTransaction: () => {
+      // Force re-render on every transaction to update toolbar button states
+      // This catches storedMarks changes (when clicking bold/italic/underline without selection)
       setForceUpdate((prev) => prev + 1);
     },
   });
@@ -90,11 +95,38 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
     }
   }, [editor, editable]);
 
+  // Focus input when link modal opens
+  useEffect(() => {
+    if (isLinkModalOpen && linkInputRef.current) {
+      linkInputRef.current.focus();
+      linkInputRef.current.select();
+    }
+  }, [isLinkModalOpen]);
+
   if (!editor) {
     return null;
   }
 
-  const toggleLink = () => {
+  // Helper to check if a mark is active, including stored marks (for when cursor is at end of line)
+  const isMarkActive = (markName: string): boolean => {
+    // First check the standard isActive
+    if (editor.isActive(markName)) {
+      return true;
+    }
+
+    // Also check storedMarks - these are marks that will be applied on next keystroke
+    const { storedMarks } = editor.state;
+    if (storedMarks) {
+      const markType = editor.schema.marks[markName];
+      if (markType && storedMarks.some(mark => mark.type === markType)) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  const openLinkModal = () => {
     if (!editor) return;
 
     // If already a link, unset it
@@ -103,16 +135,20 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
       return;
     }
 
-    // Otherwise, prompt for URL and set link
-    const url = window.prompt("Enter a URL", "https://");
+    // Get existing link URL if editing, otherwise default to https://
+    const existingUrl = editor.getAttributes("link").href;
+    setLinkUrl(existingUrl || "https://");
+    setIsLinkModalOpen(true);
+  };
 
-    if (url === null) {
-      return;
-    }
+  const handleLinkSubmit = () => {
+    if (!editor) return;
 
-    const trimmedUrl = url.trim();
+    const trimmedUrl = linkUrl.trim();
 
-    if (trimmedUrl === "") {
+    if (trimmedUrl === "" || trimmedUrl === "https://") {
+      setIsLinkModalOpen(false);
+      editor.chain().focus().run();
       return;
     }
 
@@ -122,6 +158,15 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
       .extendMarkRange("link")
       .setLink({ href: trimmedUrl })
       .run();
+
+    setIsLinkModalOpen(false);
+    setLinkUrl("https://");
+  };
+
+  const handleLinkCancel = () => {
+    setIsLinkModalOpen(false);
+    setLinkUrl("https://");
+    editor?.chain().focus().run();
   };
 
   const ToolbarButton = ({
@@ -138,6 +183,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
     <button
       type="button"
       onClick={onClick}
+      onMouseDown={(e) => e.preventDefault()} // Prevent button from stealing focus from editor
       title={title}
       className={`rounded-md p-1.5 sm:p-2 transition ${
         isActive
@@ -153,7 +199,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
     <div className="h-5 sm:h-6 w-px bg-zinc-700 mx-1 sm:mx-2" />
   );
 
-  const isLinkActive = editor.isActive("link");
+  const isLinkActive = isMarkActive("link");
 
   return (
     <div className="flex h-full flex-col space-y-3">
@@ -203,7 +249,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
           {/* Text formatting group */}
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleBold().run()}
-            isActive={editor.isActive("bold")}
+            isActive={isMarkActive("bold")}
             title="Bold"
           >
             <Bold className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -211,7 +257,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
 
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleItalic().run()}
-            isActive={editor.isActive("italic")}
+            isActive={isMarkActive("italic")}
             title="Italic"
           >
             <Italic className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -219,7 +265,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
 
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleUnderline().run()}
-            isActive={editor.isActive("underline")}
+            isActive={isMarkActive("underline")}
             title="Underline"
           >
             <UnderlineIcon className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -256,7 +302,7 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
 
           {/* Link and divider group */}
           <ToolbarButton
-            onClick={toggleLink}
+            onClick={openLinkModal}
             isActive={isLinkActive}
             title={isLinkActive ? "Remove Link" : "Add Link"}
           >
@@ -282,6 +328,61 @@ const Tiptap = ({ content = "", onChange, editable = true }: TiptapProps) => {
           className={`tiptap-editor ${!editable ? "tiptap-view-mode" : ""}`}
         />
       </div>
+
+      {/* Link Modal */}
+      {isLinkModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md mx-4 rounded-xl bg-zinc-900 shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b border-zinc-700">
+              <h3 className="text-lg font-semibold text-white">Add Link</h3>
+              <button
+                type="button"
+                onClick={handleLinkCancel}
+                className="p-1 text-zinc-400 hover:text-white transition-colors rounded-md hover:bg-zinc-800"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-4">
+              <label className="block text-sm font-medium text-zinc-300 mb-2">
+                URL
+              </label>
+              <input
+                ref={linkInputRef}
+                type="url"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleLinkSubmit();
+                  } else if (e.key === "Escape") {
+                    handleLinkCancel();
+                  }
+                }}
+                placeholder="https://example.com"
+                className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-600 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+            <div className="flex justify-end gap-3 p-4 border-t border-zinc-700">
+              <button
+                type="button"
+                onClick={handleLinkCancel}
+                className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleLinkSubmit}
+                className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Add Link
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

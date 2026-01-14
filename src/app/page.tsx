@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { calendarsApi } from "@/services/calendars";
 import { categoriesApi } from "@/services/categories";
 import { Calendar as CalendarType } from "@/types/calendar";
-import { EventCategoryType, EventCategoryResponseDto } from "@/types/category";
+import { EventCategoryResponseDto } from "@/types/category";
 import { ChevronRight as ArrowRight, icons, LucideProps } from "lucide-react";
 import SquareCalendarCard from "@/components/SquareCalendarCard";
 import UpcomingEventsSection from "@/components/UpcomingEventsSection";
@@ -62,8 +62,7 @@ export default function DiscoveryPage() {
     }
   };
 
-  // Helper function to get display label
-  const getCategoryLabel = (categoryName: EventCategoryType) => {
+  const getCategoryLabel = (categoryName: string) => {
     return categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
   };
 

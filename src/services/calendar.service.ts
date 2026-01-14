@@ -140,6 +140,16 @@ class CalendarService {
     await apiClient.delete(`${this.baseUrl}/${calendarId}/events/${eventId}`);
   }
 
+  /**
+   * Get all calendars that contain a specific event
+   */
+  async getCalendarsForEvent(eventId: string): Promise<Calendar[]> {
+    const response: AxiosResponse<Calendar[]> = await apiClient.get(
+      `${this.baseUrl}/for-event/${eventId}`
+    );
+    return response.data;
+  }
+
   // ==================== Collaborators ====================
 
   /**

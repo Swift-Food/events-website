@@ -291,9 +291,12 @@ class GuestTicketService {
    * Accept a ticket invitation (public endpoint - can be called during registration or after login)
    * POST /guest-tickets/accept/:token
    */
-  async acceptTicketInvite(token: string): Promise<AcceptTicketInviteResponseDto> {
+  async acceptTicketInvite(
+    token: string,
+    questionAnswers?: Record<string, any>
+  ): Promise<AcceptTicketInviteResponseDto> {
     const response: AxiosResponse<AcceptTicketInviteResponseDto> =
-      await apiClient.post(`${this.baseUrl}/accept/${token}`);
+      await apiClient.post(`${this.baseUrl}/accept/${token}`, { questionAnswers });
     return response.data;
   }
 

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Ticket } from "lucide-react";
-import { TicketType } from "@/types";
+import { X, Ticket, Plus, Edit, Trash2, ChevronUp, ChevronDown, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare } from "lucide-react";
+import { TicketType, FormField } from "@/types";
+import FormFieldModal from "./FormFieldModal";
 
 interface TicketTypeModalProps {
   isOpen: boolean;
@@ -23,8 +24,14 @@ export default function TicketTypeModal({
   const [localPrice, setLocalPrice] = useState("0");
   const [localIsSingleUse, setLocalIsSingleUse] = useState(false);
   const [localQuantity, setLocalQuantity] = useState("100");
+  const [localQuestions, setLocalQuestions] = useState<FormField[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // FormFieldModal state
+  const [isFormFieldModalOpen, setIsFormFieldModalOpen] = useState(false);
+  const [questionToEdit, setQuestionToEdit] = useState<FormField | null>(null);
+  const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
 
   // Handle open/close animations
   useEffect(() => {
@@ -48,6 +55,7 @@ export default function TicketTypeModal({
         setLocalPrice(ticketToEdit.price.toString());
         setLocalIsSingleUse(ticketToEdit.isSingleUse);
         setLocalQuantity(ticketToEdit.quantity?.toString() || "100");
+        setLocalQuestions(ticketToEdit.questionForm || []);
       } else {
         // Reset for new ticket
         setLocalName("");
@@ -56,6 +64,7 @@ export default function TicketTypeModal({
         setLocalPrice("0");
         setLocalIsSingleUse(false);
         setLocalQuantity("100");
+        setLocalQuestions([]);
       }
     }
   }, [isOpen, ticketToEdit]);
@@ -94,6 +103,7 @@ export default function TicketTypeModal({
       price: localIsFree ? 0 : price,
       quantity: quantity,
       isSingleUse: localIsSingleUse,
+      questionForm: localQuestions,
     };
 
     setIsSaving(true);
@@ -110,6 +120,99 @@ export default function TicketTypeModal({
 
   const handleCancel = () => {
     onClose();
+  };
+
+  // Question management helpers
+  const getQuestionTypeIcon = (type: string) => {
+    switch (type) {
+      case "short-text":
+        return <MessageSquare className="h-3.5 w-3.5" />;
+      case "long-text":
+        return <AlignLeft className="h-3.5 w-3.5" />;
+      case "single-select":
+        return <CircleDot className="h-3.5 w-3.5" />;
+      case "multi-select":
+        return <CheckSquare className="h-3.5 w-3.5" />;
+      default:
+        return <HelpCircle className="h-3.5 w-3.5" />;
+    }
+  };
+
+  const getQuestionTypeLabel = (type: string) => {
+    switch (type) {
+      case "short-text":
+        return "Short Text";
+      case "long-text":
+        return "Long Text";
+      case "single-select":
+        return "Single Select";
+      case "multi-select":
+        return "Multi Select";
+      default:
+        return type;
+    }
+  };
+
+  const handleAddQuestion = () => {
+    setQuestionToEdit(null);
+    setEditingQuestionIndex(null);
+    setIsFormFieldModalOpen(true);
+  };
+
+  const handleEditQuestion = (index: number) => {
+    const question = localQuestions[index];
+    setQuestionToEdit({ ...question, id: `question-${index}` });
+    setEditingQuestionIndex(index);
+    setIsFormFieldModalOpen(true);
+  };
+
+  const handleSaveQuestion = (field: FormField) => {
+    // Check for duplicate question (case-insensitive comparison)
+    const normalizedNewQuestion = field.question.trim().toLowerCase();
+    const isDuplicate = localQuestions.some((q, idx) => {
+      // If editing, exclude the current question from duplicate check
+      if (editingQuestionIndex !== null && idx === editingQuestionIndex) {
+        return false;
+      }
+      return q.question.trim().toLowerCase() === normalizedNewQuestion;
+    });
+
+    if (isDuplicate) {
+      alert("This question already exists for this ticket");
+      return;
+    }
+
+    if (editingQuestionIndex !== null) {
+      // Editing existing question
+      setLocalQuestions((prev) =>
+        prev.map((q, idx) => (idx === editingQuestionIndex ? field : q))
+      );
+    } else {
+      // Adding new question
+      setLocalQuestions((prev) => [...prev, field]);
+    }
+
+    setIsFormFieldModalOpen(false);
+    setQuestionToEdit(null);
+    setEditingQuestionIndex(null);
+  };
+
+  const handleDeleteQuestion = (index: number) => {
+    const question = localQuestions[index];
+    if (confirm(`Are you sure you want to delete the question "${question.question}"?`)) {
+      setLocalQuestions((prev) => prev.filter((_, idx) => idx !== index));
+    }
+  };
+
+  const handleMoveQuestion = (fromIndex: number, direction: "up" | "down") => {
+    const toIndex = direction === "up" ? fromIndex - 1 : fromIndex + 1;
+    if (toIndex < 0 || toIndex >= localQuestions.length) return;
+
+    setLocalQuestions((prev) => {
+      const reordered = [...prev];
+      [reordered[fromIndex], reordered[toIndex]] = [reordered[toIndex], reordered[fromIndex]];
+      return reordered;
+    });
   };
 
   return (
@@ -287,6 +390,124 @@ export default function TicketTypeModal({
               />
             </button>
           </div>
+
+          {/* Registration Questions Section */}
+          <div className="border-t border-foreground/10 pt-4 mt-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">
+                  Registration Questions ({localQuestions.length})
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleAddQuestion}
+                className="flex items-center gap-1.5 rounded-lg bg-primary/20 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/30"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add Question
+              </button>
+            </div>
+
+            {localQuestions.length > 0 ? (
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {localQuestions.map((question, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-2 rounded-lg bg-card-background p-3 group"
+                  >
+                    {/* Mobile ordering buttons - left side, vertically stacked */}
+                    <div className="flex flex-col gap-0.5 md:hidden">
+                      <button
+                        type="button"
+                        onClick={() => handleMoveQuestion(index, "up")}
+                        disabled={index === 0}
+                        className="rounded p-0.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Move up"
+                      >
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveQuestion(index, "down")}
+                        disabled={index === localQuestions.length - 1}
+                        className="rounded p-0.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Move down"
+                      >
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-center rounded bg-primary/10 p-1.5 text-primary flex-shrink-0">
+                      {getQuestionTypeIcon(question.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm text-foreground truncate">{question.question}</p>
+                        {question.required && (
+                          <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-xs text-red-400 flex-shrink-0">
+                            Required
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs text-muted-foreground">
+                          {getQuestionTypeLabel(question.type)}
+                          {question.options && question.options.length > 0 && (
+                            <> • {question.options.length} options</>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex items-center gap-0.5 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex-shrink-0">
+                      {/* Desktop ordering buttons */}
+                      <button
+                        type="button"
+                        onClick={() => handleMoveQuestion(index, "up")}
+                        disabled={index === 0}
+                        className="hidden md:block rounded p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Move up"
+                      >
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveQuestion(index, "down")}
+                        disabled={index === localQuestions.length - 1}
+                        className="hidden md:block rounded p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Move down"
+                      >
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleEditQuestion(index)}
+                        className="rounded p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+                        title="Edit question"
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteQuestion(index)}
+                        className="rounded p-1 text-muted-foreground transition-colors hover:bg-red-500/20 hover:text-red-400"
+                        title="Delete question"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-6 px-4 bg-card-background rounded-lg">
+                No questions added yet. Add questions to collect information from attendees.
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="mt-6 flex gap-3">
@@ -308,6 +529,18 @@ export default function TicketTypeModal({
           </button>
         </div>
       </div>
+
+      {/* FormFieldModal for adding/editing questions */}
+      <FormFieldModal
+        isOpen={isFormFieldModalOpen}
+        onClose={() => {
+          setIsFormFieldModalOpen(false);
+          setQuestionToEdit(null);
+          setEditingQuestionIndex(null);
+        }}
+        onSave={handleSaveQuestion}
+        fieldToEdit={questionToEdit}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authApi } from "./authApi";
 import { toast } from "sonner";
+import { getSafeRedirectUrl } from "../utils/safeRedirect";
 
 // Google Sign-In types
 declare global {
@@ -79,10 +80,10 @@ export function useOAuth({
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push(redirectTo || "/");
+        router.push(getSafeRedirectUrl(redirectTo));
       }
-  
-      window.location.href = redirectTo || "/";
+
+      window.location.href = getSafeRedirectUrl(redirectTo);
     } catch (error: any) {
       console.error("Google OAuth error:", error);
       const errorMessage =
@@ -131,7 +132,7 @@ export function useOAuth({
   // Initialize Apple Sign-In
   useEffect(() => {
     const initializeApple = () => {
-      if (window.AppleID?.auth) {
+      if (window.AppleID?.auth && process.env.NEXT_PUBLIC_APPLE_CLIENT_ID) {
         try {
           window.AppleID.auth.init({
             clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
@@ -229,11 +230,11 @@ export function useOAuth({
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push(redirectTo || "/");
+        router.push(getSafeRedirectUrl(redirectTo));
       }
 
       // Force reload to update auth context
-      window.location.href = redirectTo || "/";
+      window.location.href = getSafeRedirectUrl(redirectTo);
     } catch (error: any) {
       console.error("Apple OAuth error:", error);
       const errorMessage =

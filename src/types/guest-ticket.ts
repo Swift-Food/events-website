@@ -74,6 +74,16 @@ export interface GuestTicketResponseDto {
   claimDeadline?: Date | null;
   /** Whether this ticket was originally on the waitlist */
   wasWaitlisted?: boolean;
+  /** ID of the organizer who cancelled/rejected the ticket (null if cancelled by user) */
+  cancelledByEventUserId?: string | null;
+  /** Reason for cancellation/rejection */
+  cancelledReason?: string | null;
+  /** Who initiated the refund (userId) */
+  refundedByUserId?: string | null;
+  /** When the ticket was refunded */
+  refundedAt?: Date | null;
+  /** Reason for refund */
+  refundReason?: string | null;
 }
 
 /**
@@ -195,6 +205,7 @@ export interface BulkActionResponseDto {
   success: boolean;
   message?: string;
   approved?: number;
+  waitlisted?: number;
   rejected?: number;
   checkedIn?: number;
   failed?: number;
