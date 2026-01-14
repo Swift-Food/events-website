@@ -4,12 +4,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Eye, EyeOff, Tags } from "lucide-react";
+import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Eye, EyeOff, Tags, Download } from "lucide-react";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import FormFieldModal from "@/components/event-edit/FormFieldModal";
 import LocationModal from "@/components/event-edit/LocationModal";
 import CategoryModal from "@/components/event-edit/CategoryModal";
+import ImportEventModal from "@/components/event-edit/ImportEventModal";
 import GoogleMap from "@/components/GoogleMap";
 import {
   EventCreationProvider,
@@ -137,6 +138,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
@@ -1028,15 +1030,24 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               </div>
             </div>
             {mode === "create" && (
-              <button
-                type="button"
-                onClick={handleClearForm}
-                className="flex items-center gap-2 rounded-2xl bg-red-500/10 backdrop-blur-md px-5 py-3 text-red-400 transition-all hover:bg-red-500/20 hover:scale-105 cursor-pointer"
-                title="Clear entire form"
-              >
-                <Trash2 className="h-5 w-5" />
-                <span className="hidden sm:inline font-medium">Clear Form</span>
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setIsImportModalOpen(true)}
+                  className="rounded-full p-2.5 text-muted-foreground transition-colors hover:bg-card-background hover:text-foreground"
+                  title="Import event"
+                >
+                  <Download className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClearForm}
+                  className="rounded-full p-2.5 text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-400"
+                  title="Clear form"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
+              </div>
             )}
           </div>
 
@@ -1822,6 +1833,11 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
         }}
         onSave={handleSaveQuestion}
         fieldToEdit={fieldToEdit}
+      />
+
+      <ImportEventModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
       />
     </div>
   );
