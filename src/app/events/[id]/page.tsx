@@ -135,7 +135,7 @@ export default async function EventPage({ params }: PageProps) {
             price: Number(ticket.price),
             priceCurrency: "GBP",
             availability:
-              (ticket.quantityLeft ?? 0) > 0 && ticket.isAvailable
+              !ticket.isSoldOut && ticket.isAvailable
                 ? "https://schema.org/InStock"
                 : "https://schema.org/SoldOut",
             url: `${process.env.NEXT_PUBLIC_APP_URL}/events/${id}`,

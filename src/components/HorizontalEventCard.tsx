@@ -41,17 +41,17 @@ export default function HorizontalEventCard({
     });
   };
 
-  // Check if sold out (all tickets have no quantity left)
+  // Check if sold out (all tickets are sold out)
   const isSoldOut =
     event.eventTickets &&
     event.eventTickets.length > 0 &&
-    event.eventTickets.every((ticket) => ticket.quantityLeft === 0);
+    event.eventTickets.every((ticket) => ticket.isSoldOut);
 
   // Get minimum price from available public tickets
   const getMinPrice = () => {
     const availableTickets = event.eventTickets?.filter(
       (ticket) =>
-        !ticket.isPrivate && ticket.isAvailable && ticket.quantityLeft > 0
+        !ticket.isPrivate && ticket.isAvailable && !ticket.isSoldOut
     );
     if (!availableTickets || availableTickets.length === 0) return null;
 

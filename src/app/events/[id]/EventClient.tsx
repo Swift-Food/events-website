@@ -1305,7 +1305,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
             {/* Tickets */}
             {event.eventTickets && event.eventTickets.length > 0 && (() => {
               const isEventEnded = new Date(event.endDateTime) < new Date();
-              const hasAvailableTickets = event.eventTickets.some(t => (t.quantityLeft ?? 0) > 0 && t.isAvailable);
+              const hasAvailableTickets = event.eventTickets.some(t => !t.isSoldOut && t.isAvailable);
               const hasUserTicket = !!event.userTicket;
               // Allow registration even when sold out (for waitlist), but not if user already has ticket
               const canRegister = event.status === EventStatus.PUBLISHED && !isEventEnded && !hasUserTicket;
@@ -1385,12 +1385,10 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
 
                   <div className="space-y-2 sm:space-y-3">
                     {event.eventTickets.map((ticket) => {
-                      const remaining = ticket.quantityLeft ?? 0;
-                      const total = ticket.quantityTotal ?? 0;
                       const isSelected = selectedTicketId === ticket.id;
-                      const isSoldOut = remaining <= 0;
-                      const nearlySoldOutThreshold = Math.max(10, 0.1 * total);
-                      const isNearlySoldOut = !isSoldOut && total > 0 && remaining < nearlySoldOutThreshold;
+                      // Use backend-computed status fields (no quantity data needed)
+                      const isSoldOut = ticket.isSoldOut;
+                      const isNearlySoldOut = ticket.isNearlySoldOut;
                       const isManuallyUnavailable = !ticket.isAvailable; // Organizer disabled this ticket
                       const isOwnedTicket = event.userTicket?.ticketName === ticket.name;
                       const isActiveTicket = isOwnedTicket && isTicketUsable(event.userTicket!.status as GuestTicketStatus);
@@ -1552,15 +1550,13 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                           <Loader2 className="h-4 w-4 animate-spin" />
                           {(() => {
                             const ticket = event.eventTickets.find(t => t.id === selectedTicketId);
-                            const isSoldOut = (ticket?.quantityLeft ?? 0) <= 0;
-                            return isSoldOut ? "Joining waitlist..." : "Registering...";
+                            return ticket?.isSoldOut ? "Joining waitlist..." : "Registering...";
                           })()}
                         </>
                       ) : selectedTicketId ? (
                         (() => {
                           const ticket = event.eventTickets.find(t => t.id === selectedTicketId);
-                          const isSoldOut = (ticket?.quantityLeft ?? 0) <= 0;
-                          return isSoldOut ? "Join Waitlist" : "Register";
+                          return ticket?.isSoldOut ? "Join Waitlist" : "Register";
                         })()
                       ) : (
                         "Select a ticket"

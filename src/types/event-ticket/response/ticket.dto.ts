@@ -17,15 +17,19 @@ export interface EventTicketResponseDto {
   description: string | null;
   price: string;
   isSingleUse?: boolean;
-  quantityTotal: number;
-  quantitySold: number;
-  quantityLeft: number;
+  // Quantity fields are optional - only included for event organizers/admin collaborators
+  quantityTotal?: number;
+  quantitySold?: number;
+  quantityLeft?: number;
   questionForm: QuestionBlock[] | null;
   isPrivate: boolean;
   autoApprovalGuestEmailsCount?: number;
   salesStartDate: string | null;
   salesEndDate: string | null;
   isAvailable: boolean;
+  // Status fields - always included for public display
+  isSoldOut: boolean;
+  isNearlySoldOut: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -19,8 +19,9 @@ export default function EventCard({ event, isHostedEvent = false }: EventCardPro
     });
   };
 
+  // quantitySold may be undefined for public users (data hidden)
   const totalTicketsSold = event.eventTickets?.reduce(
-    (sum, ticket) => sum + ticket.quantitySold,
+    (sum, ticket) => sum + (ticket.quantitySold ?? 0),
     0
   ) || 0;
 
