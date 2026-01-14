@@ -23,6 +23,8 @@ interface ImportedEventData {
     address?: string;
     city?: string;
     postalCode?: string;
+    latitude?: number;
+    longitude?: number;
   };
   image?: string;
   url?: string;
@@ -47,8 +49,11 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
     setAddressLine1,
     setCity,
     setPostcode,
+    setLatitude,
+    setLongitude,
     setCoverPreview,
     setEventFormat,
+    clearForm,
   } = useEventCreation();
 
   // Focus input when modal opens
@@ -130,6 +135,9 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
   const applyImportedData = () => {
     if (!importedData) return;
 
+    // Clear the form first to remove any existing data (including default tickets)
+    clearForm();
+
     if (importedData.name) {
       setEventName(importedData.name);
     }
@@ -162,6 +170,10 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
       }
       if (importedData.location.postalCode) {
         setPostcode(importedData.location.postalCode);
+      }
+      if (importedData.location.latitude && importedData.location.longitude) {
+        setLatitude(importedData.location.latitude);
+        setLongitude(importedData.location.longitude);
       }
     }
 
@@ -338,12 +350,10 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
             )}
           </button>
 
-          {/* Helper text */}
-          {status === "idle" && (
-            <p className="text-xs text-center text-muted-foreground">
-              Works with Luma, Eventbrite, and most event pages
-            </p>
-          )}
+          {/* Warning note */}
+          <p className="text-xs text-center text-muted-foreground">
+            Imported data may be incomplete. Verify all fields, particularly the description. Tickets are not imported.
+          </p>
         </div>
       </div>
     </div>

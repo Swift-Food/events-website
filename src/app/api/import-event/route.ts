@@ -17,6 +17,13 @@ interface JsonLdEvent {
       postalCode?: string;
       addressCountry?: string;
     } | string;
+    geo?: {
+      "@type"?: string;
+      latitude?: number | string;
+      longitude?: number | string;
+    };
+    latitude?: number | string;
+    longitude?: number | string;
   };
   image?: string | string[] | { url?: string };
   url?: string;
@@ -106,6 +113,8 @@ function normalizeEventData(jsonLd: JsonLdEvent, metaTags: Partial<JsonLdEvent>,
     address?: string;
     city?: string;
     postalCode?: string;
+    latitude?: number;
+    longitude?: number;
   } | undefined;
 
   if (jsonLd.location) {
@@ -122,6 +131,34 @@ function normalizeEventData(jsonLd: JsonLdEvent, metaTags: Partial<JsonLdEvent>,
         locationData.city = loc.address.addressLocality;
         locationData.postalCode = loc.address.postalCode;
       }
+    }
+
+    // Extract geo coordinates - check both loc.geo and direct loc.latitude/longitude
+    let lat: number | undefined;
+    let lng: number | undefined;
+
+    if (loc.geo) {
+      lat = typeof loc.geo.latitude === "string"
+        ? parseFloat(loc.geo.latitude)
+        : loc.geo.latitude;
+      lng = typeof loc.geo.longitude === "string"
+        ? parseFloat(loc.geo.longitude)
+        : loc.geo.longitude;
+    }
+
+    // Fallback to direct latitude/longitude on location object
+    if ((!lat || !lng) && loc.latitude && loc.longitude) {
+      lat = typeof loc.latitude === "string"
+        ? parseFloat(loc.latitude)
+        : loc.latitude;
+      lng = typeof loc.longitude === "string"
+        ? parseFloat(loc.longitude)
+        : loc.longitude;
+    }
+
+    if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+      locationData.latitude = lat;
+      locationData.longitude = lng;
     }
   }
 
