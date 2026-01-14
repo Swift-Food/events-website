@@ -17,7 +17,6 @@ import {
   Twitter,
   Linkedin,
   Instagram,
-  Clock,
 } from "lucide-react";
 
 type EventTab = "upcoming" | "past";
@@ -32,7 +31,6 @@ export default function OrganizerProfileClient({
   userId,
 }: OrganizerProfileClientProps) {
   const [events, setEvents] = useState<EventResponseDto[]>([]);
-  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,15 +51,6 @@ export default function OrganizerProfileClient({
 
   const profileImage =
     initialProfile.profilePicture || initialProfile.user?.profilePicture;
-
-  const formatMemberSince = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
 
   const formatJoinedDateParts = (dateString: string) => {
     const date = new Date(dateString);
@@ -126,7 +115,6 @@ export default function OrganizerProfileClient({
 
       const newEvents = result.events ?? [];
       setEvents(newEvents);
-      setTotal(result.total ?? 0);
       setHasMore(
         newEvents.length === eventsPerPage &&
           newEvents.length < (result.total ?? 0)
@@ -196,26 +184,26 @@ export default function OrganizerProfileClient({
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
         
-        {/* Profile Header - Mobile */}
-        <div className="mb-8 sm:hidden">
+        {/* Profile Header */}
+        <div className="mb-8">
           <div className="flex flex-col items-center text-center">
             {/* Avatar */}
             {profileImage ? (
               <Image
                 src={profileImage}
                 alt={displayName}
-                width={144}
-                height={144}
-                className="rounded-full object-cover h-32 w-32"
+                width={160}
+                height={160}
+                className="rounded-full object-cover h-32 w-32 sm:h-36 sm:w-36"
               />
             ) : (
-              <div className="flex h-32 w-32 items-center justify-center rounded-full bg-primary/10">
-                <User className="h-14 w-14 text-primary" />
+              <div className="flex h-32 w-32 sm:h-36 sm:w-36 items-center justify-center rounded-full bg-primary/10">
+                <User className="h-14 w-14 sm:h-16 sm:w-16 text-primary" />
               </div>
             )}
 
             {/* Name */}
-            <h1 className="text-[32px] !font-light text-white mt-6">
+            <h1 className="text-[32px] sm:text-[36px] !font-light text-white mt-6">
               {displayName}
             </h1>
 
@@ -269,7 +257,7 @@ export default function OrganizerProfileClient({
 
             {/* Bio */}
             {initialProfile.bio && (
-              <p className="text-[15px] text-zinc-400 leading-relaxed mt-8 px-2">
+              <p className="text-[15px] text-zinc-400 leading-relaxed mt-8 px-2 sm:px-0 sm:max-w-xl">
                 {initialProfile.bio}
               </p>
             )}
@@ -281,110 +269,6 @@ export default function OrganizerProfileClient({
               <span>Joined {joinedParts.month} {joinedParts.year}</span>
             </div>
           </div>
-        </div>
-
-
-        {/* Profile Header - Desktop */}
-        <div className="mb-8 hidden sm:block space-y-4">
-          <div className="flex items-center gap-4">
-            {/* Avatar */}
-            {profileImage ? (
-              <Image
-                src={profileImage}
-                alt={displayName}
-                width={80}
-                height={80}
-                className="rounded-full object-cover shrink-0 h-20 w-20"
-              />
-            ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                <User className="h-10 w-10 text-primary" />
-              </div>
-            )}
-
-            {/* Info */}
-            <div className="flex-1 min-w-0 space-y-2">
-              <h1 className="text-2xl font-bold text-foreground truncate">
-                {displayName}
-              </h1>
-              {initialProfile.organizationName &&
-                initialProfile.user?.username && (
-                  <p className="text-sm text-muted-foreground">
-                    @{initialProfile.user.username}
-                  </p>
-                )}
-
-              {/* Stats */}
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="h-4 w-4" />
-                  <span className="font-semibold text-foreground">
-                    {initialProfile.totalEventsCreated}
-                  </span>{" "}
-                  events hosted
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Clock className="h-4 w-4" />
-                  Joined {formatMemberSince(initialProfile.createdAt)}
-                </span>
-              </div>
-
-              {/* Social Links */}
-              <div className="flex items-center gap-4">
-                {initialProfile.website && (
-                  <a
-                    href={initialProfile.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Website"
-                  >
-                    <Globe size={16} />
-                  </a>
-                )}
-                {initialProfile.twitterHandle && (
-                  <a
-                    href={`https://twitter.com/${initialProfile.twitterHandle.replace("@", "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Twitter"
-                  >
-                    <Twitter size={16} />
-                  </a>
-                )}
-                {initialProfile.linkedinUrl && (
-                  <a
-                    href={initialProfile.linkedinUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="LinkedIn"
-                  >
-                    <Linkedin size={16} />
-                  </a>
-                )}
-                {initialProfile.instagramUrl && (
-                  <a
-                    href={initialProfile.instagramUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Instagram"
-                  >
-                    <Instagram size={16} />
-                  </a>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Bio - outside the centered flex container, aligned with text content */}
-          {initialProfile.bio && (
-            <p className="text-sm text-muted-foreground ml-24">
-              {initialProfile.bio}
-            </p>
-          )}
         </div>
 
         {/* Events Section */}
