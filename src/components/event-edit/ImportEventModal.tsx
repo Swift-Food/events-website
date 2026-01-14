@@ -73,6 +73,7 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
     setCoverPreview,
     setEventFormat,
     setTicketTypes,
+    setExternalEventUrl,
     clearForm,
   } = useEventCreation();
 
@@ -233,6 +234,11 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
         "BOTH": EventFormat.BOTH,
       };
       setEventFormat(formatMap[importedData.eventFormat]);
+    }
+
+    // Set external event URL (the original URL we imported from)
+    if (importedData.url) {
+      setExternalEventUrl(importedData.url);
     }
 
     toast.success("Event details imported!");

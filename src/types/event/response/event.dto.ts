@@ -50,6 +50,7 @@ export interface EventResponseDto {
   ticketsSoldCount?: number;
   attendeesCount?: number;
   userTicket?: UserTicketDto | null;
+  externalEventUrl?: string;
 }
 
 export interface EventListResponseDto {

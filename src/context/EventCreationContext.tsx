@@ -95,6 +95,10 @@ interface EventCreationContextType {
   acceptedOrganizerTerms: boolean;
   setAcceptedOrganizerTerms: Dispatch<SetStateAction<boolean>>;
 
+  // External event import
+  externalEventUrl: string;
+  setExternalEventUrl: Dispatch<SetStateAction<string>>;
+
   // Form actions
   clearForm: () => void;
   persistEventDraft: () => void;
@@ -135,6 +139,7 @@ type EventDraft = {
   selectedCategoryIds: string[];
   selectedSubcategoryIds: string[];
   acceptedOrganizerTerms: boolean;
+  externalEventUrl: string;
 };
 
 // Helper to format a Date to datetime-local input format
@@ -292,6 +297,11 @@ export function EventCreationProvider({
     storedDraft.acceptedOrganizerTerms ?? false
   );
 
+  // External event import
+  const [externalEventUrl, setExternalEventUrl] = useState(
+    storedDraft.externalEventUrl ?? ""
+  );
+
   // Ticket management functions
   const addTicketType = useCallback((ticket: TicketType) => {
     setTicketTypes((prev) => [...prev, ticket]);
@@ -356,6 +366,7 @@ export function EventCreationProvider({
       selectedCategoryIds,
       selectedSubcategoryIds,
       acceptedOrganizerTerms,
+      externalEventUrl,
     };
 
     try {
@@ -393,6 +404,7 @@ export function EventCreationProvider({
     selectedCategoryIds,
     selectedSubcategoryIds,
     acceptedOrganizerTerms,
+    externalEventUrl,
   ]);
 
   useEffect(() => {
@@ -431,6 +443,7 @@ export function EventCreationProvider({
     setSelectedCategoryIds([]);
     setSelectedSubcategoryIds([]);
     setAcceptedOrganizerTerms(false);
+    setExternalEventUrl("");
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(STORAGE_KEY);
     }
@@ -501,6 +514,8 @@ export function EventCreationProvider({
         setSelectedSubcategoryIds,
         acceptedOrganizerTerms,
         setAcceptedOrganizerTerms,
+        externalEventUrl,
+        setExternalEventUrl,
         clearForm,
         persistEventDraft,
       }}

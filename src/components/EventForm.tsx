@@ -121,6 +121,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     setSelectedSubcategoryIds,
     acceptedOrganizerTerms,
     setAcceptedOrganizerTerms,
+    externalEventUrl,
     clearForm,
   } = useEventCreation();
 
@@ -580,6 +581,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
         subcategoryIds: selectedSubcategoryIds,
         eventUrl: undefined,
         tickets: ticketsPayload,
+        externalEventUrl: externalEventUrl || undefined,
       };
 
       let createdOrUpdatedEventId: string;

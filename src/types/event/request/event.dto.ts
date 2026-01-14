@@ -41,6 +41,7 @@ export interface CreateEventDto {
   acceptingNewTickets?: boolean;
   stopAcceptingOnStart?: boolean;
   hideFullAddress?: boolean;
+  externalEventUrl?: string;
 }
 
 export interface UpdateEventDto {
@@ -67,6 +68,7 @@ export interface UpdateEventDto {
   acceptingNewTickets?: boolean;
   stopAcceptingOnStart?: boolean;
   hideFullAddress?: boolean;
+  externalEventUrl?: string;
 }
 
 export interface EventQueryDto {
