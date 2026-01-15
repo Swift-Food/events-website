@@ -1,7 +1,7 @@
 // services/event-user.service.ts
 import apiClient from '@/lib/auth/apiClient';
 import { AxiosResponse } from 'axios';
-import { IsFollowingResponse, FollowActionResponse } from '@/types/follower';
+import { IsFollowingResponse, FollowActionResponse, FollowRelationshipResponse } from '@/types/follower';
 
 export interface EventUserStats {
   eventsCreated: number;
@@ -188,6 +188,16 @@ class EventUserService {
   async isFollowing(userId: string): Promise<IsFollowingResponse> {
     const response: AxiosResponse<IsFollowingResponse> = await apiClient.get(
       `${this.baseUrl}/${userId}/is-following`
+    );
+    return response.data;
+  }
+
+  /**
+   * Get bidirectional follow relationship with a user
+   */
+  async getFollowRelationship(userId: string): Promise<FollowRelationshipResponse> {
+    const response: AxiosResponse<FollowRelationshipResponse> = await apiClient.get(
+      `${this.baseUrl}/${userId}/follow-relationship`
     );
     return response.data;
   }

@@ -47,6 +47,7 @@ export default function UserProfileClient({
   // Follow state
   const [followStatus, setFollowStatus] =
     useState<FollowStatusType>("not_following");
+  const [followsMe, setFollowsMe] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -182,18 +183,19 @@ export default function UserProfileClient({
     fetchEvents();
   }, [fetchEvents]);
 
-  // Fetch follow status
+  // Fetch follow relationship
   useEffect(() => {
-    const checkFollowStatus = async () => {
+    const checkFollowRelationship = async () => {
       if (!isAuthenticated || isOwnProfile) return;
       try {
-        const result = await eventUserService.isFollowing(initialProfile.id);
-        setFollowStatus(result.status);
+        const result = await eventUserService.getFollowRelationship(initialProfile.id);
+        setFollowStatus(result.isFollowingStatus);
+        setFollowsMe(result.followsMe);
       } catch (err) {
-        console.error("Failed to check follow status:", err);
+        console.error("Failed to check follow relationship:", err);
       }
     };
-    checkFollowStatus();
+    checkFollowRelationship();
   }, [isAuthenticated, isOwnProfile, initialProfile.id]);
 
   const handleFollow = async () => {
@@ -274,6 +276,13 @@ export default function UserProfileClient({
               {displayName}
             </h1>
 
+            {/* Follows you indicator */}
+            {isAuthenticated && !isOwnProfile && followsMe && (
+              <p className="text-[10px] text-zinc-500 tracking-widest mt-2">
+                FOLLOWS YOU
+              </p>
+            )}
+
             {/* Social Links - Public only */}
             {isPublic && (
               <div className="flex items-center justify-center gap-5 mt-4">
@@ -332,7 +341,7 @@ export default function UserProfileClient({
               <button
                 onClick={followStatus === "not_following" ? handleFollow : handleUnfollow}
                 disabled={followLoading}
-                className="mt-4 flex items-center gap-2 px-8 py-2 rounded-full border border-zinc-500 text-white text-sm font-medium hover:bg-white/10 transition-colors disabled:opacity-50"
+                className="mt-4 flex items-center gap-2 px-12 py-2 rounded-full border border-zinc-500 text-foreground text-sm font-light tracking-widest hover:bg-white/10 transition-colors disabled:opacity-50"
               >
                 {followLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {followStatus === "following"

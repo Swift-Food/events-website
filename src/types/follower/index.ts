@@ -58,6 +58,14 @@ export interface IsFollowingResponse {
   status: FollowStatusType;
 }
 
+// Response for follow-relationship check (bidirectional)
+export interface FollowRelationshipResponse {
+  isFollowing: boolean;
+  isFollowingStatus: FollowStatusType;
+  followsMe: boolean;
+  followsMeStatus: FollowStatusType;
+}
+
 // Friend attending an event
 export interface FriendAttendingResponse {
   id: string;
