@@ -133,15 +133,15 @@ export function MealSessionCard({
               <div className="rounded-lg bg-primary/10 p-1.5 group-hover:bg-primary/20 transition-colors">
                 <Mail className="h-4 w-4 text-primary" />
               </div>
-              Special Requirements
+              Contact for enquiries
             </label>
-            <textarea
-              value={session.specialRequirements}
-              onChange={(e) => onUpdate(session.id, { specialRequirements: e.target.value })}
-              rows={3}
-              className="w-full rounded-xl border border-white/10 bg-card-secondary-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all hover:border-primary/30 resize-none"
-              placeholder="Any dietary restrictions, allergies, or special instructions..."
-            />
+            <a
+              href={`mailto:swiftfooduk@gmail.com?subject=Catering%20enquiry%20for%20${eventId}`}
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-card-secondary-background px-4 py-3 text-sm font-medium text-foreground hover:bg-primary/10 hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+            >
+              <Mail className="h-4 w-4" />
+              Send Email to swiftfooduk@gmail.com
+            </a>
           </div>
 
           {/* Bundle Selection - Enhanced */}
