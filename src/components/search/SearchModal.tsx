@@ -70,6 +70,12 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       keywords: ["tickets", "my", "purchased", "booked"],
     },
     {
+      icon: <Users className="h-4 w-4" />,
+      label: "Friends",
+      href: "/friends",
+      keywords: ["friends", "followers", "following", "social"],
+    },
+    {
       icon: <CalendarIcon className="h-4 w-4" />,
       label: "Manage Events",
       href: "/event-management",
