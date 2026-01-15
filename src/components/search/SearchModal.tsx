@@ -125,6 +125,12 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     setSelectedIndex(-1);
   }, [searchResults, searchQuery]);
 
+  // Calendar grid constants
+  const CALENDAR_COLS = 3;
+  const calendarStartIndex = filteredShortcuts.length;
+  const calendarCount = searchResults?.calendars?.items?.length ?? 0;
+  const calendarEndIndex = calendarStartIndex + calendarCount;
+
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -133,14 +139,65 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
         return;
       }
 
+      const currentItem = selectedIndex >= 0 ? allItems[selectedIndex] : null;
+      const isInCalendarSection = currentItem?.type === "calendar";
+
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setSelectedIndex((prev) =>
-          prev < allItems.length - 1 ? prev + 1 : prev
-        );
+        if (isInCalendarSection) {
+          // Move down by CALENDAR_COLS in calendar grid
+          const newIndex = selectedIndex + CALENDAR_COLS;
+          if (newIndex < calendarEndIndex) {
+            setSelectedIndex(newIndex);
+          } else {
+            // Move to first item after calendars
+            if (calendarEndIndex < allItems.length) {
+              setSelectedIndex(calendarEndIndex);
+            }
+          }
+        } else {
+          setSelectedIndex((prev) =>
+            prev < allItems.length - 1 ? prev + 1 : prev
+          );
+        }
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+        if (isInCalendarSection) {
+          // Move up by CALENDAR_COLS in calendar grid
+          const newIndex = selectedIndex - CALENDAR_COLS;
+          if (newIndex >= calendarStartIndex) {
+            setSelectedIndex(newIndex);
+          } else {
+            // Move to last shortcut or deselect
+            if (calendarStartIndex > 0) {
+              setSelectedIndex(calendarStartIndex - 1);
+            } else {
+              setSelectedIndex(-1);
+            }
+          }
+        } else {
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+        }
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        if (isInCalendarSection) {
+          // Move right within calendar row
+          const calendarLocalIndex = selectedIndex - calendarStartIndex;
+          const isLastInRow = (calendarLocalIndex + 1) % CALENDAR_COLS === 0;
+          if (!isLastInRow && selectedIndex + 1 < calendarEndIndex) {
+            setSelectedIndex(selectedIndex + 1);
+          }
+        }
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        if (isInCalendarSection) {
+          // Move left within calendar row
+          const calendarLocalIndex = selectedIndex - calendarStartIndex;
+          const isFirstInRow = calendarLocalIndex % CALENDAR_COLS === 0;
+          if (!isFirstInRow) {
+            setSelectedIndex(selectedIndex - 1);
+          }
+        }
       } else if (e.key === "Enter" && selectedIndex >= 0 && selectedIndex < allItems.length) {
         e.preventDefault();
         const item = allItems[selectedIndex];
