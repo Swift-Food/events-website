@@ -7,7 +7,10 @@
 | `/search/unified` | Events + Calendars (default) |
 | `/search/unified?type=events` | Events only |
 | `/search/unified?type=calendars` | Calendars only |
+| `/search/unified?type=events,calendars` | Events + Calendars (explicit) |
 | `/search/users` | People only |
+
+The `type` param accepts comma-separated values to specify which result types you want.
 
 ---
 
@@ -19,8 +22,11 @@
 | Param | Type | Default |
 |-------|------|---------|
 | `q` | string | required |
+| `type` | string | `events,calendars` |
 | `skip` | number | 0 |
 | `take` | number | 10 (max 50) |
+
+The `type` param accepts: `events`, `calendars`, or `events,calendars` (comma-separated).
 
 **Response:**
 ```typescript
