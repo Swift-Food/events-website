@@ -36,6 +36,11 @@ export default function UserProfileClient({
   const [hasMore, setHasMore] = useState(true);
   const [activeTab, setActiveTab] = useState<EventTab>("upcoming");
 
+  // Log profile data
+  console.log("User profile data:", initialProfile);
+
+  const isPublic = initialProfile.isProfilePublic !== false;
+
   const sentinelRef = useRef<HTMLDivElement>(null);
   const skipRef = useRef(0);
   const eventsPerPage = 12;
@@ -209,163 +214,169 @@ export default function UserProfileClient({
               {displayName}
             </h1>
 
-            {/* Social Links */}
-            <div className="flex items-center justify-center gap-5 mt-4">
-              {initialProfile.website && (
-                <a
-                  href={initialProfile.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-zinc-500 hover:text-white transition-colors"
-                  aria-label="Website"
-                >
-                  <Globe size={18} />
-                </a>
-              )}
-              {initialProfile.twitterHandle && (
-                <a
-                  href={`https://twitter.com/${initialProfile.twitterHandle.replace("@", "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-zinc-500 hover:text-white transition-colors"
-                  aria-label="Twitter"
-                >
-                  <Twitter size={18} />
-                </a>
-              )}
-              {initialProfile.linkedinUrl && (
-                <a
-                  href={initialProfile.linkedinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-zinc-500 hover:text-white transition-colors"
-                  aria-label="LinkedIn"
-                >
-                  <Linkedin size={18} />
-                </a>
-              )}
-              {initialProfile.instagramUrl && (
-                <a
-                  href={initialProfile.instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-zinc-500 hover:text-white transition-colors"
-                  aria-label="Instagram"
-                >
-                  <Instagram size={18} />
-                </a>
-              )}
-            </div>
+            {/* Social Links - Public only */}
+            {isPublic && (
+              <div className="flex items-center justify-center gap-5 mt-4">
+                {initialProfile.website && (
+                  <a
+                    href={initialProfile.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-zinc-500 hover:text-white transition-colors"
+                    aria-label="Website"
+                  >
+                    <Globe size={18} />
+                  </a>
+                )}
+                {initialProfile.twitterHandle && (
+                  <a
+                    href={`https://twitter.com/${initialProfile.twitterHandle.replace("@", "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-zinc-500 hover:text-white transition-colors"
+                    aria-label="Twitter"
+                  >
+                    <Twitter size={18} />
+                  </a>
+                )}
+                {initialProfile.linkedinUrl && (
+                  <a
+                    href={initialProfile.linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-zinc-500 hover:text-white transition-colors"
+                    aria-label="LinkedIn"
+                  >
+                    <Linkedin size={18} />
+                  </a>
+                )}
+                {initialProfile.instagramUrl && (
+                  <a
+                    href={initialProfile.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-zinc-500 hover:text-white transition-colors"
+                    aria-label="Instagram"
+                  >
+                    <Instagram size={18} />
+                  </a>
+                )}
+              </div>
+            )}
 
-            {/* Bio */}
+            {/* Bio - Always shown */}
             {initialProfile.bio && (
               <p className="text-[15px] text-zinc-400 leading-relaxed mt-8 px-2 sm:px-0 sm:max-w-xl">
                 {initialProfile.bio}
               </p>
             )}
 
-            {/* Stats */}
-            <div className="flex items-center gap-3 text-xs text-zinc-600 uppercase tracking-widest mt-6">
-              <span>{initialProfile.totalEventsCreated} Events Created</span>
-              <span>·</span>
-              <span>Joined {joinedParts.month} {joinedParts.year}</span>
-            </div>
+            {/* Stats - Public only */}
+            {isPublic && (
+              <div className="flex items-center gap-3 text-xs text-zinc-600 uppercase tracking-widest mt-6">
+                <span>{initialProfile.totalEventsCreated} Events Created</span>
+                <span>·</span>
+                <span>Joined {joinedParts.month} {joinedParts.year}</span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Events Section */}
-        <div>
-          <h2 className="text-lg font-semibold text-foreground mb-4">
-            Events by {displayName}
-          </h2>
+        {/* Events Section - Only show for public profiles */}
+        {isPublic && (
+          <div>
+            <h2 className="text-lg font-semibold text-foreground mb-4">
+              Events by {displayName}
+            </h2>
 
-          {/* Tabs */}
-          <div className="flex gap-2 mb-6">
-            <button
-              onClick={() => setActiveTab("upcoming")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeTab === "upcoming"
-                  ? "bg-primary text-white"
-                  : "bg-white/5 text-muted-foreground hover:bg-white/10"
-              }`}
-            >
-              Upcoming{!loading && ` (${upcomingCount})`}
-            </button>
-            <button
-              onClick={() => setActiveTab("past")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeTab === "past"
-                  ? "bg-primary text-white"
-                  : "bg-white/5 text-muted-foreground hover:bg-white/10"
-              }`}
-            >
-              Past{!loading && ` (${pastCount})`}
-            </button>
-          </div>
-
-          {/* Loading State */}
-          {loading && (
-            <div className="flex min-h-[300px] items-center justify-center">
-              <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
-            </div>
-          )}
-
-          {/* Error State */}
-          {error && !loading && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center">
-              <p className="text-red-400">{error}</p>
+            {/* Tabs */}
+            <div className="flex gap-2 mb-6">
               <button
-                onClick={fetchEvents}
-                className="mt-4 rounded-full bg-primary px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/80"
+                onClick={() => setActiveTab("upcoming")}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeTab === "upcoming"
+                    ? "bg-primary text-white"
+                    : "bg-white/5 text-muted-foreground hover:bg-white/10"
+                }`}
               >
-                Try Again
+                Upcoming{!loading && ` (${upcomingCount})`}
+              </button>
+              <button
+                onClick={() => setActiveTab("past")}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeTab === "past"
+                    ? "bg-primary text-white"
+                    : "bg-white/5 text-muted-foreground hover:bg-white/10"
+                }`}
+              >
+                Past{!loading && ` (${pastCount})`}
               </button>
             </div>
-          )}
 
-          {/* Empty State */}
-          {!loading && !error && filteredEvents.length === 0 && (
-            <div className="rounded-xl border border-white/10 bg-card-background p-12 text-center">
-              <Calendar className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
-              <h3 className="mb-2 text-xl font-semibold text-foreground">
-                {events.length === 0
-                  ? "No events yet"
-                  : activeTab === "upcoming"
-                  ? "No upcoming events"
-                  : "No past events"}
-              </h3>
-              <p className="text-muted-foreground">
-                {events.length === 0
-                  ? "This user hasn't published any events yet."
-                  : activeTab === "upcoming"
-                  ? "Check back later for new events."
-                  : "This user hasn't had any past events."}
+            {/* Loading State */}
+            {loading && (
+              <div className="flex min-h-[300px] items-center justify-center">
+                <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && !loading && (
+              <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center">
+                <p className="text-red-400">{error}</p>
+                <button
+                  onClick={fetchEvents}
+                  className="mt-4 rounded-full bg-primary px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/80"
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!loading && !error && filteredEvents.length === 0 && (
+              <div className="rounded-xl border border-white/10 bg-card-background p-12 text-center">
+                <Calendar className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+                <h3 className="mb-2 text-xl font-semibold text-foreground">
+                  {events.length === 0
+                    ? "No events yet"
+                    : activeTab === "upcoming"
+                    ? "No upcoming events"
+                    : "No past events"}
+                </h3>
+                <p className="text-muted-foreground">
+                  {events.length === 0
+                    ? "This user hasn't published any events yet."
+                    : activeTab === "upcoming"
+                    ? "Check back later for new events."
+                    : "This user hasn't had any past events."}
+                </p>
+              </div>
+            )}
+
+            {/* Events Timeline */}
+            {!loading && !error && filteredEvents.length > 0 && (
+              <EventsTimeline events={filteredEvents} stickyTopClass="top-20" />
+            )}
+
+            {/* Infinite scroll sentinel */}
+            <div ref={sentinelRef} className="h-4" />
+
+            {/* Loading more indicator */}
+            {loadingMore && (
+              <div className="flex justify-center py-8">
+                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+              </div>
+            )}
+
+            {/* End of results */}
+            {!loading && !hasMore && filteredEvents.length > 0 && (
+              <p className="text-center text-sm text-muted-foreground py-8">
+                You&apos;ve reached the end
               </p>
-            </div>
-          )}
-
-          {/* Events Timeline */}
-          {!loading && !error && filteredEvents.length > 0 && (
-            <EventsTimeline events={filteredEvents} stickyTopClass="top-20" />
-          )}
-
-          {/* Infinite scroll sentinel */}
-          <div ref={sentinelRef} className="h-4" />
-
-          {/* Loading more indicator */}
-          {loadingMore && (
-            <div className="flex justify-center py-8">
-              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-            </div>
-          )}
-
-          {/* End of results */}
-          {!loading && !hasMore && filteredEvents.length > 0 && (
-            <p className="text-center text-sm text-muted-foreground py-8">
-              You&apos;ve reached the end
-            </p>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

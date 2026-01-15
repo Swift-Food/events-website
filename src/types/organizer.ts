@@ -14,6 +14,7 @@ export interface OrganizerProfile {
   createdAt: string;
   updatedAt: string;
   profilePicture?: string;
+  isProfilePublic?: boolean;
   user?: {
     id: string;
     email: string;
