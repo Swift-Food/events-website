@@ -331,22 +331,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
           {/* Results Container */}
           <div className="max-h-[60vh] overflow-y-auto">
-            {/* Loading State */}
-            {isLoading && (
-              <div className="flex items-center justify-center py-8">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
-              </div>
-            )}
-
-            {/* No Results */}
-            {!isLoading && searchQuery.length >= 2 && !hasResults && filteredShortcuts.length === 0 && (
-              <div className="px-4 py-8 text-center text-muted-foreground text-sm">
-                No results found for &quot;{searchQuery}&quot;
-              </div>
-            )}
-
-            {/* Shortcuts Section - instant filtering */}
-            {!isLoading && filteredShortcuts.length > 0 && (
+            {/* Shortcuts Section - instant filtering, not affected by API loading */}
+            {filteredShortcuts.length > 0 && (
               <div className="p-2">
                 <div className="px-2 py-2">
                   <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -377,6 +363,20 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
               </div>
             )}
 
+            {/* Loading State for API results */}
+            {isLoading && (
+              <div className="flex items-center justify-center py-8">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
+              </div>
+            )}
+
+            {/* No Results */}
+            {!isLoading && searchQuery.length >= 2 && !hasResults && filteredShortcuts.length === 0 && (
+              <div className="px-4 py-8 text-center text-muted-foreground text-sm">
+                No results found for &quot;{searchQuery}&quot;
+              </div>
+            )}
+
             {/* Calendars Section */}
             {!isLoading && searchResults?.calendars?.items && searchResults.calendars.items.length > 0 && (
               <div className="p-2 border-t border-foreground/10">
@@ -385,7 +385,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     Calendars
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-3 px-2">
+                <div className="grid grid-cols-3 gap-3 px-2">
                   {searchResults.calendars.items.map((calendar, index) => {
                     const calendarOffset = filteredShortcuts.length;
                     const globalIndex = calendarOffset + index;
@@ -394,7 +394,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       <div
                         key={calendar.id}
                         data-index={globalIndex}
-                        className={`rounded-lg cursor-pointer ${isSelected ? "ring-2 ring-primary" : ""}`}
+                        className={`rounded-xl cursor-pointer h-fit ${isSelected ? "ring-2 ring-primary" : ""}`}
                         onClick={() => {
                           router.push(`/calendar/${calendar.id}`);
                           onClose();
@@ -410,7 +410,6 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                             description: calendar.description ?? undefined,
                             isPublic: !calendar.isPrivate,
                           } as Calendar}
-                          size={140}
                         />
                       </div>
                     );

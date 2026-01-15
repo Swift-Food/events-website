@@ -8,14 +8,14 @@ interface SquareCalendarCardProps {
   size?: number;
 }
 
-export default function SquareCalendarCard({ calendar, size = 160 }: SquareCalendarCardProps) {
+export default function SquareCalendarCard({ calendar, size }: SquareCalendarCardProps) {
   const eventCount = calendar.eventCount ?? 0;
 
   return (
     <Link
       href={`/calendars/${calendar.calendarUrl}`}
-      className="group relative block overflow-hidden rounded-2xl"
-      style={{ width: size, height: size }}
+      className={`group relative block overflow-hidden rounded-2xl ${!size ? "w-full aspect-square" : ""}`}
+      style={size ? { width: size, height: size } : undefined}
     >
       {/* Background Image or Color */}
       {calendar.calendarImage ? (
