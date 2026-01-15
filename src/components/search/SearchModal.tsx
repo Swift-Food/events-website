@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import {
   Search,
   X,
@@ -392,18 +391,19 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     >
                       <div className="h-10 w-10 rounded-full overflow-hidden bg-card-secondary-background flex-shrink-0">
                         {user.profilePicture ? (
-                          <Image
+                          <img
                             src={user.profilePicture}
                             alt={user.username}
-                            width={40}
-                            height={40}
                             className="h-full w-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                            }}
                           />
-                        ) : (
-                          <div className="h-full w-full flex items-center justify-center bg-primary/20">
-                            <User className="h-5 w-5 text-primary" />
-                          </div>
-                        )}
+                        ) : null}
+                        <div className={`h-full w-full flex items-center justify-center bg-primary/20 ${user.profilePicture ? 'hidden' : ''}`}>
+                          <User className="h-5 w-5 text-primary" />
+                        </div>
                       </div>
                       <div className="flex-1 text-left min-w-0">
                         <p className="text-sm font-medium truncate">
