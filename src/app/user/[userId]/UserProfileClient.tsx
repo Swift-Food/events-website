@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { eventsApi } from "@/services/events";
-import { eventUserService } from "@/services/event-user.service";
+import { followService } from "@/services/follow.service";
 import { useAuth } from "@/lib/auth/authContext";
 import {
   EventResponseDto,
@@ -188,7 +188,7 @@ export default function UserProfileClient({
     const checkFollowRelationship = async () => {
       if (!isAuthenticated || isOwnProfile) return;
       try {
-        const result = await eventUserService.getFollowRelationship(initialProfile.id);
+        const result = await followService.getFollowRelationship(initialProfile.id);
         setFollowStatus(result.isFollowingStatus);
         setFollowsMe(result.followsMe);
       } catch (err) {
@@ -202,7 +202,7 @@ export default function UserProfileClient({
     if (!isAuthenticated || followLoading) return;
     setFollowLoading(true);
     try {
-      const result = await eventUserService.followUser(initialProfile.id);
+      const result = await followService.followUser(initialProfile.id);
       setFollowStatus(result.status);
     } catch (err) {
       console.error("Failed to follow user:", err);
@@ -215,7 +215,7 @@ export default function UserProfileClient({
     if (!isAuthenticated || followLoading) return;
     setFollowLoading(true);
     try {
-      await eventUserService.unfollowUser(initialProfile.id);
+      await followService.unfollowUser(initialProfile.id);
       setFollowStatus("not_following");
     } catch (err) {
       console.error("Failed to unfollow user:", err);
