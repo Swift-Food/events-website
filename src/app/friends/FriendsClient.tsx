@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { followService } from "@/services/follow.service";
 import { FollowerResponse } from "@/types/follower";
-import { User, Loader2, ArrowLeft } from "lucide-react";
+import { User, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 type Tab = "followers" | "following";
@@ -123,13 +123,6 @@ export default function FriendsClient() {
       <div className="mx-auto max-w-2xl px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <Link
-            href="/profile"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Profile
-          </Link>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Friends
           </h1>
