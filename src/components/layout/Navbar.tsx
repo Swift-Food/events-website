@@ -9,7 +9,7 @@ import {
   LogOut,
   UserCircle,
   Ticket,
-  Calendar,
+  CalendarPlus,
   ChartNoAxesGantt,
   Search,
   Bell,
@@ -150,9 +150,14 @@ export default function Navbar() {
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/event-creation"
-              className={`rounded-full bg-foreground px-3 py-1.5 text-xs font-semibold text-background transition-colors hover:opacity-90 sm:px-5 sm:py-2 sm:text-sm ${
-                !isAuthenticated ? "hidden sm:inline-flex" : ""
-              }`}
+              className="flex sm:hidden h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/10"
+              aria-label="Create Event"
+            >
+              <CalendarPlus className="h-5 w-5" />
+            </Link>
+            <Link
+              href="/event-creation"
+              className="hidden sm:inline-flex rounded-full bg-foreground px-5 py-2 text-sm font-semibold text-background transition-colors hover:opacity-90"
             >
               Create Event
             </Link>
