@@ -19,9 +19,11 @@ export default function FriendsClient() {
   const [following, setFollowing] = useState<FollowerResponse[]>([]);
   const [followersTotal, setFollowersTotal] = useState(0);
   const [followingTotal, setFollowingTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loadingFollowers, setLoadingFollowers] = useState(true);
+  const [loadingFollowing, setLoadingFollowing] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMoreFollowers, setHasMoreFollowers] = useState(true);
+  const [hasMoreFollowing, setHasMoreFollowing] = useState(true);
 
   const ITEMS_PER_PAGE = 20;
 
@@ -34,7 +36,7 @@ export default function FriendsClient() {
 
   const fetchFollowers = useCallback(async () => {
     if (!eventUser?.id) return;
-    setLoading(true);
+    setLoadingFollowers(true);
     try {
       const result = await followService.getFollowers(eventUser.id, {
         skip: 0,
@@ -42,17 +44,17 @@ export default function FriendsClient() {
       });
       setFollowers(result.followers);
       setFollowersTotal(result.total);
-      setHasMore(result.followers.length < result.total);
+      setHasMoreFollowers(result.followers.length < result.total);
     } catch (err) {
       console.error("Failed to fetch followers:", err);
     } finally {
-      setLoading(false);
+      setLoadingFollowers(false);
     }
   }, [eventUser?.id]);
 
   const fetchFollowing = useCallback(async () => {
     if (!eventUser?.id) return;
-    setLoading(true);
+    setLoadingFollowing(true);
     try {
       const result = await followService.getFollowing(eventUser.id, {
         skip: 0,
@@ -60,15 +62,16 @@ export default function FriendsClient() {
       });
       setFollowing(result.following);
       setFollowingTotal(result.total);
-      setHasMore(result.following.length < result.total);
+      setHasMoreFollowing(result.following.length < result.total);
     } catch (err) {
       console.error("Failed to fetch following:", err);
     } finally {
-      setLoading(false);
+      setLoadingFollowing(false);
     }
   }, [eventUser?.id]);
 
   const loadMore = async () => {
+    const hasMore = activeTab === "followers" ? hasMoreFollowers : hasMoreFollowing;
     if (!eventUser?.id || loadingMore || !hasMore) return;
     setLoadingMore(true);
     try {
@@ -78,14 +81,14 @@ export default function FriendsClient() {
           take: ITEMS_PER_PAGE,
         });
         setFollowers((prev) => [...prev, ...result.followers]);
-        setHasMore(followers.length + result.followers.length < result.total);
+        setHasMoreFollowers(followers.length + result.followers.length < result.total);
       } else {
         const result = await followService.getFollowing(eventUser.id, {
           skip: following.length,
           take: ITEMS_PER_PAGE,
         });
         setFollowing((prev) => [...prev, ...result.following]);
-        setHasMore(following.length + result.following.length < result.total);
+        setHasMoreFollowing(following.length + result.following.length < result.total);
       }
     } catch (err) {
       console.error("Failed to load more:", err);
@@ -94,15 +97,15 @@ export default function FriendsClient() {
     }
   };
 
+  // Fetch both followers and following on mount
   useEffect(() => {
-    if (activeTab === "followers") {
-      fetchFollowers();
-    } else {
-      fetchFollowing();
-    }
-  }, [activeTab, fetchFollowers, fetchFollowing]);
+    fetchFollowers();
+    fetchFollowing();
+  }, [fetchFollowers, fetchFollowing]);
 
   const currentList = activeTab === "followers" ? followers : following;
+  const loading = activeTab === "followers" ? loadingFollowers : loadingFollowing;
+  const hasMore = activeTab === "followers" ? hasMoreFollowers : hasMoreFollowing;
 
   // Loading state
   if (authLoading) {
