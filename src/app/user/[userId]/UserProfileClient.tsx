@@ -377,6 +377,19 @@ export default function UserProfileClient({
             )}
           </div>
         )}
+
+        {/* Private Profile Notice */}
+        {!isPublic && (
+          <div className="rounded-xl border border-white/10 bg-card-background p-12 text-center">
+            <User className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+            <h3 className="mb-2 text-xl font-semibold text-foreground">
+              This profile is private
+            </h3>
+            <p className="text-muted-foreground">
+              Follow this user to see more of their content.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
