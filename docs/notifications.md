@@ -375,3 +375,49 @@ Email Notifications
 ```
 
 When master toggle is OFF, disable all other toggles visually.
+
+---
+
+## Registration Notification Frequency (Organizers)
+
+Organizers can control how often they receive notifications about new registrations for their events.
+
+### Available Options
+
+| Value | Description |
+|-------|-------------|
+| `realtime` | Immediate notification for each registration |
+| `batched` | Summary every 20 minutes (default) |
+| `hourly` | Summary every hour |
+| `daily` | Summary once per day at 9am |
+| `off` | No registration notifications |
+
+### Update Frequency
+
+Set when creating or updating an event:
+
+```
+POST /events
+PUT /events/:id
+```
+
+**Request Body:**
+```typescript
+{
+  // ... other event fields
+  registrationNotifyFrequency?: 'realtime' | 'batched' | 'hourly' | 'daily' | 'off'
+}
+```
+
+### UI Recommendation
+
+Add to event settings/dashboard:
+
+```
+Registration Notifications
+├── ( ) Every registration (realtime)
+├── (•) Every 20 minutes (batched) - default
+├── ( ) Hourly summary
+├── ( ) Daily summary
+└── ( ) Off
+```

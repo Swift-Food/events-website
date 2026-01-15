@@ -8,6 +8,7 @@ import { EventOwnerResponseDto } from './owner.dto';
 import { EventAddressResponseDto } from '../../address/response.dto';
 import { EventCategoryResponseDto, EventSubcategoryResponseDto } from '../../category/response.dto';
 import { EventTicketResponseDto } from '../../event-ticket/response/ticket.dto';
+import { RegistrationNotifyFrequency } from '../request/event.dto';
 
 export interface UserTicketDto {
   id: string;
@@ -41,6 +42,7 @@ export interface EventResponseDto {
   acceptingNewTickets: boolean;
   stopAcceptingOnStart: boolean;
   hideFullAddress: boolean;
+  registrationNotifyFrequency?: RegistrationNotifyFrequency;
   createdAt: string | Date;
   updatedAt: string | Date;
   owner: EventOwnerResponseDto;
