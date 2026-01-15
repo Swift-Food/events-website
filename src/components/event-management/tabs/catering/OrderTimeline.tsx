@@ -9,13 +9,13 @@ interface OrderTimelineProps {
 
 export function OrderTimeline({ status }: OrderTimelineProps) {
   const timelineSteps = [
-    { key: "pending", label: "Order Placed", shortLabel: "Placed", icon: Circle },
-    { key: "confirmed", label: "Confirmed", shortLabel: "Confirmed", icon: CheckCircle2 },
-    { key: "preparing", label: "Preparing", shortLabel: "Preparing", icon: Package },
-    { key: "ready", label: "Ready", shortLabel: "Ready", icon: CheckCircle2 },
-    { key: "delivered", label: "Delivered", shortLabel: "Delivered", icon: Truck },
+    { key: "pending_review", label: "Order Placed", shortLabel: "", icon: Circle },
+    { key: "restaurant_reviewed", label: "Confirmed", shortLabel: "", icon: CheckCircle2 },
+    { key: "paid", label: "Preparing", shortLabel: "", icon: Package },
+    { key: "ready", label: "Delivery", shortLabel: "", icon: Truck },
+    { key: "completed", label: "Delivered", shortLabel: "", icon: CheckCircle2  },
   ];
-
+  console.log("status", status)
   const statusIndex = timelineSteps.findIndex((step) => step.key === status);
   const isCancelled = status === "cancelled";
 

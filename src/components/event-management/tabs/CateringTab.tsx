@@ -264,9 +264,14 @@ export function CateringTab({ eventData }: CateringTabProps) {
         console.log("result is", JSON.stringify(result.totalDiscount))
         console.log("the type is", typeof(pricing?.totalDiscount))
         setPricing(result);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching pricing:", error);
         setPricing(null);
+
+        // Check for London delivery validation error
+        if (error.response?.status === 400 && error.response?.data?.message === "We only deliver within London currently") {
+          toast.error("We only deliver within London currently");
+        }
       } finally {
         setIsLoadingPricing(false);
       }
@@ -391,7 +396,13 @@ export function CateringTab({ eventData }: CateringTabProps) {
       setCustomerPhone("");
     } catch (error: any) {
       console.error("Error creating order:", error);
-      toast.error(error.response?.data?.message || "Failed to create catering order");
+
+      // Check for London delivery validation error
+      if (error.response?.status === 400 && error.response?.data?.message === "We only deliver within London currently") {
+        toast.error("We only deliver within London currently. Please update your event address to a London location.");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to create catering order");
+      }
     } finally {
       setIsSubmitting(false);
     }

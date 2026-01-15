@@ -17,6 +17,9 @@ export interface CreateEventAddressDto {
   location?: LocationDto;
 }
 
+// Registration notification frequency options for organizers
+export type RegistrationNotifyFrequency = 'realtime' | 'batched' | 'hourly' | 'daily' | 'off';
+
 export interface CreateEventDto {
   name: string;
   description: string;
@@ -42,6 +45,7 @@ export interface CreateEventDto {
   stopAcceptingOnStart?: boolean;
   hideFullAddress?: boolean;
   externalEventUrl?: string;
+  registrationNotifyFrequency?: RegistrationNotifyFrequency;
 }
 
 export interface UpdateEventDto {
@@ -69,6 +73,7 @@ export interface UpdateEventDto {
   stopAcceptingOnStart?: boolean;
   hideFullAddress?: boolean;
   externalEventUrl?: string;
+  registrationNotifyFrequency?: RegistrationNotifyFrequency;
 }
 
 export interface EventQueryDto {
