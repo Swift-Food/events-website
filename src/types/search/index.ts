@@ -52,3 +52,21 @@ export interface UsersSearchResponse {
   take: number;
   query: string;
 }
+
+// Events + Calendars search result (no users)
+export interface EventCalendarSearchResult {
+  type: 'event' | 'calendar';
+  event?: EventResponseDto;
+  calendar?: CalendarSearchResult;
+}
+
+// Events + Calendars search response
+export interface EventsCalendarsSearchResponse {
+  results: EventCalendarSearchResult[];
+  events: { items: EventResponseDto[]; total: number };
+  calendars: { items: CalendarSearchResult[]; total: number };
+  total: number;
+  skip: number;
+  take: number;
+  query: string;
+}
