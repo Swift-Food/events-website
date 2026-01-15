@@ -438,11 +438,17 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                         {formatPrice(ticket.price)}
                       </span>
                       <span className="text-muted-foreground">
-                        {ticket.quantitySold} / {ticket.quantityTotal} sold
+                        {(ticket.quantityTotal ?? 0) >= 100000
+                          ? `${ticket.quantitySold} sold`
+                          : `${ticket.quantitySold} / ${ticket.quantityTotal} sold`}
                       </span>
-                      <span className="text-muted-foreground">
-                        {ticket.quantityLeft} remaining
-                      </span>
+                      {(ticket.quantityTotal ?? 0) >= 100000 ? (
+                        <span className="text-primary">Unlimited</span>
+                      ) : (
+                        <span className="text-muted-foreground">
+                          {ticket.quantityLeft} remaining
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

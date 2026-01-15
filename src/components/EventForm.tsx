@@ -1430,7 +1430,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                           </p>
                           <span className="text-muted-foreground">•</span>
                           <p className="text-sm text-muted-foreground">
-                            {ticket.quantity >= 999999 ? "Unlimited" : `${ticket.quantity.toLocaleString()} available`}
+                            {ticket.quantity >= 100000 ? "Unlimited" : `${ticket.quantity.toLocaleString()} available`}
                           </p>
                           {collapsedTickets.has(ticket.id) && ticket.questionForm && ticket.questionForm.length > 0 && (
                             <>

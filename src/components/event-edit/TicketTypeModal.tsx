@@ -56,7 +56,7 @@ export default function TicketTypeModal({
         setLocalPrice(ticketToEdit.price.toString());
         setLocalIsSingleUse(ticketToEdit.isSingleUse);
         const qty = ticketToEdit.quantity ?? 100;
-        const isUnlimited = qty >= 999999;
+        const isUnlimited = qty >= 100000;
         setLocalIsUnlimited(isUnlimited);
         setLocalQuantity(isUnlimited ? "100" : qty.toString());
         setLocalQuestions(ticketToEdit.questionForm || []);
@@ -83,7 +83,7 @@ export default function TicketTypeModal({
       return;
     }
 
-    const quantity = localIsUnlimited ? 999999 : (parseInt(localQuantity) || 100);
+    const quantity = localIsUnlimited ? 100000 : (parseInt(localQuantity) || 100);
     if (!localIsUnlimited) {
       if (quantity < 1) {
         alert("Quantity must be at least 1");

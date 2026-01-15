@@ -186,7 +186,7 @@ const getDefaultTicket = (): TicketType => ({
   isFree: true,
   price: 0,
   isSingleUse: true,
-  quantity: 999999, // Unlimited by default
+  quantity: 100000, // Unlimited by default
   questionForm: [],
 });
 
