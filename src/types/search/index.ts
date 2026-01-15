@@ -3,7 +3,7 @@
 import { EventResponseDto } from '../event';
 import { FollowStatusType } from '../follower';
 
-export type SearchType = 'events' | 'calendars' | 'users' | 'all';
+export type SearchType = 'events' | 'calendars' | 'users';
 
 // User search result
 export interface UserSearchResult {
@@ -27,44 +27,27 @@ export interface CalendarSearchResult {
   ownerUsername: string;
 }
 
-// Individual search result with type discrimination
-export interface SearchResult {
-  type: 'event' | 'calendar' | 'user';
-  event?: EventResponseDto;
-  calendar?: CalendarSearchResult;
-  user?: UserSearchResult;
+// Unified search query params
+export interface UnifiedSearchQuery {
+  q: string;
+  type?: string; // Comma-separated: "events", "calendars", "users" - default: all three
+  skip?: number;
+  take?: number;
 }
 
-// Unified search response
+// Unified search response (events, calendars, and/or users)
 export interface UnifiedSearchResponse {
-  results: SearchResult[];
   events?: { items: EventResponseDto[]; total: number };
   calendars?: { items: CalendarSearchResult[]; total: number };
   users?: { items: UserSearchResult[]; total: number };
   query: string;
-}
-
-// Dedicated users search response
-export interface UsersSearchResponse {
-  users: UserSearchResult[];
-  total: number;
   skip: number;
   take: number;
-  query: string;
 }
 
-// Events + Calendars search result (no users)
-export interface EventCalendarSearchResult {
-  type: 'event' | 'calendar';
-  event?: EventResponseDto;
-  calendar?: CalendarSearchResult;
-}
-
-// Events + Calendars search response
-export interface EventsCalendarsSearchResponse {
-  results: EventCalendarSearchResult[];
-  events: { items: EventResponseDto[]; total: number };
-  calendars: { items: CalendarSearchResult[]; total: number };
+// Users search response (separate endpoint)
+export interface UsersSearchResponse {
+  users: UserSearchResult[];
   total: number;
   skip: number;
   take: number;
