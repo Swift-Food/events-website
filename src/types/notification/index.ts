@@ -17,6 +17,9 @@ export enum EventNotificationType {
   REGISTRATION_SUMMARY = 'registration_summary',
   COLLABORATOR_INVITE = 'collaborator_invite',
   COLLABORATOR_ACCEPTED = 'collaborator_accepted',
+  // Payment & alerts
+  PENDING_PAYMENT_REMINDER = 'pending_payment_reminder',
+  WAITLIST_PRESSURE_ALERT = 'waitlist_pressure_alert',
 }
 
 export enum NotificationActionType {
@@ -30,6 +33,7 @@ export enum NotificationActionType {
   REJECT_FOLLOW = 'reject_follow',
   ACCEPT_COLLAB = 'accept_collab',
   REJECT_COLLAB = 'reject_collab',
+  COMPLETE_PAYMENT = 'complete_payment',
 }
 
 // Related user data for display
@@ -101,4 +105,12 @@ export interface MarkAllAsReadResponse {
 // Delete notification response
 export interface DeleteNotificationResponse {
   success: boolean;
+}
+
+// Query params for fetching notifications
+export interface NotificationQueryParams {
+  skip?: number;
+  take?: number;
+  type?: EventNotificationType;
+  unreadOnly?: boolean;
 }

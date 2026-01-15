@@ -10,6 +10,7 @@ import { AuthProvider } from "@/lib/auth/authContext";
 import { CategoriesProvider } from "@/lib/categories-context";
 import { Toaster } from "sonner";
 import { SearchModalProvider } from "@/components/search/SearchModalContext";
+import { NotificationProvider } from "@/context/NotificationContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -154,13 +155,15 @@ export default function RootLayout({
       >
         <AuthProvider>
           <CategoriesProvider>
-            <SearchModalProvider>
-              <div className="flex min-h-screen flex-col">
-                <Navbar />
-                <main className="flex-1">{children}</main>
-                <Footer />
-              </div>
-            </SearchModalProvider>
+            <NotificationProvider>
+              <SearchModalProvider>
+                <div className="flex min-h-screen flex-col">
+                  <Navbar />
+                  <main className="flex-1">{children}</main>
+                  <Footer />
+                </div>
+              </SearchModalProvider>
+            </NotificationProvider>
           </CategoriesProvider>
         </AuthProvider>
         <Toaster

@@ -12,10 +12,10 @@ import {
   CalendarPlus,
   ChartNoAxesGantt,
   Search,
-  Bell,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth/authContext";
 import { useSearchModal } from "@/components/search/SearchModalContext";
+import { NotificationDropdown } from "@/components/notifications";
 
 const navLinks = [
   // { href: "/", label: "Home" },
@@ -70,9 +70,6 @@ export default function Navbar() {
 
   const handleSearchIconClick = () => {
     openSearchModal();
-  };
-  const handleNotifIconClick = async () => {
-    // TODO: Implement
   };
 
   const handleProtectedNavClick = (
@@ -173,13 +170,7 @@ export default function Navbar() {
                   >
                     <Search className="h-5 w-5" />
                   </button>
-                  <button
-                    onClick={handleNotifIconClick}
-                    className="flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/10 cursor-pointer"
-                    aria-label="User profile"
-                  >
-                    <Bell className="h-5 w-5" />
-                  </button>
+                  <NotificationDropdown />
                   <button
                     onClick={handleUserIconClick}
                     className="flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/10 cursor-pointer"

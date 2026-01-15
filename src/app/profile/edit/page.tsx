@@ -71,6 +71,13 @@ export default function EditProfilePage() {
     linkedinUrl: "",
     instagramUrl: "",
     isProfilePublic: true,
+    // Email notification preferences
+    allowEmailNotifications: true,
+    allowTicketReminders: true,
+    allowEventUpdateEmails: true,
+    allowWaitlistEmails: true,
+    allowCollaboratorEmails: true,
+    notifyFollowedUserEvents: true,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -97,6 +104,13 @@ export default function EditProfilePage() {
         linkedinUrl: extractUsername(eventUser.linkedinUrl || "", "linkedin"),
         instagramUrl: extractUsername(eventUser.instagramUrl || "", "instagram"),
         isProfilePublic: eventUser.isProfilePublic !== false,
+        // Email notification preferences
+        allowEmailNotifications: eventUser.allowEmailNotifications !== false,
+        allowTicketReminders: eventUser.allowTicketReminders !== false,
+        allowEventUpdateEmails: eventUser.allowEventUpdateEmails !== false,
+        allowWaitlistEmails: eventUser.allowWaitlistEmails !== false,
+        allowCollaboratorEmails: eventUser.allowCollaboratorEmails !== false,
+        notifyFollowedUserEvents: eventUser.notifyFollowedUserEvents !== false,
       });
     }
   }, [user, eventUser]);
@@ -126,6 +140,13 @@ export default function EditProfilePage() {
         linkedinUrl: buildSocialUrl(formData.linkedinUrl, "linkedin") || undefined,
         instagramUrl: buildSocialUrl(formData.instagramUrl, "instagram") || undefined,
         isProfilePublic: formData.isProfilePublic,
+        // Email notification preferences
+        allowEmailNotifications: formData.allowEmailNotifications,
+        allowTicketReminders: formData.allowTicketReminders,
+        allowEventUpdateEmails: formData.allowEventUpdateEmails,
+        allowWaitlistEmails: formData.allowWaitlistEmails,
+        allowCollaboratorEmails: formData.allowCollaboratorEmails,
+        notifyFollowedUserEvents: formData.notifyFollowedUserEvents,
       };
 
       // Remove undefined values for cleaner payload
@@ -437,6 +458,222 @@ export default function EditProfilePage() {
                   }`}
                 />
               </button>
+            </div>
+          </div>
+
+          {/* Email Notifications */}
+          <div className="rounded-2xl bg-card-background backdrop-blur-xl p-6 space-y-4">
+            <h2 className="text-lg font-semibold text-foreground mb-4">
+              Email Notifications
+            </h2>
+
+            {/* Master toggle */}
+            <div className="flex items-center gap-4 pb-4 border-b border-white/10">
+              <div className="flex-1 min-w-0">
+                <label className="block text-sm font-medium text-foreground">
+                  Email Notifications
+                </label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Master toggle for all email notifications
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={formData.allowEmailNotifications}
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    allowEmailNotifications: !prev.allowEmailNotifications,
+                  }))
+                }
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
+                  formData.allowEmailNotifications ? "bg-primary" : "bg-white/20"
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    formData.allowEmailNotifications ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Sub-toggles - Events section */}
+            <div className={`space-y-4 ${!formData.allowEmailNotifications ? "opacity-50 pointer-events-none" : ""}`}>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Events
+              </p>
+
+              <div className="flex items-center gap-4">
+                <div className="flex-1 min-w-0">
+                  <label className="block text-sm font-medium text-foreground">
+                    Event Reminders
+                  </label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Get reminded about upcoming events you&apos;re attending
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={formData.allowTicketReminders}
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      allowTicketReminders: !prev.allowTicketReminders,
+                    }))
+                  }
+                  disabled={!formData.allowEmailNotifications}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
+                    formData.allowTicketReminders ? "bg-primary" : "bg-white/20"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      formData.allowTicketReminders ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="flex-1 min-w-0">
+                  <label className="block text-sm font-medium text-foreground">
+                    Event Updates
+                  </label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Notifications when event details change (date, time, location)
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={formData.allowEventUpdateEmails}
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      allowEventUpdateEmails: !prev.allowEventUpdateEmails,
+                    }))
+                  }
+                  disabled={!formData.allowEmailNotifications}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
+                    formData.allowEventUpdateEmails ? "bg-primary" : "bg-white/20"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      formData.allowEventUpdateEmails ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="flex-1 min-w-0">
+                  <label className="block text-sm font-medium text-foreground">
+                    Waitlist Notifications
+                  </label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Get notified when you&apos;re promoted from a waitlist
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={formData.allowWaitlistEmails}
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      allowWaitlistEmails: !prev.allowWaitlistEmails,
+                    }))
+                  }
+                  disabled={!formData.allowEmailNotifications}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
+                    formData.allowWaitlistEmails ? "bg-primary" : "bg-white/20"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      formData.allowWaitlistEmails ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* Social section */}
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider pt-4">
+                Social
+              </p>
+
+              <div className="flex items-center gap-4">
+                <div className="flex-1 min-w-0">
+                  <label className="block text-sm font-medium text-foreground">
+                    Followed Users&apos; Events
+                  </label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Get notified when people you follow create new events
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={formData.notifyFollowedUserEvents}
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      notifyFollowedUserEvents: !prev.notifyFollowedUserEvents,
+                    }))
+                  }
+                  disabled={!formData.allowEmailNotifications}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
+                    formData.notifyFollowedUserEvents ? "bg-primary" : "bg-white/20"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      formData.notifyFollowedUserEvents ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* Organizer section */}
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider pt-4">
+                Organizer
+              </p>
+
+              <div className="flex items-center gap-4">
+                <div className="flex-1 min-w-0">
+                  <label className="block text-sm font-medium text-foreground">
+                    Collaborator Invites
+                  </label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Receive emails when you&apos;re invited to collaborate on events
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={formData.allowCollaboratorEmails}
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      allowCollaboratorEmails: !prev.allowCollaboratorEmails,
+                    }))
+                  }
+                  disabled={!formData.allowEmailNotifications}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
+                    formData.allowCollaboratorEmails ? "bg-primary" : "bg-white/20"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      formData.allowCollaboratorEmails ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
           </div>
 
