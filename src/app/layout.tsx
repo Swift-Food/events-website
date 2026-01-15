@@ -9,6 +9,7 @@ import Footer from "../components/layout/Footer";
 import { AuthProvider } from "@/lib/auth/authContext";
 import { CategoriesProvider } from "@/lib/categories-context";
 import { Toaster } from "sonner";
+import { SearchModalProvider } from "@/components/search/SearchModalContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -153,11 +154,13 @@ export default function RootLayout({
       >
         <AuthProvider>
           <CategoriesProvider>
-            <div className="flex min-h-screen flex-col">
-              <Navbar />
-              <main className="flex-1">{children}</main>
-              <Footer />
-            </div>
+            <SearchModalProvider>
+              <div className="flex min-h-screen flex-col">
+                <Navbar />
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </div>
+            </SearchModalProvider>
           </CategoriesProvider>
         </AuthProvider>
         <Toaster

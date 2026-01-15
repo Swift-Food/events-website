@@ -15,6 +15,7 @@ import {
   Bell,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth/authContext";
+import { useSearchModal } from "@/components/search/SearchModalContext";
 
 const navLinks = [
   // { href: "/", label: "Home" },
@@ -26,6 +27,7 @@ const navLinks = [
 export default function Navbar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { isAuthenticated, logout, user, refreshProfile } = useAuth();
+  const { openSearchModal } = useSearchModal();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -66,8 +68,8 @@ export default function Navbar() {
     }
   };
 
-  const handleSearchIconClick = async () => {
-    // TODO: Implement
+  const handleSearchIconClick = () => {
+    openSearchModal();
   };
   const handleNotifIconClick = async () => {
     // TODO: Implement
