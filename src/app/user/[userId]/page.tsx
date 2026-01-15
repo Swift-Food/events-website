@@ -1,13 +1,13 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import OrganizerProfileClient from "./OrganizerProfileClient";
+import UserProfileClient from "./UserProfileClient";
 import { OrganizerProfile } from "@/types/organizer";
 
 interface PageProps {
   params: Promise<{ userId: string }>;
 }
 
-async function getOrganizerProfile(eventUserId: string): Promise<OrganizerProfile | null> {
+async function getUserProfile(eventUserId: string): Promise<OrganizerProfile | null> {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/event-users/${eventUserId}`,
@@ -20,55 +20,55 @@ async function getOrganizerProfile(eventUserId: string): Promise<OrganizerProfil
       if (res.status === 404) {
         return null;
       }
-      throw new Error("Failed to fetch organizer profile");
+      throw new Error("Failed to fetch user profile");
     }
 
     return res.json();
   } catch (error) {
-    console.error("Error fetching organizer profile:", error);
+    console.error("Error fetching user profile:", error);
     return null;
   }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { userId } = await params;
-  const profile = await getOrganizerProfile(userId);
+  const profile = await getUserProfile(userId);
 
   if (!profile) {
     return {
-      title: "Organizer Not Found",
+      title: "User Not Found",
     };
   }
 
   const displayName = profile.organizationName ||
     [profile.firstName, profile.lastName].filter(Boolean).join(" ") ||
     profile.user?.username ||
-    "Organizer";
+    "User";
 
   const profileImage = profile.profilePicture || profile.user?.profilePicture;
   const description = `View events by ${displayName}. ${profile.totalEventsCreated} events created.`;
 
   return {
-    title: `${displayName} | Organizer Profile`,
+    title: `${displayName} | Profile`,
     description,
     openGraph: {
-      title: `${displayName} | Organizer Profile`,
+      title: `${displayName} | Profile`,
       description,
       images: profileImage ? [profileImage] : [],
       type: "profile",
     },
     twitter: {
       card: "summary",
-      title: `${displayName} | Organizer Profile`,
+      title: `${displayName} | Profile`,
       description,
       images: profileImage ? [profileImage] : [],
     },
   };
 }
 
-export default async function OrganizerProfilePage({ params }: PageProps) {
+export default async function UserProfilePage({ params }: PageProps) {
   const { userId } = await params;
-  const profile = await getOrganizerProfile(userId);
+  const profile = await getUserProfile(userId);
 
   if (!profile) {
     notFound();
@@ -77,7 +77,7 @@ export default async function OrganizerProfilePage({ params }: PageProps) {
   const displayName = profile.organizationName ||
     [profile.firstName, profile.lastName].filter(Boolean).join(" ") ||
     profile.user?.username ||
-    "Organizer";
+    "User";
 
   const profileImage = profile.profilePicture || profile.user?.profilePicture;
 
@@ -94,7 +94,7 @@ export default async function OrganizerProfilePage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <OrganizerProfileClient initialProfile={profile} userId={userId} />
+      <UserProfileClient initialProfile={profile} userId={userId} />
     </>
   );
 }

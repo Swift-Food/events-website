@@ -227,7 +227,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   };
 
   const handleUserClick = (user: UserSearchResult) => {
-    router.push(`/u/${user.username}`);
+    router.push(`/user/${user.id}`);
     onClose();
   };
 

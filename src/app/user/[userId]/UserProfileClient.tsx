@@ -21,15 +21,15 @@ import {
 
 type EventTab = "upcoming" | "past";
 
-interface OrganizerProfileClientProps {
+interface UserProfileClientProps {
   initialProfile: OrganizerProfile;
   userId: string;
 }
 
-export default function OrganizerProfileClient({
+export default function UserProfileClient({
   initialProfile,
   userId,
-}: OrganizerProfileClientProps) {
+}: UserProfileClientProps) {
   const [events, setEvents] = useState<EventResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -47,7 +47,7 @@ export default function OrganizerProfileClient({
       .filter(Boolean)
       .join(" ") ||
     initialProfile.user?.username ||
-    "Organizer";
+    "User";
 
   const profileImage =
     initialProfile.profilePicture || initialProfile.user?.profilePicture;
@@ -183,7 +183,7 @@ export default function OrganizerProfileClient({
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
-        
+
         {/* Profile Header */}
         <div className="mb-8">
           <div className="flex flex-col items-center text-center">
@@ -334,10 +334,10 @@ export default function OrganizerProfileClient({
               </h3>
               <p className="text-muted-foreground">
                 {events.length === 0
-                  ? "This organizer hasn't published any events yet."
+                  ? "This user hasn't published any events yet."
                   : activeTab === "upcoming"
                   ? "Check back later for new events."
-                  : "This organizer hasn't had any past events."}
+                  : "This user hasn't had any past events."}
               </p>
             </div>
           )}

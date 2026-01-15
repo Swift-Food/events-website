@@ -1109,7 +1109,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                 </div>
                 {event.owner?.user ? (
                   <Link
-                    href={`/profile/${event.owner.id}`}
+                    href={`/user/${event.owner.id}`}
                     className="flex items-center gap-3 group"
                   >
                     {event.owner.user.profilePicture ? (

@@ -1042,7 +1042,7 @@ export default function EventPreviewModal({
                   <p className="text-xs text-muted-foreground mb-2">Organized by</p>
                   {event.owner?.user ? (
                     <Link
-                      href={`/profile/${event.owner.id}`}
+                      href={`/user/${event.owner.id}`}
                       onClick={handleClose}
                       className="flex items-center gap-2 group"
                     >
