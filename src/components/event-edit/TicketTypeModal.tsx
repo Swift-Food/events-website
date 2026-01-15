@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Ticket, Plus, Edit, Trash2, ChevronUp, ChevronDown, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare } from "lucide-react";
+import { X, Ticket, Plus, Edit, Trash2, ChevronUp, ChevronDown, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Infinity } from "lucide-react";
 import { TicketType, FormField } from "@/types";
 import FormFieldModal from "./FormFieldModal";
 
@@ -24,7 +24,7 @@ export default function TicketTypeModal({
   const [localPrice, setLocalPrice] = useState("0");
   const [localIsSingleUse, setLocalIsSingleUse] = useState(false);
   const [localQuantity, setLocalQuantity] = useState("100");
-  const [localIsUnlimited, setLocalIsUnlimited] = useState(false);
+  const [localIsUnlimited, setLocalIsUnlimited] = useState(true);
   const [localQuestions, setLocalQuestions] = useState<FormField[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -68,7 +68,7 @@ export default function TicketTypeModal({
         setLocalPrice("0");
         setLocalIsSingleUse(false);
         setLocalQuantity("100");
-        setLocalIsUnlimited(false);
+        setLocalIsUnlimited(true);
         setLocalQuestions([]);
       }
     }
@@ -316,9 +316,10 @@ export default function TicketTypeModal({
               </div>
             </div>
             {localIsUnlimited ? (
-              <div className="h-11 flex items-center rounded-xl bg-card-background px-4">
+              <div className="h-11 flex items-center gap-2 rounded-xl bg-card-background px-4">
+                <Infinity className="h-4 w-4 text-primary" />
                 <p className="text-base md:text-sm text-muted-foreground">
-                  No limit on available tickets
+                  Unlimited tickets available
                 </p>
               </div>
             ) : (
