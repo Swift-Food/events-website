@@ -2,12 +2,15 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { eventsApi } from "@/services/events";
+import { eventUserService } from "@/services/event-user.service";
+import { useAuth } from "@/lib/auth/authContext";
 import {
   EventResponseDto,
   EventListResponseDto,
   EventStatus,
 } from "@/types/event";
 import { OrganizerProfile } from "@/types/organizer";
+import { FollowStatusType } from "@/types/follower";
 import EventsTimeline from "@/components/EventsTimeline";
 import {
   User,
@@ -16,6 +19,7 @@ import {
   Twitter,
   Linkedin,
   Instagram,
+  Loader2,
 } from "lucide-react";
 
 type EventTab = "upcoming" | "past";
@@ -29,7 +33,9 @@ export default function UserProfileClient({
   initialProfile,
   userId,
 }: UserProfileClientProps) {
+  const { user: currentUser, isAuthenticated } = useAuth();
   const isPublic = initialProfile.isProfilePublic ? true : false;
+  const isOwnProfile = currentUser?.id === initialProfile.user?.id;
 
   const [events, setEvents] = useState<EventResponseDto[]>([]);
   const [loading, setLoading] = useState(isPublic); // Only show loading if public profile
@@ -37,6 +43,11 @@ export default function UserProfileClient({
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [activeTab, setActiveTab] = useState<EventTab>("upcoming");
+
+  // Follow state
+  const [followStatus, setFollowStatus] =
+    useState<FollowStatusType>("not_following");
+  const [followLoading, setFollowLoading] = useState(false);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const skipRef = useRef(0);
@@ -171,6 +182,46 @@ export default function UserProfileClient({
     fetchEvents();
   }, [fetchEvents]);
 
+  // Fetch follow status
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      if (!isAuthenticated || isOwnProfile) return;
+      try {
+        const result = await eventUserService.isFollowing(initialProfile.id);
+        setFollowStatus(result.status);
+      } catch (err) {
+        console.error("Failed to check follow status:", err);
+      }
+    };
+    checkFollowStatus();
+  }, [isAuthenticated, isOwnProfile, initialProfile.id]);
+
+  const handleFollow = async () => {
+    if (!isAuthenticated || followLoading) return;
+    setFollowLoading(true);
+    try {
+      const result = await eventUserService.followUser(initialProfile.id);
+      setFollowStatus(result.status);
+    } catch (err) {
+      console.error("Failed to follow user:", err);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
+  const handleUnfollow = async () => {
+    if (!isAuthenticated || followLoading) return;
+    setFollowLoading(true);
+    try {
+      await eventUserService.unfollowUser(initialProfile.id);
+      setFollowStatus("not_following");
+    } catch (err) {
+      console.error("Failed to unfollow user:", err);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
@@ -191,7 +242,6 @@ export default function UserProfileClient({
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
-
         {/* Profile Header */}
         <div className="mb-8">
           <div className="flex flex-col items-center text-center">
@@ -203,12 +253,18 @@ export default function UserProfileClient({
                   alt={displayName}
                   className="h-full w-full object-cover"
                   onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.nextElementSibling?.classList.remove(
+                      "hidden"
+                    );
                   }}
                 />
               ) : null}
-              <div className={`h-full w-full flex items-center justify-center ${profileImage ? 'hidden' : ''}`}>
+              <div
+                className={`h-full w-full flex items-center justify-center ${
+                  profileImage ? "hidden" : ""
+                }`}
+              >
                 <User className="h-14 w-14 sm:h-16 sm:w-16 text-primary" />
               </div>
             </div>
@@ -234,7 +290,10 @@ export default function UserProfileClient({
                 )}
                 {initialProfile.twitterHandle && (
                   <a
-                    href={`https://twitter.com/${initialProfile.twitterHandle.replace("@", "")}`}
+                    href={`https://twitter.com/${initialProfile.twitterHandle.replace(
+                      "@",
+                      ""
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-zinc-500 hover:text-white transition-colors"
@@ -268,6 +327,22 @@ export default function UserProfileClient({
               </div>
             )}
 
+            {/* Follow Button - Only show for other users when authenticated */}
+            {isAuthenticated && !isOwnProfile && (
+              <button
+                onClick={followStatus === "not_following" ? handleFollow : handleUnfollow}
+                disabled={followLoading}
+                className="mt-4 flex items-center gap-2 px-8 py-2 rounded-full border border-zinc-500 text-white text-sm font-medium hover:bg-white/10 transition-colors disabled:opacity-50"
+              >
+                {followLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {followStatus === "following"
+                  ? "UNFOLLOW"
+                  : followStatus === "pending"
+                  ? "REQUESTED"
+                  : "FOLLOW"}
+              </button>
+            )}
+
             {/* Bio - Always shown */}
             {initialProfile.bio && (
               <p className="text-[15px] text-zinc-400 leading-relaxed mt-8 px-2 sm:px-0 sm:max-w-xl">
@@ -280,7 +355,9 @@ export default function UserProfileClient({
               <div className="flex items-center gap-3 text-xs text-zinc-600 uppercase tracking-widest mt-6">
                 <span>{initialProfile.totalEventsCreated} Events Created</span>
                 <span>·</span>
-                <span>Joined {joinedParts.month} {joinedParts.year}</span>
+                <span>
+                  Joined {joinedParts.month} {joinedParts.year}
+                </span>
               </div>
             )}
           </div>

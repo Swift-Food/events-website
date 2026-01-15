@@ -1,6 +1,7 @@
 // services/event-user.service.ts
 import apiClient from '@/lib/auth/apiClient';
 import { AxiosResponse } from 'axios';
+import { IsFollowingResponse, FollowActionResponse } from '@/types/follower';
 
 export interface EventUserStats {
   eventsCreated: number;
@@ -179,6 +180,35 @@ class EventUserService {
       `${this.baseUrl}/me/withdrawals`
     );
     return response.data;
+  }
+
+  /**
+   * Check if current user is following a user
+   */
+  async isFollowing(userId: string): Promise<IsFollowingResponse> {
+    const response: AxiosResponse<IsFollowingResponse> = await apiClient.get(
+      `${this.baseUrl}/${userId}/is-following`
+    );
+    return response.data;
+  }
+
+  /**
+   * Follow a user
+   * If target has autoAcceptFollowers: true → instant follow
+   * If autoAcceptFollowers: false → creates pending request
+   */
+  async followUser(userId: string): Promise<FollowActionResponse> {
+    const response: AxiosResponse<FollowActionResponse> = await apiClient.post(
+      `${this.baseUrl}/${userId}/follow`
+    );
+    return response.data;
+  }
+
+  /**
+   * Unfollow a user or cancel pending follow request
+   */
+  async unfollowUser(userId: string): Promise<void> {
+    await apiClient.delete(`${this.baseUrl}/${userId}/follow`);
   }
 }
 
