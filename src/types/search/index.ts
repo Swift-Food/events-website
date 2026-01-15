@@ -3,7 +3,7 @@
 import { EventResponseDto } from '../event';
 import { FollowStatusType } from '../follower';
 
-export type SearchType = 'events' | 'calendars';
+export type SearchType = 'events' | 'calendars' | 'users';
 
 // User search result
 export interface UserSearchResult {
@@ -30,15 +30,16 @@ export interface CalendarSearchResult {
 // Unified search query params
 export interface UnifiedSearchQuery {
   q: string;
-  type?: string; // Comma-separated: "events", "calendars", or "events,calendars"
+  type?: string; // Comma-separated: "events", "calendars", "users" - default: all three
   skip?: number;
   take?: number;
 }
 
-// Unified search response (events and/or calendars)
+// Unified search response (events, calendars, and/or users)
 export interface UnifiedSearchResponse {
   events?: { items: EventResponseDto[]; total: number };
   calendars?: { items: CalendarSearchResult[]; total: number };
+  users?: { items: UserSearchResult[]; total: number };
   query: string;
   skip: number;
   take: number;

@@ -11,8 +11,8 @@ class SearchService {
   private readonly baseUrl = '/search';
 
   /**
-   * Search events and/or calendars
-   * Default (no type): returns both events and calendars
+   * Search events, calendars, and/or users
+   * Default (no type): returns all three
    */
   async searchUnified(query: UnifiedSearchQuery): Promise<UnifiedSearchResponse> {
     const response: AxiosResponse<UnifiedSearchResponse> = await apiClient.get(
@@ -20,6 +20,17 @@ class SearchService {
       { params: query }
     );
     return response.data;
+  }
+
+  /**
+   * Search all (events + calendars + users)
+   */
+  async searchAll(
+    q: string,
+    skip: number = 0,
+    take: number = 10
+  ): Promise<UnifiedSearchResponse> {
+    return this.searchUnified({ q, skip, take });
   }
 
   /**
@@ -45,18 +56,29 @@ class SearchService {
   }
 
   /**
-   * Search events and calendars together
+   * Search users only via unified endpoint
+   */
+  async searchUsersUnified(
+    q: string,
+    skip: number = 0,
+    take: number = 10
+  ): Promise<UnifiedSearchResponse> {
+    return this.searchUnified({ q, type: 'users', skip, take });
+  }
+
+  /**
+   * Search events and calendars (no users)
    */
   async searchEventsAndCalendars(
     q: string,
     skip: number = 0,
     take: number = 10
   ): Promise<UnifiedSearchResponse> {
-    return this.searchUnified({ q, skip, take });
+    return this.searchUnified({ q, type: 'events,calendars', skip, take });
   }
 
   /**
-   * Search users/people by username
+   * Search users/people (legacy endpoint)
    */
   async searchUsers(
     q: string,

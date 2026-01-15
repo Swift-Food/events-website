@@ -4,17 +4,20 @@
 
 | Endpoint | Use Case |
 |----------|----------|
-| `/search/unified` | Events + Calendars (default) |
+| `/search/unified` | All (events + calendars + users) |
 | `/search/unified?type=events` | Events only |
 | `/search/unified?type=calendars` | Calendars only |
-| `/search/unified?type=events,calendars` | Events + Calendars (explicit) |
-| `/search/users` | People only |
+| `/search/unified?type=users` | Users only |
+| `/search/unified?type=events,calendars` | Events + Calendars |
+| `/search/unified?type=events,users` | Events + Users |
+| `/search/users` | Users only (legacy endpoint) |
 
-The `type` param accepts comma-separated values to specify which result types you want.
+The `type` param accepts comma-separated values: `events`, `calendars`, `users`.
+Default (no type): returns all three.
 
 ---
 
-## Events + Calendars (Combined)
+## Unified Search
 
 ### GET /search/unified?q=query
 
@@ -22,94 +25,51 @@ The `type` param accepts comma-separated values to specify which result types yo
 | Param | Type | Default |
 |-------|------|---------|
 | `q` | string | required |
-| `type` | string | `events,calendars` |
+| `type` | string | `events,calendars,users` |
 | `skip` | number | 0 |
 | `take` | number | 10 (max 50) |
-
-The `type` param accepts: `events`, `calendars`, or `events,calendars` (comma-separated).
 
 **Response:**
 ```typescript
 {
-  events: { items: EventResponseDto[]; total: number };
-  calendars: { items: CalendarSearchResult[]; total: number };
+  events?: { items: EventResponseDto[]; total: number };
+  calendars?: { items: CalendarSearchResult[]; total: number };
+  users?: { items: UserSearchResult[]; total: number };
   query: string;
   skip: number;
   take: number;
 }
 ```
+
+Only requested types are included in the response.
 
 ---
 
-## Events Only
+## Examples
 
-### GET /search/unified?type=events
-
-**Query Params:**
-| Param | Type | Default |
-|-------|------|---------|
-| `q` | string | required |
-| `type` | string | 'events' |
-| `skip` | number | 0 |
-| `take` | number | 10 (max 50) |
-
-**Response:**
-```typescript
-{
-  events: { items: EventResponseDto[]; total: number };
-  query: string;
-  skip: number;
-  take: number;
-}
+### All Results (default)
 ```
-
----
-
-## Calendars Only
-
-### GET /search/unified?type=calendars
-
-**Query Params:**
-| Param | Type | Default |
-|-------|------|---------|
-| `q` | string | required |
-| `type` | string | 'calendars' |
-| `skip` | number | 0 |
-| `take` | number | 10 (max 50) |
-
-**Response:**
-```typescript
-{
-  calendars: { items: CalendarSearchResult[]; total: number };
-  query: string;
-  skip: number;
-  take: number;
-}
+GET /search/unified?q=music
 ```
+Returns events, calendars, and users matching "music".
 
----
-
-## People Only
-
-### GET /search/users
-
-**Query Params:**
-| Param | Type | Default |
-|-------|------|---------|
-| `q` | string | required |
-| `skip` | number | 0 |
-| `take` | number | 10 (max 50) |
-
-**Response:**
-```typescript
-{
-  users: UserSearchResult[];
-  total: number;
-  skip: number;
-  take: number;
-  query: string;
-}
+### Events Only
 ```
+GET /search/unified?q=concert&type=events
+```
+Response contains only `events` field.
+
+### Events + Calendars
+```
+GET /search/unified?q=jazz&type=events,calendars
+```
+Response contains `events` and `calendars` fields.
+
+### Users Only
+```
+GET /search/unified?q=john&type=users
+```
+Response contains only `users` field.
 
 ---
 
