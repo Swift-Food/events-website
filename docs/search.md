@@ -4,7 +4,7 @@
 
 | Endpoint | Use Case |
 |----------|----------|
-| `/search/events-calendars` | Events + Calendars together |
+| `/search/unified` | Events + Calendars (default) |
 | `/search/unified?type=events` | Events only |
 | `/search/unified?type=calendars` | Calendars only |
 | `/search/users` | People only |
@@ -13,7 +13,7 @@
 
 ## Events + Calendars (Combined)
 
-### GET /search/events-calendars
+### GET /search/unified?q=query
 
 **Query Params:**
 | Param | Type | Default |
@@ -25,13 +25,11 @@
 **Response:**
 ```typescript
 {
-  results: EventCalendarSearchResult[];
   events: { items: EventResponseDto[]; total: number };
   calendars: { items: CalendarSearchResult[]; total: number };
-  total: number;
+  query: string;
   skip: number;
   take: number;
-  query: string;
 }
 ```
 
@@ -52,9 +50,10 @@
 **Response:**
 ```typescript
 {
-  results: SearchResult[];  // All will have type: 'event'
   events: { items: EventResponseDto[]; total: number };
   query: string;
+  skip: number;
+  take: number;
 }
 ```
 
@@ -75,9 +74,10 @@
 **Response:**
 ```typescript
 {
-  results: SearchResult[];  // All will have type: 'calendar'
   calendars: { items: CalendarSearchResult[]; total: number };
   query: string;
+  skip: number;
+  take: number;
 }
 ```
 
@@ -110,21 +110,6 @@
 ## Response Types
 
 ```typescript
-// Mixed result (events-calendars endpoint)
-interface EventCalendarSearchResult {
-  type: 'event' | 'calendar';
-  event?: EventResponseDto;
-  calendar?: CalendarSearchResult;
-}
-
-// Unified result (can include all types)
-interface SearchResult {
-  type: 'event' | 'calendar' | 'user';
-  event?: EventResponseDto;
-  calendar?: CalendarSearchResult;
-  user?: UserSearchResult;
-}
-
 interface CalendarSearchResult {
   id: string;
   name: string;
