@@ -4,7 +4,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { User, LogOut, UserCircle, Ticket, Calendar, ChartNoAxesGantt } from "lucide-react";
+import {
+  User,
+  LogOut,
+  UserCircle,
+  Ticket,
+  Calendar,
+  ChartNoAxesGantt,
+  Search,
+  Bell,
+} from "lucide-react";
 import { useAuth } from "@/lib/auth/authContext";
 
 const navLinks = [
@@ -57,7 +66,18 @@ export default function Navbar() {
     }
   };
 
-  const handleProtectedNavClick = (e: React.MouseEvent, href: string, requiresAuth?: boolean) => {
+  const handleSearchIconClick = async () => {
+    // TODO: Implement
+  };
+  const handleNotifIconClick = async () => {
+    // TODO: Implement
+  };
+
+  const handleProtectedNavClick = (
+    e: React.MouseEvent,
+    href: string,
+    requiresAuth?: boolean
+  ) => {
     if (requiresAuth && !isAuthenticated) {
       e.preventDefault();
       router.push(`/auth?redirect=${encodeURIComponent(href)}`);
@@ -69,7 +89,10 @@ export default function Navbar() {
       <header className="sticky top-0 z-50 backdrop-blur-sm border-b border-zinc-700">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-1 text-lg font-semibold tracking-tight hover:scale-105 hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-transform duration-200">
+            <Link
+              href="/"
+              className="flex items-center gap-1 text-lg font-semibold tracking-tight hover:scale-105 hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-transform duration-200"
+            >
               <Image
                 src="/logo.svg"
                 alt="Prismo logo"
@@ -77,7 +100,12 @@ export default function Navbar() {
                 height={24}
                 className="invert"
               />
-              <span className="hidden sm:inline font-normal text-foreground" style={{ fontFamily: 'var(--font-satoshi), sans-serif' }}>PRISMO</span>
+              <span
+                className="hidden sm:inline font-normal text-foreground"
+                style={{ fontFamily: "var(--font-satoshi), sans-serif" }}
+              >
+                PRISMO
+              </span>
             </Link>
 
             {/* Mobile Icon Navigation */}
@@ -92,7 +120,9 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/event-management"
-                onClick={(e) => handleProtectedNavClick(e, "/event-management", true)}
+                onClick={(e) =>
+                  handleProtectedNavClick(e, "/event-management", true)
+                }
                 className="flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/10"
                 aria-label="Manage"
               >
@@ -106,7 +136,9 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={(e) => handleProtectedNavClick(e, link.href, link.requiresAuth)}
+                  onClick={(e) =>
+                    handleProtectedNavClick(e, link.href, link.requiresAuth)
+                  }
                   className="transition-colors hover:opacity-80"
                 >
                   {link.label}
@@ -118,19 +150,37 @@ export default function Navbar() {
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/event-creation"
-              className={`rounded-full bg-foreground px-3 py-1.5 text-xs font-semibold text-background transition-colors hover:opacity-90 sm:px-5 sm:py-2 sm:text-sm ${!isAuthenticated ? 'hidden sm:inline-flex' : ''}`}
+              className={`rounded-full bg-foreground px-3 py-1.5 text-xs font-semibold text-background transition-colors hover:opacity-90 sm:px-5 sm:py-2 sm:text-sm ${
+                !isAuthenticated ? "hidden sm:inline-flex" : ""
+              }`}
             >
               Create Event
             </Link>
             {isAuthenticated ? (
               <div className="relative" ref={userMenuRef}>
-                <button
-                  onClick={handleUserIconClick}
-                  className="flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/10 cursor-pointer"
-                  aria-label="User profile"
-                >
-                  <User className="h-5 w-5" />
-                </button>
+                <div className="flex flex-row space-x-2">
+                  <button
+                    onClick={handleSearchIconClick}
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/10 cursor-pointer"
+                    aria-label="User profile"
+                  >
+                    <Search className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={handleNotifIconClick}
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/10 cursor-pointer"
+                    aria-label="User profile"
+                  >
+                    <Bell className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={handleUserIconClick}
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/10 cursor-pointer"
+                    aria-label="User profile"
+                  >
+                    <User className="h-5 w-5" />
+                  </button>
+                </div>
 
                 {/* User Dropdown Menu */}
                 {isUserMenuOpen && (
@@ -180,7 +230,6 @@ export default function Navbar() {
           </div>
         </div>
       </header>
-
     </>
   );
 }
