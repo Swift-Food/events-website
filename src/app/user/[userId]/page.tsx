@@ -40,10 +40,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const displayName = profile.organizationName ||
-    [profile.firstName, profile.lastName].filter(Boolean).join(" ") ||
-    profile.user?.username ||
-    "User";
+  // Priority: personal name > username > organization name > fallback
+  const personalName = [profile.firstName, profile.lastName].filter(Boolean).join(" ");
+  const displayName = personalName || profile.user?.username || profile.organizationName || "User";
 
   const profileImage = profile.profilePicture || profile.user?.profilePicture;
   const description = `View events by ${displayName}. ${profile.totalEventsCreated} events created.`;
@@ -75,10 +74,9 @@ export default async function UserProfilePage({ params }: PageProps) {
     notFound();
   }
 
-  const displayName = profile.organizationName ||
-    [profile.firstName, profile.lastName].filter(Boolean).join(" ") ||
-    profile.user?.username ||
-    "User";
+  // Priority: personal name > username > organization name > fallback
+  const personalName = [profile.firstName, profile.lastName].filter(Boolean).join(" ");
+  const displayName = personalName || profile.user?.username || profile.organizationName || "User";
 
   const profileImage = profile.profilePicture || profile.user?.profilePicture;
 
