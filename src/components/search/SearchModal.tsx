@@ -45,6 +45,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<UnifiedSearchResponse | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -111,11 +112,51 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     }
   }, [isOpen]);
 
-  // Handle escape key to close modal
+  // Build flat list of all navigable items
+  const allItems = [
+    ...filteredShortcuts.map((s, i) => ({ type: "shortcut" as const, index: i, data: s })),
+    ...(searchResults?.calendars?.items ?? []).map((c, i) => ({ type: "calendar" as const, index: i, data: c })),
+    ...(searchResults?.events?.items ?? []).map((e, i) => ({ type: "event" as const, index: i, data: e })),
+    ...(searchResults?.users?.items ?? []).map((u, i) => ({ type: "user" as const, index: i, data: u })),
+  ];
+
+  // Reset selected index when results change
+  useEffect(() => {
+    setSelectedIndex(-1);
+  }, [searchResults, searchQuery]);
+
+  // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
+        return;
+      }
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedIndex((prev) =>
+          prev < allItems.length - 1 ? prev + 1 : prev
+        );
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+      } else if (e.key === "Enter" && selectedIndex >= 0 && selectedIndex < allItems.length) {
+        e.preventDefault();
+        const item = allItems[selectedIndex];
+        if (item.type === "shortcut") {
+          handleShortcutClick(item.data as ShortcutItem);
+        } else if (item.type === "calendar") {
+          const cal = item.data as { id: string };
+          router.push(`/calendar/${cal.id}`);
+          onClose();
+        } else if (item.type === "event") {
+          const evt = item.data as EventResponseDto;
+          router.push(`/events/${evt.id}`);
+          onClose();
+        } else if (item.type === "user") {
+          handleUserClick(item.data as UserSearchResult);
+        }
       }
     };
 
@@ -128,7 +169,15 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, allItems, selectedIndex, router]);
+
+  // Scroll selected item into view
+  useEffect(() => {
+    if (selectedIndex >= 0) {
+      const selectedEl = modalRef.current?.querySelector(`[data-index="${selectedIndex}"]`);
+      selectedEl?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, [selectedIndex]);
 
   // Reset state when modal closes
   useEffect(() => {
@@ -305,11 +354,14 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   </span>
                 </div>
                 <div className="space-y-0.5">
-                  {filteredShortcuts.map((item, index) => (
+                  {filteredShortcuts.map((item, index) => {
+                    const isSelected = selectedIndex === index;
+                    return (
                     <button
                       key={index}
+                      data-index={index}
                       onClick={() => handleShortcutClick(item)}
-                      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-foreground hover:bg-foreground/5 transition-colors group"
+                      className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-foreground transition-colors group ${isSelected ? "bg-foreground/10" : "hover:bg-foreground/5"}`}
                     >
                       <span className="text-muted-foreground group-hover:text-foreground transition-colors">
                         {item.icon}
@@ -319,7 +371,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         <ExternalLink className="h-3 w-3 text-muted-foreground" />
                       )}
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -333,21 +386,35 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-3 px-2">
-                  {searchResults.calendars.items.map((calendar) => (
-                    <SquareCalendarCard
-                      key={calendar.id}
-                      calendar={{
-                        id: calendar.id,
-                        name: calendar.name,
-                        calendarUrl: calendar.id,
-                        calendarImage: calendar.coverImage ?? undefined,
-                        calendarColor: "#6366f1",
-                        description: calendar.description ?? undefined,
-                        isPublic: !calendar.isPrivate,
-                      } as Calendar}
-                      size={140}
-                    />
-                  ))}
+                  {searchResults.calendars.items.map((calendar, index) => {
+                    const calendarOffset = filteredShortcuts.length;
+                    const globalIndex = calendarOffset + index;
+                    const isSelected = selectedIndex === globalIndex;
+                    return (
+                      <div
+                        key={calendar.id}
+                        data-index={globalIndex}
+                        className={`rounded-lg cursor-pointer ${isSelected ? "ring-2 ring-primary" : ""}`}
+                        onClick={() => {
+                          router.push(`/calendar/${calendar.id}`);
+                          onClose();
+                        }}
+                      >
+                        <SquareCalendarCard
+                          calendar={{
+                            id: calendar.id,
+                            name: calendar.name,
+                            calendarUrl: calendar.id,
+                            calendarImage: calendar.coverImage ?? undefined,
+                            calendarColor: "#6366f1",
+                            description: calendar.description ?? undefined,
+                            isPublic: !calendar.isPrivate,
+                          } as Calendar}
+                          size={140}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -361,15 +428,25 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   </span>
                 </div>
                 <div>
-                  {searchResults.events.items.map((event) => (
-                    <HorizontalEventCard
-                      key={event.id}
-                      event={event}
-                      showDate
-                      showCategories={false}
-                      onClick={handleEventClick}
-                    />
-                  ))}
+                  {searchResults.events.items.map((event, index) => {
+                    const eventOffset = filteredShortcuts.length + (searchResults.calendars?.items?.length ?? 0);
+                    const globalIndex = eventOffset + index;
+                    const isSelected = selectedIndex === globalIndex;
+                    return (
+                      <div
+                        key={event.id}
+                        data-index={globalIndex}
+                        className={`rounded-lg ${isSelected ? "bg-foreground/10" : ""}`}
+                      >
+                        <HorizontalEventCard
+                          event={event}
+                          showDate
+                          showCategories={false}
+                          onClick={handleEventClick}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -383,11 +460,18 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   </span>
                 </div>
                 <div className="space-y-1">
-                  {searchResults.users.items.map((user) => (
+                  {searchResults.users.items.map((user, index) => {
+                    const userOffset = filteredShortcuts.length +
+                      (searchResults.calendars?.items?.length ?? 0) +
+                      (searchResults.events?.items?.length ?? 0);
+                    const globalIndex = userOffset + index;
+                    const isSelected = selectedIndex === globalIndex;
+                    return (
                     <button
                       key={user.id}
+                      data-index={globalIndex}
                       onClick={() => handleUserClick(user)}
-                      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-foreground hover:bg-foreground/5 transition-colors group"
+                      className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-foreground transition-colors group ${isSelected ? "bg-foreground/10" : "hover:bg-foreground/5"}`}
                     >
                       <div className="h-10 w-10 rounded-full overflow-hidden bg-card-secondary-background flex-shrink-0">
                         {user.profilePicture ? (
@@ -423,7 +507,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         </p>
                       </div>
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
