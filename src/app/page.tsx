@@ -93,27 +93,27 @@ export default function DiscoveryPage() {
             </h2>
 
             <div className="overflow-x-auto pb-4 -mx-4 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              <div className="flex gap-6">
+              <div className="flex gap-2 sm:gap-3">
                 {allCategories.slice(0, 12).map((category) => (
                   <Link
                     key={category.id}
                     href={`/events?category=${category.name}`}
-                    className="flex flex-col items-center gap-2 cursor-pointer group"
+                    className="flex flex-col items-center gap-1.5 sm:gap-2 cursor-pointer group w-14 sm:w-18 flex-shrink-0"
                   >
-                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                       {category.iconName ? (
                         <DynamicIcon
                           name={category.iconName}
-                          className="w-6 h-6 text-primary"
+                          className="w-4 h-4 sm:w-6 sm:h-6 text-primary"
                         />
                       ) : (
                         <DynamicIcon
                           name="circle"
-                          className="w-6 h-6 text-primary"
+                          className="w-4 h-4 sm:w-6 sm:h-6 text-primary"
                         />
                       )}
                     </div>
-                    <span className="text-xs font-medium text-foreground text-center whitespace-nowrap">
+                    <span className="text-[10px] sm:text-xs font-medium text-foreground text-center line-clamp-2">
                       {getCategoryLabel(category.name)}
                     </span>
                   </Link>
