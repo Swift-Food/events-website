@@ -4,9 +4,57 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { eventUserService, UpdateEventUserDto } from "@/services/event-user.service";
-import { ArrowLeft, Loader2, User, Save } from "lucide-react";
+import { ArrowLeft, Loader2, User, Save, Instagram, Linkedin, Globe } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+
+// X (Twitter) icon - not available in lucide-react
+const XIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
+// Social media URL configurations
+const SOCIAL_PREFIXES = {
+  instagram: "instagram.com/",
+  twitter: "x.com/",
+  linkedin: "linkedin.com/in/",
+};
+
+// Extract username from a social URL
+function extractUsername(url: string, platform: keyof typeof SOCIAL_PREFIXES): string {
+  if (!url) return "";
+  const prefix = SOCIAL_PREFIXES[platform];
+
+  // Handle various URL formats
+  const patterns = [
+    new RegExp(`https?://(www\\.)?${prefix.replace("/", "\\/")}(.+?)\\/?$`, "i"),
+    new RegExp(`^${prefix.replace("/", "\\/")}(.+?)\\/?$`, "i"),
+    new RegExp(`^@?(.+)$`), // Just a username
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) {
+      const extracted = match[match.length - 1];
+      // Don't return if it looks like a full URL that didn't match
+      if (!extracted.includes("http") && !extracted.includes(".com")) {
+        return extracted.replace(/^@/, ""); // Remove leading @ if present
+      }
+    }
+  }
+
+  return url;
+}
+
+// Build full URL from username
+function buildSocialUrl(username: string, platform: keyof typeof SOCIAL_PREFIXES): string {
+  if (!username) return "";
+  const cleanUsername = username.replace(/^@/, "").trim();
+  if (!cleanUsername) return "";
+  return `https://${SOCIAL_PREFIXES[platform]}${cleanUsername}`;
+}
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -44,9 +92,10 @@ export default function EditProfilePage() {
         organizationName: eventUser.organizationName || "",
         bio: eventUser.bio || "",
         website: eventUser.website || "",
-        twitterHandle: eventUser.twitterHandle || "",
-        linkedinUrl: eventUser.linkedinUrl || "",
-        instagramUrl: eventUser.instagramUrl || "",
+        // Extract usernames from stored URLs
+        twitterHandle: extractUsername(eventUser.twitterHandle || "", "twitter"),
+        linkedinUrl: extractUsername(eventUser.linkedinUrl || "", "linkedin"),
+        instagramUrl: extractUsername(eventUser.instagramUrl || "", "instagram"),
         isProfilePublic: eventUser.isProfilePublic !== false,
       });
     }
@@ -65,6 +114,7 @@ export default function EditProfilePage() {
 
     try {
       // Build update payload - send all editable fields
+      // Build full URLs from usernames for social fields
       const updateData: UpdateEventUserDto = {
         firstName: formData.firstName.trim() || undefined,
         lastName: formData.lastName.trim() || undefined,
@@ -72,9 +122,9 @@ export default function EditProfilePage() {
         organizationName: formData.organizationName.trim() || undefined,
         bio: formData.bio.trim() || undefined,
         website: formData.website.trim() || undefined,
-        twitterHandle: formData.twitterHandle.trim() || undefined,
-        linkedinUrl: formData.linkedinUrl.trim() || undefined,
-        instagramUrl: formData.instagramUrl.trim() || undefined,
+        twitterHandle: buildSocialUrl(formData.twitterHandle, "twitter") || undefined,
+        linkedinUrl: buildSocialUrl(formData.linkedinUrl, "linkedin") || undefined,
+        instagramUrl: buildSocialUrl(formData.instagramUrl, "instagram") || undefined,
         isProfilePublic: formData.isProfilePublic,
       };
 
@@ -266,65 +316,89 @@ export default function EditProfilePage() {
               Social Links
             </h2>
 
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Website
-              </label>
-              <input
-                type="url"
-                name="website"
-                value={formData.website}
-                onChange={handleChange}
-                placeholder="https://yourwebsite.com"
-                className="w-full rounded-xl border border-white/10 bg-input-background px-4 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Twitter Handle
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  @
-                </span>
-                <input
-                  type="text"
-                  name="twitterHandle"
-                  value={formData.twitterHandle}
-                  onChange={handleChange}
-                  placeholder="username"
-                  className="w-full rounded-xl border border-white/10 bg-input-background pl-8 pr-4 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                />
+            <div className="space-y-4">
+              {/* Instagram */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Instagram
+                </label>
+                <div className="flex rounded-xl border border-white/10 bg-input-background overflow-hidden focus-within:ring-2 focus-within:ring-primary/50 transition-all">
+                  <span className="flex items-center gap-2 px-3 bg-white/5 text-muted-foreground text-sm border-r border-white/10 whitespace-nowrap">
+                    <Instagram className="h-4 w-4" />
+                    instagram.com/
+                  </span>
+                  <input
+                    type="text"
+                    name="instagramUrl"
+                    value={formData.instagramUrl}
+                    onChange={handleChange}
+                    placeholder="username"
+                    className="flex-1 bg-transparent px-3 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none min-w-0"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                LinkedIn URL
-              </label>
-              <input
-                type="url"
-                name="linkedinUrl"
-                value={formData.linkedinUrl}
-                onChange={handleChange}
-                placeholder="https://linkedin.com/in/yourprofile"
-                className="w-full rounded-xl border border-white/10 bg-input-background px-4 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-              />
-            </div>
+              {/* X (Twitter) */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  X (Twitter)
+                </label>
+                <div className="flex rounded-xl border border-white/10 bg-input-background overflow-hidden focus-within:ring-2 focus-within:ring-primary/50 transition-all">
+                  <span className="flex items-center gap-2 px-3 bg-white/5 text-muted-foreground text-sm border-r border-white/10 whitespace-nowrap">
+                    <XIcon className="h-4 w-4" />
+                    x.com/
+                  </span>
+                  <input
+                    type="text"
+                    name="twitterHandle"
+                    value={formData.twitterHandle}
+                    onChange={handleChange}
+                    placeholder="username"
+                    className="flex-1 bg-transparent px-3 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none min-w-0"
+                  />
+                </div>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Instagram URL
-              </label>
-              <input
-                type="url"
-                name="instagramUrl"
-                value={formData.instagramUrl}
-                onChange={handleChange}
-                placeholder="https://instagram.com/yourprofile"
-                className="w-full rounded-xl border border-white/10 bg-input-background px-4 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-              />
+              {/* LinkedIn */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  LinkedIn
+                </label>
+                <div className="flex rounded-xl border border-white/10 bg-input-background overflow-hidden focus-within:ring-2 focus-within:ring-primary/50 transition-all">
+                  <span className="flex items-center gap-2 px-3 bg-white/5 text-muted-foreground text-sm border-r border-white/10 whitespace-nowrap">
+                    <Linkedin className="h-4 w-4" />
+                    linkedin.com/in/
+                  </span>
+                  <input
+                    type="text"
+                    name="linkedinUrl"
+                    value={formData.linkedinUrl}
+                    onChange={handleChange}
+                    placeholder="username"
+                    className="flex-1 bg-transparent px-3 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none min-w-0"
+                  />
+                </div>
+              </div>
+
+              {/* Website */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Website
+                </label>
+                <div className="flex rounded-xl border border-white/10 bg-input-background overflow-hidden focus-within:ring-2 focus-within:ring-primary/50 transition-all">
+                  <span className="flex items-center px-3 bg-white/5 text-muted-foreground border-r border-white/10">
+                    <Globe className="h-4 w-4" />
+                  </span>
+                  <input
+                    type="url"
+                    name="website"
+                    value={formData.website}
+                    onChange={handleChange}
+                    placeholder="https://yourwebsite.com"
+                    className="flex-1 bg-transparent px-3 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none min-w-0"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 

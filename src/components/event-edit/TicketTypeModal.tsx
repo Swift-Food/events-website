@@ -24,6 +24,7 @@ export default function TicketTypeModal({
   const [localPrice, setLocalPrice] = useState("0");
   const [localIsSingleUse, setLocalIsSingleUse] = useState(false);
   const [localQuantity, setLocalQuantity] = useState("100");
+  const [localIsUnlimited, setLocalIsUnlimited] = useState(false);
   const [localQuestions, setLocalQuestions] = useState<FormField[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -54,7 +55,10 @@ export default function TicketTypeModal({
         setLocalIsFree(ticketToEdit.isFree);
         setLocalPrice(ticketToEdit.price.toString());
         setLocalIsSingleUse(ticketToEdit.isSingleUse);
-        setLocalQuantity(ticketToEdit.quantity?.toString() || "100");
+        const qty = ticketToEdit.quantity ?? 100;
+        const isUnlimited = qty >= 999999;
+        setLocalIsUnlimited(isUnlimited);
+        setLocalQuantity(isUnlimited ? "100" : qty.toString());
         setLocalQuestions(ticketToEdit.questionForm || []);
       } else {
         // Reset for new ticket
@@ -64,6 +68,7 @@ export default function TicketTypeModal({
         setLocalPrice("0");
         setLocalIsSingleUse(false);
         setLocalQuantity("100");
+        setLocalIsUnlimited(false);
         setLocalQuestions([]);
       }
     }
@@ -78,15 +83,17 @@ export default function TicketTypeModal({
       return;
     }
 
-    const quantity = parseInt(localQuantity) || 100;
-    if (quantity < 1) {
-      alert("Quantity must be at least 1");
-      return;
-    }
+    const quantity = localIsUnlimited ? 999999 : (parseInt(localQuantity) || 100);
+    if (!localIsUnlimited) {
+      if (quantity < 1) {
+        alert("Quantity must be at least 1");
+        return;
+      }
 
-    if (quantity > 100000) {
-      alert("Quantity cannot exceed 100,000");
-      return;
+      if (quantity > 100000) {
+        alert("Quantity cannot exceed 100,000");
+        return;
+      }
     }
 
     const price = parseFloat(localPrice) || 0;
@@ -283,21 +290,53 @@ export default function TicketTypeModal({
 
           {/* Quantity */}
           <div>
-            <label className="text-sm font-medium text-foreground block mb-1.5">
-              Quantity Available <span className="text-red-400">*</span>
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="100000"
-              value={localQuantity}
-              onChange={(e) => setLocalQuantity(e.target.value)}
-              className="w-full rounded-xl bg-card-background px-4 py-3 text-foreground text-base md:text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-              placeholder="100"
-            />
-            <p className="text-xs text-muted-foreground mt-1.5">
-              Number of tickets available must be within 1 - 100,000
-            </p>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-sm font-medium text-foreground">
+                Quantity Available {!localIsUnlimited && <span className="text-red-400">*</span>}
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Unlimited</span>
+                <button
+                  type="button"
+                  onClick={() => setLocalIsUnlimited(!localIsUnlimited)}
+                  className={`h-6 w-11 rounded-full transition-all flex-shrink-0 ${
+                    localIsUnlimited
+                      ? "bg-primary"
+                      : "bg-card-background"
+                  }`}
+                >
+                  <span
+                    className={`block h-5 w-5 rounded-full transition-all ${
+                      localIsUnlimited
+                        ? "translate-x-5 bg-primary-foreground"
+                        : "translate-x-0.5 bg-foreground"
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+            {localIsUnlimited ? (
+              <div className="h-11 flex items-center rounded-xl bg-card-background px-4">
+                <p className="text-base md:text-sm text-muted-foreground">
+                  No limit on available tickets
+                </p>
+              </div>
+            ) : (
+              <>
+                <input
+                  type="number"
+                  min="1"
+                  max="100000"
+                  value={localQuantity}
+                  onChange={(e) => setLocalQuantity(e.target.value)}
+                  className="w-full rounded-xl bg-card-background px-4 py-3 text-foreground text-base md:text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  placeholder="100"
+                />
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  Number of tickets available must be within 1 - 100,000
+                </p>
+              </>
+            )}
           </div>
 
           {/* Price Toggle */}
