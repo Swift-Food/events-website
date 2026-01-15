@@ -36,7 +36,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   // Focus input when modal opens
   useEffect(() => {
     if (isOpen && inputRef.current) {
-      inputRef.current.focus();
+      // Small delay to ensure modal is rendered, helps trigger keyboard on mobile
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
     }
   }, [isOpen]);
 
@@ -119,7 +122,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       className="fixed inset-0 z-[100] overflow-y-auto bg-black/60 backdrop-blur-sm"
       onClick={handleBackdropClick}
     >
-      <div className="min-h-screen px-4 pt-[15vh]">
+      <div className="min-h-screen px-4 pt-4 sm:pt-[15vh]">
         <div
           ref={modalRef}
           onClick={(e) => e.stopPropagation()}
@@ -131,6 +134,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             <input
               ref={inputRef}
               type="text"
+              autoFocus
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search for events, calendars and more..."
