@@ -54,12 +54,14 @@ export default function UserProfileClient({
   const skipRef = useRef(0);
   const eventsPerPage = 12;
 
+  // Priority: personal name > username > organization name > fallback
+  const personalName = [initialProfile.firstName, initialProfile.lastName]
+    .filter(Boolean)
+    .join(" ");
   const displayName =
-    initialProfile.organizationName ||
-    [initialProfile.firstName, initialProfile.lastName]
-      .filter(Boolean)
-      .join(" ") ||
+    personalName ||
     initialProfile.user?.username ||
+    initialProfile.organizationName ||
     "User";
 
   const profileImage =
