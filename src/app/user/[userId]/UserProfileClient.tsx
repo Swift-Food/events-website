@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import Image from "next/image";
 import { eventsApi } from "@/services/events";
 import {
   EventResponseDto,
@@ -188,19 +187,22 @@ export default function UserProfileClient({
         <div className="mb-8">
           <div className="flex flex-col items-center text-center">
             {/* Avatar */}
-            {profileImage ? (
-              <Image
-                src={profileImage}
-                alt={displayName}
-                width={160}
-                height={160}
-                className="rounded-full object-cover h-32 w-32 sm:h-36 sm:w-36"
-              />
-            ) : (
-              <div className="flex h-32 w-32 sm:h-36 sm:w-36 items-center justify-center rounded-full bg-primary/10">
+            <div className="h-32 w-32 sm:h-36 sm:w-36 rounded-full overflow-hidden bg-primary/10">
+              {profileImage ? (
+                <img
+                  src={profileImage}
+                  alt={displayName}
+                  className="h-full w-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+              ) : null}
+              <div className={`h-full w-full flex items-center justify-center ${profileImage ? 'hidden' : ''}`}>
                 <User className="h-14 w-14 sm:h-16 sm:w-16 text-primary" />
               </div>
-            )}
+            </div>
 
             {/* Name */}
             <h1 className="text-[32px] sm:text-[36px] !font-light text-white mt-6">
