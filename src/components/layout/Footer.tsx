@@ -13,9 +13,9 @@ export default function Footer() {
   return (
     <footer className="border-t border-white/10 bg-background">
       <div className="mx-auto max-w-6xl px-6 py-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Logo and Links */}
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
             <Link href="/">
               <Image
                 src="/logo.svg"
@@ -25,7 +25,7 @@ export default function Footer() {
                 className="invert"
               />
             </Link>
-            <nav className="flex items-center gap-6 text-sm text-zinc-400">
+            <nav className="flex items-center gap-4 sm:gap-6 text-sm text-zinc-400">
               <Link href="/" className="transition-colors hover:text-white">
                 Discover
               </Link>
