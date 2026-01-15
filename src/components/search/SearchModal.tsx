@@ -218,12 +218,27 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
     if (isOpen) {
       document.addEventListener("keydown", handleKeyDown);
+      // Robust scroll lock for iOS
+      const scrollY = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
       document.body.style.overflow = "hidden";
     }
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      // Restore scroll position
+      const scrollY = document.body.style.top;
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
       document.body.style.overflow = "";
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY, 10) * -1);
+      }
     };
   }, [isOpen, onClose, allItems, selectedIndex, router]);
 
@@ -346,14 +361,14 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] overflow-y-auto bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] overflow-hidden bg-black/40 backdrop-blur-sm touch-none"
       onClick={handleBackdropClick}
     >
-      <div className="min-h-screen px-4 pt-4 sm:pt-[15vh]">
+      <div className="h-full px-4 pt-4 sm:pt-[15vh] flex flex-col items-center overflow-hidden">
         <div
           ref={modalRef}
           onClick={(e) => e.stopPropagation()}
-          className="relative mx-auto w-full max-w-xl rounded-xl border border-foreground/10 bg-card-background shadow-2xl animate-in fade-in duration-200"
+          className="relative w-full max-w-xl rounded-xl border border-foreground/10 bg-card-background shadow-2xl animate-in fade-in duration-200 flex flex-col max-h-[85dvh] sm:max-h-[70vh] touch-auto"
         >
           {/* Search Input */}
           <div className="border-b border-foreground/10">
@@ -386,7 +401,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
           </div>
 
           {/* Results Container */}
-          <div className="max-h-[60vh] overflow-y-auto">
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
             {/* Shortcuts Section - instant filtering, not affected by API loading */}
             {filteredShortcuts.length > 0 && (
               <div className="p-2">
