@@ -37,9 +37,9 @@ export default function UserProfileClient({
   const [activeTab, setActiveTab] = useState<EventTab>("upcoming");
 
   // Log profile data
-  console.log("User profile data:", initialProfile);
+  // console.log("User profile data:", initialProfile);
 
-  const isPublic = initialProfile.isProfilePublic !== false;
+  const isPublic = initialProfile.isProfilePublic ? true : false;
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const skipRef = useRef(0);

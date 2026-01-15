@@ -69,6 +69,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function UserProfilePage({ params }: PageProps) {
   const { userId } = await params;
   const profile = await getUserProfile(userId);
+  // console.log("User profile data:", profile);
 
   if (!profile) {
     notFound();

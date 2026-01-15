@@ -22,6 +22,7 @@ export default function EditProfilePage() {
     twitterHandle: "",
     linkedinUrl: "",
     instagramUrl: "",
+    isProfilePublic: true,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -46,6 +47,7 @@ export default function EditProfilePage() {
         twitterHandle: eventUser.twitterHandle || "",
         linkedinUrl: eventUser.linkedinUrl || "",
         instagramUrl: eventUser.instagramUrl || "",
+        isProfilePublic: eventUser.isProfilePublic !== false,
       });
     }
   }, [user, eventUser]);
@@ -73,6 +75,7 @@ export default function EditProfilePage() {
         twitterHandle: formData.twitterHandle.trim() || undefined,
         linkedinUrl: formData.linkedinUrl.trim() || undefined,
         instagramUrl: formData.instagramUrl.trim() || undefined,
+        isProfilePublic: formData.isProfilePublic,
       };
 
       // Remove undefined values for cleaner payload
@@ -322,6 +325,44 @@ export default function EditProfilePage() {
                 placeholder="https://instagram.com/yourprofile"
                 className="w-full rounded-xl border border-white/10 bg-input-background px-4 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
               />
+            </div>
+          </div>
+
+          {/* Privacy Settings */}
+          <div className="rounded-2xl bg-card-background backdrop-blur-xl p-6 space-y-4">
+            <h2 className="text-lg font-semibold text-foreground mb-4">
+              Privacy Settings
+            </h2>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-sm font-medium text-foreground">
+                  Public Profile
+                </label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  When enabled, anyone can see your full profile, events, and activity
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={formData.isProfilePublic}
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    isProfilePublic: !prev.isProfilePublic,
+                  }))
+                }
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  formData.isProfilePublic ? "bg-primary" : "bg-white/20"
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    formData.isProfilePublic ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
             </div>
           </div>
 
