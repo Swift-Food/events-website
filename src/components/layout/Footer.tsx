@@ -20,9 +20,9 @@ export default function Footer() {
               <Image
                 src="/logo.svg"
                 alt="Prismo logo"
-                width={20}
-                height={20}
-                className="invert"
+                width={32}
+                height={32}
+                className="invert sm:w-5 sm:h-5"
               />
             </Link>
             <nav className="flex items-center gap-4 sm:gap-6 text-sm text-zinc-400">
