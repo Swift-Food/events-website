@@ -29,17 +29,14 @@ export default function UserProfileClient({
   initialProfile,
   userId,
 }: UserProfileClientProps) {
+  const isPublic = initialProfile.isProfilePublic ? true : false;
+
   const [events, setEvents] = useState<EventResponseDto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isPublic); // Only show loading if public profile
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [activeTab, setActiveTab] = useState<EventTab>("upcoming");
-
-  // Log profile data
-  // console.log("User profile data:", initialProfile);
-
-  const isPublic = initialProfile.isProfilePublic ? true : false;
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const skipRef = useRef(0);
@@ -100,6 +97,12 @@ export default function UserProfileClient({
   }, [events]);
 
   const fetchEvents = useCallback(async () => {
+    // Skip fetching if profile is private
+    if (!isPublic) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     skipRef.current = 0;
@@ -130,10 +133,11 @@ export default function UserProfileClient({
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, isPublic]);
 
   const loadMoreEvents = useCallback(async () => {
-    if (loadingMore || !hasMore) return;
+    // Skip loading more if profile is private
+    if (!isPublic || loadingMore || !hasMore) return;
 
     setLoadingMore(true);
     try {
@@ -161,7 +165,7 @@ export default function UserProfileClient({
     } finally {
       setLoadingMore(false);
     }
-  }, [userId, loadingMore, hasMore]);
+  }, [userId, isPublic, loadingMore, hasMore]);
 
   useEffect(() => {
     fetchEvents();
