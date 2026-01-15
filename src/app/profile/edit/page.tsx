@@ -334,8 +334,8 @@ export default function EditProfilePage() {
               Privacy Settings
             </h2>
 
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-center gap-4">
+              <div className="flex-1 min-w-0">
                 <label className="block text-sm font-medium text-foreground">
                   Public Profile
                 </label>
@@ -353,7 +353,7 @@ export default function EditProfilePage() {
                     isProfilePublic: !prev.isProfilePublic,
                   }))
                 }
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
                   formData.isProfilePublic ? "bg-primary" : "bg-white/20"
                 }`}
               >
