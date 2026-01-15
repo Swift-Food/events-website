@@ -29,6 +29,18 @@ export interface EventUser {
   website: string | null;
   googleId: string | null;
   isGoogleUser: boolean;
+  // Follower system
+  followerCount: number;
+  followingCount: number;
+  // Privacy settings (only visible to profile owner)
+  isProfilePublic?: boolean;
+  autoAcceptFollowers?: boolean;
+  showEventAttendance?: boolean;
+  notifyFollowedUserEvents?: boolean;
+  // Email preferences
+  allowEventUpdateEmails?: boolean;
+  allowWaitlistEmails?: boolean;
+  allowCollaboratorEmails?: boolean;
 }
 
 export interface User {

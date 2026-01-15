@@ -43,6 +43,15 @@ export interface UpdateEventUserDto {
   twitterHandle?: string;
   linkedinUrl?: string;
   instagramUrl?: string;
+  isProfilePublic?: boolean;
+  autoAcceptFollowers?: boolean;
+  showEventAttendance?: boolean;
+  notifyFollowedUserEvents?: boolean;
+  allowEmailNotifications?: boolean;
+  allowTicketReminders?: boolean;
+  allowEventUpdateEmails?: boolean;
+  allowWaitlistEmails?: boolean;
+  allowCollaboratorEmails?: boolean;
 }
 
 export interface EventUserResponse {
