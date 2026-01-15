@@ -6,7 +6,6 @@ import {
   Search,
   X,
   Plus,
-  Home,
   Calendar as CalendarIcon,
   Compass,
   HelpCircle,
@@ -59,10 +58,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       keywords: ["create", "new", "event", "add"],
     },
     {
-      icon: <Home className="h-4 w-4" />,
-      label: "Open Home",
+      icon: <Compass className="h-4 w-4" />,
+      label: "Open Discover",
       href: "/",
-      keywords: ["home", "main", "start"],
+      keywords: ["discover", "explore", "find", "browse", "home"],
     },
     {
       icon: <Ticket className="h-4 w-4" />,
@@ -75,12 +74,6 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       label: "Manage Events",
       href: "/event-management",
       keywords: ["manage", "events", "dashboard", "admin"],
-    },
-    {
-      icon: <Compass className="h-4 w-4" />,
-      label: "Open Discover",
-      href: "/",
-      keywords: ["discover", "explore", "find", "browse"],
     },
     {
       icon: <HelpCircle className="h-4 w-4" />,
