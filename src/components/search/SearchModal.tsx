@@ -435,7 +435,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     Calendars
                   </span>
                 </div>
-                <div className="grid grid-cols-3 gap-3 px-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 px-2">
                   {searchResults.calendars.items.map((calendar, index) => {
                     const calendarOffset = filteredShortcuts.length;
                     const globalIndex = calendarOffset + index;
