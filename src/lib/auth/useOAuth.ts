@@ -132,6 +132,8 @@ export function useOAuth({
   // Initialize Apple Sign-In
   useEffect(() => {
     const initializeApple = () => {
+      console.log('Apple Client ID:', process.env.NEXT_PUBLIC_APPLE_CLIENT_ID);
+      console.log('Apple Redirect:', process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI);
       if (window.AppleID?.auth && process.env.NEXT_PUBLIC_APPLE_CLIENT_ID) {
         try {
           window.AppleID.auth.init({
