@@ -71,6 +71,7 @@ export default function EditProfilePage() {
     linkedinUrl: "",
     instagramUrl: "",
     isProfilePublic: true,
+    autoAcceptFollowers: true,
     // Email notification preferences
     allowEmailNotifications: true,
     allowTicketReminders: true,
@@ -104,6 +105,7 @@ export default function EditProfilePage() {
         linkedinUrl: extractUsername(eventUser.linkedinUrl || "", "linkedin"),
         instagramUrl: extractUsername(eventUser.instagramUrl || "", "instagram"),
         isProfilePublic: eventUser.isProfilePublic !== false,
+        autoAcceptFollowers: eventUser.autoAcceptFollowers !== false,
         // Email notification preferences
         allowEmailNotifications: eventUser.allowEmailNotifications !== false,
         allowTicketReminders: eventUser.allowTicketReminders !== false,
@@ -140,6 +142,7 @@ export default function EditProfilePage() {
         linkedinUrl: buildSocialUrl(formData.linkedinUrl, "linkedin") || undefined,
         instagramUrl: buildSocialUrl(formData.instagramUrl, "instagram") || undefined,
         isProfilePublic: formData.isProfilePublic,
+        autoAcceptFollowers: formData.autoAcceptFollowers,
         // Email notification preferences
         allowEmailNotifications: formData.allowEmailNotifications,
         allowTicketReminders: formData.allowTicketReminders,
@@ -455,6 +458,37 @@ export default function EditProfilePage() {
                 <span
                   className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
                     formData.isProfilePublic ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex-1 min-w-0">
+                <label className="block text-sm font-medium text-foreground">
+                  Auto-Accept Followers
+                </label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  When enabled, new followers are automatically accepted without requiring approval
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={formData.autoAcceptFollowers}
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    autoAcceptFollowers: !prev.autoAcceptFollowers,
+                  }))
+                }
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
+                  formData.autoAcceptFollowers ? "bg-primary" : "bg-white/20"
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    formData.autoAcceptFollowers ? "translate-x-6" : "translate-x-1"
                   }`}
                 />
               </button>

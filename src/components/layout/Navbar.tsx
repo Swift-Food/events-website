@@ -8,6 +8,7 @@ import {
   User,
   LogOut,
   UserCircle,
+  Users,
   Ticket,
   CalendarPlus,
   ChartNoAxesGantt,
@@ -204,6 +205,16 @@ export default function Navbar() {
                       >
                         <UserCircle className="h-4 w-4" />
                         Profile
+                      </button>
+                      <button
+                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
+                        onClick={() => {
+                          router.push("/friends");
+                          setIsUserMenuOpen(false);
+                        }}
+                      >
+                        <Users className="h-4 w-4" />
+                        Friends
                       </button>
                       <button
                         className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5 hover:text-red-400"

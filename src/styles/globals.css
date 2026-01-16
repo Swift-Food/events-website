@@ -271,6 +271,12 @@ input[type="date"] {
   min-width: 0;
 }
 
+input[type="datetime-local"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+}
+
 /* Animation utilities for modals */
 @keyframes fadeIn {
   from { opacity: 0; }
