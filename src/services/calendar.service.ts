@@ -7,15 +7,16 @@ import {
   CalendarSubscription,
   ListCalendarsResponse,
   AcceptInviteResponse,
+  CalendarEventsResponse,
   CreateCalendarDto,
   UpdateCalendarDto,
   CalendarQueryDto,
+  CalendarEventsQueryDto,
   AddEventToCalendarDto,
   InviteCalendarCollaboratorDto,
   UpdateCalendarCollaboratorDto,
   UpdateSubscriptionPreferencesDto,
 } from '@/types/calendar';
-import { EventResponseDto } from '@/types/event';
 
 class CalendarService {
   private readonly baseUrl = '/calendars';
@@ -109,11 +110,15 @@ class CalendarService {
   }
 
   /**
-   * Get all events in a calendar
+   * Get all events in a calendar with filtering
    */
-  async getCalendarEvents(calendarId: string): Promise<EventResponseDto[]> {
-    const response: AxiosResponse<EventResponseDto[]> = await apiClient.get(
-      `${this.baseUrl}/${calendarId}/events`
+  async getCalendarEvents(
+    calendarId: string,
+    query?: CalendarEventsQueryDto
+  ): Promise<CalendarEventsResponse> {
+    const response: AxiosResponse<CalendarEventsResponse> = await apiClient.get(
+      `${this.baseUrl}/${calendarId}/events`,
+      { params: query }
     );
     return response.data;
   }

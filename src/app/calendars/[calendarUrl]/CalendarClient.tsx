@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { calendarService } from "@/services/calendar.service";
 import { useAuth } from "@/lib/auth/authContext";
-import { Calendar, CalendarRole } from "@/types/calendar";
+import { Calendar, CalendarRole, CalendarEventsFilter } from "@/types/calendar";
 import { EventResponseDto } from "@/types/event";
 import {
   Calendar as CalendarIcon,
@@ -43,6 +43,9 @@ export default function CalendarClient({
 
   const [calendar, setCalendar] = useState<Calendar>(initialCalendar);
   const [events, setEvents] = useState<EventResponseDto[]>([]);
+  const [activeTab, setActiveTab] = useState<CalendarEventsFilter>("upcoming");
+  const [upcomingCount, setUpcomingCount] = useState(0);
+  const [pastCount, setPastCount] = useState(0);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [loadingSubscription, setLoadingSubscription] = useState(false);
@@ -75,8 +78,10 @@ export default function CalendarClient({
     const fetchEvents = async () => {
       try {
         setLoadingEvents(true);
-        const calendarEvents = await calendarService.getCalendarEvents(calendar.id);
-        setEvents(calendarEvents);
+        const response = await calendarService.getCalendarEvents(calendar.id, { filter: activeTab });
+        setEvents(response.events);
+        setUpcomingCount(response.upcomingCount);
+        setPastCount(response.pastCount);
       } catch (err) {
         console.error("Failed to fetch calendar events:", err);
         toast.error("Failed to load calendar events");
@@ -86,7 +91,7 @@ export default function CalendarClient({
     };
 
     fetchEvents();
-  }, [calendar.id]);
+  }, [calendar.id, activeTab]);
 
   // Check if user is subscribed
   useEffect(() => {
@@ -214,8 +219,10 @@ export default function CalendarClient({
 
   const refreshEvents = async () => {
     try {
-      const calendarEvents = await calendarService.getCalendarEvents(calendar.id);
-      setEvents(calendarEvents);
+      const response = await calendarService.getCalendarEvents(calendar.id, { filter: activeTab });
+      setEvents(response.events);
+      setUpcomingCount(response.upcomingCount);
+      setPastCount(response.pastCount);
     } catch (err) {
       console.error("Failed to refresh calendar events:", err);
     }
@@ -525,9 +532,33 @@ export default function CalendarClient({
 
             {/* Events Section */}
             <div className="pt-6">
-              <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                Events
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-semibold text-foreground">
+                  Events
+                </h2>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setActiveTab("upcoming")}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      activeTab === "upcoming"
+                        ? "bg-primary text-white"
+                        : "bg-card-background border border-white/10 text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Upcoming ({upcomingCount})
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("past")}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      activeTab === "past"
+                        ? "bg-primary text-white"
+                        : "bg-card-background border border-white/10 text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Past ({pastCount})
+                  </button>
+                </div>
+              </div>
 
               {loadingEvents ? (
                 <div className="flex min-h-[200px] items-center justify-center">
@@ -537,12 +568,14 @@ export default function CalendarClient({
                 <div className="rounded-xl border border-white/10 bg-card-background p-12 text-center">
                   <CalendarIcon className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
                   <h3 className="mb-2 text-xl font-semibold text-foreground">
-                    No events yet
+                    {activeTab === "upcoming" ? "No upcoming events" : "No past events"}
                   </h3>
                   <p className="text-muted-foreground">
-                    {canManage
-                      ? "Add events to this calendar to get started"
-                      : "Check back later for new events"}
+                    {activeTab === "upcoming"
+                      ? canManage
+                        ? "Add events to this calendar to get started"
+                        : "Check back later for new events"
+                      : "Past events will appear here after they end"}
                   </p>
                 </div>
               ) : (

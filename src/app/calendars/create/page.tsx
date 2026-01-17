@@ -28,6 +28,7 @@ export default function CreateCalendarPage() {
   const [calendarColor, setCalendarColor] = useState("#6366f1");
   const [calendarType, setCalendarType] = useState<CalendarType>(CalendarType.PERSONAL);
   const [isPublic, setIsPublic] = useState(true);
+  const [autoDeletePastEventsAfterDays, setAutoDeletePastEventsAfterDays] = useState<number | null>(null);
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -141,6 +142,7 @@ export default function CreateCalendarPage() {
         calendarType,
         isPublic,
         ownerEventUserId: user.eventUser.id,
+        autoDeletePastEventsAfterDays,
       });
 
       toast.success("Calendar created successfully!");
@@ -356,6 +358,30 @@ export default function CreateCalendarPage() {
                 }`}
               />
             </button>
+          </div>
+
+          {/* Auto-delete past events */}
+          <div>
+            <label htmlFor="autoDelete" className="block text-sm font-medium text-foreground mb-2">
+              Auto-delete Past Events
+            </label>
+            <select
+              id="autoDelete"
+              value={autoDeletePastEventsAfterDays === null ? "never" : autoDeletePastEventsAfterDays.toString()}
+              onChange={(e) => setAutoDeletePastEventsAfterDays(
+                e.target.value === "never" ? null : parseInt(e.target.value)
+              )}
+              className="w-full rounded-lg border border-white/10 bg-card-background px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option value="never">Never (keep all past events)</option>
+              <option value="0">Immediately after event ends</option>
+              <option value="1">1 day after event ends</option>
+              <option value="7">7 days after event ends</option>
+              <option value="30">30 days after event ends</option>
+            </select>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Automatically remove events from this calendar after they end
+            </p>
           </div>
 
           {/* Submit Button */}

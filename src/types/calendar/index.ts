@@ -9,6 +9,8 @@ export type {
   CreateCalendarDto,
   UpdateCalendarDto,
   CalendarQueryDto,
+  CalendarEventsFilter,
+  CalendarEventsQueryDto,
   AddEventToCalendarDto,
   UpdateCalendarEventDto,
   InviteCalendarCollaboratorDto,
@@ -27,4 +29,5 @@ export type {
   ListCalendarsResponse,
   AcceptInviteResponse,
   IsSubscribedResponse,
+  CalendarEventsResponse,
 } from './response/calendar.dto';

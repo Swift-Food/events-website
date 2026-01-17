@@ -40,6 +40,7 @@ export interface CreateCalendarDto {
   isPublic?: boolean; // Default: true
   addressId?: string; // UUID
   addressData?: CreateCalendarAddressDto;
+  autoDeletePastEventsAfterDays?: number | null; // null = never, 0 = immediately, 7 = 7 days after
 }
 
 export interface UpdateCalendarDto {
@@ -52,6 +53,7 @@ export interface UpdateCalendarDto {
   isPublic?: boolean;
   addressId?: string; // UUID
   addressData?: UpdateCalendarAddressDto;
+  autoDeletePastEventsAfterDays?: number | null; // null = never, 0 = immediately, 7 = 7 days after
 }
 
 export interface CalendarQueryDto {
@@ -61,6 +63,13 @@ export interface CalendarQueryDto {
   isPublic?: boolean;
   skip?: number; // Default: 0
   take?: number; // Default: 20
+}
+
+// Query params for calendar events
+export type CalendarEventsFilter = 'upcoming' | 'past' | 'all';
+
+export interface CalendarEventsQueryDto {
+  filter?: CalendarEventsFilter;
 }
 
 // Calendar Events DTOs
