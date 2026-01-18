@@ -1245,24 +1245,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
             {/* Main Location Button - always visible at top */}
             {(() => {
-              const hasVenue = Boolean(addressLine1 && city && postcode);
-              const hasVirtualLink = Boolean(virtualMeetingUrl);
               const hasError = validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode;
-
-              // Determine button text based on current state
-              let buttonText = "Add Event Location";
-              let buttonSubtext = "Offline location or virtual link";
-
-              if (hasVenue && hasVirtualLink) {
-                buttonText = "Event Location";
-                buttonSubtext = "Venue and virtual link added";
-              } else if (hasVenue) {
-                buttonText = "Event Location";
-                buttonSubtext = venueName || [addressLine1, city].filter(Boolean).join(", ");
-              } else if (hasVirtualLink) {
-                buttonText = "Event Location";
-                buttonSubtext = "Virtual link added";
-              }
 
               return (
                 <div className="relative">
@@ -1289,10 +1272,10 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                     <MapPin className={`h-5 w-5 ${hasError ? "text-red-400" : "text-muted-foreground"}`} />
                     <div className="flex-1 text-left">
                       <p className={`text-base font-semibold ${hasError ? "text-red-400" : "text-foreground"}`}>
-                        {buttonText}
+                        Add Event Location
                       </p>
                       <p className={`text-sm ${hasError ? "text-red-400/80" : "text-muted-foreground"}`}>
-                        {buttonSubtext}
+                        Physical location or virtual link
                       </p>
                     </div>
                     <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isLocationModalOpen && !locationEditMode ? 'rotate-180' : ''}`} />
@@ -1312,56 +1295,68 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
             {/* Virtual Link Card */}
             {virtualMeetingUrl && (
-              <VirtualLinkCard
-                virtualMeetingUrl={virtualMeetingUrl}
-                onEdit={() => {
-                  setLocationEditMode({ type: 'virtual' });
-                  setIsLocationModalOpen(true);
-                }}
-                onDelete={() => {
-                  setVirtualMeetingUrl("");
-                }}
-              />
+              <div className="relative">
+                <VirtualLinkCard
+                  virtualMeetingUrl={virtualMeetingUrl}
+                  onEdit={() => {
+                    setLocationEditMode({ type: 'virtual' });
+                    setIsLocationModalOpen(true);
+                  }}
+                  onDelete={() => {
+                    setVirtualMeetingUrl("");
+                  }}
+                />
+                {/* Edit Modal for Virtual Link */}
+                {isLocationModalOpen && locationEditMode?.type === 'virtual' && (
+                  <LocationModal
+                    isOpen={isLocationModalOpen}
+                    onClose={() => {
+                      setIsLocationModalOpen(false);
+                      setLocationEditMode(null);
+                    }}
+                    editMode={locationEditMode}
+                  />
+                )}
+              </div>
             )}
 
             {/* Venue Card */}
             {addressLine1 && city && postcode && (
-              <VenueCard
-                venueName={venueName}
-                addressLine1={addressLine1}
-                addressLine2={addressLine2}
-                city={city}
-                postcode={postcode}
-                hideFullAddress={hideFullAddress}
-                onToggleHideAddress={() => setHideFullAddress(!hideFullAddress)}
-                onEdit={() => {
-                  setLocationEditMode({ type: 'venue' });
-                  setIsLocationModalOpen(true);
-                }}
-                onDelete={() => {
-                  setVenueName("");
-                  setAddressLine1("");
-                  setAddressLine2("");
-                  setCity("");
-                  setPostcode("");
-                  setLatitude(null);
-                  setLongitude(null);
-                  setLocation("");
-                }}
-              />
-            )}
-
-            {/* Edit Modal - positioned relative to cards for editing */}
-            {isLocationModalOpen && locationEditMode && (
               <div className="relative">
-                <LocationModal
-                  isOpen={isLocationModalOpen}
-                  onClose={() => {
-                    setIsLocationModalOpen(false);
-                    setLocationEditMode(null);
+                <VenueCard
+                  venueName={venueName}
+                  addressLine1={addressLine1}
+                  addressLine2={addressLine2}
+                  city={city}
+                  postcode={postcode}
+                  hideFullAddress={hideFullAddress}
+                  onToggleHideAddress={() => setHideFullAddress(!hideFullAddress)}
+                  onEdit={() => {
+                    setLocationEditMode({ type: 'venue' });
+                    setIsLocationModalOpen(true);
                   }}
-                  editMode={locationEditMode}
+                  onDelete={() => {
+                    setVenueName("");
+                    setAddressLine1("");
+                    setAddressLine2("");
+                    setCity("");
+                    setPostcode("");
+                    setLatitude(null);
+                    setLongitude(null);
+                    setLocation("");
+                  }}
                 />
+                {/* Edit Modal for Venue */}
+                {isLocationModalOpen && locationEditMode?.type === 'venue' && (
+                  <LocationModal
+                    isOpen={isLocationModalOpen}
+                    onClose={() => {
+                      setIsLocationModalOpen(false);
+                      setLocationEditMode(null);
+                    }}
+                    editMode={locationEditMode}
+                  />
+                )}
               </div>
             )}
 
