@@ -1310,6 +1310,20 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               );
             })()}
 
+            {/* Virtual Link Card */}
+            {virtualMeetingUrl && (
+              <VirtualLinkCard
+                virtualMeetingUrl={virtualMeetingUrl}
+                onEdit={() => {
+                  setLocationEditMode({ type: 'virtual' });
+                  setIsLocationModalOpen(true);
+                }}
+                onDelete={() => {
+                  setVirtualMeetingUrl("");
+                }}
+              />
+            )}
+
             {/* Venue Card */}
             {addressLine1 && city && postcode && (
               <VenueCard
@@ -1333,20 +1347,6 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   setLatitude(null);
                   setLongitude(null);
                   setLocation("");
-                }}
-              />
-            )}
-
-            {/* Virtual Link Card */}
-            {virtualMeetingUrl && (
-              <VirtualLinkCard
-                virtualMeetingUrl={virtualMeetingUrl}
-                onEdit={() => {
-                  setLocationEditMode({ type: 'virtual' });
-                  setIsLocationModalOpen(true);
-                }}
-                onDelete={() => {
-                  setVirtualMeetingUrl("");
                 }}
               />
             )}
