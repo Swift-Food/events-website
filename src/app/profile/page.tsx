@@ -385,8 +385,35 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        {/* Stats Cards - Mobile: unified card, Desktop: 3 separate cards */}
+        {/* Mobile unified stats card */}
+        <div className="sm:hidden rounded-2xl bg-card-background backdrop-blur-xl p-4 mb-6">
+          <div className="flex justify-around items-stretch">
+            <MobileStatItem
+              label="Created"
+              value={stats?.eventsCreated ?? 0}
+              icon={<Calendar className="h-5 w-5" />}
+              isLoading={isLoadingStats}
+            />
+            <div className="w-px bg-foreground/10 mx-2" />
+            <MobileStatItem
+              label="Attended"
+              value={stats?.eventsAttended ?? 0}
+              icon={<CalendarCheck className="h-5 w-5" />}
+              isLoading={isLoadingStats}
+            />
+            <div className="w-px bg-foreground/10 mx-2" />
+            <MobileStatItem
+              label="Upcoming"
+              value={upcomingAttendingEvents.length + upcomingHostedEvents.length}
+              icon={<Ticket className="h-5 w-5" />}
+              isLoading={isLoadingEvents || isLoadingTickets}
+            />
+          </div>
+        </div>
+
+        {/* Desktop: 3 separate cards */}
+        <div className="hidden sm:grid sm:grid-cols-3 gap-4 mb-6">
           <StatsCard
             label="Events Created"
             value={stats?.eventsCreated ?? 0}
@@ -509,6 +536,30 @@ function StatsCard({ label, value, icon, isLoading, isText }: StatsCardProps) {
           <p className="text-xs text-muted-foreground">{label}</p>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Mobile Stats Item Component - vertically stacked, centered
+interface MobileStatItemProps {
+  label: string;
+  value: number | string;
+  icon: React.ReactNode;
+  isLoading?: boolean;
+}
+
+function MobileStatItem({ label, value, icon, isLoading }: MobileStatItemProps) {
+  return (
+    <div className="flex flex-col items-center justify-center flex-1 py-1">
+      <div className="rounded-full bg-primary/20 p-2 text-primary mb-2">
+        {icon}
+      </div>
+      {isLoading ? (
+        <div className="h-6 w-8 bg-card-secondary-background rounded animate-pulse mb-1" />
+      ) : (
+        <p className="text-xl font-bold text-foreground">{value}</p>
+      )}
+      <p className="text-xs text-muted-foreground">{label}</p>
     </div>
   );
 }
