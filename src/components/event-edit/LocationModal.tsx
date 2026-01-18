@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Search, MapPin, Video, Users, Link } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Search, MapPin, Video, Link, X } from "lucide-react";
 import { useEventCreation } from "@/context/EventCreationContext";
 import { GOOGLE_MAPS_CONFIG } from "@/constants/google-maps";
 import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
-import { EventFormat } from "@/types/event/status";
 
 // UK Postcode validation regex
 const UK_POSTCODE_REGEX = /^([A-Z]{1,2}\d{1,2}[A-Z]?)\s?(\d[A-Z]{2})$/i;
@@ -15,12 +14,42 @@ const validateUKPostcode = (postcode: string): boolean => {
   return UK_POSTCODE_REGEX.test(postcode.trim());
 };
 
+// URL detection patterns
+const URL_PATTERNS = /^(https?:\/\/|www\.)|^(zoom\.us|meet\.google\.com|teams\.microsoft\.com|webex\.com)/i;
+
+const isLikelyUrl = (input: string): boolean => {
+  const trimmed = input.trim();
+  if (!trimmed) return false;
+  return URL_PATTERNS.test(trimmed) || trimmed.includes('.com/') || trimmed.includes('.co/');
+};
+
+// Detect platform from URL
+const detectPlatform = (url: string): string => {
+  const lowerUrl = url.toLowerCase();
+  if (lowerUrl.includes('zoom.us')) return 'Zoom';
+  if (lowerUrl.includes('meet.google.com')) return 'Google Meet';
+  if (lowerUrl.includes('teams.microsoft.com')) return 'Microsoft Teams';
+  if (lowerUrl.includes('webex.com')) return 'Webex';
+  return 'Virtual Meeting';
+};
+
+// Truncate URL for display
+const truncateUrl = (url: string, maxLength: number = 45): string => {
+  if (url.length <= maxLength) return url;
+  return url.substring(0, maxLength) + "...";
+};
+
+export type LocationEditMode = { type: 'venue' } | { type: 'virtual' } | null;
+
 interface LocationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  editMode?: LocationEditMode;
 }
 
-export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
+type ModalView = 'search' | 'manual-address' | 'virtual-link';
+
+export default function LocationModal({ isOpen, onClose, editMode = null }: LocationModalProps) {
   const {
     venueName,
     setVenueName,
@@ -37,17 +66,25 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
     longitude,
     setLongitude,
     setLocation,
-    eventFormat,
-    setEventFormat,
     virtualMeetingUrl,
     setVirtualMeetingUrl,
-    hideFullAddress,
-    setHideFullAddress,
   } = useEventCreation();
 
-  // Local state for editing
-  const [localEventFormat, setLocalEventFormat] = useState(eventFormat);
-  const [localVirtualMeetingUrl, setLocalVirtualMeetingUrl] = useState(virtualMeetingUrl);
+  // Determine initial view based on edit mode
+  const getInitialView = useCallback((): ModalView => {
+    if (editMode?.type === 'venue') return 'manual-address';
+    if (editMode?.type === 'virtual') return 'virtual-link';
+    return 'search';
+  }, [editMode]);
+
+  // Current view state
+  const [currentView, setCurrentView] = useState<ModalView>(getInitialView());
+
+  // Search input state
+  const [searchInput, setSearchInput] = useState("");
+  const [detectedUrl, setDetectedUrl] = useState<string | null>(null);
+
+  // Local state for manual address editing
   const [localVenueName, setLocalVenueName] = useState(venueName);
   const [localAddressLine1, setLocalAddressLine1] = useState(addressLine1);
   const [localAddressLine2, setLocalAddressLine2] = useState(addressLine2);
@@ -55,19 +92,24 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
   const [localPostcode, setLocalPostcode] = useState(postcode);
   const [localLatitude, setLocalLatitude] = useState<number | null>(latitude);
   const [localLongitude, setLocalLongitude] = useState<number | null>(longitude);
-  const [localHideFullAddress, setLocalHideFullAddress] = useState(hideFullAddress);
-  const [addressValidationError, setAddressValidationError] = useState<string | null>(null);
+
+  // Local state for virtual link
+  const [localVirtualUrl, setLocalVirtualUrl] = useState(virtualMeetingUrl);
+
+  // Validation error
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   // Google Places Autocomplete refs
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const locationInputRef = useRef<HTMLInputElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  // Update local state when modal opens
+  // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
-      setLocalEventFormat(eventFormat);
-      setLocalVirtualMeetingUrl(virtualMeetingUrl);
+      setCurrentView(getInitialView());
+      setSearchInput("");
+      setDetectedUrl(null);
       setLocalVenueName(venueName);
       setLocalAddressLine1(addressLine1);
       setLocalAddressLine2(addressLine2);
@@ -75,24 +117,18 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
       setLocalPostcode(postcode);
       setLocalLatitude(latitude);
       setLocalLongitude(longitude);
-      setLocalHideFullAddress(hideFullAddress);
-      setAddressValidationError(null);
+      setLocalVirtualUrl(virtualMeetingUrl);
+      setValidationError(null);
     }
-  }, [isOpen, eventFormat, virtualMeetingUrl, venueName, addressLine1, addressLine2, city, postcode, latitude, longitude, hideFullAddress]);
+  }, [isOpen, venueName, addressLine1, addressLine2, city, postcode, latitude, longitude, virtualMeetingUrl, getInitialView]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         const target = event.target as HTMLElement;
-        // Check if click is on the parent button (which has its own toggle logic)
-        if (target.closest('[data-location-trigger]')) {
-          return;
-        }
-        // Check if click is on Google Places autocomplete dropdown
-        if (target.closest('.pac-container')) {
-          return;
-        }
+        if (target.closest('[data-location-trigger]')) return;
+        if (target.closest('.pac-container')) return;
         onClose();
       }
     };
@@ -100,19 +136,12 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, onClose]);
 
-  // Check if physical location fields should be shown
-  const showPhysicalLocation = localEventFormat === EventFormat.IN_PERSON || localEventFormat === EventFormat.BOTH;
-
-  // Initialize Google Places Autocomplete
+  // Initialize Google Places Autocomplete for search view
   useEffect(() => {
-    if (!isOpen || !showPhysicalLocation) {
-      // Clean up when closing or switching to virtual-only
+    if (!isOpen || currentView !== 'search') {
       if (autocompleteRef.current) {
         google.maps.event.clearInstanceListeners(autocompleteRef.current);
         autocompleteRef.current = null;
@@ -121,33 +150,19 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
     }
 
     const initializeAutocomplete = () => {
-      if (!locationInputRef.current || !window.google?.maps?.places) return;
+      if (!searchInputRef.current || !window.google?.maps?.places) return;
 
-      // Clean up any existing instance first
       if (autocompleteRef.current) {
         google.maps.event.clearInstanceListeners(autocompleteRef.current);
         autocompleteRef.current = null;
       }
 
       autocompleteRef.current = new google.maps.places.Autocomplete(
-        locationInputRef.current,
+        searchInputRef.current,
         {
-          componentRestrictions: {
-            country: GOOGLE_MAPS_CONFIG.COUNTRY_RESTRICTION,
-          },
-          fields: [
-            "address_components",
-            "formatted_address",
-            "geometry",
-            "name",
-            "place_id",
-          ],
-          bounds: {
-            north: 51.6723,
-            south: 51.3844,
-            east: 0.1485,
-            west: -0.3514,
-          },
+          componentRestrictions: { country: GOOGLE_MAPS_CONFIG.COUNTRY_RESTRICTION },
+          fields: ["address_components", "formatted_address", "geometry", "name", "place_id"],
+          bounds: { north: 51.6723, south: 51.3844, east: 0.1485, west: -0.3514 },
           strictBounds: false,
         }
       );
@@ -155,7 +170,6 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
       autocompleteRef.current.addListener("place_changed", handlePlaceSelect);
     };
 
-    // Small delay to ensure the input is mounted
     const timeoutId = setTimeout(() => {
       loadGoogleMapsScript().then(initializeAutocomplete);
     }, 100);
@@ -167,133 +181,114 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
         autocompleteRef.current = null;
       }
     };
-  }, [isOpen, showPhysicalLocation]);
+  }, [isOpen, currentView]);
 
+  // Handle search input changes - detect URLs
+  const handleSearchInputChange = (value: string) => {
+    setSearchInput(value);
+
+    if (isLikelyUrl(value)) {
+      setDetectedUrl(value.trim());
+    } else {
+      setDetectedUrl(null);
+    }
+  };
+
+  // Handle place selection from Google autocomplete
   const handlePlaceSelect = () => {
     const place = autocompleteRef.current?.getPlace();
     if (!place) return;
-
-    // Clear all fields first
-    setLocalVenueName("");
-    setLocalAddressLine1("");
-    setLocalAddressLine2("");
-    setLocalCity("");
-    setLocalPostcode("");
-    setLocalLatitude(null);
-    setLocalLongitude(null);
-
-    // Clear the search input
-    if (locationInputRef.current) {
-      locationInputRef.current.value = "";
-    }
 
     let street = "";
     let cityName = "";
     let postcodeValue = "";
     let country = "";
-    let buildingName = "";
+    let buildingName = place.name || "";
 
-    // Get the place name
-    if (place.name) {
-      buildingName = place.name;
-    }
-
-    // Parse address components
     if (place.address_components) {
       place.address_components.forEach((component) => {
         const types = component.types;
-
-        if (types.includes("street_number")) {
-          street = component.long_name + " ";
-        }
-        if (types.includes("route")) {
-          street += component.long_name;
-        }
-        if (types.includes("locality") || types.includes("postal_town")) {
-          cityName = component.long_name;
-        }
-        if (types.includes("postal_code")) {
-          postcodeValue = component.long_name;
-        }
-        if (types.includes("country")) {
-          country = component.short_name;
-        }
-        if (types.includes("premise") && !buildingName) {
-          buildingName = component.long_name;
-        }
+        if (types.includes("street_number")) street = component.long_name + " ";
+        if (types.includes("route")) street += component.long_name;
+        if (types.includes("locality") || types.includes("postal_town")) cityName = component.long_name;
+        if (types.includes("postal_code")) postcodeValue = component.long_name;
+        if (types.includes("country")) country = component.short_name;
+        if (types.includes("premise") && !buildingName) buildingName = component.long_name;
       });
-    }
-
-    if (place.geometry?.location) {
-      setLocalLatitude(place.geometry.location.lat());
-      setLocalLongitude(place.geometry.location.lng());
     }
 
     // Validate UK address
     if (country && country !== "GB") {
-      setAddressValidationError(
-        "Sorry, we only support addresses within the United Kingdom."
-      );
-    } else {
-      setAddressValidationError(null);
+      setValidationError("Sorry, we only support addresses within the United Kingdom.");
+      return;
     }
 
-    // Set venue name
-    if (buildingName) {
-      setLocalVenueName(buildingName);
-    }
+    // Set coordinates
+    const lat = place.geometry?.location?.lat() ?? null;
+    const lng = place.geometry?.location?.lng() ?? null;
 
-    // Update address fields
+    // Build address line 1
+    let addressL1 = "";
+    let addressL2 = "";
     if (buildingName && !street) {
-      setLocalAddressLine1(buildingName);
+      addressL1 = buildingName;
     } else if (street) {
-      setLocalAddressLine1(street.trim());
+      addressL1 = street.trim();
       if (buildingName && !street.includes(buildingName)) {
-        setLocalAddressLine2(buildingName);
+        addressL2 = buildingName;
       }
     }
 
-    setLocalCity(cityName);
-    setLocalPostcode(postcodeValue);
+    // Save directly to context and close
+    setVenueName(buildingName);
+    setAddressLine1(addressL1);
+    setAddressLine2(addressL2);
+    setCity(cityName);
+    setPostcode(postcodeValue);
+    setLatitude(lat);
+    setLongitude(lng);
+
+    // Update location string for display
+    const fullAddress = [addressL1, addressL2, cityName, postcodeValue].filter(Boolean).join(", ");
+    setLocation(fullAddress);
+
+    onClose();
   };
 
-  const handleSave = () => {
-    // Validate format is selected
-    if (localEventFormat === null) {
-      setAddressValidationError("Please select an event format");
+  // Add virtual link from URL confirmation
+  const handleAddVirtualLink = () => {
+    if (!detectedUrl) return;
+
+    // Ensure URL has protocol
+    let url = detectedUrl;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+
+    setVirtualMeetingUrl(url);
+    onClose();
+  };
+
+  // Cancel URL detection
+  const handleCancelUrl = () => {
+    setDetectedUrl(null);
+    setSearchInput("");
+  };
+
+  // Save manual address
+  const handleSaveManualAddress = () => {
+    // Validate required fields
+    if (!localAddressLine1 || !localCity || !localPostcode) {
+      setValidationError("Please complete all required address fields");
       return;
     }
 
-    // Validate virtual meeting URL for virtual/hybrid events
-    if (
-      (localEventFormat === EventFormat.VIRTUAL || localEventFormat === EventFormat.BOTH) &&
-      !localVirtualMeetingUrl.trim()
-    ) {
-      setAddressValidationError("Please enter a virtual meeting URL");
+    if (!validateUKPostcode(localPostcode)) {
+      setValidationError("Please enter a valid UK postcode");
       return;
     }
 
-    // Validate address for in-person/hybrid events
-    if (localEventFormat === EventFormat.IN_PERSON || localEventFormat === EventFormat.BOTH) {
-      if (!localAddressLine1 || !localCity || !localPostcode) {
-        setAddressValidationError("Please complete all required address fields");
-        return;
-      }
-
-      if (!validateUKPostcode(localPostcode)) {
-        setAddressValidationError("Please enter a valid UK postcode");
-        return;
-      }
-    }
-
-    // Save event format to context
-    setEventFormat(localEventFormat);
-
-    // Always save virtual URL to context (preserves value when switching formats)
-    setVirtualMeetingUrl(localVirtualMeetingUrl);
-
-    // Always save address fields to context (preserves values when switching formats)
-    // The submission logic in EventForm will determine what to send to the API
+    // Save to context
     setVenueName(localVenueName);
     setAddressLine1(localAddressLine1);
     setAddressLine2(localAddressLine2);
@@ -301,19 +296,38 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
     setPostcode(localPostcode);
     setLatitude(localLatitude);
     setLongitude(localLongitude);
-    setHideFullAddress(localHideFullAddress);
 
-    // Update the full location string for display purposes
-    if (localEventFormat === EventFormat.IN_PERSON || localEventFormat === EventFormat.BOTH) {
-      const fullAddress = [localAddressLine1, localAddressLine2, localCity, localPostcode]
-        .filter(Boolean)
-        .join(", ");
-      setLocation(fullAddress);
-    } else {
-      setLocation("");
-    }
+    // Update location string
+    const fullAddress = [localAddressLine1, localAddressLine2, localCity, localPostcode].filter(Boolean).join(", ");
+    setLocation(fullAddress);
 
     onClose();
+  };
+
+  // Save virtual link from focused input
+  const handleSaveVirtualLink = () => {
+    if (!localVirtualUrl.trim()) {
+      setValidationError("Please enter a virtual meeting URL");
+      return;
+    }
+
+    // Ensure URL has protocol
+    let url = localVirtualUrl.trim();
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+
+    setVirtualMeetingUrl(url);
+    onClose();
+  };
+
+  // Get modal title based on current state
+  const getModalTitle = () => {
+    if (editMode?.type === 'venue') return 'Edit Venue';
+    if (editMode?.type === 'virtual') return 'Edit Virtual Link';
+    if (currentView === 'manual-address') return 'Enter Address';
+    if (currentView === 'virtual-link') return 'Add Virtual Link';
+    return 'Location';
   };
 
   if (!isOpen) return null;
@@ -324,256 +338,283 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
       className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-card-background/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
     >
       <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
-        {/* Event Format Selector */}
-        <div>
-          <label className="block text-xs font-medium text-muted-foreground mb-2">
-            Event Format
-          </label>
-          <div className="flex rounded-lg overflow-hidden bg-card-secondary-background border border-white/10">
-            <button
-              type="button"
-              onClick={() => setLocalEventFormat(EventFormat.IN_PERSON)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 transition-all ${
-                localEventFormat === EventFormat.IN_PERSON
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <MapPin className="h-4 w-4" />
-              <span className="text-sm font-medium">In Person</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setLocalEventFormat(EventFormat.VIRTUAL)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 transition-all ${
-                localEventFormat === EventFormat.VIRTUAL
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Video className="h-4 w-4" />
-              <span className="text-sm font-medium">Virtual</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setLocalEventFormat(EventFormat.BOTH)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 transition-all ${
-                localEventFormat === EventFormat.BOTH
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Users className="h-4 w-4" />
-              <span className="text-sm font-medium">Both</span>
-            </button>
-          </div>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-semibold text-foreground">{getModalTitle()}</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 rounded-lg hover:bg-white/10 transition-colors text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
-        {addressValidationError && (
+        {/* Validation Error */}
+        {validationError && (
           <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-            <p className="text-sm text-red-400">{addressValidationError}</p>
+            <p className="text-sm text-red-400">{validationError}</p>
           </div>
         )}
 
-        {/* Virtual Meeting URL (for Virtual and Both events) */}
-        {(localEventFormat === EventFormat.VIRTUAL || localEventFormat === EventFormat.BOTH) && (
-          <div className="border-t border-white/10 pt-4">
-            {/* Label for Both/Hybrid events */}
-            {localEventFormat === EventFormat.BOTH && (
-              <div className="flex items-center gap-3 mb-3">
-                <div className="flex-1 h-px bg-white/10"></div>
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Virtual Meeting</span>
-                <div className="flex-1 h-px bg-white/10"></div>
-              </div>
-            )}
-            <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-              Meeting URL <span className="text-red-400">*</span>
-            </label>
-            <div className="flex items-center gap-2 rounded-lg bg-card-secondary-background px-3 py-2 border border-white/10 focus-within:border-primary/50 transition-all">
-              <Link className="h-4 w-4 text-muted-foreground" />
-              <input
-                type="url"
-                value={localVirtualMeetingUrl}
-                onChange={(e) => setLocalVirtualMeetingUrl(e.target.value)}
-                placeholder="https://zoom.us/j/... or Google Meet link"
-                className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-1.5">
-              Zoom, Google Meet, Teams, or any meeting URL
-            </p>
-          </div>
-        )}
-
-        {/* Physical Location (for In Person and Both events) */}
-        {showPhysicalLocation && (
+        {/* Search View */}
+        {currentView === 'search' && (
           <>
-            {/* Divider for Both/Hybrid events */}
-            {localEventFormat === EventFormat.BOTH && (
-              <div className="flex items-center gap-3 pt-2">
-                <div className="flex-1 h-px bg-white/10"></div>
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Physical Venue</span>
-                <div className="flex-1 h-px bg-white/10"></div>
+            {/* Unified Search Input */}
+            <div className="relative">
+              <div className={`flex items-center gap-2 rounded-lg px-3 py-2.5 border transition-all ${
+                detectedUrl
+                  ? "bg-purple-500/10 border-purple-500/50"
+                  : "bg-card-secondary-background border-white/10 focus-within:border-primary/50"
+              }`}>
+                {detectedUrl ? (
+                  <Link className="h-4 w-4 text-purple-400" />
+                ) : (
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                )}
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => handleSearchInputChange(e.target.value)}
+                  placeholder="Search venue or paste meeting link..."
+                  className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
+                />
+              </div>
+            </div>
+
+            {/* URL Confirmation Row */}
+            {detectedUrl && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                <Link className="h-4 w-4 text-purple-400 flex-shrink-0" />
+                <span className="flex-1 text-sm text-foreground truncate">
+                  {truncateUrl(detectedUrl)}
+                </span>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleCancelUrl}
+                    className="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAddVirtualLink}
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition-colors"
+                  >
+                    Add Link
+                  </button>
+                </div>
               </div>
             )}
 
-            <div className={localEventFormat === EventFormat.BOTH ? "" : "border-t border-white/10 pt-4"}>
-              {/* Google Places Search */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <input
-                  ref={locationInputRef}
-                  type="text"
-                  placeholder="Search for a location"
-                  className="w-full rounded-lg bg-card-secondary-background pl-10 pr-4 py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {/* Venue Name */}
-              <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                  Venue Name (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={localVenueName}
-                  onChange={(e) => setLocalVenueName(e.target.value)}
-                  placeholder="e.g., UCL Student Centre"
-                  className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
-                />
-              </div>
-
-              {/* Address Line 1 */}
-              <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                  Address Line 1 <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={localAddressLine1}
-                  onChange={(e) => {
-                    setLocalAddressLine1(e.target.value);
-                    // Clear lat/lng when manually editing - requires re-selection from autocomplete
-                    setLocalLatitude(null);
-                    setLocalLongitude(null);
-                  }}
-                  placeholder="Street address"
-                  className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
-                />
-              </div>
-
-              {/* Address Line 2 */}
-              <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                  Address Line 2 (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={localAddressLine2}
-                  onChange={(e) => setLocalAddressLine2(e.target.value)}
-                  placeholder="Apartment, suite, building, etc."
-                  className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
-                />
-              </div>
-
-              {/* City and Postcode */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                    City <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={localCity}
-                    onChange={(e) => {
-                      setLocalCity(e.target.value);
-                      // Clear lat/lng when manually editing - requires re-selection from autocomplete
-                      setLocalLatitude(null);
-                      setLocalLongitude(null);
-                    }}
-                    placeholder="City"
-                    className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
-                  />
+            {/* Divider */}
+            {!detectedUrl && (
+              <>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-white/10"></div>
+                  <span className="text-xs font-medium text-muted-foreground">or</span>
+                  <div className="flex-1 h-px bg-white/10"></div>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                    Postcode <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={localPostcode}
-                    onChange={(e) => {
-                      setLocalPostcode(e.target.value.toUpperCase());
-                      // Clear lat/lng when manually editing - requires re-selection from autocomplete
-                      setLocalLatitude(null);
-                      setLocalLongitude(null);
-                    }}
-                    placeholder="e.g., SW1A 1AA"
-                    className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
-                  />
-                </div>
-              </div>
 
-              {/* Validation feedback */}
-              <div className="space-y-1">
-                {localPostcode && (
-                  <div>
-                    {validateUKPostcode(localPostcode) ? (
-                      <p className="text-xs text-green-400">Valid UK postcode</p>
-                    ) : (
-                      <p className="text-xs text-red-400">Please enter a valid UK postcode</p>
-                    )}
-                  </div>
-                )}
-                {localAddressLine1 && localLatitude !== null && localLongitude !== null && (
-                  <p className="text-xs text-green-400">Location coordinates set</p>
-                )}
-              </div>
-
-              {/* Hide Full Address Toggle */}
-              <div className="flex items-center justify-between pt-3 border-t border-white/10">
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    Hide Full Address
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Only reveal after registration
-                  </p>
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentView('virtual-link')}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg bg-card-secondary-background border border-white/10 hover:bg-white/5 transition-colors"
+                  >
+                    <Link className="h-4 w-4 text-purple-400" />
+                    <span className="text-sm font-medium text-foreground">Add Virtual Link</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentView('manual-address')}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg bg-card-secondary-background border border-white/10 hover:bg-white/5 transition-colors"
+                  >
+                    <MapPin className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium text-foreground">Enter Manually</span>
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setLocalHideFullAddress((prev) => !prev)}
-                  className={`h-6 w-11 rounded-full transition-all ${
-                    localHideFullAddress
-                      ? "bg-primary"
-                      : "bg-card-secondary-background"
-                  }`}
-                >
-                  <span
-                    className={`block h-5 w-5 rounded-full transition-all ${
-                      localHideFullAddress
-                        ? "translate-x-5 bg-primary-foreground"
-                        : "translate-x-0.5 bg-foreground"
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
+              </>
+            )}
           </>
         )}
 
-        {/* Save Button */}
-        <div className="pt-2">
-          <button
-            type="button"
-            onClick={handleSave}
-            className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90"
-          >
-            Save
-          </button>
-        </div>
+        {/* Manual Address View */}
+        {currentView === 'manual-address' && (
+          <div className="space-y-3">
+            {/* Back button if not in edit mode */}
+            {!editMode && (
+              <button
+                type="button"
+                onClick={() => setCurrentView('search')}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                &larr; Back to search
+              </button>
+            )}
+
+            {/* Venue Name */}
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                Venue Name (Optional)
+              </label>
+              <input
+                type="text"
+                value={localVenueName}
+                onChange={(e) => setLocalVenueName(e.target.value)}
+                placeholder="e.g., UCL Student Centre"
+                className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+              />
+            </div>
+
+            {/* Address Line 1 */}
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                Address Line 1 <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="text"
+                value={localAddressLine1}
+                onChange={(e) => {
+                  setLocalAddressLine1(e.target.value);
+                  setLocalLatitude(null);
+                  setLocalLongitude(null);
+                }}
+                placeholder="Street address"
+                className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+              />
+            </div>
+
+            {/* Address Line 2 */}
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                Address Line 2 (Optional)
+              </label>
+              <input
+                type="text"
+                value={localAddressLine2}
+                onChange={(e) => setLocalAddressLine2(e.target.value)}
+                placeholder="Apartment, suite, building, etc."
+                className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+              />
+            </div>
+
+            {/* City and Postcode */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                  City <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={localCity}
+                  onChange={(e) => {
+                    setLocalCity(e.target.value);
+                    setLocalLatitude(null);
+                    setLocalLongitude(null);
+                  }}
+                  placeholder="City"
+                  className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                  Postcode <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={localPostcode}
+                  onChange={(e) => {
+                    setLocalPostcode(e.target.value.toUpperCase());
+                    setLocalLatitude(null);
+                    setLocalLongitude(null);
+                  }}
+                  placeholder="e.g., SW1A 1AA"
+                  className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Validation feedback */}
+            {localPostcode && (
+              <div>
+                {validateUKPostcode(localPostcode) ? (
+                  <p className="text-xs text-green-400">Valid UK postcode</p>
+                ) : (
+                  <p className="text-xs text-red-400">Please enter a valid UK postcode</p>
+                )}
+              </div>
+            )}
+
+            {/* Save Button */}
+            <button
+              type="button"
+              onClick={handleSaveManualAddress}
+              className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 mt-2"
+            >
+              {editMode?.type === 'venue' ? 'Save Changes' : 'Add Venue'}
+            </button>
+          </div>
+        )}
+
+        {/* Virtual Link View */}
+        {currentView === 'virtual-link' && (
+          <div className="space-y-3">
+            {/* Back button if not in edit mode */}
+            {!editMode && (
+              <button
+                type="button"
+                onClick={() => setCurrentView('search')}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                &larr; Back to search
+              </button>
+            )}
+
+            {/* Virtual Link Input */}
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                Meeting URL <span className="text-red-400">*</span>
+              </label>
+              <div className="flex items-center gap-2 rounded-lg bg-card-secondary-background px-3 py-2 border border-white/10 focus-within:border-purple-500/50 transition-all">
+                <Link className="h-4 w-4 text-purple-400" />
+                <input
+                  type="url"
+                  value={localVirtualUrl}
+                  onChange={(e) => setLocalVirtualUrl(e.target.value)}
+                  placeholder="https://zoom.us/j/... or Google Meet link"
+                  className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
+                  autoFocus
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1.5">
+                Zoom, Google Meet, Teams, or any meeting URL
+              </p>
+            </div>
+
+            {/* Platform detection preview */}
+            {localVirtualUrl && isLikelyUrl(localVirtualUrl) && (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                <Video className="h-4 w-4 text-purple-400" />
+                <span className="text-xs text-muted-foreground">
+                  Detected: <span className="text-foreground">{detectPlatform(localVirtualUrl)}</span>
+                </span>
+              </div>
+            )}
+
+            {/* Save Button */}
+            <button
+              type="button"
+              onClick={handleSaveVirtualLink}
+              className="w-full rounded-lg bg-purple-500 py-2.5 text-sm font-semibold text-white transition-all hover:bg-purple-600 mt-2"
+            >
+              {editMode?.type === 'virtual' ? 'Save Changes' : 'Add Virtual Link'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -8,7 +8,8 @@ import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X, HelpCircle, Mess
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import FormFieldModal from "@/components/event-edit/FormFieldModal";
-import LocationModal from "@/components/event-edit/LocationModal";
+import LocationModal, { LocationEditMode } from "@/components/event-edit/LocationModal";
+import { VenueCard, VirtualLinkCard } from "@/components/event-edit/LocationCards";
 import CategoryModal from "@/components/event-edit/CategoryModal";
 import ImportEventModal from "@/components/event-edit/ImportEventModal";
 import GoogleMap from "@/components/GoogleMap";
@@ -136,6 +137,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   const [activeTicketIdForQuestions, setActiveTicketIdForQuestions] = useState<string | null>(null);
   const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [locationEditMode, setLocationEditMode] = useState<LocationEditMode>(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
@@ -173,6 +175,25 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   console.log("Ticket Types: ", ticketTypes);
 
   const [isInitialDataLoaded, setIsInitialDataLoaded] = useState(false);
+
+  // Auto-infer eventFormat based on what's been added
+  useEffect(() => {
+    const hasVenue = Boolean(addressLine1 && city && postcode);
+    const hasVirtualLink = Boolean(virtualMeetingUrl);
+
+    let inferredFormat: EventFormat | null = null;
+    if (hasVenue && hasVirtualLink) {
+      inferredFormat = EventFormat.BOTH;
+    } else if (hasVenue) {
+      inferredFormat = EventFormat.IN_PERSON;
+    } else if (hasVirtualLink) {
+      inferredFormat = EventFormat.VIRTUAL;
+    }
+
+    if (inferredFormat !== eventFormat) {
+      setEventFormat(inferredFormat);
+    }
+  }, [addressLine1, city, postcode, virtualMeetingUrl]);
 
   // Fetch categories on mount
   useEffect(() => {
@@ -1207,111 +1228,181 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           </div>
 
           {/* Event Location & Format */}
-          <div ref={locationRef} className="space-y-4">
-            <div className="relative">
-              {/* Location validation errors indicator */}
-              {(validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode) && (
-                <div className="mb-2 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-                  <p className="text-sm text-red-400 font-medium">Please complete the location details:</p>
-                  <ul className="text-xs text-red-400/80 mt-1 list-disc list-inside">
-                    {validationErrors.eventFormat && <li>{validationErrors.eventFormat}</li>}
-                    {validationErrors.virtualMeetingUrl && <li>{validationErrors.virtualMeetingUrl}</li>}
-                    {validationErrors.addressLine1 && <li>{validationErrors.addressLine1}</li>}
-                    {validationErrors.city && <li>{validationErrors.city}</li>}
-                    {validationErrors.postcode && <li>{validationErrors.postcode}</li>}
-                  </ul>
-                </div>
-              )}
-              <button
-                type="button"
-                data-location-trigger
-                onClick={() => {
-                  setIsLocationModalOpen(!isLocationModalOpen);
-                  // Clear location-related errors when user opens the modal
-                  if (validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode) {
-                    setValidationErrors(prev => ({
-                      ...prev,
-                      eventFormat: undefined,
-                      virtualMeetingUrl: undefined,
-                      addressLine1: undefined,
-                      city: undefined,
-                      postcode: undefined,
-                    }));
+          <div ref={locationRef} className="space-y-3">
+            {/* Location validation errors indicator */}
+            {(validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode) && (
+              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                <p className="text-sm text-red-400 font-medium">Please complete the location details:</p>
+                <ul className="text-xs text-red-400/80 mt-1 list-disc list-inside">
+                  {validationErrors.eventFormat && <li>{validationErrors.eventFormat}</li>}
+                  {validationErrors.virtualMeetingUrl && <li>{validationErrors.virtualMeetingUrl}</li>}
+                  {validationErrors.addressLine1 && <li>{validationErrors.addressLine1}</li>}
+                  {validationErrors.city && <li>{validationErrors.city}</li>}
+                  {validationErrors.postcode && <li>{validationErrors.postcode}</li>}
+                </ul>
+              </div>
+            )}
+
+            {/* Venue Card */}
+            {addressLine1 && city && postcode && (
+              <VenueCard
+                venueName={venueName}
+                addressLine1={addressLine1}
+                addressLine2={addressLine2}
+                city={city}
+                postcode={postcode}
+                hideFullAddress={hideFullAddress}
+                onToggleHideAddress={() => setHideFullAddress(!hideFullAddress)}
+                onEdit={() => {
+                  setLocationEditMode({ type: 'venue' });
+                  setIsLocationModalOpen(true);
+                }}
+                onDelete={() => {
+                  setVenueName("");
+                  setAddressLine1("");
+                  setAddressLine2("");
+                  setCity("");
+                  setPostcode("");
+                  setLatitude(null);
+                  setLongitude(null);
+                  setLocation("");
+                  // Auto-update event format
+                  if (virtualMeetingUrl) {
+                    setEventFormat(EventFormat.VIRTUAL);
+                  } else {
+                    setEventFormat(null);
                   }
                 }}
-                className={`flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer ${(validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode) ? "ring-2 ring-red-400/50" : ""}`}
-              >
-                <MapPin className={`h-5 w-5 ${(validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode) ? "text-red-400" : "text-muted-foreground"}`} />
-                <div className="flex-1 text-left">
-                  {eventFormat === null ? (
-                    <>
-                      <p className={`text-base font-semibold ${validationErrors.eventFormat ? "text-red-400" : "text-foreground"}`}>Location</p>
-                      <p className={`text-sm ${validationErrors.eventFormat ? "text-red-400/80" : "text-muted-foreground"}`}>
-                        Add venue location or virtual link
+              />
+            )}
+
+            {/* Virtual Link Card */}
+            {virtualMeetingUrl && (
+              <VirtualLinkCard
+                virtualMeetingUrl={virtualMeetingUrl}
+                onEdit={() => {
+                  setLocationEditMode({ type: 'virtual' });
+                  setIsLocationModalOpen(true);
+                }}
+                onDelete={() => {
+                  setVirtualMeetingUrl("");
+                  // Auto-update event format
+                  const hasVenue = Boolean(addressLine1 && city && postcode);
+                  if (hasVenue) {
+                    setEventFormat(EventFormat.IN_PERSON);
+                  } else {
+                    setEventFormat(null);
+                  }
+                }}
+              />
+            )}
+
+            {/* Add Location Button - only show if something can still be added */}
+            {(() => {
+              const hasVenue = Boolean(addressLine1 && city && postcode);
+              const hasVirtualLink = Boolean(virtualMeetingUrl);
+
+              // Don't show button if both are added
+              if (hasVenue && hasVirtualLink) return null;
+
+              // Determine button text
+              let buttonText = "Add venue or virtual link";
+              let buttonSubtext = "Set where your event takes place";
+              if (hasVenue && !hasVirtualLink) {
+                buttonText = "Add virtual link";
+                buttonSubtext = "Optional: Add an online meeting link";
+              } else if (!hasVenue && hasVirtualLink) {
+                buttonText = "Add venue";
+                buttonSubtext = "Optional: Add a physical location";
+              }
+
+              const hasError = validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode;
+
+              return (
+                <div className="relative">
+                  <button
+                    type="button"
+                    data-location-trigger
+                    onClick={() => {
+                      setLocationEditMode(null);
+                      setIsLocationModalOpen(!isLocationModalOpen);
+                      // Clear location-related errors when user opens the modal
+                      if (hasError) {
+                        setValidationErrors(prev => ({
+                          ...prev,
+                          eventFormat: undefined,
+                          virtualMeetingUrl: undefined,
+                          addressLine1: undefined,
+                          city: undefined,
+                          postcode: undefined,
+                        }));
+                      }
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer ${hasError ? "ring-2 ring-red-400/50" : ""}`}
+                  >
+                    <MapPin className={`h-5 w-5 ${hasError ? "text-red-400" : "text-muted-foreground"}`} />
+                    <div className="flex-1 text-left">
+                      <p className={`text-base font-semibold ${hasError ? "text-red-400" : "text-foreground"}`}>
+                        {buttonText}
                       </p>
-                    </>
-                  ) : eventFormat === EventFormat.VIRTUAL ? (
-                    <>
-                      <div className="flex items-center gap-2">
-                        <p className="text-base font-semibold text-foreground">Virtual</p>
-                        <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">Online</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {virtualMeetingUrl ? "Meeting link added" : "Add meeting link"}
+                      <p className={`text-sm ${hasError ? "text-red-400/80" : "text-muted-foreground"}`}>
+                        {buttonSubtext}
                       </p>
-                    </>
-                  ) : eventFormat === EventFormat.BOTH ? (
-                    <>
-                      <div className="flex items-center gap-2">
-                        <p className="text-base font-semibold text-foreground">Hybrid</p>
-                        <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">In Person + Online</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {addressLine1 && virtualMeetingUrl
-                          ? `${venueName || city || addressLine1} + Meeting link`
-                          : addressLine1
-                          ? `${venueName || city || addressLine1} - Add meeting link`
-                          : virtualMeetingUrl
-                          ? "Meeting link added - Add venue"
-                          : "Add venue and meeting link"}
-                      </p>
-                    </>
-                  ) : addressLine1 ? (
-                    <>
-                      <div className="flex items-center gap-2">
-                        <p className="text-base font-semibold text-foreground">In Person</p>
-                        <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">Physical</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {venueName || [addressLine1, city].filter(Boolean).join(", ")}
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-2">
-                        <p className="text-base font-semibold text-foreground">In Person</p>
-                        <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">Physical</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Add venue location
-                      </p>
-                    </>
+                    </div>
+                    <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isLocationModalOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Location Dropdown */}
+                  {isLocationModalOpen && (
+                    <LocationModal
+                      isOpen={isLocationModalOpen}
+                      onClose={() => {
+                        setIsLocationModalOpen(false);
+                        setLocationEditMode(null);
+                        // Auto-infer event format after modal closes
+                        const venueComplete = Boolean(addressLine1 && city && postcode);
+                        const hasLink = Boolean(virtualMeetingUrl);
+                        if (venueComplete && hasLink) {
+                          setEventFormat(EventFormat.BOTH);
+                        } else if (venueComplete) {
+                          setEventFormat(EventFormat.IN_PERSON);
+                        } else if (hasLink) {
+                          setEventFormat(EventFormat.VIRTUAL);
+                        }
+                      }}
+                      editMode={locationEditMode}
+                    />
                   )}
                 </div>
-                <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isLocationModalOpen ? 'rotate-180' : ''}`} />
-              </button>
+              );
+            })()}
 
-              {/* Location Dropdown */}
-              {isLocationModalOpen && (
+            {/* Edit Modal - shown when editing existing venue/link */}
+            {isLocationModalOpen && locationEditMode && (
+              <div className="relative">
                 <LocationModal
                   isOpen={isLocationModalOpen}
-                  onClose={() => setIsLocationModalOpen(false)}
+                  onClose={() => {
+                    setIsLocationModalOpen(false);
+                    setLocationEditMode(null);
+                    // Auto-infer event format after modal closes
+                    const venueComplete = Boolean(addressLine1 && city && postcode);
+                    const hasLink = Boolean(virtualMeetingUrl);
+                    if (venueComplete && hasLink) {
+                      setEventFormat(EventFormat.BOTH);
+                    } else if (venueComplete) {
+                      setEventFormat(EventFormat.IN_PERSON);
+                    } else if (hasLink) {
+                      setEventFormat(EventFormat.VIRTUAL);
+                    }
+                  }}
+                  editMode={locationEditMode}
                 />
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* Google Map - shown when location is set for in-person/hybrid events */}
-            {(eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH) &&
+            {/* Google Map - shown when venue is set */}
+            {addressLine1 && city && postcode &&
               latitude !== null && longitude !== null && !isLocationModalOpen && (
                 <GoogleMap
                   latitude={latitude}
