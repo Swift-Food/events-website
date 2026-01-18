@@ -141,9 +141,9 @@ export default function DiscoveryPage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-visible sm:flex-wrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {calendars.slice(0, 6).map((calendar) => (
-                <div key={calendar.id} className="flex-shrink-0">
+                <div key={calendar.id} className="flex-shrink-0 sm:flex-shrink">
                   <SquareCalendarCard calendar={calendar} size={200} />
                 </div>
               ))}
