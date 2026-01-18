@@ -105,7 +105,12 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
-      setInputValue("");
+      // For virtual edit mode, initialize with existing URL
+      if (editMode?.type === 'virtual') {
+        setInputValue(virtualMeetingUrl);
+      } else {
+        setInputValue("");
+      }
       setPredictions([]);
       setValidationError(null);
       setHighlightedIndex(-1);
@@ -122,7 +127,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
         inputRef.current?.focus();
       }, 100);
     }
-  }, [isOpen, venueName, addressLine1, addressLine2, city, postcode, latitude, longitude]);
+  }, [isOpen, editMode, venueName, addressLine1, addressLine2, city, postcode, latitude, longitude, virtualMeetingUrl]);
 
   // Reset highlighted index when predictions change
   useEffect(() => {
@@ -331,14 +336,14 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
 
   // Save virtual link (for edit mode)
   const handleSaveVirtualLink = useCallback(() => {
-    const url = normalizeUrl(inputValue || virtualMeetingUrl);
+    const url = normalizeUrl(inputValue);
     if (!url || url === 'https://') {
       setValidationError("Please enter a virtual meeting URL");
       return;
     }
     setVirtualMeetingUrl(url);
     onClose();
-  }, [inputValue, onClose, setVirtualMeetingUrl, virtualMeetingUrl]);
+  }, [inputValue, onClose, setVirtualMeetingUrl]);
 
   // Build list of selectable options for keyboard navigation
   const getSelectableOptions = useCallback(() => {
@@ -440,7 +445,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
           <input
             ref={inputRef}
             type="text"
-            value={inputValue || virtualMeetingUrl}
+            value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Enter virtual meeting link..."
@@ -455,7 +460,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
           )}
 
           {/* Preview */}
-          {(inputValue || virtualMeetingUrl) && (
+          {inputValue && (
             <button
               type="button"
               onClick={handleSaveVirtualLink}
@@ -465,7 +470,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground">Virtual</p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {normalizeUrl(inputValue || virtualMeetingUrl)}
+                  {normalizeUrl(inputValue)}
                 </p>
               </div>
             </button>
@@ -491,7 +496,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search for a new location..."
-            className="w-full bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground/50 border-b border-white/10 pb-3"
+            className="w-full bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground/50"
             autoFocus
           />
 
@@ -529,11 +534,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
           )}
 
           {/* Divider */}
-          <div className="flex items-center gap-3 my-4">
-            <div className="flex-1 h-px bg-white/10"></div>
-            <span className="text-xs font-medium text-muted-foreground">or edit manually</span>
-            <div className="flex-1 h-px bg-white/10"></div>
-          </div>
+          <div className="h-px bg-white/10 my-2"></div>
 
           {/* Manual Address Form */}
           <div className="space-y-3">
