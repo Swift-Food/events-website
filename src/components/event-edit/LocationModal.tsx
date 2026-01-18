@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { MapPin, Link, Video } from "lucide-react";
 import { useEventCreation } from "@/context/EventCreationContext";
 import { GOOGLE_MAPS_CONFIG } from "@/constants/google-maps";
@@ -81,6 +81,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
   const [inputValue, setInputValue] = useState("");
   const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
   const [isLoadingPredictions, setIsLoadingPredictions] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
   // Local state for venue edit mode
   const [localVenueName, setLocalVenueName] = useState(venueName);
@@ -107,6 +108,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
       setInputValue("");
       setPredictions([]);
       setValidationError(null);
+      setHighlightedIndex(-1);
       setLocalVenueName(venueName);
       setLocalAddressLine1(addressLine1);
       setLocalAddressLine2(addressLine2);
@@ -121,6 +123,11 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
       }, 100);
     }
   }, [isOpen, venueName, addressLine1, addressLine2, city, postcode, latitude, longitude]);
+
+  // Reset highlighted index when predictions change
+  useEffect(() => {
+    setHighlightedIndex(-1);
+  }, [predictions, inputValue]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -191,7 +198,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
   }, [inputValue, editMode]);
 
   // Handle selecting a place prediction
-  const handleSelectPlace = (prediction: PlacePrediction) => {
+  const handleSelectPlace = useCallback((prediction: PlacePrediction) => {
     if (!placesServiceRef.current) return;
 
     placesServiceRef.current.getDetails(
@@ -273,25 +280,31 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
         onClose();
       }
     );
-  };
+  }, [editMode, onClose, setAddressLine1, setAddressLine2, setCity, setLatitude, setLocation, setLongitude, setPostcode, setVenueName]);
 
   // Handle selecting virtual link option
-  const handleSelectVirtualLink = () => {
+  const handleSelectVirtualLink = useCallback(() => {
     const url = normalizeUrl(inputValue);
     setVirtualMeetingUrl(url);
     onClose();
-  };
+  }, [inputValue, onClose, setVirtualMeetingUrl]);
 
   // Handle "Use [text]" option for manual entry
-  const handleUseAsManualEntry = () => {
+  const handleUseAsManualEntry = useCallback(() => {
     // Open venue edit mode with the text as venue name
     setLocalVenueName(inputValue);
     setInputValue("");
     setPredictions([]);
-  };
+  }, [inputValue]);
+
+  // Handle "Add Virtual Link" button
+  const handleAddVirtualLinkClick = useCallback(() => {
+    setInputValue("https://");
+    inputRef.current?.focus();
+  }, []);
 
   // Save venue (for edit mode)
-  const handleSaveVenue = () => {
+  const handleSaveVenue = useCallback(() => {
     if (!localAddressLine1 || !localCity || !localPostcode) {
       setValidationError("Please complete all required address fields");
       return;
@@ -314,10 +327,10 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
     setLocation(fullAddress);
 
     onClose();
-  };
+  }, [localAddressLine1, localAddressLine2, localCity, localLatitude, localLongitude, localPostcode, localVenueName, onClose, setAddressLine1, setAddressLine2, setCity, setLatitude, setLocation, setLongitude, setPostcode, setVenueName]);
 
   // Save virtual link (for edit mode)
-  const handleSaveVirtualLink = () => {
+  const handleSaveVirtualLink = useCallback(() => {
     const url = normalizeUrl(inputValue || virtualMeetingUrl);
     if (!url || url === 'https://') {
       setValidationError("Please enter a virtual meeting URL");
@@ -325,7 +338,83 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
     }
     setVirtualMeetingUrl(url);
     onClose();
-  };
+  }, [inputValue, onClose, setVirtualMeetingUrl, virtualMeetingUrl]);
+
+  // Build list of selectable options for keyboard navigation
+  const getSelectableOptions = useCallback(() => {
+    const isUrlInput = isLikelyUrl(inputValue);
+    const options: { type: string; data?: PlacePrediction }[] = [];
+
+    if (isUrlInput && !editMode) {
+      // URL option
+      options.push({ type: 'virtual-link' });
+    } else if (predictions.length > 0) {
+      // Place predictions
+      predictions.forEach((p) => options.push({ type: 'prediction', data: p }));
+      // "Use as text" option
+      if (inputValue.trim() && !editMode) {
+        options.push({ type: 'use-text' });
+      }
+    } else if (!inputValue.trim() && !editMode) {
+      // Virtual options when empty
+      options.push({ type: 'add-virtual-link' });
+    } else if (inputValue.trim() && !isUrlInput && predictions.length === 0 && !editMode) {
+      // No results - show "use as text"
+      options.push({ type: 'use-text' });
+    }
+
+    return options;
+  }, [inputValue, predictions, editMode]);
+
+  // Handle keyboard navigation
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const options = getSelectableOptions();
+    const optionCount = options.length;
+
+    switch (e.key) {
+      case 'Escape':
+        e.preventDefault();
+        onClose();
+        break;
+
+      case 'ArrowDown':
+        e.preventDefault();
+        if (optionCount > 0) {
+          setHighlightedIndex((prev) => (prev + 1) % optionCount);
+        }
+        break;
+
+      case 'ArrowUp':
+        e.preventDefault();
+        if (optionCount > 0) {
+          setHighlightedIndex((prev) => (prev - 1 + optionCount) % optionCount);
+        }
+        break;
+
+      case 'Enter':
+        e.preventDefault();
+        if (highlightedIndex >= 0 && highlightedIndex < optionCount) {
+          const option = options[highlightedIndex];
+          switch (option.type) {
+            case 'virtual-link':
+              handleSelectVirtualLink();
+              break;
+            case 'prediction':
+              if (option.data) handleSelectPlace(option.data);
+              break;
+            case 'use-text':
+              handleUseAsManualEntry();
+              break;
+            case 'add-virtual-link':
+              handleAddVirtualLinkClick();
+              break;
+          }
+        } else if (editMode?.type === 'virtual') {
+          handleSaveVirtualLink();
+        }
+        break;
+    }
+  }, [getSelectableOptions, highlightedIndex, onClose, handleSelectVirtualLink, handleSelectPlace, handleUseAsManualEntry, handleAddVirtualLinkClick, editMode, handleSaveVirtualLink]);
 
   if (!isOpen) return null;
 
@@ -334,6 +423,10 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
   const showPredictions = predictions.length > 0 && !isUrlInput;
   const showUrlOption = isUrlInput && !editMode;
   const showUseAsText = inputValue.trim() && !isUrlInput && predictions.length > 0 && !editMode;
+  const showNoResultsUseText = !isLoadingPredictions && inputValue.trim() && !isUrlInput && predictions.length === 0 && !editMode;
+
+  // Calculate option indices for highlighting
+  let optionIndex = 0;
 
   // Virtual Link Edit Mode
   if (editMode?.type === 'virtual') {
@@ -349,6 +442,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
             type="text"
             value={inputValue || virtualMeetingUrl}
             onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Enter virtual meeting link..."
             className="w-full bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground/50 border-b border-white/10 pb-3"
             autoFocus
@@ -365,7 +459,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
             <button
               type="button"
               onClick={handleSaveVirtualLink}
-              className="w-full mt-3 flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors text-left"
+              className="w-full mt-3 flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-left"
             >
               <Video className="h-5 w-5 text-muted-foreground" />
               <div className="flex-1 min-w-0">
@@ -395,6 +489,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Search for a new location..."
             className="w-full bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground/50 border-b border-white/10 pb-3"
             autoFocus
@@ -409,12 +504,15 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
           {/* Predictions */}
           {showPredictions && (
             <div className="mt-2">
-              {predictions.map((prediction) => (
+              {predictions.map((prediction, idx) => (
                 <button
                   key={prediction.place_id}
                   type="button"
                   onClick={() => handleSelectPlace(prediction)}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors text-left"
+                  onMouseEnter={() => setHighlightedIndex(idx)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left ${
+                    highlightedIndex === idx ? 'bg-white/10' : 'hover:bg-white/5'
+                  }`}
                 >
                   <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -553,6 +651,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Enter location or virtual link"
           className="w-full bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground/50"
           autoFocus
@@ -571,7 +670,10 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
           <button
             type="button"
             onClick={handleSelectVirtualLink}
-            className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors text-left"
+            onMouseEnter={() => setHighlightedIndex(0)}
+            className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${
+              highlightedIndex === 0 ? 'bg-white/10' : 'hover:bg-white/5'
+            }`}
           >
             <Video className="h-5 w-5 text-muted-foreground" />
             <div className="flex-1 min-w-0">
@@ -585,38 +687,50 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
       {/* Place Predictions */}
       {showPredictions && (
         <div className="px-1 pb-2">
-          {predictions.map((prediction) => (
-            <button
-              key={prediction.place_id}
-              type="button"
-              onClick={() => handleSelectPlace(prediction)}
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors text-left"
-            >
-              <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
-                  {prediction.structured_formatting.main_text}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {prediction.structured_formatting.secondary_text}
-                </p>
-              </div>
-            </button>
-          ))}
+          {predictions.map((prediction) => {
+            const currentIndex = optionIndex++;
+            return (
+              <button
+                key={prediction.place_id}
+                type="button"
+                onClick={() => handleSelectPlace(prediction)}
+                onMouseEnter={() => setHighlightedIndex(currentIndex)}
+                className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${
+                  highlightedIndex === currentIndex ? 'bg-white/10' : 'hover:bg-white/5'
+                }`}
+              >
+                <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {prediction.structured_formatting.main_text}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {prediction.structured_formatting.secondary_text}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
 
           {/* Use as text option */}
-          {showUseAsText && (
-            <button
-              type="button"
-              onClick={handleUseAsManualEntry}
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors text-left"
-            >
-              <MapPin className="h-5 w-5 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
-                Use &quot;{inputValue}&quot;
-              </p>
-            </button>
-          )}
+          {showUseAsText && (() => {
+            const currentIndex = optionIndex++;
+            return (
+              <button
+                type="button"
+                onClick={handleUseAsManualEntry}
+                onMouseEnter={() => setHighlightedIndex(currentIndex)}
+                className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${
+                  highlightedIndex === currentIndex ? 'bg-white/10' : 'hover:bg-white/5'
+                }`}
+              >
+                <MapPin className="h-5 w-5 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  Use &quot;{inputValue}&quot;
+                </p>
+              </button>
+            );
+          })()}
         </div>
       )}
 
@@ -631,11 +745,11 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
           <div className="px-1 pb-2">
             <button
               type="button"
-              onClick={() => {
-                setInputValue("https://");
-                inputRef.current?.focus();
-              }}
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors text-left"
+              onClick={handleAddVirtualLinkClick}
+              onMouseEnter={() => setHighlightedIndex(0)}
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${
+                highlightedIndex === 0 ? 'bg-white/10' : 'hover:bg-white/5'
+              }`}
             >
               <Link className="h-5 w-5 text-muted-foreground" />
               <p className="text-sm font-medium text-foreground">Add Virtual Link</p>
@@ -657,12 +771,15 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
       )}
 
       {/* No results */}
-      {!isLoadingPredictions && inputValue.trim() && !isUrlInput && predictions.length === 0 && (
+      {showNoResultsUseText && (
         <div className="px-1 pb-2">
           <button
             type="button"
             onClick={handleUseAsManualEntry}
-            className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors text-left"
+            onMouseEnter={() => setHighlightedIndex(0)}
+            className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${
+              highlightedIndex === 0 ? 'bg-white/10' : 'hover:bg-white/5'
+            }`}
           >
             <MapPin className="h-5 w-5 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
