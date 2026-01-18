@@ -1243,6 +1243,73 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               </div>
             )}
 
+            {/* Main Location Button - always visible at top */}
+            {(() => {
+              const hasVenue = Boolean(addressLine1 && city && postcode);
+              const hasVirtualLink = Boolean(virtualMeetingUrl);
+              const hasError = validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode;
+
+              // Determine button text based on current state
+              let buttonText = "Add Event Location";
+              let buttonSubtext = "Offline location or virtual link";
+
+              if (hasVenue && hasVirtualLink) {
+                buttonText = "Event Location";
+                buttonSubtext = "Venue and virtual link added";
+              } else if (hasVenue) {
+                buttonText = "Event Location";
+                buttonSubtext = venueName || [addressLine1, city].filter(Boolean).join(", ");
+              } else if (hasVirtualLink) {
+                buttonText = "Event Location";
+                buttonSubtext = "Virtual link added";
+              }
+
+              return (
+                <div className="relative">
+                  <button
+                    type="button"
+                    data-location-trigger
+                    onClick={() => {
+                      if (!locationEditMode) {
+                        setIsLocationModalOpen(!isLocationModalOpen);
+                      }
+                      if (hasError) {
+                        setValidationErrors(prev => ({
+                          ...prev,
+                          eventFormat: undefined,
+                          virtualMeetingUrl: undefined,
+                          addressLine1: undefined,
+                          city: undefined,
+                          postcode: undefined,
+                        }));
+                      }
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer ${hasError ? "ring-2 ring-red-400/50" : ""}`}
+                  >
+                    <MapPin className={`h-5 w-5 ${hasError ? "text-red-400" : "text-muted-foreground"}`} />
+                    <div className="flex-1 text-left">
+                      <p className={`text-base font-semibold ${hasError ? "text-red-400" : "text-foreground"}`}>
+                        {buttonText}
+                      </p>
+                      <p className={`text-sm ${hasError ? "text-red-400/80" : "text-muted-foreground"}`}>
+                        {buttonSubtext}
+                      </p>
+                    </div>
+                    <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isLocationModalOpen && !locationEditMode ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Location Modal - for adding new */}
+                  {isLocationModalOpen && !locationEditMode && (
+                    <LocationModal
+                      isOpen={isLocationModalOpen}
+                      onClose={() => setIsLocationModalOpen(false)}
+                      editMode={null}
+                    />
+                  )}
+                </div>
+              );
+            })()}
+
             {/* Venue Card */}
             {addressLine1 && city && postcode && (
               <VenueCard
@@ -1266,12 +1333,6 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   setLatitude(null);
                   setLongitude(null);
                   setLocation("");
-                  // Auto-update event format
-                  if (virtualMeetingUrl) {
-                    setEventFormat(EventFormat.VIRTUAL);
-                  } else {
-                    setEventFormat(null);
-                  }
                 }}
               />
             )}
@@ -1286,98 +1347,11 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 }}
                 onDelete={() => {
                   setVirtualMeetingUrl("");
-                  // Auto-update event format
-                  const hasVenue = Boolean(addressLine1 && city && postcode);
-                  if (hasVenue) {
-                    setEventFormat(EventFormat.IN_PERSON);
-                  } else {
-                    setEventFormat(null);
-                  }
                 }}
               />
             )}
 
-            {/* Add Location Button - only show if something can still be added */}
-            {(() => {
-              const hasVenue = Boolean(addressLine1 && city && postcode);
-              const hasVirtualLink = Boolean(virtualMeetingUrl);
-
-              // Don't show button if both are added
-              if (hasVenue && hasVirtualLink) return null;
-
-              // Determine button text
-              let buttonText = "Add venue or virtual link";
-              let buttonSubtext = "Set where your event takes place";
-              if (hasVenue && !hasVirtualLink) {
-                buttonText = "Add virtual link";
-                buttonSubtext = "Optional: Add an online meeting link";
-              } else if (!hasVenue && hasVirtualLink) {
-                buttonText = "Add venue";
-                buttonSubtext = "Optional: Add a physical location";
-              }
-
-              const hasError = validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode;
-
-              return (
-                <div className="relative">
-                  <button
-                    type="button"
-                    data-location-trigger
-                    onClick={() => {
-                      setLocationEditMode(null);
-                      setIsLocationModalOpen(!isLocationModalOpen);
-                      // Clear location-related errors when user opens the modal
-                      if (hasError) {
-                        setValidationErrors(prev => ({
-                          ...prev,
-                          eventFormat: undefined,
-                          virtualMeetingUrl: undefined,
-                          addressLine1: undefined,
-                          city: undefined,
-                          postcode: undefined,
-                        }));
-                      }
-                    }}
-                    className={`flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer ${hasError ? "ring-2 ring-red-400/50" : ""}`}
-                  >
-                    <MapPin className={`h-5 w-5 ${hasError ? "text-red-400" : "text-muted-foreground"}`} />
-                    <div className="flex-1 text-left">
-                      <p className={`text-base font-semibold ${hasError ? "text-red-400" : "text-foreground"}`}>
-                        {buttonText}
-                      </p>
-                      <p className={`text-sm ${hasError ? "text-red-400/80" : "text-muted-foreground"}`}>
-                        {buttonSubtext}
-                      </p>
-                    </div>
-                    <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isLocationModalOpen ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {/* Location Dropdown */}
-                  {isLocationModalOpen && (
-                    <LocationModal
-                      isOpen={isLocationModalOpen}
-                      onClose={() => {
-                        setIsLocationModalOpen(false);
-                        setLocationEditMode(null);
-                        // Auto-infer event format after modal closes
-                        const venueComplete = Boolean(addressLine1 && city && postcode);
-                        const hasLink = Boolean(virtualMeetingUrl);
-                        if (venueComplete && hasLink) {
-                          setEventFormat(EventFormat.BOTH);
-                        } else if (venueComplete) {
-                          setEventFormat(EventFormat.IN_PERSON);
-                        } else if (hasLink) {
-                          setEventFormat(EventFormat.VIRTUAL);
-                        }
-                      }}
-                      editMode={locationEditMode}
-                    />
-                  )}
-                </div>
-              );
-            })()}
-
-            {/* Edit Modal - shown when editing existing venue/link */}
+            {/* Edit Modal - positioned relative to cards for editing */}
             {isLocationModalOpen && locationEditMode && (
               <div className="relative">
                 <LocationModal
@@ -1385,16 +1359,6 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   onClose={() => {
                     setIsLocationModalOpen(false);
                     setLocationEditMode(null);
-                    // Auto-infer event format after modal closes
-                    const venueComplete = Boolean(addressLine1 && city && postcode);
-                    const hasLink = Boolean(virtualMeetingUrl);
-                    if (venueComplete && hasLink) {
-                      setEventFormat(EventFormat.BOTH);
-                    } else if (venueComplete) {
-                      setEventFormat(EventFormat.IN_PERSON);
-                    } else if (hasLink) {
-                      setEventFormat(EventFormat.VIRTUAL);
-                    }
                   }}
                   editMode={locationEditMode}
                 />

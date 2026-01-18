@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, MapPin, Video, Link, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { MapPin, Link, Video } from "lucide-react";
 import { useEventCreation } from "@/context/EventCreationContext";
 import { GOOGLE_MAPS_CONFIG } from "@/constants/google-maps";
 import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
@@ -14,40 +14,47 @@ const validateUKPostcode = (postcode: string): boolean => {
   return UK_POSTCODE_REGEX.test(postcode.trim());
 };
 
-// URL detection patterns
-const URL_PATTERNS = /^(https?:\/\/|www\.)|^(zoom\.us|meet\.google\.com|teams\.microsoft\.com|webex\.com)/i;
-
+// URL detection
 const isLikelyUrl = (input: string): boolean => {
-  const trimmed = input.trim();
+  const trimmed = input.trim().toLowerCase();
   if (!trimmed) return false;
-  return URL_PATTERNS.test(trimmed) || trimmed.includes('.com/') || trimmed.includes('.co/');
+  return (
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('www.') ||
+    trimmed.includes('zoom.us') ||
+    trimmed.includes('meet.google.com') ||
+    trimmed.includes('teams.microsoft.com') ||
+    trimmed.includes('webex.com') ||
+    /^[a-z0-9-]+\.[a-z]{2,}/.test(trimmed)
+  );
 };
 
-// Detect platform from URL
-const detectPlatform = (url: string): string => {
-  const lowerUrl = url.toLowerCase();
-  if (lowerUrl.includes('zoom.us')) return 'Zoom';
-  if (lowerUrl.includes('meet.google.com')) return 'Google Meet';
-  if (lowerUrl.includes('teams.microsoft.com')) return 'Microsoft Teams';
-  if (lowerUrl.includes('webex.com')) return 'Webex';
-  return 'Virtual Meeting';
-};
-
-// Truncate URL for display
-const truncateUrl = (url: string, maxLength: number = 45): string => {
-  if (url.length <= maxLength) return url;
-  return url.substring(0, maxLength) + "...";
+// Ensure URL has protocol
+const normalizeUrl = (url: string): string => {
+  const trimmed = url.trim();
+  if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+    return 'https://' + trimmed;
+  }
+  return trimmed;
 };
 
 export type LocationEditMode = { type: 'venue' } | { type: 'virtual' } | null;
+
+interface PlacePrediction {
+  place_id: string;
+  description: string;
+  structured_formatting: {
+    main_text: string;
+    secondary_text: string;
+  };
+}
 
 interface LocationModalProps {
   isOpen: boolean;
   onClose: () => void;
   editMode?: LocationEditMode;
 }
-
-type ModalView = 'search' | 'manual-address' | 'virtual-link';
 
 export default function LocationModal({ isOpen, onClose, editMode = null }: LocationModalProps) {
   const {
@@ -70,21 +77,12 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
     setVirtualMeetingUrl,
   } = useEventCreation();
 
-  // Determine initial view based on edit mode
-  const getInitialView = useCallback((): ModalView => {
-    if (editMode?.type === 'venue') return 'manual-address';
-    if (editMode?.type === 'virtual') return 'virtual-link';
-    return 'search';
-  }, [editMode]);
+  // Input state
+  const [inputValue, setInputValue] = useState("");
+  const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
+  const [isLoadingPredictions, setIsLoadingPredictions] = useState(false);
 
-  // Current view state
-  const [currentView, setCurrentView] = useState<ModalView>(getInitialView());
-
-  // Search input state
-  const [searchInput, setSearchInput] = useState("");
-  const [detectedUrl, setDetectedUrl] = useState<string | null>(null);
-
-  // Local state for manual address editing
+  // Local state for venue edit mode
   const [localVenueName, setLocalVenueName] = useState(venueName);
   const [localAddressLine1, setLocalAddressLine1] = useState(addressLine1);
   const [localAddressLine2, setLocalAddressLine2] = useState(addressLine2);
@@ -93,23 +91,22 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
   const [localLatitude, setLocalLatitude] = useState<number | null>(latitude);
   const [localLongitude, setLocalLongitude] = useState<number | null>(longitude);
 
-  // Local state for virtual link
-  const [localVirtualUrl, setLocalVirtualUrl] = useState(virtualMeetingUrl);
-
   // Validation error
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  // Google Places Autocomplete refs
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  // Google services refs
+  const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
+  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
+  const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
-      setCurrentView(getInitialView());
-      setSearchInput("");
-      setDetectedUrl(null);
+      setInputValue("");
+      setPredictions([]);
+      setValidationError(null);
       setLocalVenueName(venueName);
       setLocalAddressLine1(addressLine1);
       setLocalAddressLine2(addressLine2);
@@ -117,10 +114,13 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
       setLocalPostcode(postcode);
       setLocalLatitude(latitude);
       setLocalLongitude(longitude);
-      setLocalVirtualUrl(virtualMeetingUrl);
-      setValidationError(null);
+
+      // Focus input after a short delay
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
-  }, [isOpen, venueName, addressLine1, addressLine2, city, postcode, latitude, longitude, virtualMeetingUrl, getInitialView]);
+  }, [isOpen, venueName, addressLine1, addressLine2, city, postcode, latitude, longitude]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -128,7 +128,6 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         const target = event.target as HTMLElement;
         if (target.closest('[data-location-trigger]')) return;
-        if (target.closest('.pac-container')) return;
         onClose();
       }
     };
@@ -139,145 +138,160 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, onClose]);
 
-  // Initialize Google Places Autocomplete for search view
+  // Initialize Google Places services
   useEffect(() => {
-    if (!isOpen || currentView !== 'search') {
-      if (autocompleteRef.current) {
-        google.maps.event.clearInstanceListeners(autocompleteRef.current);
-        autocompleteRef.current = null;
+    if (!isOpen) return;
+
+    const initializeServices = async () => {
+      await loadGoogleMapsScript();
+
+      if (window.google?.maps?.places) {
+        autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
+        sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
+
+        // Create a dummy div for PlacesService
+        const dummyDiv = document.createElement('div');
+        placesServiceRef.current = new google.maps.places.PlacesService(dummyDiv);
       }
+    };
+
+    initializeServices();
+  }, [isOpen]);
+
+  // Fetch predictions when input changes (debounced)
+  useEffect(() => {
+    if (!inputValue.trim() || isLikelyUrl(inputValue) || editMode?.type === 'virtual') {
+      setPredictions([]);
       return;
     }
-
-    const initializeAutocomplete = () => {
-      if (!searchInputRef.current || !window.google?.maps?.places) return;
-
-      if (autocompleteRef.current) {
-        google.maps.event.clearInstanceListeners(autocompleteRef.current);
-        autocompleteRef.current = null;
-      }
-
-      autocompleteRef.current = new google.maps.places.Autocomplete(
-        searchInputRef.current,
-        {
-          componentRestrictions: { country: GOOGLE_MAPS_CONFIG.COUNTRY_RESTRICTION },
-          fields: ["address_components", "formatted_address", "geometry", "name", "place_id"],
-          bounds: { north: 51.6723, south: 51.3844, east: 0.1485, west: -0.3514 },
-          strictBounds: false,
-        }
-      );
-
-      autocompleteRef.current.addListener("place_changed", handlePlaceSelect);
-    };
 
     const timeoutId = setTimeout(() => {
-      loadGoogleMapsScript().then(initializeAutocomplete);
-    }, 100);
+      if (autocompleteServiceRef.current && sessionTokenRef.current) {
+        setIsLoadingPredictions(true);
 
-    return () => {
-      clearTimeout(timeoutId);
-      if (autocompleteRef.current) {
-        google.maps.event.clearInstanceListeners(autocompleteRef.current);
-        autocompleteRef.current = null;
+        autocompleteServiceRef.current.getPlacePredictions(
+          {
+            input: inputValue,
+            componentRestrictions: { country: GOOGLE_MAPS_CONFIG.COUNTRY_RESTRICTION },
+            sessionToken: sessionTokenRef.current,
+          },
+          (results, status) => {
+            setIsLoadingPredictions(false);
+            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+              setPredictions(results as PlacePrediction[]);
+            } else {
+              setPredictions([]);
+            }
+          }
+        );
       }
-    };
-  }, [isOpen, currentView]);
+    }, 300);
 
-  // Handle search input changes - detect URLs
-  const handleSearchInputChange = (value: string) => {
-    setSearchInput(value);
+    return () => clearTimeout(timeoutId);
+  }, [inputValue, editMode]);
 
-    if (isLikelyUrl(value)) {
-      setDetectedUrl(value.trim());
-    } else {
-      setDetectedUrl(null);
-    }
+  // Handle selecting a place prediction
+  const handleSelectPlace = (prediction: PlacePrediction) => {
+    if (!placesServiceRef.current) return;
+
+    placesServiceRef.current.getDetails(
+      {
+        placeId: prediction.place_id,
+        fields: ["address_components", "formatted_address", "geometry", "name"],
+        sessionToken: sessionTokenRef.current!,
+      },
+      (place, status) => {
+        if (status !== google.maps.places.PlacesServiceStatus.OK || !place) return;
+
+        // Reset session token after successful place details request
+        sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
+
+        let street = "";
+        let cityName = "";
+        let postcodeValue = "";
+        let country = "";
+        let buildingName = place.name || "";
+
+        if (place.address_components) {
+          place.address_components.forEach((component) => {
+            const types = component.types;
+            if (types.includes("street_number")) street = component.long_name + " ";
+            if (types.includes("route")) street += component.long_name;
+            if (types.includes("locality") || types.includes("postal_town")) cityName = component.long_name;
+            if (types.includes("postal_code")) postcodeValue = component.long_name;
+            if (types.includes("country")) country = component.short_name;
+            if (types.includes("premise") && !buildingName) buildingName = component.long_name;
+          });
+        }
+
+        // Validate UK address
+        if (country && country !== "GB") {
+          setValidationError("Sorry, we only support addresses within the United Kingdom.");
+          return;
+        }
+
+        const lat = place.geometry?.location?.lat() ?? null;
+        const lng = place.geometry?.location?.lng() ?? null;
+
+        let addressL1 = "";
+        let addressL2 = "";
+        if (buildingName && !street) {
+          addressL1 = buildingName;
+        } else if (street) {
+          addressL1 = street.trim();
+          if (buildingName && !street.includes(buildingName)) {
+            addressL2 = buildingName;
+          }
+        }
+
+        // If in venue edit mode, update local state
+        if (editMode?.type === 'venue') {
+          setLocalVenueName(buildingName);
+          setLocalAddressLine1(addressL1);
+          setLocalAddressLine2(addressL2);
+          setLocalCity(cityName);
+          setLocalPostcode(postcodeValue);
+          setLocalLatitude(lat);
+          setLocalLongitude(lng);
+          setInputValue("");
+          setPredictions([]);
+          return;
+        }
+
+        // Otherwise save directly and close
+        setVenueName(buildingName);
+        setAddressLine1(addressL1);
+        setAddressLine2(addressL2);
+        setCity(cityName);
+        setPostcode(postcodeValue);
+        setLatitude(lat);
+        setLongitude(lng);
+
+        const fullAddress = [addressL1, addressL2, cityName, postcodeValue].filter(Boolean).join(", ");
+        setLocation(fullAddress);
+
+        onClose();
+      }
+    );
   };
 
-  // Handle place selection from Google autocomplete
-  const handlePlaceSelect = () => {
-    const place = autocompleteRef.current?.getPlace();
-    if (!place) return;
-
-    let street = "";
-    let cityName = "";
-    let postcodeValue = "";
-    let country = "";
-    let buildingName = place.name || "";
-
-    if (place.address_components) {
-      place.address_components.forEach((component) => {
-        const types = component.types;
-        if (types.includes("street_number")) street = component.long_name + " ";
-        if (types.includes("route")) street += component.long_name;
-        if (types.includes("locality") || types.includes("postal_town")) cityName = component.long_name;
-        if (types.includes("postal_code")) postcodeValue = component.long_name;
-        if (types.includes("country")) country = component.short_name;
-        if (types.includes("premise") && !buildingName) buildingName = component.long_name;
-      });
-    }
-
-    // Validate UK address
-    if (country && country !== "GB") {
-      setValidationError("Sorry, we only support addresses within the United Kingdom.");
-      return;
-    }
-
-    // Set coordinates
-    const lat = place.geometry?.location?.lat() ?? null;
-    const lng = place.geometry?.location?.lng() ?? null;
-
-    // Build address line 1
-    let addressL1 = "";
-    let addressL2 = "";
-    if (buildingName && !street) {
-      addressL1 = buildingName;
-    } else if (street) {
-      addressL1 = street.trim();
-      if (buildingName && !street.includes(buildingName)) {
-        addressL2 = buildingName;
-      }
-    }
-
-    // Save directly to context and close
-    setVenueName(buildingName);
-    setAddressLine1(addressL1);
-    setAddressLine2(addressL2);
-    setCity(cityName);
-    setPostcode(postcodeValue);
-    setLatitude(lat);
-    setLongitude(lng);
-
-    // Update location string for display
-    const fullAddress = [addressL1, addressL2, cityName, postcodeValue].filter(Boolean).join(", ");
-    setLocation(fullAddress);
-
-    onClose();
-  };
-
-  // Add virtual link from URL confirmation
-  const handleAddVirtualLink = () => {
-    if (!detectedUrl) return;
-
-    // Ensure URL has protocol
-    let url = detectedUrl;
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      url = 'https://' + url;
-    }
-
+  // Handle selecting virtual link option
+  const handleSelectVirtualLink = () => {
+    const url = normalizeUrl(inputValue);
     setVirtualMeetingUrl(url);
     onClose();
   };
 
-  // Cancel URL detection
-  const handleCancelUrl = () => {
-    setDetectedUrl(null);
-    setSearchInput("");
+  // Handle "Use [text]" option for manual entry
+  const handleUseAsManualEntry = () => {
+    // Open venue edit mode with the text as venue name
+    setLocalVenueName(inputValue);
+    setInputValue("");
+    setPredictions([]);
   };
 
-  // Save manual address
-  const handleSaveManualAddress = () => {
-    // Validate required fields
+  // Save venue (for edit mode)
+  const handleSaveVenue = () => {
     if (!localAddressLine1 || !localCity || !localPostcode) {
       setValidationError("Please complete all required address fields");
       return;
@@ -288,7 +302,6 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
       return;
     }
 
-    // Save to context
     setVenueName(localVenueName);
     setAddressLine1(localAddressLine1);
     setAddressLine2(localAddressLine2);
@@ -297,166 +310,135 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
     setLatitude(localLatitude);
     setLongitude(localLongitude);
 
-    // Update location string
     const fullAddress = [localAddressLine1, localAddressLine2, localCity, localPostcode].filter(Boolean).join(", ");
     setLocation(fullAddress);
 
     onClose();
   };
 
-  // Save virtual link from focused input
+  // Save virtual link (for edit mode)
   const handleSaveVirtualLink = () => {
-    if (!localVirtualUrl.trim()) {
+    const url = normalizeUrl(inputValue || virtualMeetingUrl);
+    if (!url || url === 'https://') {
       setValidationError("Please enter a virtual meeting URL");
       return;
     }
-
-    // Ensure URL has protocol
-    let url = localVirtualUrl.trim();
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      url = 'https://' + url;
-    }
-
     setVirtualMeetingUrl(url);
     onClose();
   };
 
-  // Get modal title based on current state
-  const getModalTitle = () => {
-    if (editMode?.type === 'venue') return 'Edit Venue';
-    if (editMode?.type === 'virtual') return 'Edit Virtual Link';
-    if (currentView === 'manual-address') return 'Enter Address';
-    if (currentView === 'virtual-link') return 'Add Virtual Link';
-    return 'Location';
-  };
-
   if (!isOpen) return null;
 
-  return (
-    <div
-      ref={dropdownRef}
-      className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-card-background/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
-    >
-      <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-foreground">{getModalTitle()}</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-white/10 transition-colors text-muted-foreground hover:text-foreground"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+  const isUrlInput = isLikelyUrl(inputValue);
+  const showVirtualOptions = !inputValue.trim() && !editMode;
+  const showPredictions = predictions.length > 0 && !isUrlInput;
+  const showUrlOption = isUrlInput && !editMode;
+  const showUseAsText = inputValue.trim() && !isUrlInput && predictions.length > 0 && !editMode;
 
-        {/* Validation Error */}
-        {validationError && (
-          <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-            <p className="text-sm text-red-400">{validationError}</p>
-          </div>
-        )}
+  // Virtual Link Edit Mode
+  if (editMode?.type === 'virtual') {
+    return (
+      <div
+        ref={dropdownRef}
+        className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-card-background/95 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
+      >
+        <div className="p-3">
+          {/* URL Input */}
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue || virtualMeetingUrl}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Enter virtual meeting link..."
+            className="w-full bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground/50 border-b border-white/10 pb-3"
+            autoFocus
+          />
 
-        {/* Search View */}
-        {currentView === 'search' && (
-          <>
-            {/* Unified Search Input */}
-            <div className="relative">
-              <div className={`flex items-center gap-2 rounded-lg px-3 py-2.5 border transition-all ${
-                detectedUrl
-                  ? "bg-purple-500/10 border-purple-500/50"
-                  : "bg-card-secondary-background border-white/10 focus-within:border-primary/50"
-              }`}>
-                {detectedUrl ? (
-                  <Link className="h-4 w-4 text-purple-400" />
-                ) : (
-                  <Search className="h-4 w-4 text-muted-foreground" />
-                )}
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchInput}
-                  onChange={(e) => handleSearchInputChange(e.target.value)}
-                  placeholder="Search venue or paste meeting link..."
-                  className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
-                />
-              </div>
+          {validationError && (
+            <div className="mt-3 p-2 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <p className="text-xs text-red-400">{validationError}</p>
             </div>
+          )}
 
-            {/* URL Confirmation Row */}
-            {detectedUrl && (
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
-                <Link className="h-4 w-4 text-purple-400 flex-shrink-0" />
-                <span className="flex-1 text-sm text-foreground truncate">
-                  {truncateUrl(detectedUrl)}
-                </span>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <button
-                    type="button"
-                    onClick={handleCancelUrl}
-                    className="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleAddVirtualLink}
-                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition-colors"
-                  >
-                    Add Link
-                  </button>
-                </div>
+          {/* Preview */}
+          {(inputValue || virtualMeetingUrl) && (
+            <button
+              type="button"
+              onClick={handleSaveVirtualLink}
+              className="w-full mt-3 flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors text-left"
+            >
+              <Video className="h-5 w-5 text-muted-foreground" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground">Virtual</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {normalizeUrl(inputValue || virtualMeetingUrl)}
+                </p>
               </div>
-            )}
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
-            {/* Divider */}
-            {!detectedUrl && (
-              <>
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 h-px bg-white/10"></div>
-                  <span className="text-xs font-medium text-muted-foreground">or</span>
-                  <div className="flex-1 h-px bg-white/10"></div>
-                </div>
+  // Venue Edit Mode
+  if (editMode?.type === 'venue') {
+    return (
+      <div
+        ref={dropdownRef}
+        className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-card-background/95 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
+      >
+        <div className="p-3 max-h-[70vh] overflow-y-auto">
+          {/* Search Input */}
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Search for a new location..."
+            className="w-full bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground/50 border-b border-white/10 pb-3"
+            autoFocus
+          />
 
-                {/* Action Buttons */}
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentView('virtual-link')}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg bg-card-secondary-background border border-white/10 hover:bg-white/5 transition-colors"
-                  >
-                    <Link className="h-4 w-4 text-purple-400" />
-                    <span className="text-sm font-medium text-foreground">Add Virtual Link</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentView('manual-address')}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg bg-card-secondary-background border border-white/10 hover:bg-white/5 transition-colors"
-                  >
-                    <MapPin className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium text-foreground">Enter Manually</span>
-                  </button>
-                </div>
-              </>
-            )}
-          </>
-        )}
+          {validationError && (
+            <div className="mt-3 p-2 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <p className="text-xs text-red-400">{validationError}</p>
+            </div>
+          )}
 
-        {/* Manual Address View */}
-        {currentView === 'manual-address' && (
+          {/* Predictions */}
+          {showPredictions && (
+            <div className="mt-2">
+              {predictions.map((prediction) => (
+                <button
+                  key={prediction.place_id}
+                  type="button"
+                  onClick={() => handleSelectPlace(prediction)}
+                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors text-left"
+                >
+                  <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {prediction.structured_formatting.main_text}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {prediction.structured_formatting.secondary_text}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 my-4">
+            <div className="flex-1 h-px bg-white/10"></div>
+            <span className="text-xs font-medium text-muted-foreground">or edit manually</span>
+            <div className="flex-1 h-px bg-white/10"></div>
+          </div>
+
+          {/* Manual Address Form */}
           <div className="space-y-3">
-            {/* Back button if not in edit mode */}
-            {!editMode && (
-              <button
-                type="button"
-                onClick={() => setCurrentView('search')}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                &larr; Back to search
-              </button>
-            )}
-
-            {/* Venue Name */}
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1.5">
                 Venue Name (Optional)
@@ -470,7 +452,6 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
               />
             </div>
 
-            {/* Address Line 1 */}
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1.5">
                 Address Line 1 <span className="text-red-400">*</span>
@@ -488,7 +469,6 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
               />
             </div>
 
-            {/* Address Line 2 */}
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1.5">
                 Address Line 2 (Optional)
@@ -502,7 +482,6 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
               />
             </div>
 
-            {/* City and Postcode */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5">
@@ -538,7 +517,6 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
               </div>
             </div>
 
-            {/* Validation feedback */}
             {localPostcode && (
               <div>
                 {validateUKPostcode(localPostcode) ? (
@@ -549,73 +527,150 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
               </div>
             )}
 
-            {/* Save Button */}
             <button
               type="button"
-              onClick={handleSaveManualAddress}
-              className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 mt-2"
+              onClick={handleSaveVenue}
+              className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90"
             >
-              {editMode?.type === 'venue' ? 'Save Changes' : 'Add Venue'}
+              Save Changes
             </button>
           </div>
-        )}
-
-        {/* Virtual Link View */}
-        {currentView === 'virtual-link' && (
-          <div className="space-y-3">
-            {/* Back button if not in edit mode */}
-            {!editMode && (
-              <button
-                type="button"
-                onClick={() => setCurrentView('search')}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                &larr; Back to search
-              </button>
-            )}
-
-            {/* Virtual Link Input */}
-            <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                Meeting URL <span className="text-red-400">*</span>
-              </label>
-              <div className="flex items-center gap-2 rounded-lg bg-card-secondary-background px-3 py-2 border border-white/10 focus-within:border-purple-500/50 transition-all">
-                <Link className="h-4 w-4 text-purple-400" />
-                <input
-                  type="url"
-                  value={localVirtualUrl}
-                  onChange={(e) => setLocalVirtualUrl(e.target.value)}
-                  placeholder="https://zoom.us/j/... or Google Meet link"
-                  className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
-                  autoFocus
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-1.5">
-                Zoom, Google Meet, Teams, or any meeting URL
-              </p>
-            </div>
-
-            {/* Platform detection preview */}
-            {localVirtualUrl && isLikelyUrl(localVirtualUrl) && (
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                <Video className="h-4 w-4 text-purple-400" />
-                <span className="text-xs text-muted-foreground">
-                  Detected: <span className="text-foreground">{detectPlatform(localVirtualUrl)}</span>
-                </span>
-              </div>
-            )}
-
-            {/* Save Button */}
-            <button
-              type="button"
-              onClick={handleSaveVirtualLink}
-              className="w-full rounded-lg bg-purple-500 py-2.5 text-sm font-semibold text-white transition-all hover:bg-purple-600 mt-2"
-            >
-              {editMode?.type === 'virtual' ? 'Save Changes' : 'Add Virtual Link'}
-            </button>
-          </div>
-        )}
+        </div>
       </div>
+    );
+  }
+
+  // Default Search Mode
+  return (
+    <div
+      ref={dropdownRef}
+      className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-card-background/95 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
+    >
+      <div className="p-3">
+        {/* Search Input */}
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          placeholder="Enter location or virtual link"
+          className="w-full bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground/50"
+          autoFocus
+        />
+      </div>
+
+      {validationError && (
+        <div className="mx-3 mb-3 p-2 bg-red-500/10 border border-red-500/30 rounded-lg">
+          <p className="text-xs text-red-400">{validationError}</p>
+        </div>
+      )}
+
+      {/* URL Option - when URL is detected */}
+      {showUrlOption && (
+        <div className="px-1 pb-2">
+          <button
+            type="button"
+            onClick={handleSelectVirtualLink}
+            className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors text-left"
+          >
+            <Video className="h-5 w-5 text-muted-foreground" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground">Virtual</p>
+              <p className="text-xs text-muted-foreground truncate">{normalizeUrl(inputValue)}</p>
+            </div>
+          </button>
+        </div>
+      )}
+
+      {/* Place Predictions */}
+      {showPredictions && (
+        <div className="px-1 pb-2">
+          {predictions.map((prediction) => (
+            <button
+              key={prediction.place_id}
+              type="button"
+              onClick={() => handleSelectPlace(prediction)}
+              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors text-left"
+            >
+              <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">
+                  {prediction.structured_formatting.main_text}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {prediction.structured_formatting.secondary_text}
+                </p>
+              </div>
+            </button>
+          ))}
+
+          {/* Use as text option */}
+          {showUseAsText && (
+            <button
+              type="button"
+              onClick={handleUseAsManualEntry}
+              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors text-left"
+            >
+              <MapPin className="h-5 w-5 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">
+                Use &quot;{inputValue}&quot;
+              </p>
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Virtual Options - shown when input is empty */}
+      {showVirtualOptions && (
+        <div className="border-t border-white/10">
+          <div className="px-4 py-2">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Virtual Options
+            </p>
+          </div>
+          <div className="px-1 pb-2">
+            <button
+              type="button"
+              onClick={() => {
+                setInputValue("https://");
+                inputRef.current?.focus();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors text-left"
+            >
+              <Link className="h-5 w-5 text-muted-foreground" />
+              <p className="text-sm font-medium text-foreground">Add Virtual Link</p>
+            </button>
+          </div>
+          <div className="px-4 pb-3">
+            <p className="text-xs text-muted-foreground">
+              If you have a virtual event link, you can enter or paste it above.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Loading state */}
+      {isLoadingPredictions && inputValue.trim() && !isUrlInput && (
+        <div className="px-4 pb-3">
+          <p className="text-xs text-muted-foreground">Searching...</p>
+        </div>
+      )}
+
+      {/* No results */}
+      {!isLoadingPredictions && inputValue.trim() && !isUrlInput && predictions.length === 0 && (
+        <div className="px-1 pb-2">
+          <button
+            type="button"
+            onClick={handleUseAsManualEntry}
+            className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors text-left"
+          >
+            <MapPin className="h-5 w-5 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              Use &quot;{inputValue}&quot;
+            </p>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
