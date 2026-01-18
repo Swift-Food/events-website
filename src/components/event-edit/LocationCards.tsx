@@ -55,17 +55,17 @@ export function VenueCard({
             <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
               <MapPin className="h-5 w-5 text-primary" />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground truncate">
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground">
                 {displayName}
               </p>
               {venueName && addressLine1 !== venueName && (
-                <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {addressSummary}
                 </p>
               )}
               {!venueName && (
-                <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {[city, postcode].filter(Boolean).join(", ")}
                 </p>
               )}
