@@ -1073,7 +1073,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               onClick={() => setIsImportModalOpen(true)}
               className="flex w-full items-center gap-3 rounded-xl border border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 px-4 py-3 transition-all"
             >
-              <Download className="h-4 w-4 text-primary" />
+              <Download className="h-5 w-5 text-primary flex-shrink-0" />
               <span className="text-sm text-muted-foreground">
                 Have an event on Eventbrite, Meetup, Luma, or elsewhere? <span className="text-primary font-medium">Import it</span>
               </span>
