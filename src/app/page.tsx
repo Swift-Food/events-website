@@ -95,9 +95,9 @@ export default function LandingPage() {
       {/* Hero Section */}
       <main className="relative flex flex-col items-center justify-start md:justify-center flex-grow py-12 md:py-0 px-6 z-10 overflow-hidden min-h-[calc(100vh-80px)]">
         {/* Main Content Wrapper */}
-        <div className="w-full max-w-5xl flex flex-col items-center text-center gap-8 md:gap-14 mt-16 md:mt-24 md:translate-y-6">
+        <div className="w-full max-w-5xl flex flex-col items-center text-center gap-8 md:gap-14 mt-8 md:mt-12 md:translate-y-6">
           <h1
-            className="text-glow text-5xl md:text-7xl lg:text-[7.5rem] font-black leading-[1.6] md:leading-[1.1] tracking-tighter text-white uppercase max-w-5xl select-none"
+            className="text-glow text-4xl md:text-6xl lg:text-[6rem] font-black leading-[1.6] md:leading-[1.1] tracking-tighter text-white uppercase max-w-5xl select-none"
             style={{ fontFamily: "var(--font-satoshi), sans-serif" }}
           >
             <AnimatedWord text="Plan it." delayOffset={100} />
@@ -127,14 +127,11 @@ export default function LandingPage() {
                 Discover Now
               </span>
             </Link>
-            <div className="text-[11px] text-white/70 font-mono font-bold tracking-[0.5em] uppercase animate-pulse">
-              System Online
-            </div>
           </div>
         </div>
 
         {/* Partners section at bottom */}
-        <div
+        {/* <div
           className="animate-reveal mt-auto md:mt-32 mb-8 w-full max-w-screen-lg border-t border-white/30 pt-10 opacity-0"
           style={{ animationDelay: "1600ms" }}
         >
@@ -154,7 +151,7 @@ export default function LandingPage() {
               )
             )}
           </div>
-        </div>
+        </div> */}
       </main>
 
       {/* Features Section */}
