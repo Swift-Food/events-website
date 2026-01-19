@@ -86,7 +86,7 @@ export default function LandingPage() {
     <div className="relative min-h-screen overflow-hidden">
       {/* Animated gradient background */}
       <div className="shader-gradient" />
-      <div className="noise-overlay" />
+      {/* <div className="noise-overlay" /> */}
       <div className="scanline" />
 
       {/* Grid overlay */}
