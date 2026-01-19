@@ -97,7 +97,7 @@ export default function LandingPage() {
         {/* Main Content Wrapper */}
         <div className="w-full max-w-5xl flex flex-col items-center text-center gap-8 md:gap-10">
           <h1
-            className="text-glow text-4xl md:text-6xl lg:text-[6rem] font-black leading-[1.6] md:leading-[1.1] tracking-tighter text-white uppercase max-w-5xl select-none"
+            className="text-glow text-5xl md:text-6xl lg:text-[6rem] font-black leading-[1.4] md:leading-[1.1] tracking-tighter text-white uppercase max-w-5xl select-none"
             style={{ fontFamily: "var(--font-satoshi), sans-serif" }}
           >
             <AnimatedWord text="Plan it." delayOffset={100} />
