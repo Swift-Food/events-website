@@ -85,6 +85,13 @@ export default function Navbar() {
     }
   };
 
+  // Dynamic classes based on landing page
+  const textColor = isLandingPage ? "text-zinc-900" : "text-foreground";
+  const hoverBg = isLandingPage ? "hover:bg-zinc-900/10" : "hover:bg-foreground/10";
+  const logoFilter = isLandingPage ? "" : "invert";
+  const buttonBg = isLandingPage ? "bg-zinc-900 text-white" : "bg-foreground text-background";
+  const borderColor = isLandingPage ? "border-zinc-900/20 hover:border-zinc-900/40" : "border-foreground/20 hover:border-foreground/40";
+
   return (
     <>
       <header className={`sticky top-0 z-50 backdrop-blur-sm ${isLandingPage ? "" : "border-b border-zinc-700"}`}>
@@ -92,17 +99,17 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className="flex items-center gap-1 text-lg font-semibold tracking-tight hover:scale-105 hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-transform duration-200"
+              className={`flex items-center gap-1 text-lg font-semibold tracking-tight hover:scale-105 ${isLandingPage ? "hover:drop-shadow-[0_0_8px_rgba(0,0,0,0.3)]" : "hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"} transition-transform duration-200`}
             >
               <Image
                 src="/logo.svg"
                 alt="Prismo logo"
                 width={24}
                 height={24}
-                className="invert"
+                className={logoFilter}
               />
               <span
-                className="hidden sm:inline font-normal text-foreground"
+                className={`hidden sm:inline font-normal ${textColor}`}
                 style={{ fontFamily: "var(--font-satoshi), sans-serif" }}
               >
                 PRISMO
@@ -114,7 +121,7 @@ export default function Navbar() {
               <Link
                 href="/my-tickets"
                 onClick={(e) => handleProtectedNavClick(e, "/my-tickets", true)}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/10"
+                className={`flex h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg}`}
                 aria-label="Tickets"
               >
                 <Ticket className="h-5 w-5" />
@@ -124,7 +131,7 @@ export default function Navbar() {
                 onClick={(e) =>
                   handleProtectedNavClick(e, "/event-management", true)
                 }
-                className="flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/10"
+                className={`flex h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg}`}
                 aria-label="Manage"
               >
                 <ChartNoAxesGantt className="h-5 w-5" />
@@ -132,7 +139,7 @@ export default function Navbar() {
             </nav>
 
             {/* Desktop Navigation */}
-            <nav className="ml-8 hidden gap-6 text-sm font-medium text-foreground sm:flex">
+            <nav className={`ml-8 hidden gap-6 text-sm font-medium ${textColor} sm:flex`}>
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -151,14 +158,14 @@ export default function Navbar() {
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/event-creation"
-              className="flex sm:hidden h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/10"
+              className={`flex sm:hidden h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg}`}
               aria-label="Create Event"
             >
               <CalendarPlus className="h-5 w-5" />
             </Link>
             <Link
               href="/event-creation"
-              className="hidden sm:inline-flex rounded-full bg-foreground px-5 py-2 text-sm font-semibold text-background transition-colors hover:opacity-90"
+              className={`hidden sm:inline-flex rounded-full ${buttonBg} px-5 py-2 text-sm font-semibold transition-colors hover:opacity-90`}
             >
               Create Event
             </Link>
@@ -167,15 +174,15 @@ export default function Navbar() {
                 <div className="flex flex-row space-x-2">
                   <button
                     onClick={handleSearchIconClick}
-                    className="flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/10 cursor-pointer"
+                    className={`flex h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg} cursor-pointer`}
                     aria-label="User profile"
                   >
                     <Search className="h-5 w-5" />
                   </button>
-                  <NotificationDropdown />
+                  <NotificationDropdown isLandingPage={isLandingPage} />
                   <button
                     onClick={handleUserIconClick}
-                    className="flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/10 cursor-pointer"
+                    className={`flex h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg} cursor-pointer`}
                     aria-label="User profile"
                   >
                     <User className="h-5 w-5" />
@@ -230,7 +237,7 @@ export default function Navbar() {
               </div>
             ) : (
               <Link
-                className="rounded-full border border-foreground/20 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-foreground/40 hover:bg-foreground/5 cursor-pointer sm:px-5 sm:py-2 sm:text-sm"
+                className={`rounded-full border ${borderColor} px-3 py-1.5 text-xs font-semibold ${textColor} transition-colors ${isLandingPage ? "hover:bg-zinc-900/5" : "hover:bg-foreground/5"} cursor-pointer sm:px-5 sm:py-2 sm:text-sm`}
                 aria-label="Sign in"
                 href={"/auth"}
               >

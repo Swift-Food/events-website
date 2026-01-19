@@ -5,7 +5,11 @@ import { Bell, CheckCheck, Loader2 } from "lucide-react";
 import { useNotifications } from "@/context/NotificationContext";
 import NotificationItem from "./NotificationItem";
 
-export default function NotificationDropdown() {
+interface NotificationDropdownProps {
+  isLandingPage?: boolean;
+}
+
+export default function NotificationDropdown({ isLandingPage = false }: NotificationDropdownProps) {
   const {
     notifications,
     unreadCount,
@@ -65,7 +69,7 @@ export default function NotificationDropdown() {
       {/* Bell button */}
       <button
         onClick={toggleDropdown}
-        className="relative flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/10 cursor-pointer"
+        className={`relative flex h-9 w-9 items-center justify-center rounded-full ${isLandingPage ? "text-zinc-900 hover:bg-zinc-900/10" : "text-foreground hover:bg-foreground/10"} transition-colors cursor-pointer`}
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />
