@@ -308,6 +308,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             isSingleUse: ticket.isSingleUse ?? true,
             quantity: ticket.quantityTotal || 100,
             questionForm: questionForm,
+            maxGroupSize: ticket.maxGroupSize ?? 1,
           };
         });
 
@@ -563,6 +564,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           required: field.required,
         })),
         isPrivate: false,
+        maxGroupSize: ticket.maxGroupSize ?? 1,
       }));
 
       // Prepare event data WITH tickets
@@ -1472,6 +1474,11 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                             </span>
                           )}
                         </div>
+                        {(ticket.maxGroupSize || 1) > 1 && (
+                          <span className="inline-block rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-400 mt-1">
+                            Groups
+                          </span>
+                        )}
                         {ticket.description && (
                           <p className="text-sm text-muted-foreground mt-1">
                             {ticket.description}

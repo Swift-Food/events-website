@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Ticket, Plus, Edit, Trash2, ChevronUp, ChevronDown, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Infinity } from "lucide-react";
+import { X, Ticket, Plus, Edit, Trash2, ChevronUp, ChevronDown, ChevronRight, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Infinity, Users, Settings } from "lucide-react";
 import { TicketType, FormField } from "@/types";
 import FormFieldModal from "./FormFieldModal";
 
@@ -10,6 +10,53 @@ interface TicketTypeModalProps {
   onClose: () => void;
   onSave: (ticket: TicketType) => void | Promise<void>;
   ticketToEdit?: TicketType | null;
+}
+
+// Small component for group size input with validation warning
+function GroupSizeInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const [inputValue, setInputValue] = useState(value.toString());
+  const numValue = parseInt(inputValue);
+  const showWarning = !isNaN(numValue) && numValue < 2;
+
+  const validateAndApply = () => {
+    const val = parseInt(inputValue) || 5;
+    const clamped = Math.min(50, Math.max(2, val));
+    onChange(clamped);
+    setInputValue(clamped.toString());
+  };
+
+  return (
+    <div className="pl-6 space-y-1">
+      <div className="flex items-center gap-3">
+        <label className="text-sm text-muted-foreground">
+          Max group size:
+        </label>
+        <input
+          type="number"
+          min="2"
+          max="50"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onBlur={validateAndApply}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              validateAndApply();
+              (e.target as HTMLInputElement).blur();
+            }
+          }}
+          className={`w-20 h-9 rounded-lg bg-card-background px-3 text-foreground text-sm outline-none focus:ring-2 transition-all ${
+            showWarning ? "ring-2 ring-red-500/50 focus:ring-red-500/50" : "focus:ring-primary/50"
+          }`}
+        />
+      </div>
+      {showWarning && (
+        <p className="text-xs text-red-400">
+          Group size must be at least 2. Use the toggle to disable group purchases.
+        </p>
+      )}
+    </div>
+  );
 }
 
 export default function TicketTypeModal({
@@ -26,8 +73,13 @@ export default function TicketTypeModal({
   const [localQuantity, setLocalQuantity] = useState("100");
   const [localIsUnlimited, setLocalIsUnlimited] = useState(true);
   const [localQuestions, setLocalQuestions] = useState<FormField[]>([]);
+  const [localMaxGroupSize, setLocalMaxGroupSize] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Collapsible section state
+  const [settingsExpanded, setSettingsExpanded] = useState(false);
+  const [questionsExpanded, setQuestionsExpanded] = useState(false);
 
   // FormFieldModal state
   const [isFormFieldModalOpen, setIsFormFieldModalOpen] = useState(false);
@@ -60,6 +112,12 @@ export default function TicketTypeModal({
         setLocalIsUnlimited(isUnlimited);
         setLocalQuantity(isUnlimited ? "100" : qty.toString());
         setLocalQuestions(ticketToEdit.questionForm || []);
+        setLocalMaxGroupSize(ticketToEdit.maxGroupSize || 1);
+        // Smart auto-expand: expand sections with non-default values
+        const hasAdvancedSettings = ticketToEdit.isSingleUse || (ticketToEdit.maxGroupSize || 1) > 1;
+        const hasQuestions = ticketToEdit.questionForm && ticketToEdit.questionForm.length > 0;
+        setSettingsExpanded(hasAdvancedSettings);
+        setQuestionsExpanded(!!hasQuestions);
       } else {
         // Reset for new ticket
         setLocalName("");
@@ -70,6 +128,9 @@ export default function TicketTypeModal({
         setLocalQuantity("100");
         setLocalIsUnlimited(true);
         setLocalQuestions([]);
+        setLocalMaxGroupSize(1);
+        setSettingsExpanded(false);
+        setQuestionsExpanded(false);
       }
     }
   }, [isOpen, ticketToEdit]);
@@ -111,6 +172,7 @@ export default function TicketTypeModal({
       quantity: quantity,
       isSingleUse: localIsSingleUse,
       questionForm: localQuestions,
+      maxGroupSize: localMaxGroupSize,
     };
 
     setIsSaving(true);
@@ -288,58 +350,6 @@ export default function TicketTypeModal({
             />
           </div>
 
-          {/* Quantity */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-sm font-medium text-foreground">
-                Quantity Available {!localIsUnlimited && <span className="text-red-400">*</span>}
-              </label>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Unlimited</span>
-                <button
-                  type="button"
-                  onClick={() => setLocalIsUnlimited(!localIsUnlimited)}
-                  className={`h-6 w-11 rounded-full transition-all flex-shrink-0 ${
-                    localIsUnlimited
-                      ? "bg-primary"
-                      : "bg-card-background"
-                  }`}
-                >
-                  <span
-                    className={`block h-5 w-5 rounded-full transition-all ${
-                      localIsUnlimited
-                        ? "translate-x-5 bg-primary-foreground"
-                        : "translate-x-0.5 bg-foreground"
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
-            {localIsUnlimited ? (
-              <div className="h-11 flex items-center gap-2 rounded-xl bg-card-background px-4">
-                <Infinity className="h-4 w-4 text-primary" />
-                <p className="text-base md:text-sm text-muted-foreground">
-                  Unlimited tickets available
-                </p>
-              </div>
-            ) : (
-              <>
-                <input
-                  type="number"
-                  min="1"
-                  max="100000"
-                  value={localQuantity}
-                  onChange={(e) => setLocalQuantity(e.target.value)}
-                  className="w-full rounded-xl bg-card-background px-4 py-3 text-foreground text-base md:text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                  placeholder="100"
-                />
-                <p className="text-xs text-muted-foreground mt-1.5">
-                  Number of tickets available must be within 1 - 100,000
-                </p>
-              </>
-            )}
-          </div>
-
           {/* Price Toggle */}
           <div>
             <label className="text-sm font-medium text-foreground block mb-1.5">
@@ -402,56 +412,193 @@ export default function TicketTypeModal({
             </div>
           </div>
 
-          {/* Single Use Toggle */}
-          <div className="flex items-center justify-between py-2">
-            <div>
-              <p className="text-sm font-medium text-foreground">
-                Single-Use Ticket
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Ticket will be invalidated after first use
-              </p>
+          {/* Quantity */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-sm font-medium text-foreground">
+                Quantity Available {!localIsUnlimited && <span className="text-red-400">*</span>}
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Unlimited</span>
+                <button
+                  type="button"
+                  onClick={() => setLocalIsUnlimited(!localIsUnlimited)}
+                  className={`h-6 w-11 rounded-full transition-all flex-shrink-0 ${
+                    localIsUnlimited
+                      ? "bg-primary"
+                      : "bg-card-background"
+                  }`}
+                >
+                  <span
+                    className={`block h-5 w-5 rounded-full transition-all ${
+                      localIsUnlimited
+                        ? "translate-x-5 bg-primary-foreground"
+                        : "translate-x-0.5 bg-foreground"
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setLocalIsSingleUse(!localIsSingleUse)}
-              className={`h-6 w-11 rounded-full transition-all ${
-                localIsSingleUse
-                  ? "bg-primary"
-                  : "bg-card-background"
-              }`}
-            >
-              <span
-                className={`block h-5 w-5 rounded-full transition-all ${
-                  localIsSingleUse
-                    ? "translate-x-5 bg-primary-foreground"
-                    : "translate-x-0.5 bg-foreground"
-                }`}
-              />
-            </button>
+            {localIsUnlimited ? (
+              <div className="h-11 flex items-center gap-2 rounded-xl bg-card-background px-4">
+                <Infinity className="h-4 w-4 text-primary" />
+                <p className="text-base md:text-sm text-muted-foreground">
+                  Unlimited tickets available
+                </p>
+              </div>
+            ) : (
+              <>
+                <input
+                  type="number"
+                  min="1"
+                  max="100000"
+                  value={localQuantity}
+                  onChange={(e) => setLocalQuantity(e.target.value)}
+                  className="w-full rounded-xl bg-card-background px-4 py-3 text-foreground text-base md:text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  placeholder="100"
+                />
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  Number of tickets available must be within 1 - 100,000
+                </p>
+              </>
+            )}
           </div>
 
-          {/* Registration Questions Section */}
-          <div className="border-t border-foreground/10 pt-4 mt-4">
-            <div className="flex items-center justify-between mb-3">
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {/* COLLAPSIBLE SECTIONS - Style A: Bordered Accordion             */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
+
+          {/* Additional Settings - Collapsible */}
+          <div className="border border-foreground/10 rounded-xl overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setSettingsExpanded(!settingsExpanded)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-card-background/50 hover:bg-card-background transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Settings className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">Additional Settings</span>
+                {(localIsSingleUse || localMaxGroupSize > 1) && (
+                  <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                    {[localIsSingleUse && "Single-use", localMaxGroupSize > 1 && "Group"].filter(Boolean).join(", ")}
+                  </span>
+                )}
+              </div>
+              <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${settingsExpanded ? "rotate-90" : ""}`} />
+            </button>
+
+            {settingsExpanded && (
+              <div className="px-4 py-3 space-y-4 border-t border-foreground/10">
+                {/* Single Use Toggle */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      Single-Use Ticket
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Ticket will be invalidated after first check in
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setLocalIsSingleUse(!localIsSingleUse)}
+                    className={`h-6 w-11 rounded-full transition-all ${
+                      localIsSingleUse
+                        ? "bg-primary"
+                        : "bg-card-background"
+                    }`}
+                  >
+                    <span
+                      className={`block h-5 w-5 rounded-full transition-all ${
+                        localIsSingleUse
+                          ? "translate-x-5 bg-primary-foreground"
+                          : "translate-x-0.5 bg-foreground"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Group Tickets - Toggle + Size Input */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <p className="text-sm font-medium text-foreground">
+                          Allow Group Purchases
+                        </p>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {localMaxGroupSize > 1
+                          ? `Attendees can buy up to ${localMaxGroupSize} tickets`
+                          : "Each person must purchase their own ticket"}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setLocalMaxGroupSize(localMaxGroupSize > 1 ? 1 : 5)}
+                      className={`h-6 w-11 rounded-full transition-all flex-shrink-0 ${
+                        localMaxGroupSize > 1
+                          ? "bg-primary"
+                          : "bg-card-background"
+                      }`}
+                    >
+                      <span
+                        className={`block h-5 w-5 rounded-full transition-all ${
+                          localMaxGroupSize > 1
+                            ? "translate-x-5 bg-primary-foreground"
+                            : "translate-x-0.5 bg-foreground"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Group size input - only shown when enabled */}
+                  {localMaxGroupSize > 1 && (
+                    <GroupSizeInput
+                      value={localMaxGroupSize}
+                      onChange={setLocalMaxGroupSize}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Registration Questions - Collapsible */}
+          <div className="border border-foreground/10 rounded-xl overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setQuestionsExpanded(!questionsExpanded)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-card-background/50 hover:bg-card-background transition-colors"
+            >
               <div className="flex items-center gap-2">
                 <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium text-foreground">
-                  Registration Questions ({localQuestions.length})
-                </span>
+                <span className="text-sm font-medium text-foreground">Registration Questions</span>
+                {localQuestions.length > 0 && (
+                  <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                    {localQuestions.length}
+                  </span>
+                )}
               </div>
-              <button
-                type="button"
-                onClick={handleAddQuestion}
-                className="flex items-center gap-1.5 rounded-lg bg-primary/20 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/30"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                Add Question
-              </button>
-            </div>
+              <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${questionsExpanded ? "rotate-90" : ""}`} />
+            </button>
 
-            {localQuestions.length > 0 ? (
-              <div className="space-y-2 max-h-48 overflow-y-auto">
+            {questionsExpanded && (
+              <div className="px-4 py-3 border-t border-foreground/10">
+                <div className="flex items-center justify-end mb-3">
+                  <button
+                    type="button"
+                    onClick={handleAddQuestion}
+                    className="flex items-center gap-1.5 rounded-lg bg-primary/20 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/30"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Add Question
+                  </button>
+                </div>
+
+                {localQuestions.length > 0 ? (
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
                 {localQuestions.map((question, index) => (
                   <div
                     key={index}
@@ -540,12 +687,14 @@ export default function TicketTypeModal({
                       </button>
                     </div>
                   </div>
-                ))}
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-6 px-4 bg-card-background rounded-lg">
+                    No questions added yet. Add questions to collect information from attendees.
+                  </p>
+                )}
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-6 px-4 bg-card-background rounded-lg">
-                No questions added yet. Add questions to collect information from attendees.
-              </p>
             )}
           </div>
         </div>

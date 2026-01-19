@@ -165,9 +165,13 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
                 notification.relatedUserId
               );
               toast.success("Follow request accepted");
-              // Remove the notification after action
+              // Update notification to show post-action state
               setNotifications((prev) =>
-                prev.filter((n) => n.id !== notification.id)
+                prev.map((n) =>
+                  n.id === notification.id
+                    ? { ...n, body: "You have accepted this request", availableActions: [], readAt: new Date().toISOString() }
+                    : n
+                )
               );
               setUnreadCount((prev) => Math.max(0, prev - 1));
             }
@@ -179,8 +183,13 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
                 notification.relatedUserId
               );
               toast.success("Follow request rejected");
+              // Update notification to show post-action state
               setNotifications((prev) =>
-                prev.filter((n) => n.id !== notification.id)
+                prev.map((n) =>
+                  n.id === notification.id
+                    ? { ...n, body: "You have rejected this request", availableActions: [], readAt: new Date().toISOString() }
+                    : n
+                )
               );
               setUnreadCount((prev) => Math.max(0, prev - 1));
             }
@@ -193,8 +202,13 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
                 notification.relatedCollaboratorId
               );
               toast.success("Collaborator invite accepted");
+              // Update notification to show post-action state
               setNotifications((prev) =>
-                prev.filter((n) => n.id !== notification.id)
+                prev.map((n) =>
+                  n.id === notification.id
+                    ? { ...n, body: "You have accepted this invite", availableActions: [], readAt: new Date().toISOString() }
+                    : n
+                )
               );
               setUnreadCount((prev) => Math.max(0, prev - 1));
             }
@@ -206,8 +220,13 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
                 notification.relatedCollaboratorId
               );
               toast.success("Collaborator invite rejected");
+              // Update notification to show post-action state
               setNotifications((prev) =>
-                prev.filter((n) => n.id !== notification.id)
+                prev.map((n) =>
+                  n.id === notification.id
+                    ? { ...n, body: "You have rejected this invite", availableActions: [], readAt: new Date().toISOString() }
+                    : n
+                )
               );
               setUnreadCount((prev) => Math.max(0, prev - 1));
             }

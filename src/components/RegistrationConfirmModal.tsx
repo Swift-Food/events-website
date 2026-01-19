@@ -8,6 +8,7 @@ import {
   Video,
   Loader2,
   Check,
+  Users,
 } from "lucide-react";
 import { EventResponseDto } from "@/types/event";
 import { EventTicketResponseDto, QuestionBlock } from "@/types/event-ticket/response/ticket.dto";
@@ -20,6 +21,7 @@ interface RegistrationConfirmModalProps {
   isRegistering: boolean;
   onClose: () => void;
   onConfirm: (questionAnswers: Record<string, any>) => void;
+  onSwitchToGroup?: () => void;
 }
 
 export default function RegistrationConfirmModal({
@@ -29,12 +31,14 @@ export default function RegistrationConfirmModal({
   isRegistering,
   onClose,
   onConfirm,
+  onSwitchToGroup,
 }: RegistrationConfirmModalProps) {
   const [acceptedTicketTerms, setAcceptedTicketTerms] = useState(false);
   const [step, setStep] = useState<'summary' | 'questions'>('summary');
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, any>>({});
 
   const hasQuestions = ticket?.questionForm && ticket.questionForm.length > 0;
+  const supportsGroupPurchase = (ticket?.maxGroupSize || 1) > 1 && onSwitchToGroup;
 
   const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -297,6 +301,17 @@ export default function RegistrationConfirmModal({
                   )}
                 </button>
               </div>
+
+              {/* Group Purchase Option */}
+              {supportsGroupPurchase && (
+                <button
+                  onClick={onSwitchToGroup}
+                  className="w-full mt-3 flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Users className="h-4 w-4" />
+                  <span>Buying for a group? Invite friends instead</span>
+                </button>
+              )}
           </div>
         ) : (
           /* Questions Panel */

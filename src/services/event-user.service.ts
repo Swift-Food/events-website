@@ -1,6 +1,7 @@
 // services/event-user.service.ts
 import apiClient from '@/lib/auth/apiClient';
 import { AxiosResponse } from 'axios';
+import { MutualFollowsResponse } from '@/types/group-purchase';
 
 export interface EventUserStats {
   eventsCreated: number;
@@ -177,6 +178,19 @@ class EventUserService {
   async getPayoutHistory(): Promise<PayoutHistoryItem[]> {
     const response: AxiosResponse<PayoutHistoryItem[]> = await apiClient.get(
       `${this.baseUrl}/me/withdrawals`
+    );
+    return response.data;
+  }
+
+  /**
+   * Get mutual follows (people who follow you and you follow back)
+   * Used for group ticket invite search
+   */
+  async getMutualFollows(search?: string): Promise<MutualFollowsResponse> {
+    const params = search ? { search } : {};
+    const response: AxiosResponse<MutualFollowsResponse> = await apiClient.get(
+      `${this.baseUrl}/me/mutual-follows`,
+      { params }
     );
     return response.data;
   }

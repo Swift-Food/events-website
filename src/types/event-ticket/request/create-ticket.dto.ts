@@ -31,4 +31,6 @@ export interface CreateEventTicketDto {
   autoApprovalGuestEmails?: string[];
   salesStartDate?: string;
   salesEndDate?: string;
+  /** Maximum group size for group ticket purchases */
+  maxGroupSize?: number;
 }

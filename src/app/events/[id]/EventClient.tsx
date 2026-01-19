@@ -53,6 +53,7 @@ import {
 import SmartAppBanner from "@/components/SmartAppBanner";
 import ExternalLinkConfirmModal from "@/components/ExternalLinkConfirmModal";
 import RegistrationConfirmModal from "@/components/RegistrationConfirmModal";
+import GroupPurchaseModal from "@/components/GroupPurchaseModal";
 import SaveToCalendarModal from "@/components/SaveToCalendarModal";
 import { usePathname } from "next/navigation";
 
@@ -82,6 +83,9 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
   // Registration confirmation modal state
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingTicketId, setPendingTicketId] = useState<string | null>(null);
+
+  // Group purchase modal state
+  const [showGroupPurchaseModal, setShowGroupPurchaseModal] = useState(false);
 
   // Calendar dropdown state
   const [showCalendarDropdown, setShowCalendarDropdown] = useState(false);
@@ -265,7 +269,23 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
 
     setPendingTicketId(ticketId);
     setSelectedTicketId(ticketId);
+    // Always show regular confirmation modal first - group option is secondary
     setShowConfirmModal(true);
+  };
+
+  // Switch from single ticket to group purchase flow
+  const handleSwitchToGroupPurchase = () => {
+    setShowConfirmModal(false);
+    setShowGroupPurchaseModal(true);
+  };
+
+  // Handler for when a group session is created
+  const handleGroupSessionCreated = (sessionId: string) => {
+    setShowGroupPurchaseModal(false);
+    setPendingTicketId(null);
+    toast.success("Group created! Your friends have been invited.");
+    // Redirect to a group session management page or my-tickets with a group filter
+    router.push(`/my-tickets?groupSession=${sessionId}`);
   };
 
   // Called when user confirms registration from the confirmation modal
@@ -1623,6 +1643,26 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
               setPendingTicketId(null);
             }}
             onConfirm={handleConfirmRegistration}
+            onSwitchToGroup={handleSwitchToGroupPurchase}
+          />
+        );
+      })()}
+
+      {/* Group Purchase Modal */}
+      {showGroupPurchaseModal && event && pendingTicketId && (() => {
+        const pendingTicket = event.eventTickets?.find(t => t.id === pendingTicketId);
+        if (!pendingTicket) return null;
+
+        return (
+          <GroupPurchaseModal
+            isOpen={showGroupPurchaseModal}
+            event={event}
+            ticket={pendingTicket}
+            onClose={() => {
+              setShowGroupPurchaseModal(false);
+              setPendingTicketId(null);
+            }}
+            onSessionCreated={handleGroupSessionCreated}
           />
         );
       })()}

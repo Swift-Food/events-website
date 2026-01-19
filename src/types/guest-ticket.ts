@@ -84,6 +84,19 @@ export interface GuestTicketResponseDto {
   refundedAt?: Date | null;
   /** Reason for refund */
   refundReason?: string | null;
+  // Group purchase fields
+  /** Group purchase ID - links all tickets bought in the same transaction */
+  groupPurchaseId?: string | null;
+  /** Guest's first name (for group purchases) */
+  guestFirstName?: string | null;
+  /** Guest's last name (for group purchases) */
+  guestLastName?: string | null;
+  /** Guest's email (for group purchases) */
+  guestEmail?: string | null;
+  /** Whether this is the primary ticket in a group purchase */
+  isPrimaryTicket?: boolean;
+  /** Reference to the buyer's ticket in a group purchase */
+  primaryTicketId?: string | null;
 }
 
 /**
@@ -169,6 +182,60 @@ export interface PendingTicketsResponseDto {
 export interface RegisterForTicketDto {
   eventTicketId: string;
   questionAnswers?: Record<string, any>;
+}
+
+// Group Registration Types
+
+/**
+ * Guest info for additional guests in a group purchase
+ */
+export interface GuestInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+/**
+ * Request DTO for registering a group of tickets
+ */
+export interface GroupRegisterForTicketDto {
+  eventTicketId: string;
+  quantity: number;
+  questionAnswers?: Record<string, any>;
+  additionalGuests: GuestInfo[];
+}
+
+/**
+ * Individual ticket in a group purchase response
+ */
+export interface GroupTicketDto {
+  id: string;
+  guestFirstName: string | null;
+  guestLastName: string | null;
+  guestEmail: string | null;
+  isPrimaryTicket: boolean;
+  status: GuestTicketStatus;
+  qrCode: string | null;
+  qrCodeImageUrl: string | null;
+  checkInCode: string | null;
+  checkInCodeFormatted: string | null;
+}
+
+/**
+ * Response when registering for multiple tickets in a group
+ */
+export interface GroupRegisterTicketResponseDto {
+  success: boolean;
+  message: string;
+  groupPurchaseId: string;
+  tickets: GroupTicketDto[];
+  totalQuantity: number;
+  requiresPayment: boolean;
+  totalAmount?: number;
+  currency?: string;
+  clientSecret?: string;
+  isWaitlisted?: boolean;
+  waitlistPosition?: number;
 }
 
 export interface UpdateTicketStatusDto {

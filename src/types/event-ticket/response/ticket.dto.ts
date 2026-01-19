@@ -30,6 +30,8 @@ export interface EventTicketResponseDto {
   // Status fields - always included for public display
   isSoldOut: boolean;
   isNearlySoldOut: boolean;
+  /** Maximum group size for group ticket purchases */
+  maxGroupSize?: number;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -22,6 +22,8 @@ import {
   LeaveWaitlistResponseDto,
   WaitlistResponseDto,
   WaitlistCountResponseDto,
+  GroupRegisterForTicketDto,
+  GroupRegisterTicketResponseDto,
 } from "@/types/guest-ticket";
 
 class GuestTicketService {
@@ -35,6 +37,19 @@ class GuestTicketService {
   ): Promise<RegisterTicketResponseDto> {
     const response: AxiosResponse<RegisterTicketResponseDto> =
       await apiClient.post(`${this.baseUrl}/register`, data);
+    return response.data;
+  }
+
+  /**
+   * Register for multiple tickets in a single group purchase.
+   * One buyer can purchase multiple tickets of the same type.
+   * Each ticket gets its own QR code and check-in code.
+   */
+  async registerGroupForTicket(
+    data: GroupRegisterForTicketDto
+  ): Promise<GroupRegisterTicketResponseDto> {
+    const response: AxiosResponse<GroupRegisterTicketResponseDto> =
+      await apiClient.post(`${this.baseUrl}/register-group`, data);
     return response.data;
   }
 

@@ -14,4 +14,6 @@ export interface TicketType {
   isSingleUse: boolean;
   quantity: number;
   questionForm?: FormField[];
+  /** Maximum group size for group ticket purchases */
+  maxGroupSize?: number;
 }

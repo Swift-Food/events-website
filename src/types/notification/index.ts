@@ -20,6 +20,14 @@ export enum EventNotificationType {
   // Payment & alerts
   PENDING_PAYMENT_REMINDER = 'pending_payment_reminder',
   WAITLIST_PRESSURE_ALERT = 'waitlist_pressure_alert',
+  // Group purchase notifications
+  GROUP_TICKET_INVITE = 'group_ticket_invite',
+  GROUP_INVITE_ACCEPTED = 'group_invite_accepted',
+  GROUP_INVITE_DECLINED = 'group_invite_declined',
+  GROUP_KICKED = 'group_kicked',
+  GROUP_DISSOLVED = 'group_dissolved',
+  GROUP_EXPIRED = 'group_expired',
+  GROUP_PURCHASE_COMPLETE = 'group_purchase_complete',
 }
 
 export enum NotificationActionType {
@@ -34,6 +42,10 @@ export enum NotificationActionType {
   ACCEPT_COLLAB = 'accept_collab',
   REJECT_COLLAB = 'reject_collab',
   COMPLETE_PAYMENT = 'complete_payment',
+  // Group purchase actions
+  ACCEPT_GROUP_INVITE = 'accept_group_invite',
+  DECLINE_GROUP_INVITE = 'decline_group_invite',
+  VIEW_GROUP = 'view_group',
 }
 
 // Related user data for display
@@ -63,6 +75,7 @@ export interface EventNotificationResponse {
   relatedUserId: string | null;
   relatedTicketId: string | null;
   relatedCollaboratorId: string | null;
+  relatedGroupSessionId: string | null;
   relatedUser?: RelatedUser;
   relatedEvent?: RelatedEvent;
   readAt: string | null;
