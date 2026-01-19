@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import {
   User,
@@ -19,8 +19,7 @@ import { useSearchModal } from "@/components/search/SearchModalContext";
 import { NotificationDropdown } from "@/components/notifications";
 
 const navLinks = [
-  // { href: "/", label: "Home" },
-  { href: "/", label: "Discover" },
+  { href: "/discover", label: "Discover" },
   { href: "/my-tickets", label: "Tickets", requiresAuth: true },
   { href: "/event-management", label: "Manage", requiresAuth: true },
 ];
@@ -31,6 +30,8 @@ export default function Navbar() {
   const { openSearchModal } = useSearchModal();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const isLandingPage = pathname === "/";
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -86,7 +87,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 backdrop-blur-sm border-b border-zinc-700">
+      <header className={`sticky top-0 z-50 backdrop-blur-sm ${isLandingPage ? "" : "border-b border-zinc-700"}`}>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <Link

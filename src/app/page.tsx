@@ -1,163 +1,196 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { calendarsApi } from "@/services/calendars";
-import { categoriesApi } from "@/services/categories";
-import { Calendar as CalendarType } from "@/types/calendar";
-import { EventCategoryResponseDto } from "@/types/category";
-import { ChevronRight as ArrowRight, icons, LucideProps } from "lucide-react";
-import SquareCalendarCard from "@/components/SquareCalendarCard";
-import UpcomingEventsSection from "@/components/UpcomingEventsSection";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { Ticket, Eye, BarChart3 } from "lucide-react";
 
-// Dynamic icon component for Lucide icons
-const DynamicIcon = ({ name, ...props }: { name: string } & LucideProps) => {
-  const IconComponent = icons[name as keyof typeof icons];
-
-  if (!IconComponent) {
-    // Fallback to a default icon if not found
-    const FallbackIcon = icons.Circle;
-    return <FallbackIcon {...props} />;
-  }
-
-  return <IconComponent {...props} />;
+// Animated word component with letter-by-letter reveal
+const AnimatedWord: React.FC<{ text: string; delayOffset: number }> = ({
+  text,
+  delayOffset,
+}) => {
+  return (
+    <span className="inline-block whitespace-nowrap">
+      {text.split("").map((char, i) => (
+        <span
+          key={i}
+          className="inline-block transition-all cursor-default text-white"
+          style={{
+            opacity: 0,
+            animationName: "reveal-up, letter-jump",
+            animationDuration: "1s, 0.8s",
+            animationIterationCount: "1, 1",
+            animationFillMode: "forwards, none",
+            animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1), ease-in-out",
+            animationDelay: `${delayOffset + i * 60}ms, ${1000 + delayOffset + i * 60}ms`,
+          }}
+          onMouseEnter={(e) => {
+            const target = e.currentTarget;
+            target.style.animation = "none";
+            void target.offsetWidth;
+            target.style.animation = "letter-jump 0.8s ease-in-out forwards";
+            target.style.opacity = "1";
+            target.style.color = "#cc4004";
+          }}
+          onAnimationEnd={(e) => {
+            if (e.animationName === "letter-jump") {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.color = "white";
+            }
+          }}
+        >
+          {char === " " ? "\u00A0" : char}
+        </span>
+      ))}
+    </span>
+  );
 };
 
-export default function DiscoveryPage() {
-  // Calendars state
-  const [calendars, setCalendars] = useState<CalendarType[]>([]);
-  const [loadingCalendars, setLoadingCalendars] = useState(true);
+// Feature data
+const features = [
+  {
+    id: "1",
+    title: "Seamless Ticketing",
+    description:
+      "Instant issuance and verification protocols for physical and digital entry points. Zero latency.",
+    icon: Ticket,
+  },
+  {
+    id: "2",
+    title: "Immersive Spaces",
+    description:
+      "Architectural tools to build atmospheric digital twin environments for your attendees.",
+    icon: Eye,
+  },
+  {
+    id: "3",
+    title: "Community Analytics",
+    description:
+      "Deep learning insights into audience engagement, retention, and growth vectors.",
+    icon: BarChart3,
+  },
+];
 
-  // Categories
-  const [allCategories, setAllCategories] = useState<EventCategoryResponseDto[]>([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
+export default function LandingPage() {
+  const [mounted, setMounted] = useState(false);
 
-  // Fetch all categories
-  const fetchAllCategories = async () => {
-    try {
-      setLoadingCategories(true);
-      const categories = await categoriesApi.findAll();
-      setAllCategories(categories);
-      console.log("Categories: ", categories)
-    } catch (err) {
-      console.error("Failed to fetch categories:", err);
-    } finally {
-      setLoadingCategories(false);
-    }
-  };
-
-  // Fetch calendars
-  const fetchCalendars = async () => {
-    try {
-      setLoadingCalendars(true);
-      const result = await calendarsApi.findAll({
-        isPublic: true,
-        take: 10,
-      });
-      setCalendars(result.calendars ?? []);
-    } catch (err) {
-      console.error("Failed to fetch calendars:", err);
-    } finally {
-      setLoadingCalendars(false);
-    }
-  };
-
-  const getCategoryLabel = (categoryName: string) => {
-    return categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
-  };
-
-  // Fetch calendars and categories on mount
   useEffect(() => {
-    fetchCalendars();
-    fetchAllCategories();
+    setMounted(true);
   }, []);
 
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-            Discover Events
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Animated gradient background */}
+      <div className="shader-gradient" />
+      <div className="noise-overlay" />
+      <div className="scanline" />
+
+      {/* Grid overlay */}
+      <div className="fixed inset-0 bg-grid-landing pointer-events-none z-0" />
+
+      {/* Hero Section */}
+      <main className="relative flex flex-col items-center justify-start md:justify-center flex-grow py-12 md:py-0 px-6 z-10 overflow-hidden min-h-[calc(100vh-80px)]">
+        {/* Main Content Wrapper */}
+        <div className="w-full max-w-5xl flex flex-col items-center text-center gap-8 md:gap-14 mt-16 md:mt-24 md:translate-y-6">
+          <h1
+            className="text-glow text-5xl md:text-7xl lg:text-[7.5rem] font-black leading-[1.6] md:leading-[1.1] tracking-tighter text-white uppercase max-w-5xl select-none"
+            style={{ fontFamily: "var(--font-satoshi), sans-serif" }}
+          >
+            <AnimatedWord text="Plan it." delayOffset={100} />
+            <br />
+            <AnimatedWord text="Launch it." delayOffset={400} />
+            <br />
+            <AnimatedWord text="Host it." delayOffset={700} />
           </h1>
-          <p className="mt-2 text-md text-muted-foreground">
-            Find and join exciting events happening around you
+
+          <p
+            className="animate-reveal max-w-3xl text-base md:text-xl font-bold text-white leading-relaxed px-4 text-glow opacity-0"
+            style={{ animationDelay: "1200ms" }}
+          >
+            From discovering and creating events to selling tickets and handling
+            catering, Prismo runs the entire event lifecycle.
           </p>
+
+          <div
+            className="animate-reveal pt-6 flex flex-col items-center gap-6 opacity-0"
+            style={{ animationDelay: "1400ms" }}
+          >
+            <Link
+              href="/discover"
+              className="group relative flex items-center justify-center gap-4 h-16 md:h-20 px-12 md:px-20 rounded-full border-2 border-white bg-white/10 backdrop-blur-md text-white overflow-hidden transition-all duration-500 hover:border-white hover:bg-white hover:text-black hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_50px_rgba(255,255,255,0.4)]"
+            >
+              <span className="relative z-10 text-lg md:text-xl font-black tracking-[0.2em] transition-colors uppercase">
+                Discover Now
+              </span>
+            </Link>
+            <div className="text-[11px] text-white/70 font-mono font-bold tracking-[0.5em] uppercase animate-pulse">
+              System Online
+            </div>
+          </div>
         </div>
 
-        {/* Event Categories Section */}
-        {!loadingCategories && allCategories.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-foreground mb-4">
-              Browse by Category
-            </h2>
+        {/* Partners section at bottom */}
+        <div
+          className="animate-reveal mt-auto md:mt-32 mb-8 w-full max-w-screen-lg border-t border-white/30 pt-10 opacity-0"
+          style={{ animationDelay: "1600ms" }}
+        >
+          <p className="text-center text-[11px] font-mono text-white/70 mb-8 uppercase tracking-[0.5em] font-bold">
+            Global Network Partners
+          </p>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-20 opacity-80 hover:opacity-100 transition-all duration-700">
+            {["VELOCITY", "NEXUS", "ORBITAL", "PULSE", "QUANTUM"].map(
+              (partner) => (
+                <span
+                  key={partner}
+                  className="text-sm md:text-2xl font-black text-white tracking-tighter hover:scale-110 transition-all cursor-default text-glow"
+                  style={{ fontFamily: "var(--font-satoshi), sans-serif" }}
+                >
+                  {partner}
+                </span>
+              )
+            )}
+          </div>
+        </div>
+      </main>
 
-            <div className="overflow-x-auto pb-4 -mx-4 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              <div className="flex gap-2 sm:gap-3">
-                {allCategories.slice(0, 12).map((category) => (
-                  <Link
-                    key={category.id}
-                    href={`/events?category=${category.name}`}
-                    className="flex flex-col items-center gap-1.5 sm:gap-2 cursor-pointer group w-14 sm:w-18 flex-shrink-0"
+      {/* Features Section */}
+      <section className="relative z-10 w-full py-32 bg-[#050505] border-t border-white/5">
+        <div className="max-w-[1440px] mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => {
+              const IconComponent = feature.icon;
+              return (
+                <div
+                  key={feature.id}
+                  className="animate-reveal landing-feature-card group relative p-10 rounded-xl border border-white/10 bg-[#131315] hover:border-purple-500/50 transition-all duration-500"
+                  style={{ animationDelay: `${(index + 3) * 150}ms` }}
+                >
+                  {/* Animated corner glow */}
+                  <div className="absolute -top-10 -right-10 w-24 h-24 bg-purple-500/10 blur-3xl group-hover:bg-purple-500/20 transition-colors" />
+
+                  <div className="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center mb-8 group-hover:bg-purple-500/20 group-hover:scale-110 transition-all duration-500">
+                    <IconComponent className="w-7 h-7 text-white group-hover:text-purple-500 transition-colors" />
+                  </div>
+
+                  <h3
+                    className="text-2xl font-bold text-white mb-4 group-hover:text-purple-500 transition-colors"
+                    style={{ fontFamily: "var(--font-satoshi), sans-serif" }}
                   >
-                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                      {category.iconName ? (
-                        <DynamicIcon
-                          name={category.iconName}
-                          className="w-4 h-4 sm:w-6 sm:h-6 text-primary"
-                        />
-                      ) : (
-                        <DynamicIcon
-                          name="circle"
-                          className="w-4 h-4 sm:w-6 sm:h-6 text-primary"
-                        />
-                      )}
-                    </div>
-                    <span className="text-[10px] sm:text-xs font-medium text-foreground text-center line-clamp-2">
-                      {getCategoryLabel(category.name)}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Upcoming Events Section */}
-        <UpcomingEventsSection />
-
-        {/* Calendars Section */}
-        {!loadingCalendars && calendars.length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">
-                Browse Calendars
-              </h2>
-              <Link
-                href="/calendars"
-                className="flex items-center gap-1 text-sm text-primary hover:underline"
-              >
-                View All
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            {/* Mobile: horizontal scroll */}
-            <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              {calendars.slice(0, 6).map((calendar) => (
-                <div key={calendar.id} className="flex-shrink-0">
-                  <SquareCalendarCard calendar={calendar} size={200} />
+                    {feature.title}
+                  </h3>
+                  <p className="text-base text-gray-400 leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
-              ))}
-            </div>
-            {/* Desktop: responsive grid */}
-            <div className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {calendars.slice(0, 6).map((calendar) => (
-                <SquareCalendarCard key={calendar.id} calendar={calendar} />
-              ))}
-            </div>
+              );
+            })}
           </div>
-        )}
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
