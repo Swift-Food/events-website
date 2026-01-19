@@ -213,73 +213,73 @@ export default function LandingPage() {
       </main>
 
       {/* Features Section */}
-      <FeaturesSection />
+      {/* <FeaturesSection /> */}
     </div>
   );
 }
 
 // Separate component for features section with scroll reveal
-function FeaturesSection() {
-  const { ref, isVisible } = useScrollReveal(0.15);
+// function FeaturesSection() {
+//   const { ref, isVisible } = useScrollReveal(0.15);
 
-  return (
-    <section className="relative z-10 w-full py-32 bg-[#050505] border-t border-white/5">
-      <div className="max-w-[1440px] mx-auto px-6">
-        <div ref={ref} className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {features.map((feature, index) => {
-            const IconComponent = feature.icon;
-            return (
-              <div
-                key={feature.id}
-                className={`landing-feature-card group relative p-10 rounded-xl border border-white/10 bg-[#131315] hover:border-purple-500/50 transition-all duration-700 ${
-                  isVisible
-                    ? "opacity-100 translate-y-0 blur-0"
-                    : "opacity-0 translate-y-12 blur-sm"
-                }`}
-                style={{
-                  transitionDelay: isVisible ? `${index * 150}ms` : "0ms",
-                }}
-              >
-                {/* Animated corner glow */}
-                <div className="absolute -top-10 -right-10 w-24 h-24 bg-purple-500/10 blur-3xl group-hover:bg-purple-500/20 transition-colors" />
+//   return (
+//     <section className="relative z-10 w-full py-32 bg-[#050505] border-t border-white/5">
+//       <div className="max-w-[1440px] mx-auto px-6">
+//         <div ref={ref} className="grid grid-cols-1 md:grid-cols-3 gap-8">
+//           {features.map((feature, index) => {
+//             const IconComponent = feature.icon;
+//             return (
+//               <div
+//                 key={feature.id}
+//                 className={`landing-feature-card group relative p-10 rounded-xl border border-white/10 bg-[#131315] hover:border-purple-500/50 transition-all duration-700 ${
+//                   isVisible
+//                     ? "opacity-100 translate-y-0 blur-0"
+//                     : "opacity-0 translate-y-12 blur-sm"
+//                 }`}
+//                 style={{
+//                   transitionDelay: isVisible ? `${index * 150}ms` : "0ms",
+//                 }}
+//               >
+//                 {/* Animated corner glow */}
+//                 <div className="absolute -top-10 -right-10 w-24 h-24 bg-purple-500/10 blur-3xl group-hover:bg-purple-500/20 transition-colors" />
 
-                <div
-                  className={`w-14 h-14 rounded-full bg-white/5 flex items-center justify-center mb-8 group-hover:bg-purple-500/20 group-hover:scale-110 transition-all duration-500 ${
-                    isVisible ? "scale-100 rotate-0" : "scale-75 -rotate-12"
-                  }`}
-                  style={{
-                    transitionDelay: isVisible ? `${index * 150 + 100}ms` : "0ms",
-                  }}
-                >
-                  <IconComponent className="w-7 h-7 text-white group-hover:text-purple-500 transition-colors" />
-                </div>
+//                 <div
+//                   className={`w-14 h-14 rounded-full bg-white/5 flex items-center justify-center mb-8 group-hover:bg-purple-500/20 group-hover:scale-110 transition-all duration-500 ${
+//                     isVisible ? "scale-100 rotate-0" : "scale-75 -rotate-12"
+//                   }`}
+//                   style={{
+//                     transitionDelay: isVisible ? `${index * 150 + 100}ms` : "0ms",
+//                   }}
+//                 >
+//                   <IconComponent className="w-7 h-7 text-white group-hover:text-purple-500 transition-colors" />
+//                 </div>
 
-                <h3
-                  className={`text-2xl font-bold text-white mb-4 group-hover:text-purple-500 transition-all duration-500 ${
-                    isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
-                  }`}
-                  style={{
-                    fontFamily: "var(--font-satoshi), sans-serif",
-                    transitionDelay: isVisible ? `${index * 150 + 200}ms` : "0ms",
-                  }}
-                >
-                  {feature.title}
-                </h3>
-                <p
-                  className={`text-base text-gray-400 leading-relaxed transition-all duration-500 ${
-                    isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
-                  }`}
-                  style={{
-                    transitionDelay: isVisible ? `${index * 150 + 300}ms` : "0ms",
-                  }}
-                >
-                  {feature.description}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
+//                 <h3
+//                   className={`text-2xl font-bold text-white mb-4 group-hover:text-purple-500 transition-all duration-500 ${
+//                     isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
+//                   }`}
+//                   style={{
+//                     fontFamily: "var(--font-satoshi), sans-serif",
+//                     transitionDelay: isVisible ? `${index * 150 + 200}ms` : "0ms",
+//                   }}
+//                 >
+//                   {feature.title}
+//                 </h3>
+//                 <p
+//                   className={`text-base text-gray-400 leading-relaxed transition-all duration-500 ${
+//                     isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
+//                   }`}
+//                   style={{
+//                     transitionDelay: isVisible ? `${index * 150 + 300}ms` : "0ms",
+//                   }}
+//                 >
+//                   {feature.description}
+//                 </p>
+//               </div>
+//             );
+//           })}
+//         </div>
+//       </div>
+//     </section>
+//   );
+// }
