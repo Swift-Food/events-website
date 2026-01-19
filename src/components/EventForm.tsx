@@ -1771,7 +1771,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           {/* Organiser Terms Checkbox - Only shown in create mode */}
           {mode === "create" && (
             <div ref={organizerTermsRef} className={`rounded-xl backdrop-blur-xl p-4 md:p-5 ${validationErrors.organizerTerms ? "bg-red-500/10 border border-red-500/30" : "bg-card-background"}`}>
-              <label className="flex items-start gap-3 cursor-pointer">
+              <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={acceptedOrganizerTerms}
@@ -1781,7 +1781,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                       setValidationErrors(prev => ({ ...prev, organizerTerms: undefined }));
                     }
                   }}
-                  className={`mt-1 h-5 w-5 rounded bg-card-secondary-background text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer ${validationErrors.organizerTerms ? "border-red-400" : "border-foreground/20"}`}
+                  className={`h-5 w-5 rounded bg-card-secondary-background text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer flex-shrink-0 ${validationErrors.organizerTerms ? "border-red-400" : "border-foreground/20"}`}
                 />
                 <span className={`text-sm ${validationErrors.organizerTerms ? "text-red-400" : "text-muted-foreground"}`}>
                   I agree to the{" "}
