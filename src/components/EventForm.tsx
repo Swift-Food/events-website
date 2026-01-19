@@ -1055,26 +1055,30 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               </div>
             </div>
             {mode === "create" && (
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setIsImportModalOpen(true)}
-                  className="rounded-full p-2.5 text-muted-foreground transition-colors hover:bg-card-background hover:text-foreground"
-                  title="Import event"
-                >
-                  <Download className="h-5 w-5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleClearForm}
-                  className="rounded-full p-2.5 text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-400"
-                  title="Clear form"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleClearForm}
+                className="rounded-full p-2.5 text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-400"
+                title="Clear form"
+              >
+                <Trash2 className="h-5 w-5" />
+              </button>
             )}
           </div>
+
+          {/* Import Event Section - Only shown in create mode */}
+          {mode === "create" && (
+            <button
+              type="button"
+              onClick={() => setIsImportModalOpen(true)}
+              className="flex w-full items-center gap-3 rounded-xl border border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 px-4 py-3 transition-all"
+            >
+              <Download className="h-4 w-4 text-primary" />
+              <span className="text-sm text-muted-foreground">
+                Have an event on Eventbrite, Meetup, Luma, or elsewhere? <span className="text-primary font-medium">Import it</span>
+              </span>
+            </button>
+          )}
 
           <div className="rounded-xl backdrop-blur-xl pl-4 py-4">
             <div className="flex gap-5">
