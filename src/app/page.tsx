@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Ticket, Eye, BarChart3 } from "lucide-react";
+import { ShaderGradient, ShaderGradientCanvas } from "@shadergradient/react";
 
 // Animated word component with letter-by-letter reveal
 const AnimatedWord: React.FC<{ text: string; delayOffset: number }> = ({
@@ -85,8 +86,39 @@ export default function LandingPage() {
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Animated gradient background */}
-      <div className="shader-gradient" />
-      {/* <div className="noise-overlay" /> */}
+      <div className="fixed inset-0 z-[-1]">
+        <ShaderGradientCanvas>
+          <ShaderGradient
+            animate="on"
+            brightness={1.2}
+            cAzimuthAngle={180}
+            cDistance={2.9}
+            cPolarAngle={120}
+            cameraZoom={1}
+            color1="#ebedff"
+            color2="#f3f2f8"
+            color3="#dbf8ff"
+            envPreset="city"
+            grain="off"
+            lightType="3d"
+            positionX={0}
+            positionY={1.8}
+            positionZ={0}
+            reflection={0.1}
+            rotationX={0}
+            rotationY={0}
+            rotationZ={-90}
+            type="waterPlane"
+            uAmplitude={0}
+            uDensity={1}
+            uFrequency={5.5}
+            uSpeed={0.3}
+            uStrength={3}
+            uTime={0.2}
+            wireframe={false}
+          />
+        </ShaderGradientCanvas>
+      </div>
       <div className="scanline" />
 
       {/* Grid overlay */}
