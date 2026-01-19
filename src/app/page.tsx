@@ -93,9 +93,9 @@ export default function LandingPage() {
       <div className="fixed inset-0 bg-grid-landing pointer-events-none z-0" />
 
       {/* Hero Section */}
-      <main className="relative flex flex-col items-center justify-start md:justify-center flex-grow py-12 md:py-0 px-6 z-10 overflow-hidden min-h-[calc(100vh-80px)]">
+      <main className="relative flex flex-col items-center justify-center h-[calc(100vh-72px)] px-6 z-10 overflow-hidden">
         {/* Main Content Wrapper */}
-        <div className="w-full max-w-5xl flex flex-col items-center text-center gap-8 md:gap-14 mt-8 md:mt-12 md:translate-y-6">
+        <div className="w-full max-w-5xl flex flex-col items-center text-center gap-8 md:gap-10">
           <h1
             className="text-glow text-4xl md:text-6xl lg:text-[6rem] font-black leading-[1.6] md:leading-[1.1] tracking-tighter text-white uppercase max-w-5xl select-none"
             style={{ fontFamily: "var(--font-satoshi), sans-serif" }}
