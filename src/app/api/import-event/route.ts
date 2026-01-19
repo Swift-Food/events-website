@@ -95,6 +95,34 @@ function extractMetaTags(html: string): Partial<JsonLdEvent> {
   return result;
 }
 
+// Common placeholder texts that platforms use to hide real addresses
+const PLACEHOLDER_ADDRESS_PATTERNS = [
+  /register to see address/i,
+  /rsvp to see address/i,
+  /sign up to see/i,
+  /address revealed/i,
+  /to be announced/i,
+  /tba/i,
+  /tbd/i,
+];
+
+function isPlaceholderAddress(address: string): boolean {
+  return PLACEHOLDER_ADDRESS_PATTERNS.some(pattern => pattern.test(address.trim()));
+}
+
+// Try to extract city from location name like "London, England" or "New York, NY"
+function extractCityFromLocationName(name: string): string | undefined {
+  if (!name) return undefined;
+
+  // Common patterns: "City, Country/State" or just "City"
+  const parts = name.split(",").map(p => p.trim());
+  if (parts.length >= 1 && parts[0]) {
+    // Return first part as city (e.g., "London" from "London, England")
+    return parts[0];
+  }
+  return undefined;
+}
+
 function normalizeEventData(jsonLd: JsonLdEvent, metaTags: Partial<JsonLdEvent>, originalUrl: string) {
   // Get image URL from various formats
   let imageUrl: string | undefined;
@@ -125,12 +153,21 @@ function normalizeEventData(jsonLd: JsonLdEvent, metaTags: Partial<JsonLdEvent>,
 
     if (loc.address) {
       if (typeof loc.address === "string") {
-        locationData.address = loc.address;
+        // Skip placeholder addresses like "Register to See Address"
+        if (!isPlaceholderAddress(loc.address)) {
+          locationData.address = loc.address;
+        }
       } else {
         locationData.address = loc.address.streetAddress;
         locationData.city = loc.address.addressLocality;
         locationData.postalCode = loc.address.postalCode;
       }
+    }
+
+    // If we don't have a city from the structured address, try to extract from location.name
+    // e.g., "London, England" -> city: "London"
+    if (!locationData.city && loc.name) {
+      locationData.city = extractCityFromLocationName(loc.name);
     }
 
     // Extract geo coordinates - check both loc.geo and direct loc.latitude/longitude

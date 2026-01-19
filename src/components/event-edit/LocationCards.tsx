@@ -22,8 +22,10 @@ interface VenueCardProps {
   venueName: string;
   addressLine1: string;
   addressLine2?: string;
-  city: string;
-  postcode: string;
+  city?: string;
+  postcode?: string;
+  latitude?: number | null;
+  longitude?: number | null;
   hideFullAddress: boolean;
   onToggleHideAddress: () => void;
   onEdit: () => void;
@@ -36,6 +38,8 @@ export function VenueCard({
   addressLine2,
   city,
   postcode,
+  latitude,
+  longitude,
   hideFullAddress,
   onToggleHideAddress,
   onEdit,
@@ -44,7 +48,9 @@ export function VenueCard({
   // Build address summary
   const addressParts = [addressLine1, addressLine2, city, postcode].filter(Boolean);
   const addressSummary = addressParts.join(", ");
-  const displayName = venueName || addressLine1;
+  const displayName = venueName || addressLine1 || city;
+  const hasCoordinates = latitude !== null && latitude !== undefined && longitude !== null && longitude !== undefined;
+  const isPartialAddress = !city || !postcode;
 
   return (
     <div className="rounded-xl bg-card-background/60 backdrop-blur-xl border border-white/10 overflow-hidden">
@@ -59,14 +65,19 @@ export function VenueCard({
               <p className="text-sm font-semibold text-foreground">
                 {displayName}
               </p>
-              {venueName && addressLine1 !== venueName && (
+              {venueName && addressLine1 && addressLine1 !== venueName && (
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {addressSummary}
                 </p>
               )}
-              {!venueName && (
+              {!venueName && addressSummary && (
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {[city, postcode].filter(Boolean).join(", ")}
+                  {addressSummary}
+                </p>
+              )}
+              {isPartialAddress && hasCoordinates && (
+                <p className="text-xs text-amber-400 mt-1">
+                  Partial address imported - tap edit to complete
                 </p>
               )}
             </div>

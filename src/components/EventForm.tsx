@@ -1324,8 +1324,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               </div>
             )}
 
-            {/* Venue Card */}
-            {addressLine1 && city && postcode && (
+            {/* Venue Card - show if we have addressLine1 OR (venueName/city with coordinates) */}
+            {(addressLine1 || (venueName && latitude !== null) || (city && latitude !== null)) && (
               <div className="relative">
                 <VenueCard
                   venueName={venueName}
@@ -1333,6 +1333,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   addressLine2={addressLine2}
                   city={city}
                   postcode={postcode}
+                  latitude={latitude}
+                  longitude={longitude}
                   hideFullAddress={hideFullAddress}
                   onToggleHideAddress={() => setHideFullAddress(!hideFullAddress)}
                   onEdit={() => {
@@ -1364,16 +1366,15 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               </div>
             )}
 
-            {/* Google Map - shown when venue is set */}
-            {addressLine1 && city && postcode &&
-              latitude !== null && longitude !== null && !isLocationModalOpen && (
-                <GoogleMap
-                  latitude={latitude}
-                  longitude={longitude}
-                  title={venueName || addressLine1}
-                  className="h-48 w-full rounded-xl"
-                />
-              )}
+            {/* Google Map - shown when we have coordinates */}
+            {latitude !== null && longitude !== null && !isLocationModalOpen && (
+              <GoogleMap
+                latitude={latitude}
+                longitude={longitude}
+                title={venueName || addressLine1 || city || "Event Location"}
+                className="h-48 w-full rounded-xl"
+              />
+            )}
           </div>
 
           <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 md:p-5 space-y-5">
