@@ -38,3 +38,6 @@ export * from './notification';
 
 // Search types
 export * from './search';
+
+// Highlight types
+export * from './highlight';

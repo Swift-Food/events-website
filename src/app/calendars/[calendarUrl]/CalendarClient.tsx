@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { calendarService } from "@/services/calendar.service";
+import { highlightService } from "@/services/highlight.service";
 import { useAuth } from "@/lib/auth/authContext";
 import { Calendar, CalendarRole, CalendarEventsFilter } from "@/types/calendar";
 import { EventResponseDto } from "@/types/event";
+import { HighlightResponseDto } from "@/types/highlight";
 import {
   Calendar as CalendarIcon,
   MapPin,
@@ -28,6 +30,7 @@ import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
 import AddEventsToCalendarModal from "@/components/AddEventsToCalendarModal";
+import { HighlightsBar, AddHighlightModal } from "@/components/highlights";
 
 interface CalendarClientProps {
   initialCalendar: Calendar;
@@ -56,6 +59,11 @@ export default function CalendarClient({
 
   // Add events modal state
   const [showAddEventsModal, setShowAddEventsModal] = useState(false);
+
+  // Highlights state
+  const [highlights, setHighlights] = useState<HighlightResponseDto[]>([]);
+  const [loadingHighlights, setLoadingHighlights] = useState(true);
+  const [showAddHighlightModal, setShowAddHighlightModal] = useState(false);
 
   // Re-fetch calendar data when user is authenticated
   useEffect(() => {
@@ -111,6 +119,44 @@ export default function CalendarClient({
 
     checkSubscription();
   }, [isAuthenticated, authLoading, calendar.id]);
+
+  // Fetch highlights for the calendar
+  useEffect(() => {
+    const fetchHighlights = async () => {
+      if (!calendar.ownerEventUserId) return;
+
+      try {
+        setLoadingHighlights(true);
+        const response = await highlightService.getUserHighlights(
+          calendar.ownerEventUserId,
+          { calendarId: calendar.id }
+        );
+        setHighlights(response.highlights);
+      } catch (err) {
+        console.error("Failed to fetch highlights:", err);
+        // Silent fail - highlights are not critical
+      } finally {
+        setLoadingHighlights(false);
+      }
+    };
+
+    fetchHighlights();
+  }, [calendar.id, calendar.ownerEventUserId]);
+
+  // Refresh highlights
+  const refreshHighlights = async () => {
+    if (!calendar.ownerEventUserId) return;
+
+    try {
+      const response = await highlightService.getUserHighlights(
+        calendar.ownerEventUserId,
+        { calendarId: calendar.id }
+      );
+      setHighlights(response.highlights);
+    } catch (err) {
+      console.error("Failed to refresh highlights:", err);
+    }
+  };
 
   // Check if user is owner or collaborator and determine role
   useEffect(() => {
@@ -313,6 +359,17 @@ export default function CalendarClient({
           <ArrowLeft className="h-5 w-5" />
           Back to Calendars
         </button>
+
+        {/* Highlights Bar */}
+        {(highlights.length > 0 || canManage) && !loadingHighlights && (
+          <div className="mb-6">
+            <HighlightsBar
+              highlights={highlights}
+              showAddButton={canManage}
+              onAddClick={() => setShowAddHighlightModal(true)}
+            />
+          </div>
+        )}
 
         {/* Main Content */}
         <div className="flex flex-col gap-6 lg:flex-row-reverse">
@@ -604,6 +661,14 @@ export default function CalendarClient({
           onEventsAdded={refreshEvents}
         />
       )}
+
+      {/* Add Highlight Modal */}
+      <AddHighlightModal
+        isOpen={showAddHighlightModal}
+        onClose={() => setShowAddHighlightModal(false)}
+        onSuccess={refreshHighlights}
+        calendarId={calendar.id}
+      />
     </div>
   );
 }
