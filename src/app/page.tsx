@@ -121,9 +121,9 @@ export default function LandingPage() {
             cDistance={2.9}
             cPolarAngle={120}
             cameraZoom={1}
-            color1="#ebedff"
-            color2="#f3f2f8"
-            color3="#dbf8ff"
+            color1="#b8e7f5"
+            color2="#d9ccff"
+            color3="#faf9f6"
             envPreset="city"
             grain="off"
             lightType="3d"
@@ -138,7 +138,7 @@ export default function LandingPage() {
             uAmplitude={0}
             uDensity={1}
             uFrequency={5.5}
-            uSpeed={0.3}
+            uSpeed={0.1}
             uStrength={3}
             uTime={0.2}
             wireframe={false}
