@@ -4,17 +4,26 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { calendarService } from "@/services/calendar.service";
 import { imageService } from "@/services/image.service";
+import { highlightService } from "@/services/highlight.service";
 import { useAuth } from "@/lib/auth/authContext";
 import { Calendar, CalendarType, CalendarRole } from "@/types/calendar";
+import { HighlightResponseDto } from "@/types/highlight";
 import {
   ArrowLeft,
   Upload,
   Loader2,
   Image as ImageIcon,
   X,
+  Trash2,
+  Edit3,
+  Clock,
+  Sparkles,
+  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
+import { AddHighlightModal, HighlightViewer } from "@/components/highlights";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 export default function EditCalendarPage() {
   const router = useRouter();
@@ -38,6 +47,18 @@ export default function EditCalendarPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
+
+  // Highlights state
+  const [highlights, setHighlights] = useState<HighlightResponseDto[]>([]);
+  const [loadingHighlights, setLoadingHighlights] = useState(false);
+  const [showAddHighlightModal, setShowAddHighlightModal] = useState(false);
+  const [showHighlightViewer, setShowHighlightViewer] = useState(false);
+  const [selectedHighlightIndex, setSelectedHighlightIndex] = useState(0);
+  const [highlightToDelete, setHighlightToDelete] = useState<HighlightResponseDto | null>(null);
+  const [deletingHighlight, setDeletingHighlight] = useState(false);
+  const [editingCaption, setEditingCaption] = useState<string | null>(null);
+  const [captionValue, setCaptionValue] = useState("");
+  const [savingCaption, setSavingCaption] = useState(false);
 
   // Preset colors
   const presetColors = [
@@ -98,6 +119,100 @@ export default function EditCalendarPage() {
 
     fetchCalendar();
   }, [isAuthenticated, authLoading, calendarUrl, user, router]);
+
+  // Fetch highlights when calendar is loaded
+  useEffect(() => {
+    const fetchHighlights = async () => {
+      if (!calendar?.ownerEventUserId) return;
+
+      try {
+        setLoadingHighlights(true);
+        const response = await highlightService.getUserHighlights(
+          calendar.ownerEventUserId,
+          { calendarId: calendar.id }
+        );
+        setHighlights(response.highlights);
+      } catch (err) {
+        console.error("Failed to fetch highlights:", err);
+      } finally {
+        setLoadingHighlights(false);
+      }
+    };
+
+    fetchHighlights();
+  }, [calendar?.id, calendar?.ownerEventUserId]);
+
+  // Refresh highlights
+  const refreshHighlights = async () => {
+    if (!calendar?.ownerEventUserId) return;
+
+    try {
+      const response = await highlightService.getUserHighlights(
+        calendar.ownerEventUserId,
+        { calendarId: calendar.id }
+      );
+      setHighlights(response.highlights);
+    } catch (err) {
+      console.error("Failed to refresh highlights:", err);
+    }
+  };
+
+  // Delete highlight
+  const handleDeleteHighlight = async () => {
+    if (!highlightToDelete) return;
+
+    try {
+      setDeletingHighlight(true);
+      await highlightService.deleteHighlight(highlightToDelete.id);
+      toast.success("Highlight deleted");
+      setHighlights((prev) => prev.filter((h) => h.id !== highlightToDelete.id));
+      setHighlightToDelete(null);
+    } catch (error: any) {
+      console.error("Failed to delete highlight:", error);
+      toast.error(error.response?.data?.message || "Failed to delete highlight");
+    } finally {
+      setDeletingHighlight(false);
+    }
+  };
+
+  // Update highlight caption
+  const handleSaveCaption = async (highlightId: string) => {
+    try {
+      setSavingCaption(true);
+      await highlightService.updateHighlight(highlightId, {
+        caption: captionValue.trim() || undefined,
+      });
+      toast.success("Caption updated");
+      setHighlights((prev) =>
+        prev.map((h) =>
+          h.id === highlightId ? { ...h, caption: captionValue.trim() || undefined } : h
+        )
+      );
+      setEditingCaption(null);
+      setCaptionValue("");
+    } catch (error: any) {
+      console.error("Failed to update caption:", error);
+      toast.error(error.response?.data?.message || "Failed to update caption");
+    } finally {
+      setSavingCaption(false);
+    }
+  };
+
+  // Get time remaining for highlight
+  const getTimeRemaining = (expiresAt: string) => {
+    const now = new Date();
+    const expiry = new Date(expiresAt);
+    const diffMs = expiry.getTime() - now.getTime();
+
+    if (diffMs <= 0) return "Expired";
+
+    const hours = Math.floor(diffMs / 3600000);
+    const mins = Math.floor((diffMs % 3600000) / 60000);
+
+    if (hours < 1) return `${mins}m remaining`;
+    if (hours < 24) return `${hours}h ${mins}m remaining`;
+    return `${Math.floor(hours / 24)}d ${hours % 24}h remaining`;
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -430,7 +545,214 @@ export default function EditCalendarPage() {
             </button>
           </div>
         </form>
+
+        {/* Highlights Management Section */}
+        <div className="mt-12 border-t border-white/10 pt-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-500">
+                <Sparkles className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-foreground">Highlights</h2>
+                <p className="text-sm text-muted-foreground">
+                  Stories-style content that appears on your calendar page
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowAddHighlightModal(true)}
+              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4" />
+              Add Highlight
+            </button>
+          </div>
+
+          {loadingHighlights ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : highlights.length === 0 ? (
+            <div className="rounded-xl border border-white/10 bg-card-background p-8 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-purple-500/20 via-pink-500/20 to-orange-500/20">
+                <Sparkles className="h-8 w-8 text-pink-400" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-foreground">No highlights yet</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Create highlights to share temporary content with your subscribers
+              </p>
+              <button
+                onClick={() => setShowAddHighlightModal(true)}
+                className="rounded-lg bg-primary px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+              >
+                Create First Highlight
+              </button>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {highlights.map((highlight, index) => {
+                const firstMedia = highlight.mediaItems[0];
+                const thumbnailUrl =
+                  firstMedia?.type === "video" && firstMedia?.thumbnailUrl
+                    ? firstMedia.thumbnailUrl
+                    : firstMedia?.url;
+                const isEditingThis = editingCaption === highlight.id;
+
+                return (
+                  <div
+                    key={highlight.id}
+                    className="rounded-xl border border-white/10 bg-card-background overflow-hidden group"
+                  >
+                    {/* Thumbnail */}
+                    <button
+                      onClick={() => {
+                        setSelectedHighlightIndex(index);
+                        setShowHighlightViewer(true);
+                      }}
+                      className="relative aspect-video w-full overflow-hidden"
+                    >
+                      {thumbnailUrl ? (
+                        <Image
+                          src={thumbnailUrl}
+                          alt=""
+                          fill
+                          className="object-cover transition-transform group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-card-secondary-background">
+                          <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                      )}
+
+                      {/* Media count badge */}
+                      {highlight.mediaItems.length > 1 && (
+                        <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                          <ImageIcon className="h-3 w-3" />
+                          {highlight.mediaItems.length}
+                        </div>
+                      )}
+
+                      {/* Play overlay for video */}
+                      {highlight.mediaType === "video" && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover:opacity-100">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90">
+                            <div className="ml-1 h-0 w-0 border-b-8 border-l-12 border-t-8 border-solid border-b-transparent border-l-black border-t-transparent" />
+                          </div>
+                        </div>
+                      )}
+                    </button>
+
+                    {/* Info */}
+                    <div className="p-4">
+                      {/* Expiration */}
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
+                        <Clock className="h-3.5 w-3.5" />
+                        {getTimeRemaining(highlight.expiresAt)}
+                      </div>
+
+                      {/* Caption */}
+                      {isEditingThis ? (
+                        <div className="space-y-2">
+                          <textarea
+                            value={captionValue}
+                            onChange={(e) => setCaptionValue(e.target.value.slice(0, 500))}
+                            placeholder="Add a caption..."
+                            rows={2}
+                            className="w-full rounded-lg border border-white/10 bg-card-secondary-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+                          />
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">
+                              {captionValue.length}/500
+                            </span>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                  setEditingCaption(null);
+                                  setCaptionValue("");
+                                }}
+                                className="px-3 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() => handleSaveCaption(highlight.id)}
+                                disabled={savingCaption}
+                                className="px-3 py-1 text-xs bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50"
+                              >
+                                {savingCaption ? "Saving..." : "Save"}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-foreground line-clamp-2 min-h-[2.5rem]">
+                          {highlight.caption || (
+                            <span className="text-muted-foreground italic">No caption</span>
+                          )}
+                        </p>
+                      )}
+
+                      {/* Actions */}
+                      {!isEditingThis && (
+                        <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-white/5">
+                          <button
+                            onClick={() => {
+                              setEditingCaption(highlight.id);
+                              setCaptionValue(highlight.caption || "");
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-white/5"
+                          >
+                            <Edit3 className="h-3.5 w-3.5" />
+                            Edit Caption
+                          </button>
+                          <button
+                            onClick={() => setHighlightToDelete(highlight)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-400 hover:text-red-300 transition-colors rounded-md hover:bg-red-500/10"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Add Highlight Modal */}
+      <AddHighlightModal
+        isOpen={showAddHighlightModal}
+        onClose={() => setShowAddHighlightModal(false)}
+        onSuccess={refreshHighlights}
+        calendarId={calendar?.id}
+      />
+
+      {/* Highlight Viewer */}
+      {showHighlightViewer && highlights.length > 0 && (
+        <HighlightViewer
+          highlights={highlights}
+          initialHighlightIndex={selectedHighlightIndex}
+          onClose={() => setShowHighlightViewer(false)}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!highlightToDelete}
+        onClose={() => setHighlightToDelete(null)}
+        onConfirm={handleDeleteHighlight}
+        title="Delete Highlight"
+        message="Are you sure you want to delete this highlight? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        isLoading={deletingHighlight}
+        variant="danger"
+      />
     </div>
   );
 }
