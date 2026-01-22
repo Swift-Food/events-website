@@ -1,7 +1,7 @@
 "use client";
 
 import { CateringOrder } from "@/types/catering";
-import { Circle, CheckCircle2, Package, Truck } from "lucide-react";
+import { Clock, Search, CreditCard, CheckCircle2, Package } from "lucide-react";
 
 interface OrderTimelineProps {
   status: CateringOrder["status"];
@@ -9,14 +9,14 @@ interface OrderTimelineProps {
 
 export function OrderTimeline({ status }: OrderTimelineProps) {
   const timelineSteps = [
-    { key: "pending_review", label: "Order Placed", shortLabel: "", icon: Circle },
-    { key: "restaurant_reviewed", label: "Confirmed", shortLabel: "", icon: CheckCircle2 },
-    { key: "paid", label: "Preparing", shortLabel: "", icon: Package },
-    { key: "ready", label: "Delivery", shortLabel: "", icon: Truck },
-    { key: "completed", label: "Delivered", shortLabel: "", icon: CheckCircle2  },
+    { keys: ["pending_review"], label: "Submitted", shortLabel: "", icon: Clock },
+    { keys: ["admin_reviewed", "restaurant_reviewed"], label: "Reviewing", shortLabel: "", icon: Search },
+    { keys: ["payment_link_sent"], label: "Payment", shortLabel: "", icon: CreditCard },
+    { keys: ["paid", "confirmed"], label: "Confirmed", shortLabel: "", icon: CheckCircle2 },
+    { keys: ["completed"], label: "Delivered", shortLabel: "", icon: Package },
   ];
-  console.log("status", status)
-  const statusIndex = timelineSteps.findIndex((step) => step.key === status);
+
+  const statusIndex = timelineSteps.findIndex((step) => step.keys.includes(status));
   const isCancelled = status === "cancelled";
 
   return (
@@ -28,7 +28,7 @@ export function OrderTimeline({ status }: OrderTimelineProps) {
           const isCurrent = index === statusIndex;
 
           return (
-            <div key={step.key} className="flex flex-col items-center flex-1">
+            <div key={step.keys[0]} className="flex flex-col items-center flex-1">
               <div className="relative flex items-center w-full">
                 {index > 0 && (
                   <div
