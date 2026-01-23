@@ -47,6 +47,8 @@ export default function NotificationItem({
       case EventNotificationType.COLLABORATOR_INVITE:
       case EventNotificationType.COLLABORATOR_ACCEPTED:
         return <Users className="h-5 w-5" />;
+      case EventNotificationType.COLLABORATOR_MAJOR_CHANGE:
+        return <AlertCircle className="h-5 w-5" />;
       case EventNotificationType.PENDING_PAYMENT_REMINDER:
         return <CreditCard className="h-5 w-5" />;
       case EventNotificationType.WAITLIST_PRESSURE_ALERT:
