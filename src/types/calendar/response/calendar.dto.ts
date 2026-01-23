@@ -51,6 +51,7 @@ export interface Calendar {
   isPublic: boolean;
   addressId?: string;
   subscriberCount: number;
+  showSubscriberCount: boolean;
   eventCount?: number;
   autoDeletePastEventsAfterDays?: number | null; // null = never, 0 = immediately, 7 = 7 days after
   createdAt: string; // ISO date

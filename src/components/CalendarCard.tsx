@@ -47,12 +47,14 @@ export default function CalendarCard({ calendar }: CalendarCardProps) {
         )}
 
         {/* Subscriber Count - pushed to bottom */}
-        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-auto">
-          <Users className="h-3 w-3" />
-          <span>
-            {calendar.subscriberCount || 0} subscriber{calendar.subscriberCount !== 1 ? "s" : ""}
-          </span>
-        </div>
+        {(calendar.showSubscriberCount ?? true) && (
+          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-auto">
+            <Users className="h-3 w-3" />
+            <span>
+              {calendar.subscriberCount || 0} subscriber{calendar.subscriberCount !== 1 ? "s" : ""}
+            </span>
+          </div>
+        )}
       </div>
     </Link>
   );

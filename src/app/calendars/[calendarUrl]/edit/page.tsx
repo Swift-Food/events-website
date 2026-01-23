@@ -40,6 +40,7 @@ export default function EditCalendarPage() {
   const [calendarColor, setCalendarColor] = useState("#6366f1");
   const [calendarType, setCalendarType] = useState<CalendarType>(CalendarType.PERSONAL);
   const [isPublic, setIsPublic] = useState(true);
+  const [showSubscriberCount, setShowSubscriberCount] = useState(true);
   const [autoDeletePastEventsAfterDays, setAutoDeletePastEventsAfterDays] = useState<number | null>(null);
 
   // UI state
@@ -84,6 +85,7 @@ export default function EditCalendarPage() {
         setCalendarColor(cal.calendarColor || "#6366f1");
         setCalendarType(cal.calendarType);
         setIsPublic(cal.isPublic);
+        setShowSubscriberCount(cal.showSubscriberCount ?? true);
         setAutoDeletePastEventsAfterDays(cal.autoDeletePastEventsAfterDays ?? null);
 
         // Check permissions
@@ -281,6 +283,7 @@ export default function EditCalendarPage() {
         calendarColor,
         calendarType,
         isPublic,
+        showSubscriberCount,
         autoDeletePastEventsAfterDays,
       });
 
@@ -491,6 +494,29 @@ export default function EditCalendarPage() {
               <div
                 className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
                   isPublic ? "translate-x-5" : "translate-x-0.5"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Show Subscriber Count Toggle */}
+          <div className="flex items-center justify-between rounded-lg border border-white/10 bg-card-background p-4">
+            <div>
+              <p className="font-medium text-foreground">Show Subscriber Count</p>
+              <p className="text-sm text-muted-foreground">
+                Display the number of subscribers on your calendar
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowSubscriberCount(!showSubscriberCount)}
+              className={`relative h-6 w-11 rounded-full transition-colors ${
+                showSubscriberCount ? "bg-primary" : "bg-white/10"
+              }`}
+            >
+              <div
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                  showSubscriberCount ? "translate-x-5" : "translate-x-0.5"
                 }`}
               />
             </button>

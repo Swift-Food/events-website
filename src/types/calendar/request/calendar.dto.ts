@@ -38,6 +38,7 @@ export interface CreateCalendarDto {
   calendarUrl: string; // Required, 3-100 chars, unique slug
   calendarType?: CalendarType; // Default: 'personal'
   isPublic?: boolean; // Default: true
+  showSubscriberCount?: boolean; // Default: true
   addressId?: string; // UUID
   addressData?: CreateCalendarAddressDto;
   autoDeletePastEventsAfterDays?: number | null; // null = never, 0 = immediately, 7 = 7 days after
@@ -51,6 +52,7 @@ export interface UpdateCalendarDto {
   calendarUrl?: string; // Max 100 chars
   calendarType?: CalendarType;
   isPublic?: boolean;
+  showSubscriberCount?: boolean;
   addressId?: string; // UUID
   addressData?: UpdateCalendarAddressDto;
   autoDeletePastEventsAfterDays?: number | null; // null = never, 0 = immediately, 7 = 7 days after

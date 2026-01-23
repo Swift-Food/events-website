@@ -39,12 +39,14 @@ export default function HorizontalCalendarCard({ calendar }: HorizontalCalendarC
         </h3>
 
         {/* Subscriber Count */}
-        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-          <Users className="h-3 w-3" />
-          <span>
-            {calendar.subscriberCount || 0} subscriber{calendar.subscriberCount !== 1 ? "s" : ""}
-          </span>
-        </div>
+        {(calendar.showSubscriberCount ?? true) && (
+          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+            <Users className="h-3 w-3" />
+            <span>
+              {calendar.subscriberCount || 0} subscriber{calendar.subscriberCount !== 1 ? "s" : ""}
+            </span>
+          </div>
+        )}
 
         {/* Description */}
         {calendar.description && (
