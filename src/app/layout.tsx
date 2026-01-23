@@ -128,7 +128,7 @@ export const metadata: Metadata = {
   },
 
   verification: {
-    google: "bu1_vFJg_q2u8Syf9Cith5Q6G_Zld7hqwqLw8gDdtSM", // Add this from Google Search Console
+    google: "l_Ow3tEKxEFcM_rrdvkT77bOFCo4wGhoAGFqA8qCYcA",
   },
 };
 
@@ -140,8 +140,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta name="google-site-verification" content="adpKD3g-CZhZcqQThLRFwNkpl9_BD9tTxZbTJfkHPXE" />
-        <Script
+                <Script
           src="https://accounts.google.com/gsi/client"
           strategy="beforeInteractive"
         />
