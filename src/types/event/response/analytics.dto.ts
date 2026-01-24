@@ -6,5 +6,7 @@ export interface DailyViewData {
 export interface ViewAnalyticsResponse {
   dailyViews: DailyViewData[];
   totalViews: number;
+  viewsToday: number;
   periodDays: number;
+  isTrackingActive: boolean;
 }
