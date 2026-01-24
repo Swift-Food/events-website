@@ -337,38 +337,36 @@ export default function ProfilePage() {
     <div className="min-h-[calc(100vh-64px)] bg-background">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Profile Header */}
-        <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 sm:p-8 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-            {/* Avatar + User Info */}
-            <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
-              {/* Avatar */}
-              <div className="relative shrink-0">
-                <div className="h-16 w-16 sm:h-24 sm:w-24 rounded-full bg-primary/20 flex items-center justify-center ring-4 ring-primary/20">
-                  <User className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
-                </div>
-              </div>
-
-              {/* User Info */}
-              <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-3xl font-bold text-foreground truncate">
-                  {eventUser?.firstName || eventUser?.lastName
-                    ? `${eventUser.firstName || ''} ${eventUser.lastName || ''}`.trim()
-                    : user.username || user.email.split('@')[0]}
-                </h1>
-                {user.username && (
-                  <p className="text-muted-foreground mt-1 truncate">@{user.username}</p>
-                )}
-                <p className="text-muted-foreground text-sm mt-1 truncate">{user.email}</p>
-                {eventUser?.organizationName && (
-                  <p className="text-primary text-sm font-medium mt-2 truncate">
-                    {eventUser.organizationName}
-                  </p>
-                )}
+        <div className="rounded-3xl bg-card-background backdrop-blur-xl p-6 lg:p-8 mb-6">
+          {/* Avatar + User Info Row - Always visible */}
+          <div className="flex items-center gap-4 lg:gap-6">
+            {/* Avatar */}
+            <div className="relative shrink-0">
+              <div className="h-16 w-16 lg:h-24 lg:w-24 rounded-full bg-primary/20 flex items-center justify-center ring-4 ring-primary/20">
+                <User className="h-8 w-8 lg:h-12 lg:w-12 text-primary" />
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-3 shrink-0">
+            {/* User Info */}
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl lg:text-3xl font-bold text-foreground truncate">
+                {eventUser?.firstName || eventUser?.lastName
+                  ? `${eventUser.firstName || ''} ${eventUser.lastName || ''}`.trim()
+                  : user.username || user.email.split('@')[0]}
+              </h1>
+              {user.username && (
+                <p className="text-muted-foreground text-sm lg:text-base mt-0.5 lg:mt-1 truncate">@{user.username}</p>
+              )}
+              <p className="text-muted-foreground text-xs lg:text-sm mt-0.5 lg:mt-1 truncate">{user.email}</p>
+              {eventUser?.organizationName && (
+                <p className="text-primary text-xs lg:text-sm font-medium mt-1 lg:mt-2 truncate">
+                  {eventUser.organizationName}
+                </p>
+              )}
+            </div>
+
+            {/* Desktop Actions - Inline */}
+            <div className="hidden lg:flex items-center gap-3 shrink-0">
               {eventUser?.id && (
                 <Link
                   href={`/user/${eventUser.id}`}
@@ -391,6 +389,34 @@ export default function ProfilePage() {
                 <Plus className="h-4 w-4" />
                 Create Event
               </Link>
+            </div>
+          </div>
+
+          {/* Mobile/Tablet Actions - Stacked below */}
+          <div className="lg:hidden mt-5 flex flex-col gap-2.5">
+            <Link
+              href="/event-creation"
+              className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4" />
+              Create Event
+            </Link>
+            <div className="flex gap-2.5">
+              <Link
+                href="/profile/edit"
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-card-secondary-background px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
+              >
+                Edit Profile
+              </Link>
+              {eventUser?.id && (
+                <Link
+                  href={`/user/${eventUser.id}`}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-card-secondary-background px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Public Profile
+                </Link>
+              )}
             </div>
           </div>
         </div>
