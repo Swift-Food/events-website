@@ -569,7 +569,7 @@ function Banner({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 w-full sm:w-auto">
             <button
               onClick={onToggleExpand}
               className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
