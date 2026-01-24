@@ -461,3 +461,30 @@ input[type="datetime-local"] {
 .landing-feature-card:hover::after {
   width: 100%;
 }
+
+/* Organic drifting animations for mesh gradient */
+@keyframes drift {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.1); }
+  66% { transform: translate(15px, 15px) scale(0.95); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes drift-alt {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-25px, 15px) scale(0.95); }
+  66% { transform: translate(20px, -10px) scale(1.05); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+.animate-drift {
+  animation: drift 8s ease-in-out infinite;
+}
+
+.animate-drift-alt {
+  animation: drift-alt 10s ease-in-out infinite;
+}
+
+.animate-drift-reverse {
+  animation: drift 9s ease-in-out infinite reverse;
+}

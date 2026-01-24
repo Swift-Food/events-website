@@ -139,9 +139,9 @@ export default function EditProfilePage() {
       return;
     }
 
-    // Max 5MB
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image must be less than 5MB");
+    // Max 10MB
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image must be less than 10MB");
       return;
     }
 

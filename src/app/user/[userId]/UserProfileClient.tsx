@@ -245,12 +245,32 @@ export default function UserProfileClient({
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
+      {/* Banner Section */}
+      <div className="relative h-48 sm:h-56 w-full overflow-hidden">
+        {initialProfile.profileBannerImageUrl ? (
+          <img
+            src={initialProfile.profileBannerImageUrl}
+            alt="Profile banner"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-background overflow-hidden">
+            {/* Blue Glow */}
+            <div className="absolute top-[-30%] left-[10%] w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] bg-blue-500/30 rounded-full blur-[80px] animate-drift opacity-70" />
+            {/* Purple Glow */}
+            <div className="absolute bottom-[-20%] right-[5%] w-[350px] h-[350px] sm:w-[450px] sm:h-[450px] bg-purple-500/25 rounded-full blur-[100px] animate-drift-alt opacity-60" />
+            {/* Cyan Accent */}
+            <div className="absolute top-[20%] right-[20%] w-[200px] h-[200px] sm:w-[300px] sm:h-[300px] bg-cyan-400/20 rounded-full blur-[70px] animate-drift-reverse opacity-50" />
+          </div>
+        )}
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-3xl px-4 sm:px-6 py-8">
         {/* Profile Header */}
-        <div className="mb-8">
+        <div className="mb-8 -mt-24 sm:-mt-28">
           <div className="flex flex-col items-center text-center">
-            {/* Avatar */}
-            <div className="h-32 w-32 sm:h-36 sm:w-36 rounded-full overflow-hidden bg-primary/10">
+            {/* Avatar - overlaps the banner */}
+            <div className={`h-32 w-32 sm:h-36 sm:w-36 rounded-full overflow-hidden border-4 border-background ${profileImage ? "" : "bg-zinc-700"}`}>
               {profileImage ? (
                 <img
                   src={profileImage}
@@ -261,6 +281,8 @@ export default function UserProfileClient({
                     e.currentTarget.nextElementSibling?.classList.remove(
                       "hidden"
                     );
+                    // Add solid background when image fails to load
+                    e.currentTarget.parentElement?.classList.add("bg-zinc-700");
                   }}
                 />
               ) : null}
