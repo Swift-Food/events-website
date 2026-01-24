@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { eventUserService, UpdateEventUserDto } from "@/services/event-user.service";
-import { ArrowLeft, Loader2, User, Save, Instagram, Linkedin, Globe } from "lucide-react";
+import { ArrowLeft, Loader2, User, Save, Instagram, Linkedin, Globe, Image } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -66,6 +66,7 @@ export default function EditProfilePage() {
     username: "",
     organizationName: "",
     bio: "",
+    profileBannerImageUrl: "",
     website: "",
     twitterHandle: "",
     linkedinUrl: "",
@@ -99,6 +100,7 @@ export default function EditProfilePage() {
         username: user.username || "",
         organizationName: eventUser.organizationName || "",
         bio: eventUser.bio || "",
+        profileBannerImageUrl: eventUser.profileBannerImageUrl || "",
         website: eventUser.website || "",
         // Extract usernames from stored URLs
         twitterHandle: extractUsername(eventUser.twitterHandle || "", "twitter"),
@@ -137,6 +139,7 @@ export default function EditProfilePage() {
         username: formData.username.trim() || undefined,
         organizationName: formData.organizationName.trim() || undefined,
         bio: formData.bio.trim() || undefined,
+        profileBannerImageUrl: formData.profileBannerImageUrl.trim() || undefined,
         website: formData.website.trim() || undefined,
         twitterHandle: buildSocialUrl(formData.twitterHandle, "twitter") || undefined,
         linkedinUrl: buildSocialUrl(formData.linkedinUrl, "linkedin") || undefined,
@@ -211,7 +214,7 @@ export default function EditProfilePage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Avatar Section */}
-          <div className="rounded-2xl bg-card-background backdrop-blur-xl p-6">
+          <div className="rounded-2xl bg-card-background backdrop-blur-xl p-6 space-y-6">
             <div className="flex items-center gap-4">
               <div className="h-20 w-20 rounded-full bg-primary/20 flex items-center justify-center ring-4 ring-primary/20">
                 <User className="h-10 w-10 text-primary" />
@@ -222,6 +225,41 @@ export default function EditProfilePage() {
                   Profile picture uploads coming soon
                 </p>
               </div>
+            </div>
+
+            {/* Profile Banner */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Profile Banner
+              </label>
+              <div className="flex rounded-xl border border-white/10 bg-input-background overflow-hidden focus-within:ring-2 focus-within:ring-primary/50 transition-all">
+                <span className="flex items-center px-3 bg-white/5 text-muted-foreground border-r border-white/10">
+                  <Image className="h-4 w-4" />
+                </span>
+                <input
+                  type="url"
+                  name="profileBannerImageUrl"
+                  value={formData.profileBannerImageUrl}
+                  onChange={handleChange}
+                  placeholder="https://example.com/banner.jpg"
+                  className="flex-1 bg-transparent px-3 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none min-w-0"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Enter a URL for your profile banner image
+              </p>
+              {formData.profileBannerImageUrl && (
+                <div className="mt-3 rounded-lg overflow-hidden border border-white/10">
+                  <img
+                    src={formData.profileBannerImageUrl}
+                    alt="Banner preview"
+                    className="w-full h-32 object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
