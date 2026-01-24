@@ -40,6 +40,7 @@ export interface UpdateEventUserDto {
   username?: string;
   organizationName?: string;
   bio?: string;
+  profileBannerImageUrl?: string;
   website?: string;
   twitterHandle?: string;
   linkedinUrl?: string;
