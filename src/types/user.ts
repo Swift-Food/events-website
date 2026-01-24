@@ -14,6 +14,7 @@ export interface EventUser {
   allowEmailNotifications: boolean;
   allowTicketReminders: boolean;
   bio: string | null;
+  profileBannerImageUrl: string | null;
   createdAt: string;
   linkedinUrl: string | null;
   instagramUrl: string | null;

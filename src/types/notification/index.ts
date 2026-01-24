@@ -17,6 +17,7 @@ export enum EventNotificationType {
   REGISTRATION_SUMMARY = 'registration_summary',
   COLLABORATOR_INVITE = 'collaborator_invite',
   COLLABORATOR_ACCEPTED = 'collaborator_accepted',
+  COLLABORATOR_MAJOR_CHANGE = 'collaborator_major_change',
   // Payment & alerts
   PENDING_PAYMENT_REMINDER = 'pending_payment_reminder',
   WAITLIST_PRESSURE_ALERT = 'waitlist_pressure_alert',

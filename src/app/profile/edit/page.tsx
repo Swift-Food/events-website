@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { eventUserService, UpdateEventUserDto } from "@/services/event-user.service";
-import { ArrowLeft, Loader2, User, Save, Instagram, Linkedin, Globe } from "lucide-react";
+import { imageService } from "@/services/image.service";
+import { ArrowLeft, Loader2, User, Save, Instagram, Linkedin, Globe, Upload, X } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -66,6 +67,7 @@ export default function EditProfilePage() {
     username: "",
     organizationName: "",
     bio: "",
+    profileBannerImageUrl: "",
     website: "",
     twitterHandle: "",
     linkedinUrl: "",
@@ -83,6 +85,11 @@ export default function EditProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Banner upload state
+  const [isDraggingBanner, setIsDraggingBanner] = useState(false);
+  const [isUploadingBanner, setIsUploadingBanner] = useState(false);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -99,6 +106,7 @@ export default function EditProfilePage() {
         username: user.username || "",
         organizationName: eventUser.organizationName || "",
         bio: eventUser.bio || "",
+        profileBannerImageUrl: eventUser.profileBannerImageUrl || "",
         website: eventUser.website || "",
         // Extract usernames from stored URLs
         twitterHandle: extractUsername(eventUser.twitterHandle || "", "twitter"),
@@ -124,6 +132,64 @@ export default function EditProfilePage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Banner upload handlers
+  const handleBannerUpload = useCallback(async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    // Max 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be less than 5MB");
+      return;
+    }
+
+    setIsUploadingBanner(true);
+    try {
+      // TODO: Add cropping modal here before upload (see EventForm.tsx for pattern)
+      // For now, upload directly - frontend dev can add crop modal later
+      const uploadedUrl = await imageService.uploadImage(file);
+      setFormData((prev) => ({ ...prev, profileBannerImageUrl: uploadedUrl }));
+      toast.success("Banner uploaded!");
+    } catch (error) {
+      console.error("Failed to upload banner:", error);
+      toast.error("Failed to upload banner");
+    } finally {
+      setIsUploadingBanner(false);
+    }
+  }, []);
+
+  const handleBannerFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleBannerUpload(file);
+    }
+  };
+
+  const handleBannerDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingBanner(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleBannerUpload(file);
+    }
+  }, [handleBannerUpload]);
+
+  const handleBannerDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingBanner(true);
+  }, []);
+
+  const handleBannerDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingBanner(false);
+  }, []);
+
+  const removeBanner = () => {
+    setFormData((prev) => ({ ...prev, profileBannerImageUrl: "" }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
@@ -137,6 +203,7 @@ export default function EditProfilePage() {
         username: formData.username.trim() || undefined,
         organizationName: formData.organizationName.trim() || undefined,
         bio: formData.bio.trim() || undefined,
+        profileBannerImageUrl: formData.profileBannerImageUrl.trim() || undefined,
         website: formData.website.trim() || undefined,
         twitterHandle: buildSocialUrl(formData.twitterHandle, "twitter") || undefined,
         linkedinUrl: buildSocialUrl(formData.linkedinUrl, "linkedin") || undefined,
@@ -211,7 +278,7 @@ export default function EditProfilePage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Avatar Section */}
-          <div className="rounded-2xl bg-card-background backdrop-blur-xl p-6">
+          <div className="rounded-2xl bg-card-background backdrop-blur-xl p-6 space-y-6">
             <div className="flex items-center gap-4">
               <div className="h-20 w-20 rounded-full bg-primary/20 flex items-center justify-center ring-4 ring-primary/20">
                 <User className="h-10 w-10 text-primary" />
@@ -222,6 +289,84 @@ export default function EditProfilePage() {
                   Profile picture uploads coming soon
                 </p>
               </div>
+            </div>
+
+            {/* Profile Banner */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Profile Banner
+              </label>
+
+              {formData.profileBannerImageUrl ? (
+                // Banner preview with remove button
+                <div className="relative rounded-xl overflow-hidden border border-white/10">
+                  <img
+                    src={formData.profileBannerImageUrl}
+                    alt="Profile banner"
+                    className="w-full h-32 object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => bannerInputRef.current?.click()}
+                      className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg text-white text-sm font-medium hover:bg-white/30 transition-colors"
+                    >
+                      Change
+                    </button>
+                    <button
+                      type="button"
+                      onClick={removeBanner}
+                      className="p-2 bg-red-500/80 backdrop-blur-sm rounded-lg text-white hover:bg-red-500 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                // Upload drop zone
+                <div
+                  onDrop={handleBannerDrop}
+                  onDragOver={handleBannerDragOver}
+                  onDragLeave={handleBannerDragLeave}
+                  onClick={() => bannerInputRef.current?.click()}
+                  className={`
+                    relative rounded-xl border-2 border-dashed transition-all cursor-pointer
+                    h-32 flex flex-col items-center justify-center gap-2
+                    ${isDraggingBanner
+                      ? "border-primary bg-primary/10"
+                      : "border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10"
+                    }
+                    ${isUploadingBanner ? "pointer-events-none opacity-60" : ""}
+                  `}
+                >
+                  {isUploadingBanner ? (
+                    <>
+                      <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                      <p className="text-sm text-muted-foreground">Uploading...</p>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-8 w-8 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        {isDraggingBanner ? "Drop image here" : "Click or drag image to upload"}
+                      </p>
+                      <p className="text-xs text-muted-foreground/60">
+                        Recommended: 1500 x 500px (3:1 ratio)
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
+
+              <input
+                ref={bannerInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleBannerFileChange}
+                className="hidden"
+              />
+
+              {/* TODO: Add crop modal here - see EventForm.tsx for react-easy-crop pattern */}
             </div>
           </div>
 
