@@ -1,35 +1,8 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Ticket, Eye, BarChart3 } from "lucide-react";
 import { ShaderGradient, ShaderGradientCanvas } from "@shadergradient/react";
-
-// Hook for scroll-triggered animations
-const useScrollReveal = (threshold = 0.2) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold }
-    );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => observer.disconnect();
-  }, [threshold]);
-
-  return { ref, isVisible };
-};
 
 // Animated word component with letter-by-letter reveal
 const AnimatedWord: React.FC<{ text: string; delayOffset: number }> = ({
@@ -73,36 +46,20 @@ const AnimatedWord: React.FC<{ text: string; delayOffset: number }> = ({
   );
 };
 
-// Feature data
-const features = [
-  {
-    id: "1",
-    title: "Seamless Ticketing",
-    description:
-      "Instant issuance and verification protocols for physical and digital entry points. Zero latency.",
-    icon: Ticket,
-  },
-  {
-    id: "2",
-    title: "Immersive Spaces",
-    description:
-      "Architectural tools to build atmospheric digital twin environments for your attendees.",
-    icon: Eye,
-  },
-  {
-    id: "3",
-    title: "Community Analytics",
-    description:
-      "Deep learning insights into audience engagement, retention, and growth vectors.",
-    icon: BarChart3,
-  },
-];
-
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+
+    // Prevent elastic/bounce overscroll on the home page
+    document.documentElement.style.overscrollBehavior = "none";
+    document.body.style.overscrollBehavior = "none";
+
+    return () => {
+      document.documentElement.style.overscrollBehavior = "";
+      document.body.style.overscrollBehavior = "";
+    };
   }, []);
 
   if (!mounted) {
@@ -110,7 +67,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative h-screen overflow-hidden">
       {/* Animated gradient background */}
       <div className="fixed inset-0 z-[-1]">
         <ShaderGradientCanvas>
