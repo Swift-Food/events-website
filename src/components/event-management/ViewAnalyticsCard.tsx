@@ -80,14 +80,33 @@ export function ViewAnalyticsCard({ eventId }: ViewAnalyticsCardProps) {
             <p className="text-xs text-muted-foreground">Last 30 days</p>
           </div>
         </div>
-        <div className="text-right">
-          <div className="flex items-center gap-1.5 text-lg font-bold text-foreground">
-            <Eye className="h-4 w-4 text-muted-foreground" />
-            {analytics.totalViews}
+        <div className="flex items-center gap-4">
+          {/* Views Today - prominent */}
+          <div className="text-right">
+            <div className="flex items-center gap-1.5 text-lg font-bold text-foreground">
+              <Eye className="h-4 w-4 text-muted-foreground" />
+              {analytics.viewsToday}
+            </div>
+            <p className="text-xs text-muted-foreground">today</p>
           </div>
-          <p className="text-xs text-muted-foreground">total views</p>
+          {/* Total Views - secondary */}
+          <div className="text-right border-l border-white/10 pl-4">
+            <div className="text-lg font-bold text-muted-foreground">
+              {analytics.totalViews}
+            </div>
+            <p className="text-xs text-muted-foreground">total</p>
+          </div>
         </div>
       </div>
+
+      {/* Tracking Status */}
+      {!analytics.isTrackingActive && (
+        <div className="mb-4 px-3 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+          <p className="text-xs text-yellow-500">
+            Tracking paused — event has started
+          </p>
+        </div>
+      )}
 
       {/* Chart - Desktop (all 30 days) */}
       <div className="hidden sm:block">
