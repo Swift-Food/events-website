@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { eventUserService, UpdateEventUserDto } from "@/services/event-user.service";
-import { ArrowLeft, Loader2, User, Save, Instagram, Linkedin, Globe, Image } from "lucide-react";
+import { imageService } from "@/services/image.service";
+import { ArrowLeft, Loader2, User, Save, Instagram, Linkedin, Globe, Upload, X } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -84,6 +85,11 @@ export default function EditProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Banner upload state
+  const [isDraggingBanner, setIsDraggingBanner] = useState(false);
+  const [isUploadingBanner, setIsUploadingBanner] = useState(false);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -124,6 +130,64 @@ export default function EditProfilePage() {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Banner upload handlers
+  const handleBannerUpload = useCallback(async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    // Max 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be less than 5MB");
+      return;
+    }
+
+    setIsUploadingBanner(true);
+    try {
+      // TODO: Add cropping modal here before upload (see EventForm.tsx for pattern)
+      // For now, upload directly - frontend dev can add crop modal later
+      const uploadedUrl = await imageService.uploadImage(file);
+      setFormData((prev) => ({ ...prev, profileBannerImageUrl: uploadedUrl }));
+      toast.success("Banner uploaded!");
+    } catch (error) {
+      console.error("Failed to upload banner:", error);
+      toast.error("Failed to upload banner");
+    } finally {
+      setIsUploadingBanner(false);
+    }
+  }, []);
+
+  const handleBannerFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleBannerUpload(file);
+    }
+  };
+
+  const handleBannerDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingBanner(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleBannerUpload(file);
+    }
+  }, [handleBannerUpload]);
+
+  const handleBannerDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingBanner(true);
+  }, []);
+
+  const handleBannerDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingBanner(false);
+  }, []);
+
+  const removeBanner = () => {
+    setFormData((prev) => ({ ...prev, profileBannerImageUrl: "" }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -232,34 +296,77 @@ export default function EditProfilePage() {
               <label className="block text-sm font-medium text-foreground mb-2">
                 Profile Banner
               </label>
-              <div className="flex rounded-xl border border-white/10 bg-input-background overflow-hidden focus-within:ring-2 focus-within:ring-primary/50 transition-all">
-                <span className="flex items-center px-3 bg-white/5 text-muted-foreground border-r border-white/10">
-                  <Image className="h-4 w-4" />
-                </span>
-                <input
-                  type="url"
-                  name="profileBannerImageUrl"
-                  value={formData.profileBannerImageUrl}
-                  onChange={handleChange}
-                  placeholder="https://example.com/banner.jpg"
-                  className="flex-1 bg-transparent px-3 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none min-w-0"
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Enter a URL for your profile banner image
-              </p>
-              {formData.profileBannerImageUrl && (
-                <div className="mt-3 rounded-lg overflow-hidden border border-white/10">
+
+              {formData.profileBannerImageUrl ? (
+                // Banner preview with remove button
+                <div className="relative rounded-xl overflow-hidden border border-white/10">
                   <img
                     src={formData.profileBannerImageUrl}
-                    alt="Banner preview"
+                    alt="Profile banner"
                     className="w-full h-32 object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
                   />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => bannerInputRef.current?.click()}
+                      className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg text-white text-sm font-medium hover:bg-white/30 transition-colors"
+                    >
+                      Change
+                    </button>
+                    <button
+                      type="button"
+                      onClick={removeBanner}
+                      className="p-2 bg-red-500/80 backdrop-blur-sm rounded-lg text-white hover:bg-red-500 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                // Upload drop zone
+                <div
+                  onDrop={handleBannerDrop}
+                  onDragOver={handleBannerDragOver}
+                  onDragLeave={handleBannerDragLeave}
+                  onClick={() => bannerInputRef.current?.click()}
+                  className={`
+                    relative rounded-xl border-2 border-dashed transition-all cursor-pointer
+                    h-32 flex flex-col items-center justify-center gap-2
+                    ${isDraggingBanner
+                      ? "border-primary bg-primary/10"
+                      : "border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10"
+                    }
+                    ${isUploadingBanner ? "pointer-events-none opacity-60" : ""}
+                  `}
+                >
+                  {isUploadingBanner ? (
+                    <>
+                      <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                      <p className="text-sm text-muted-foreground">Uploading...</p>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-8 w-8 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        {isDraggingBanner ? "Drop image here" : "Click or drag image to upload"}
+                      </p>
+                      <p className="text-xs text-muted-foreground/60">
+                        Recommended: 1500 x 500px (3:1 ratio)
+                      </p>
+                    </>
+                  )}
                 </div>
               )}
+
+              <input
+                ref={bannerInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleBannerFileChange}
+                className="hidden"
+              />
+
+              {/* TODO: Add crop modal here - see EventForm.tsx for react-easy-crop pattern */}
             </div>
           </div>
 
