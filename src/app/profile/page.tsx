@@ -26,6 +26,7 @@ import {
   History,
   Users,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
 import StripeConnectCard from "@/components/payments/StripeConnectCard";
 import { toast } from "sonner";
@@ -368,6 +369,15 @@ export default function ProfilePage() {
 
             {/* Actions */}
             <div className="flex items-center gap-3 shrink-0">
+              {eventUser?.id && (
+                <Link
+                  href={`/user/${eventUser.id}`}
+                  className="flex items-center justify-center gap-2 rounded-full border border-white/10 bg-card-secondary-background px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Public Profile
+                </Link>
+              )}
               <Link
                 href="/profile/edit"
                 className="flex items-center justify-center gap-2 rounded-full border border-white/10 bg-card-secondary-background px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
