@@ -158,14 +158,14 @@ export default function Navbar() {
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/event-creation"
-              className={`flex sm:hidden h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg}`}
+              className={`flex lg:hidden h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg}`}
               aria-label="Create Event"
             >
               <CalendarPlus className="h-5 w-5" />
             </Link>
             <Link
               href="/event-creation"
-              className={`hidden sm:inline-flex rounded-full ${buttonBg} px-5 py-2 text-sm font-semibold transition-colors hover:opacity-90`}
+              className={`hidden lg:inline-flex rounded-full ${buttonBg} px-5 py-2 text-sm font-semibold transition-colors hover:opacity-90`}
             >
               Create Event
             </Link>
