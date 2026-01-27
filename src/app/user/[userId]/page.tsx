@@ -32,6 +32,7 @@ async function getUserProfile(eventUserId: string): Promise<OrganizerProfile | n
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { userId } = await params;
+  console.log("user id", userId)
   const profile = await getUserProfile(userId);
 
   if (!profile) {
