@@ -9,6 +9,7 @@ import {
   LogOut,
   UserCircle,
   Users,
+  Settings,
   Ticket,
   CalendarPlus,
   ChartNoAxesGantt,
@@ -26,7 +27,7 @@ const navLinks = [
 
 export default function Navbar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const { isAuthenticated, logout, user, refreshProfile } = useAuth();
+  const { isAuthenticated, logout, user, eventUser, refreshProfile } = useAuth();
   const { openSearchModal } = useSearchModal();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -207,7 +208,9 @@ export default function Navbar() {
                       <button
                         className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
                         onClick={() => {
-                          router.push("/profile");
+                          if (eventUser?.id) {
+                            router.push(`/user/${eventUser.id}`);
+                          }
                           setIsUserMenuOpen(false);
                         }}
                       >
@@ -223,6 +226,16 @@ export default function Navbar() {
                       >
                         <Users className="h-4 w-4" />
                         Friends
+                      </button>
+                      <button
+                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
+                        onClick={() => {
+                          router.push("/profile/edit");
+                          setIsUserMenuOpen(false);
+                        }}
+                      >
+                        <Settings className="h-4 w-4" />
+                        Settings
                       </button>
                       <button
                         className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5 hover:text-red-400"
