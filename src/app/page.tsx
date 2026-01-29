@@ -14,7 +14,7 @@ const AnimatedWord: React.FC<{ text: string; delayOffset: number }> = ({
       {text.split("").map((char, i) => (
         <span
           key={i}
-          className="inline-block transition-all cursor-default text-white"
+          className="inline-block transition-colors duration-300 cursor-default text-white"
           style={{
             opacity: 0,
             animationName: "reveal-up, letter-jump",
