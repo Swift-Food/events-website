@@ -404,7 +404,7 @@ input[type="datetime-local"] {
 
 @keyframes letter-jump {
   0%, 100% { transform: translateY(0); color: white; }
-  50% { transform: translateY(-12px); color: var(--landing-color1); }
+  50% { transform: translateY(-12px); color: #3b82f6; }
 }
 
 .animate-reveal {

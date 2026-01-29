@@ -30,7 +30,7 @@ const AnimatedWord: React.FC<{ text: string; delayOffset: number }> = ({
             void target.offsetWidth;
             target.style.animation = "letter-jump 0.8s ease-in-out forwards";
             target.style.opacity = "1";
-            target.style.color = "#cc4004";
+            target.style.color = "#3b82f6";
           }}
           onAnimationEnd={(e) => {
             if (e.animationName === "letter-jump") {
