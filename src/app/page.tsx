@@ -14,15 +14,15 @@ const AnimatedWord: React.FC<{ text: string; delayOffset: number }> = ({
       {text.split("").map((char, i) => (
         <span
           key={i}
-          className="inline-block transition-colors duration-300 cursor-default text-white"
+          className="inline-block transition-colors duration-300 cursor-default text-white will-change-[transform,opacity]"
           style={{
             opacity: 0,
-            animationName: "reveal-up, letter-jump",
-            animationDuration: "1s, 0.8s",
-            animationIterationCount: "1, 1",
-            animationFillMode: "forwards, none",
-            animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1), ease-in-out",
-            animationDelay: `${delayOffset + i * 60}ms, ${1000 + delayOffset + i * 60}ms`,
+            animationName: "reveal-up-color",
+            animationDuration: "1.2s",
+            animationIterationCount: "1",
+            animationFillMode: "forwards",
+            animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+            animationDelay: `${delayOffset + i * 50}ms`,
           }}
           onMouseEnter={(e) => {
             const target = e.currentTarget;
