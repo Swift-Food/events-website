@@ -756,6 +756,52 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
  })}
  </div>
  )}
+
+ {/* Organizer - Mobile/Tablet */}
+ <div className="mt-6 h-px bg-white/10" />
+ <div className="py-4 flex items-center gap-3 sm:justify-center">
+   {event.owner?.user ? (
+     <Link
+       href={`/user/${event.owner.id}`}
+       className="flex items-center gap-3 group"
+     >
+       {event.owner.user.profilePicture ? (
+         <Image
+           src={event.owner.user.profilePicture}
+           alt={(event.owner.firstName || event.owner.lastName)
+             ? [event.owner.firstName, event.owner.lastName].filter(Boolean).join(' ')
+             : event.owner.user.username || "Organizer"}
+           width={48}
+           height={48}
+           className="rounded-full"
+         />
+       ) : (
+         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
+           <User className="h-6 w-6 text-muted-foreground" />
+         </div>
+       )}
+       <div>
+         <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
+           {(event.owner.firstName || event.owner.lastName)
+             ? [event.owner.firstName, event.owner.lastName].filter(Boolean).join(' ')
+             : event.owner.user.username || "Anonymous"}
+         </p>
+         <p className="text-sm text-muted-foreground">Organizer</p>
+       </div>
+     </Link>
+   ) : (
+     <div className="flex items-center gap-3">
+       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
+         <User className="h-6 w-6 text-muted-foreground" />
+       </div>
+       <div>
+         <p className="font-semibold text-foreground">Event Organizer</p>
+         <p className="text-sm text-muted-foreground">Organizer</p>
+       </div>
+     </div>
+   )}
+ </div>
+ <div className="h-px bg-white/10" />
  </div>
 
  {/* Date & Time Card - Bottom left on tablet, normal on mobile/desktop */}
@@ -1050,110 +1096,6 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
  </div>
  </div>
 
- {/* Organizer & Stats - Side by side on sm-md, separate on lg+ */}
- <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
- {/* Organizer Card */}
- <div className="rounded-xl bg-card-background p-4 sm:p-6">
- <div className="flex items-center justify-between mb-4">
- <h3 className="text-lg font-semibold text-foreground">
- Organized by
- </h3>
- {/* Status Badge - Show on mobile/tablet, hide on desktop - only for collaborators */}
- {userRole && (
- <div className="flex items-center gap-2 lg:hidden">
- {event.isPrivate && (
- <span className="flex items-center gap-1 rounded-full bg-purple-500/20 px-2 py-1 text-xs font-semibold text-purple-400">
- <Lock className="h-3 w-3"/>
- Private
- </span>
- )}
- <span
- className={`rounded-full px-3 py-1 text-xs font-semibold ${
- statusColors[event.status] ||"bg-gray-500/20 text-gray-400"}`}
- >
- {event.status}
- </span>
- </div>
- )}
- </div>
- {event.owner?.user ? (
- <Link
- href={`/user/${event.owner.id}`}
- className="flex items-center gap-3 group">
- {event.owner.user.profilePicture ? (
- <Image
- src={event.owner.user.profilePicture}
- alt={(event.owner.firstName || event.owner.lastName)
- ? [event.owner.firstName, event.owner.lastName].filter(Boolean).join('')
- : event.owner.user.username ||"Organizer"}
- width={48}
- height={48}
- className="rounded-full"/>
- ) : (
- <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
- <User className="h-6 w-6 text-primary"/>
- </div>
- )}
- <div>
- <p className="font-medium text-foreground group-hover:text-primary transition-colors">
- {(event.owner.firstName || event.owner.lastName)
- ? [event.owner.firstName, event.owner.lastName].filter(Boolean).join('')
- : event.owner.user.username ||"Anonymous"}
- </p>
- <p className="text-sm text-muted-foreground">Organizer</p>
- </div>
- </Link>
- ) : (
- <div className="flex items-center gap-3">
- <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
- <User className="h-6 w-6 text-primary"/>
- </div>
- <div>
- <p className="font-medium text-foreground">Event Organizer</p>
- <p className="text-sm text-muted-foreground">Organizer</p>
- </div>
- </div>
- )}
- </div>
-
- {/* Event Stats Card */}
- {/* <div className="rounded-xl border border-neutral-700 bg-card-background p-4 sm:p-6">
- <h3 className="mb-4 text-lg font-semibold text-foreground">
- Event Stats
- </h3>
- <div className="space-y-3">
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-2 text-muted-foreground">
- <Users className="h-5 w-5"/>
- <span>Attendees</span>
- </div>
- <span className="font-semibold text-foreground">
- {event.attendeesCount || 0}
- </span>
- </div>
- {event.ticketsSoldCount !== undefined && (
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-2 text-muted-foreground">
- <Ticket className="h-5 w-5"/>
- <span>Tickets Sold</span>
- </div>
- <span className="font-semibold text-foreground">
- {event.ticketsSoldCount}
- </span>
- </div>
- )}
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-2 text-muted-foreground">
- <Clock className="h-5 w-5"/>
- <span>Views</span>
- </div>
- <span className="font-semibold text-foreground">
- {event.viewCount ?? 0}
- </span>
- </div>
- </div>
- </div> */}
- </div>
  </section>
 
  {/* Right Column - Main Content */}
@@ -1195,6 +1137,52 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
  })}
  </div>
  )}
+
+ {/* Organizer - Desktop */}
+ <div className="mt-8 h-px bg-white/10" />
+ <div className="py-6 flex items-center gap-3">
+   {event.owner?.user ? (
+     <Link
+       href={`/user/${event.owner.id}`}
+       className="flex items-center gap-3 group"
+     >
+       {event.owner.user.profilePicture ? (
+         <Image
+           src={event.owner.user.profilePicture}
+           alt={(event.owner.firstName || event.owner.lastName)
+             ? [event.owner.firstName, event.owner.lastName].filter(Boolean).join(' ')
+             : event.owner.user.username || "Organizer"}
+           width={48}
+           height={48}
+           className="rounded-full"
+         />
+       ) : (
+         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
+           <User className="h-6 w-6 text-muted-foreground" />
+         </div>
+       )}
+       <div>
+         <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
+           {(event.owner.firstName || event.owner.lastName)
+             ? [event.owner.firstName, event.owner.lastName].filter(Boolean).join(' ')
+             : event.owner.user.username || "Anonymous"}
+         </p>
+         <p className="text-sm text-muted-foreground">Organizer</p>
+       </div>
+     </Link>
+   ) : (
+     <div className="flex items-center gap-3">
+       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
+         <User className="h-6 w-6 text-muted-foreground" />
+       </div>
+       <div>
+         <p className="font-semibold text-foreground">Event Organizer</p>
+         <p className="text-sm text-muted-foreground">Organizer</p>
+       </div>
+     </div>
+   )}
+ </div>
+ <div className="h-px bg-white/10" />
  </div>
 
  {/* Invitation Banner */}
