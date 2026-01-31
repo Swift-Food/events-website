@@ -74,8 +74,8 @@ export default function HighlightsBar({
             const timeRemaining = getTimeRemaining(highlight.expiresAt);
             const firstMedia = highlight.mediaItems[0];
             const thumbnailUrl =
-              firstMedia?.type === "video" && firstMedia?.thumbnailUrl
-                ? firstMedia.thumbnailUrl
+              firstMedia?.type === "video"
+                ? firstMedia?.thumbnailUrl
                 : firstMedia?.url;
 
             return (
@@ -95,7 +95,15 @@ export default function HighlightsBar({
                   {/* Thumbnail */}
                   <div className="relative h-16 w-16 overflow-hidden rounded-full p-[3px]">
                     <div className="h-full w-full overflow-hidden rounded-full">
-                      {thumbnailUrl ? (
+                      {firstMedia?.type === "video" && !thumbnailUrl ? (
+                        <video
+                          src={firstMedia.url}
+                          muted
+                          playsInline
+                          preload="metadata"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : thumbnailUrl ? (
                         <Image
                           src={thumbnailUrl}
                           alt=""

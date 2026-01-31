@@ -596,8 +596,8 @@ export default function EditCalendarPage() {
               {highlights.map((highlight, index) => {
                 const firstMedia = highlight.mediaItems[0];
                 const thumbnailUrl =
-                  firstMedia?.type === "video" && firstMedia?.thumbnailUrl
-                    ? firstMedia.thumbnailUrl
+                  firstMedia?.type === "video"
+                    ? firstMedia?.thumbnailUrl
                     : firstMedia?.url;
                 const isEditingThis = editingCaption === highlight.id;
 
@@ -614,7 +614,15 @@ export default function EditCalendarPage() {
                       }}
                       className="relative aspect-video w-full overflow-hidden"
                     >
-                      {thumbnailUrl ? (
+                      {firstMedia?.type === "video" && !thumbnailUrl ? (
+                        <video
+                          src={firstMedia.url}
+                          muted
+                          playsInline
+                          preload="metadata"
+                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        />
+                      ) : thumbnailUrl ? (
                         <Image
                           src={thumbnailUrl}
                           alt=""
