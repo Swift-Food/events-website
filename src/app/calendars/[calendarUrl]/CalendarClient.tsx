@@ -518,7 +518,7 @@ export default function CalendarClient({
           </section>
 
           {/* Right Column - Main Content */}
-          <section className="flex-1 space-y-6">
+          <section className="flex-1 min-w-0 space-y-6">
             {/* Calendar Name and Description */}
             <div>
               <h1 className="mb-4 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
