@@ -1224,7 +1224,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                     <Link
                       key={category.id}
                       href={`/events?category=${category.name}`}
-                      className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary/50 hover:bg-primary/10"
+                      className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary/50 hover:bg-primary/10"
                     >
                       {category.name}
                     </Link>
