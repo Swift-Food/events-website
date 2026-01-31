@@ -23,7 +23,10 @@ export default function HighlightsBar({
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   // Calculate time remaining until expiration
-  const getTimeRemaining = (expiresAt: string) => {
+  const getTimeRemaining = (expiresAt: string | null) => {
+    if (!expiresAt){
+      return ''
+    }
     const now = new Date();
     const expiry = new Date(expiresAt);
     const diffMs = expiry.getTime() - now.getTime();
@@ -119,7 +122,7 @@ export default function HighlightsBar({
 
                 {/* Time remaining label */}
                 <span className="text-xs text-muted-foreground">
-                  {timeRemaining || "Expired"}
+                  {timeRemaining || ""}
                 </span>
               </button>
             );

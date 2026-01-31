@@ -39,7 +39,7 @@ export default function AddHighlightModal({
 }: AddHighlightModalProps) {
   const [mediaItems, setMediaItems] = useState<MediaPreview[]>([]);
   const [caption, setCaption] = useState("");
-  const [expiresInHours, setExpiresInHours] = useState(24);
+  const [expiresInHours, setExpiresInHours] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -210,7 +210,7 @@ export default function AddHighlightModal({
     });
     setMediaItems([]);
     setCaption("");
-    setExpiresInHours(24);
+    setExpiresInHours(null);
     onClose();
   };
 
