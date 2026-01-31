@@ -1170,7 +1170,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
               </div>
 
               {/* Event Stats Card */}
-              <div className="rounded-xl border border-neutral-700 bg-card-background p-4 sm:p-6">
+              {/* <div className="rounded-xl border border-neutral-700 bg-card-background p-4 sm:p-6">
                 <h3 className="mb-4 text-lg font-semibold text-foreground">
                   Event Stats
                 </h3>
@@ -1205,7 +1205,7 @@ export default function EventClient({ initialEvent, eventId }: EventClientProps)
                     </span>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </section>
 
