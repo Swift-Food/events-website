@@ -443,7 +443,10 @@ export default function CalendarClient({
                 Organized by
               </h3>
               {calendar.owner?.user ? (
-                <div className="flex items-center gap-3">
+                <Link
+                  href={`/user/${calendar.ownerEventUserId}`}
+                  className="flex items-center gap-3 transition-opacity hover:opacity-80"
+                >
                   {calendar.owner.user.profilePicture ? (
                     <Image
                       src={calendar.owner.user.profilePicture}
@@ -473,7 +476,7 @@ export default function CalendarClient({
                     </p>
                     <p className="text-sm text-muted-foreground">Owner</p>
                   </div>
-                </div>
+                </Link>
               ) : (
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
