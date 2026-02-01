@@ -55,6 +55,10 @@ export default function ThemePicker({
     if (type === "solid" && activeMobileTab === "details") {
       setActiveMobileTab("base");
     }
+    // If switching to shader and on palette tab, move to base
+    if (type === "shader" && activeMobileTab === "palette") {
+      setActiveMobileTab("base");
+    }
   };
 
   // Sync scroll position to page indicator
@@ -81,31 +85,52 @@ export default function ThemePicker({
   }, [handleScroll]);
 
   const isDetailsDisabled = theme.type === "solid";
+  const isPaletteDisabled = theme.type === "shader";
 
   // Background type preview thumbnails
   const getBgPreview = (type: BackgroundType) => {
     switch (type) {
       case "solid":
+        // Meadow palette preview
         return (
-          <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
-            <div className="w-4 h-4 rounded-md bg-gradient-to-br from-zinc-400 to-zinc-600 shadow-sm" />
+          <div className="w-full h-full flex">
+            <div className="flex-1" style={{ backgroundColor: "#0e8622" }} />
+            <div className="flex-1" style={{ backgroundColor: "#cee29a" }} />
+            <div className="flex-1" style={{ backgroundColor: "#ddf2eb" }} />
           </div>
         );
       case "landscape":
+        // Lake image
         return (
-          <div className="w-full h-full bg-gradient-to-br from-amber-900/60 via-sky-800/50 to-emerald-900/40 opacity-70" />
+          <Image
+            src="/Landscape theme/Lake.jpg"
+            alt="Landscape"
+            fill
+            className="object-cover"
+            sizes="120px"
+          />
         );
       case "shader":
-        return (
-          <div className="w-full h-full bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 opacity-70" />
-        );
-      case "pattern":
+        // Unicorn shader colors
         return (
           <div
-            className="w-full h-full bg-zinc-800 opacity-50"
+            className="w-full h-full"
             style={{
-              backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
-              backgroundSize: "6px 6px",
+              background: "linear-gradient(135deg, #b8e7f5 0%, #d9ccff 50%, #faf9f6 100%)",
+            }}
+          />
+        );
+      case "pattern":
+        // Crosses pattern on Desert palette background
+        return (
+          <div
+            className="w-full h-full"
+            style={{
+              backgroundColor: "#ffe9bd",
+              backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(
+                "<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><path d='M13 9 L17 9 L17 13 L21 13 L21 17 L17 17 L17 21 L13 21 L13 17 L9 17 L9 13 L13 13 Z' fill='rgba(255,109,42,0.35)'/><path d='M43 39 L47 39 L47 43 L51 43 L51 47 L47 47 L47 51 L43 51 L43 47 L39 47 L39 43 L43 43 Z' fill='rgba(255,109,42,0.35)'/></svg>"
+              )}")`,
+              backgroundRepeat: "repeat",
             }}
           />
         );
@@ -116,15 +141,15 @@ export default function ThemePicker({
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col justify-end pointer-events-none">
-      {/* Backdrop */}
+      {/* Invisible backdrop for click-to-close */}
       <div
-        className="absolute inset-0 bg-black/40 pointer-events-auto"
+        className="absolute inset-0 pointer-events-auto"
         onClick={onToggle}
       />
 
       {/* Customizer Tray */}
       <div
-        className="relative w-full bg-[#1c1c1f]/[0.98] backdrop-blur-3xl border-t border-white/10 shadow-[0_-32px_64px_rgba(0,0,0,0.5)] overflow-hidden rounded-t-[2.5rem] md:rounded-t-[3rem] pointer-events-auto"
+        className="relative w-full bg-black/40 backdrop-blur-2xl border-t border-white/10 shadow-[0_-32px_64px_rgba(0,0,0,0.5)] overflow-hidden rounded-t-[2.5rem] md:rounded-t-[3rem] pointer-events-auto"
         style={{
           animation: "themePickerSlideUp 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
         }}
@@ -159,7 +184,7 @@ export default function ThemePicker({
           </div>
 
           {/* Content: 3-column grid on desktop, tabbed on mobile */}
-          <div className="md:grid md:grid-cols-[240px_1fr_1.5fr] gap-16 lg:gap-24 items-start">
+          <div className={`md:grid ${isPaletteDisabled ? "md:grid-cols-[240px_1fr]" : "md:grid-cols-[240px_1fr_1.5fr]"} gap-16 lg:gap-24 items-start`}>
             {/* Column 1: Base Style Selection */}
             <div
               className={`${
@@ -203,11 +228,15 @@ export default function ThemePicker({
               </div>
             </div>
 
-            {/* Column 2: Color Palette Selection */}
+            {/* Column 2: Color Palette Selection (hidden for shader) */}
             <div
               className={`${
-                activeMobileTab === "palette" ? "block" : "hidden"
-              } md:block space-y-6 md:border-l md:border-white/5 md:pl-16 overflow-hidden`}
+                isPaletteDisabled
+                  ? "hidden"
+                  : activeMobileTab === "palette"
+                  ? "block"
+                  : "hidden"
+              } ${isPaletteDisabled ? "md:hidden" : "md:block"} space-y-6 md:border-l md:border-white/5 md:pl-16 overflow-hidden`}
             >
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between mb-8">
@@ -228,7 +257,7 @@ export default function ThemePicker({
                 >
                   {/* Page 1: Monotone */}
                   <div className="min-w-full snap-start px-1">
-                    <div className="grid grid-cols-4 grid-rows-2 gap-y-8 gap-x-6 py-2">
+                    <div className="grid grid-cols-4 grid-rows-2 gap-y-6 gap-x-6 py-2">
                       {SINGLE_COLOR_PALETTES.map((preset) => (
                         <button
                           key={preset.id}
@@ -236,21 +265,30 @@ export default function ThemePicker({
                           onClick={() =>
                             onChange({ ...theme, colorPalette: preset.id })
                           }
-                          className={`w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center p-0.5 border-2 transition-all hover:scale-110 active:scale-95 mx-auto ${
-                            theme.colorPalette === preset.id
-                              ? "border-white ring-4 md:ring-8 ring-white/10"
-                              : "border-transparent"
-                          }`}
+                          className="flex flex-col items-center gap-1.5 transition-all hover:scale-110 active:scale-95 mx-auto"
                         >
-                          <div className="w-full h-full rounded-full overflow-hidden flex transform -rotate-45 shadow-inner">
-                            {preset.colors.map((color, i) => (
-                              <div
-                                key={i}
-                                className="flex-1 h-full"
-                                style={{ backgroundColor: color }}
-                              />
-                            ))}
+                          <div
+                            className={`w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center p-0.5 border-2 transition-all ${
+                              theme.colorPalette === preset.id
+                                ? "border-white ring-4 md:ring-8 ring-white/10"
+                                : "border-transparent"
+                            }`}
+                          >
+                            <div className="w-full h-full rounded-full overflow-hidden flex transform -rotate-45 shadow-inner">
+                              {preset.colors.map((color, i) => (
+                                <div
+                                  key={i}
+                                  className="flex-1 h-full"
+                                  style={{ backgroundColor: color }}
+                                />
+                              ))}
+                            </div>
                           </div>
+                          <span className={`text-[10px] truncate w-14 text-center ${
+                            theme.colorPalette === preset.id ? "text-white font-semibold" : "text-zinc-500"
+                          }`}>
+                            {preset.name}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -258,7 +296,7 @@ export default function ThemePicker({
 
                   {/* Page 2: Themes */}
                   <div className="min-w-full snap-start px-1">
-                    <div className="grid grid-cols-4 grid-rows-2 gap-y-8 gap-x-6 py-2">
+                    <div className="grid grid-cols-4 grid-rows-2 gap-y-6 gap-x-6 py-2">
                       {MULTI_COLOR_PALETTES.map((preset) => (
                         <button
                           key={preset.id}
@@ -266,21 +304,30 @@ export default function ThemePicker({
                           onClick={() =>
                             onChange({ ...theme, colorPalette: preset.id })
                           }
-                          className={`w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center p-0.5 border-2 transition-all hover:scale-110 active:scale-95 mx-auto ${
-                            theme.colorPalette === preset.id
-                              ? "border-white ring-4 md:ring-8 ring-white/10"
-                              : "border-transparent"
-                          }`}
+                          className="flex flex-col items-center gap-1.5 transition-all hover:scale-110 active:scale-95 mx-auto"
                         >
-                          <div className="w-full h-full rounded-full overflow-hidden flex transform -rotate-45 shadow-inner">
-                            {preset.colors.map((color, i) => (
-                              <div
-                                key={i}
-                                className="flex-1 h-full"
-                                style={{ backgroundColor: color }}
-                              />
-                            ))}
+                          <div
+                            className={`w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center p-0.5 border-2 transition-all ${
+                              theme.colorPalette === preset.id
+                                ? "border-white ring-4 md:ring-8 ring-white/10"
+                                : "border-transparent"
+                            }`}
+                          >
+                            <div className="w-full h-full rounded-full overflow-hidden flex transform -rotate-45 shadow-inner">
+                              {preset.colors.map((color, i) => (
+                                <div
+                                  key={i}
+                                  className="flex-1 h-full"
+                                  style={{ backgroundColor: color }}
+                                />
+                              ))}
+                            </div>
                           </div>
+                          <span className={`text-[10px] truncate w-14 text-center ${
+                            theme.colorPalette === preset.id ? "text-white font-semibold" : "text-zinc-500"
+                          }`}>
+                            {preset.name}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -320,7 +367,7 @@ export default function ThemePicker({
               <div className="min-h-[220px]">
                 {/* Landscape options */}
                 {theme.type === "landscape" && (
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-3 gap-4">
                     {LANDSCAPE_OPTIONS.map((opt) => (
                       <button
                         key={opt.id}
@@ -332,20 +379,29 @@ export default function ThemePicker({
                             imageOpacity: theme.imageOpacity ?? 0.4,
                           })
                         }
-                        className={`relative aspect-square rounded-[1.5rem] overflow-hidden border-2 transition-all group ${
-                          theme.image === opt.id
-                            ? "border-white shadow-2xl scale-105 z-10 ring-4 md:ring-8 ring-white/5"
-                            : "border-white/5 opacity-40 hover:opacity-100"
-                        }`}
+                        className="flex flex-col items-center gap-2 group"
                       >
-                        <Image
-                          src={`/Landscape theme/${opt.filename}`}
-                          alt={opt.name}
-                          fill
-                          className="object-cover"
-                          sizes="120px"
-                        />
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
+                        <div
+                          className={`relative w-full aspect-square rounded-[1.5rem] overflow-hidden border-2 transition-all ${
+                            theme.image === opt.id
+                              ? "border-white shadow-2xl scale-105 z-10 ring-4 md:ring-8 ring-white/5"
+                              : "border-white/5 opacity-40 group-hover:opacity-100"
+                          }`}
+                        >
+                          <Image
+                            src={`/Landscape theme/${opt.filename}`}
+                            alt={opt.name}
+                            fill
+                            className="object-cover"
+                            sizes="120px"
+                          />
+                          <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
+                        </div>
+                        <span className={`text-[10px] font-bold uppercase tracking-widest ${
+                          theme.image === opt.id ? "text-white" : "text-zinc-600 group-hover:text-zinc-400"
+                        }`}>
+                          {opt.name}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -462,9 +518,14 @@ export default function ThemePicker({
 
           <button
             type="button"
-            onClick={() => setActiveMobileTab("palette")}
+            onClick={() => !isPaletteDisabled && setActiveMobileTab("palette")}
+            disabled={isPaletteDisabled}
             className={`flex flex-col items-center gap-1 transition-all ${
-              activeMobileTab === "palette" ? "text-white" : "text-zinc-600"
+              isPaletteDisabled
+                ? "opacity-20 grayscale cursor-not-allowed"
+                : activeMobileTab === "palette"
+                ? "text-white"
+                : "text-zinc-600"
             }`}
           >
             <div
