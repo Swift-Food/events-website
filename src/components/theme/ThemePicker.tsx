@@ -89,8 +89,44 @@ export default function ThemePicker({
 
   const currentPalette = (PALETTE_MAP[theme.colorPalette] ?? PALETTE_MAP["default"]).palette;
 
+  // Derive a darker, saturated shade from the page background for pattern previews
+  const getPatternColor = () => {
+    const m = currentPalette.pageBackground.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/);
+    if (!m) return "rgba(0,0,0,0.2)";
+    let r = Number(m[1]), g = Number(m[2]), b = Number(m[3]);
+    // Convert to HSL to darken while preserving hue/saturation
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0;
+    const l = (max + min) / 2;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+      else if (max === g) h = ((b - r) / d + 2) / 6;
+      else h = ((r - g) / d + 4) / 6;
+    }
+    // Darken: reduce lightness, boost saturation
+    const newL = Math.max(l * 0.45, 0.08);
+    const newS = Math.min(s * 1.4, 1);
+    // HSL to RGB
+    const hue2rgb = (p: number, q: number, t: number) => {
+      if (t < 0) t += 1; if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    const q2 = newL < 0.5 ? newL * (1 + newS) : newL + newS - newL * newS;
+    const p2 = 2 * newL - q2;
+    const rr = Math.round(hue2rgb(p2, q2, h + 1/3) * 255);
+    const gg = Math.round(hue2rgb(p2, q2, h) * 255);
+    const bb = Math.round(hue2rgb(p2, q2, h - 1/3) * 255);
+    return `rgba(${rr}, ${gg}, ${bb}, 0.45)`;
+  };
+
   const getPatternPreviewBg = (patternId: string) => {
-    const c = currentPalette.mainTextColor.replace(/,\s*[\d.]+\)$/, ", 0.35)");
+    const c = getPatternColor();
     const encode = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
     switch (patternId) {
       case "dots":
@@ -100,7 +136,10 @@ export default function ThemePicker({
       case "stripes":
         return encode(`<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><rect x='8' y='0' width='4' height='20' fill='${c}'/></svg>`);
       case "checkers": {
-        const c2 = currentPalette.cardBackground;
+        const m2 = currentPalette.pageBackground.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/);
+        const c2 = m2
+          ? `rgba(${Math.round(Number(m2[1]) * 0.88)}, ${Math.round(Number(m2[2]) * 0.88)}, ${Math.round(Number(m2[3]) * 0.88)}, 1)`
+          : currentPalette.cardBackground;
         return encode(`<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><rect x='0' y='0' width='40' height='40' fill='${c}'/><rect x='40' y='40' width='40' height='40' fill='${c}'/><rect x='40' y='0' width='40' height='40' fill='${c2}'/><rect x='0' y='40' width='40' height='40' fill='${c2}'/></svg>`);
       }
       case "crosses":

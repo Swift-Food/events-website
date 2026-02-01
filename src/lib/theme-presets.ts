@@ -270,10 +270,37 @@ function generateCrosses(color: string): string {
   return `<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><path d='M13 9 L17 9 L17 13 L21 13 L21 17 L17 17 L17 21 L13 21 L13 17 L9 17 L9 13 L13 13 Z' fill='${color}'/><path d='M43 39 L47 39 L47 43 L51 43 L51 47 L47 47 L47 51 L43 51 L43 47 L39 47 L39 43 L43 43 Z' fill='${color}'/></svg>`;
 }
 
+/** Darken a color by converting to HSL, reducing lightness, and boosting saturation */
+function darkenColor(r: number, g: number, b: number, amount: number, alpha: number): string {
+  let rr = r / 255, gg = g / 255, bb = b / 255;
+  const max = Math.max(rr, gg, bb), min = Math.min(rr, gg, bb);
+  let h = 0, s = 0;
+  const l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === rr) h = ((gg - bb) / d + (gg < bb ? 6 : 0)) / 6;
+    else if (max === gg) h = ((bb - rr) / d + 2) / 6;
+    else h = ((rr - gg) / d + 4) / 6;
+  }
+  const newL = Math.max(l * amount, 0.08);
+  const newS = Math.min(s * 1.4, 1);
+  const hue2rgb = (p: number, q: number, t: number) => {
+    if (t < 0) t += 1; if (t > 1) t -= 1;
+    if (t < 1/6) return p + (q - p) * 6 * t;
+    if (t < 1/2) return q;
+    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+    return p;
+  };
+  const q = newL < 0.5 ? newL * (1 + newS) : newL + newS - newL * newS;
+  const p = 2 * newL - q;
+  return `rgba(${Math.round(hue2rgb(p, q, h + 1/3) * 255)}, ${Math.round(hue2rgb(p, q, h) * 255)}, ${Math.round(hue2rgb(p, q, h - 1/3) * 255)}, ${alpha})`;
+}
+
 /** Returns the CSS `background-image` value for a pattern */
 export function getPatternCSS(patternId: string, palette: ColorPalette): string {
-  const { r, g, b } = parseColor(palette.mainTextColor);
-  const patternColor = `rgba(${r}, ${g}, ${b}, 0.15)`;
+  const { r, g, b } = parseColor(palette.pageBackground);
+  const patternColor = darkenColor(r, g, b, 0.45, 0.15);
 
   let svg: string;
   switch (patternId) {
@@ -287,8 +314,7 @@ export function getPatternCSS(patternId: string, palette: ColorPalette): string 
       svg = generateStripes(patternColor);
       break;
     case "checkers": {
-      const { r: bgR, g: bgG, b: bgB } = parseColor(palette.pageBackground);
-      const bgColor = `rgba(${bgR}, ${bgG}, ${bgB}, 0.15)`;
+      const bgColor = darkenColor(r, g, b, 0.88, 0.15);
       svg = generateCheckers(patternColor, bgColor);
       break;
     }
