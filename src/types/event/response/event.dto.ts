@@ -27,6 +27,7 @@ export interface EventResponseDto {
   description: string;
   eventImage: string | null;
   eventColor: string;
+  eventTheme?: string | null; // JSON-stringified EventThemeConfig from backend
   startDateTime: string | Date;
   endDateTime: string | Date;
   status: EventStatus;
