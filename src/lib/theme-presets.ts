@@ -226,6 +226,7 @@ export const LANDSCAPE_OPTIONS: LandscapeOption[] = [
   { id: "mountain", name: "Mountain", filename: "Mountain.jpg" },
   { id: "night-sky", name: "Night Sky", filename: "Night Sky.jpg" },
   { id: "ocean", name: "Ocean", filename: "Ocean.jpg" },
+  { id: "city", name: "City", filename: "City.jpg" },
 ];
 
 export const LANDSCAPE_MAP: Record<string, LandscapeOption> = Object.fromEntries(
