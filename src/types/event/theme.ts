@@ -15,7 +15,7 @@ export interface EventThemeConfig {
   image?: string;
   /** landscape only: 0-1 */
   imageOpacity?: number;
-  /** shader only: "aurora", "sunset", etc. */
+  /** shader only: "unicorn", "peach", "desert", "arctic", "dusk", "sky", "midnight", "aquarium" */
   shaderPreset?: string;
   /** pattern only: "dots", "grid", "stripes", "checkers", "crosses" */
   pattern?: string;

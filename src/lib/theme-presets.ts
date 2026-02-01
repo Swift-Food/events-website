@@ -197,12 +197,14 @@ function shaderPreset(
 }
 
 export const SHADER_PRESETS: ShaderPreset[] = [
-  shaderPreset("aurora", "Aurora", "#b8e7f5", "#d9ccff", "#faf9f6", false, "#4a3d8f"),
-  shaderPreset("sunset", "Sunset", "#ff6d2a", "#ffc2b3", "#1c275f", true, "#ff8c5a"),
-  shaderPreset("ocean", "Ocean", "#0e8622", "#2e80e4", "#afcff6", false, "#1a5fb4"),
-  shaderPreset("lavender", "Lavender", "#d9ccff", "#f9c8db", "#f8f5e6", false, "#7c5cbf"),
-  shaderPreset("fire", "Fire", "#ff6d2a", "#f3a39c", "#ffe9bd", false, "#d4440f"),
-  shaderPreset("forest", "Forest", "#5f7b24", "#7b9d2f", "#ddf2eb", false, "#3d6b1e"),
+  shaderPreset("unicorn", "Unicorn", "#b8e7f5", "#d9ccff", "#faf9f6", false, "#4a3d8f"),
+  shaderPreset("peach", "Peach", "#f9c8db", "#cee29a", "#ddf2eb", false, "#5a7a2e"),
+  shaderPreset("desert", "Desert", "#ff6d2a", "#afcff6", "#f8e6a9", false, "#d4440f"),
+  shaderPreset("arctic", "Arctic", "#1c4074", "#c6dcda", "#f8f5e6", false, "#1c4074"),
+  shaderPreset("dusk", "Dusk", "#402c61", "#92475c", "#f3a39c", false, "#402c61"),
+  shaderPreset("sky", "Sky", "#2e80e4", "#afcff6", "#f8e6a9", false, "#1a5fb4"),
+  shaderPreset("midnight", "Midnight", "#1c275f", "#596394", "#ececec", true, "#8090c0"),
+  shaderPreset("aquarium", "Aquarium", "#a3d6b4", "#cddbf9", "#99b0ed", false, "#3a6b8c"),
 ];
 
 export const SHADER_MAP: Record<string, ShaderPreset> = Object.fromEntries(

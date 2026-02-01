@@ -49,7 +49,7 @@ export default function InlineThemePicker({
       updated.imageOpacity = 0.4;
     }
     if (type === "shader" && !updated.shaderPreset) {
-      updated.shaderPreset = "aurora";
+      updated.shaderPreset = "unicorn";
     }
     if (type === "pattern" && !updated.pattern) {
       updated.pattern = "dots";
@@ -133,7 +133,7 @@ export default function InlineThemePicker({
         );
       }
       case "shader": {
-        const shader = SHADER_PRESETS.find((s) => s.id === (theme.shaderPreset ?? "aurora")) ?? SHADER_PRESETS[0];
+        const shader = SHADER_PRESETS.find((s) => s.id === (theme.shaderPreset ?? "unicorn")) ?? SHADER_PRESETS[0];
         return (
           <div
             className="w-full h-full rounded-lg"

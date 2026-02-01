@@ -44,7 +44,7 @@ export default function ThemePicker({
       updated.imageOpacity = 0.4;
     }
     if (type === "shader" && !updated.shaderPreset) {
-      updated.shaderPreset = "aurora";
+      updated.shaderPreset = "unicorn";
     }
     if (type === "pattern" && !updated.pattern) {
       updated.pattern = "dots";
