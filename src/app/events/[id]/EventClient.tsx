@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
@@ -65,6 +65,10 @@ import RegistrationConfirmModal from "@/components/RegistrationConfirmModal";
 import GroupPurchaseModal from "@/components/GroupPurchaseModal";
 import SaveToCalendarModal from "@/components/SaveToCalendarModal";
 import { usePathname } from "next/navigation";
+import { useEventTheme } from "@/context/EventThemeContext";
+import { getThemeCSSVariables } from "@/lib/theme-presets";
+import EventThemeBackground from "@/components/theme/EventThemeBackground";
+import EventThemeStyles from "@/components/theme/EventThemeStyles";
 
 interface EventClientProps {
   initialEvent: EventResponseDto;
@@ -79,7 +83,19 @@ export default function EventClient({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { isAuthenticated, user, isLoading: authLoading } = useAuth();
+  const { config: themeConfig, palette: themePalette, shader: themeShader, landscape: themeLandscape } = useEventTheme();
+  const themeCSSVars = useMemo(() => getThemeCSSVariables(themePalette), [themePalette]);
   const inviteToken = searchParams.get("inviteToken");
+
+  // Apply theme CSS variables to document root so navbar inherits them
+  useEffect(() => {
+    const root = document.documentElement;
+    const entries = Object.entries(themeCSSVars);
+    entries.forEach(([key, value]) => root.style.setProperty(key, value));
+    return () => {
+      entries.forEach(([key]) => root.style.removeProperty(key));
+    };
+  }, [themeCSSVars]);
 
   // Build current path for SmartAppBanner
   const currentPath = `${pathname}${
@@ -667,7 +683,18 @@ export default function EventClient({
       {/* Smart App Banner - shown on mobile when viewing invite */}
       <SmartAppBanner currentPath={currentPath} />
 
-      <div className="min-h-screen bg-background">
+      <div
+        className={`relative min-h-screen ${themeConfig.type === "solid" ? "bg-background" : ""}`}
+        style={themeCSSVars as React.CSSProperties}
+      >
+        <EventThemeBackground
+          config={themeConfig}
+          palette={themePalette}
+          shader={themeShader}
+          landscape={themeLandscape}
+        />
+        <EventThemeStyles />
+        <div className="relative z-10">
         {/* Management/Scanner Banner - Mobile (full width) */}
         {userRole && (
           <div
@@ -1871,7 +1898,7 @@ export default function EventClient({
                 </h2>
                 {event.description ? (
                   <div
-                    className="tiptap-editor tiptap-view-mode"
+                    className="tiptap-editor tiptap-view-mode themed-event"
                     dangerouslySetInnerHTML={{ __html: event.description }}
                   />
                 ) : (
@@ -2045,6 +2072,7 @@ export default function EventClient({
             onClose={() => setShowSaveToCalendarModal(false)}
           />
         )}
+        </div>
       </div>
     </>
   );

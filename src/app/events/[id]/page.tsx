@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EventResponseDto, EventStatus } from "@/types/event";
+import { EventThemeProvider } from "@/context/EventThemeContext";
 import EventClient from "./EventClient";
 
 interface PageProps {
@@ -150,7 +151,9 @@ export default async function EventPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <EventClient initialEvent={event} eventId={id} />
+      <EventThemeProvider themeJson={event.eventTheme}>
+        <EventClient initialEvent={event} eventId={id} />
+      </EventThemeProvider>
     </>
   );
 }
