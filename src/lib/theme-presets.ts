@@ -318,12 +318,22 @@ export function resolveTheme(config: EventThemeConfig): {
       const { r, g, b } = parseColor(color);
       return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     };
-    palette = {
-      ...basePalette,
-      pageBackground: isDefault ? "transparent" : basePalette.pageBackground,
-      cardBackground: withAlpha(basePalette.cardBackground, 0.75),
-      cardSecondaryBackground: withAlpha(basePalette.cardSecondaryBackground, 0.6),
-    };
+    palette = isDefault
+      ? {
+          ...basePalette,
+          pageBackground: "transparent",
+          cardBackground: "rgba(255, 255, 255, 0.15)",
+          cardSecondaryBackground: "rgba(255, 255, 255, 0.08)",
+          mainTextColor: "rgba(0, 0, 0, 0.75)",
+          subTextColor: "rgba(0, 0, 0, 0.5)",
+          primaryColor: "rgba(0, 0, 0, 0.7)",
+          borderColor: "rgba(0, 0, 0, 0.1)",
+        }
+      : {
+          ...basePalette,
+          cardBackground: withAlpha(basePalette.cardBackground, 0.75),
+          cardSecondaryBackground: withAlpha(basePalette.cardSecondaryBackground, 0.6),
+        };
   }
 
   return {
