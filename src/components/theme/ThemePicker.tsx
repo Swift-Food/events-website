@@ -63,7 +63,7 @@ export default function ThemePicker({
       <button
         type="button"
         onClick={onToggle}
-        className="mx-auto flex items-center gap-2 rounded-t-xl bg-card-background px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-card-background/90"
+        className="mx-auto flex items-center gap-2 rounded-t-xl bg-card-background/80 backdrop-blur-md px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-card-background/90"
         style={{ marginBottom: "-1px" }}
       >
         <Palette className="h-4 w-4" />
@@ -76,7 +76,7 @@ export default function ThemePicker({
       </button>
 
       {/* Panel body */}
-      <div className="bg-card-background border-t border-foreground/10 max-h-[70vh] overflow-y-auto">
+      <div className="bg-card-background/80 backdrop-blur-md border-t border-foreground/10 max-h-[70vh] overflow-y-auto">
         <div className="mx-auto max-w-2xl px-4 py-5 space-y-5">
           {/* Background type selector */}
           <div>

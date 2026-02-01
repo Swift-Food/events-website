@@ -19,6 +19,7 @@ import {
 } from "@/context/EventCreationContext";
 import { resolveTheme, getThemeCSSVariables, PALETTE_MAP } from "@/lib/theme-presets";
 import ThemePicker from "@/components/theme/ThemePicker";
+import EventThemeBackground from "@/components/theme/EventThemeBackground";
 import { TicketType, UpdateEventDto, EventStatus } from "@/types";
 import { FormField } from "@/types";
 import { EventCategoryResponseDto } from "@/types/category";
@@ -985,10 +986,18 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
   return (
     <div
-      className="flex min-h-[calc(100vh-64px)] justify-center bg-background px-3 md:px-6 pb-4 transition-colors duration-300"
+      className="relative flex min-h-[calc(100vh-64px)] justify-center bg-background px-3 md:px-6 pb-4 transition-colors duration-300"
       style={themeCSSVars as React.CSSProperties}
     >
-      <div className="flex w-full max-w-5xl flex-col gap-6 text-foreground lg:flex-row">
+      {/* Theme background layer for landscape/shader/pattern */}
+      <EventThemeBackground
+        config={eventTheme}
+        palette={resolvedTheme.palette}
+        shader={resolvedTheme.shader}
+        landscape={resolvedTheme.landscape}
+      />
+
+      <div className="relative z-10 flex w-full max-w-5xl flex-col gap-6 text-foreground lg:flex-row">
         <section className="flex flex-col gap-5 rounded-3xl lg:p-7 lg:w-96 lg:shrink-0 lg:sticky lg:top-20 lg:self-start sm:flex-row lg:flex-col">
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background backdrop-blur-sm  sm:flex-1 sm:basis-0 lg:w-full lg:flex-none">
             {coverPreview ? (

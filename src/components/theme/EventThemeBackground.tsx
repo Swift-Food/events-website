@@ -2,7 +2,8 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useEventTheme } from "@/context/EventThemeContext";
+import type { EventThemeConfig, ColorPalette } from "@/types/event/theme";
+import type { ShaderPreset, LandscapeOption } from "@/types/event/theme";
 import { getPatternCSS } from "@/lib/theme-presets";
 
 const ShaderBackgroundInner = dynamic(
@@ -10,9 +11,19 @@ const ShaderBackgroundInner = dynamic(
   { ssr: false }
 );
 
-export default function EventThemeBackground() {
-  const { config, palette, shader, landscape } = useEventTheme();
+interface EventThemeBackgroundProps {
+  config: EventThemeConfig;
+  palette: ColorPalette;
+  shader?: ShaderPreset;
+  landscape?: LandscapeOption;
+}
 
+export default function EventThemeBackground({
+  config,
+  palette,
+  shader,
+  landscape,
+}: EventThemeBackgroundProps) {
   if (config.type === "solid") {
     return null;
   }
