@@ -13,6 +13,8 @@ import type { Dispatch, SetStateAction } from "react";
 import { TicketType } from "@/types";
 import { FormField } from "@/types";
 import { EventFormat } from "@/types/event/status";
+import type { EventThemeConfig } from "@/types/event/theme";
+import { DEFAULT_THEME_CONFIG } from "@/lib/theme-presets";
 
 interface EventCreationContextType {
   // Event details
@@ -99,6 +101,10 @@ interface EventCreationContextType {
   externalEventUrl: string;
   setExternalEventUrl: Dispatch<SetStateAction<string>>;
 
+  // Theme
+  eventTheme: EventThemeConfig;
+  setEventTheme: Dispatch<SetStateAction<EventThemeConfig>>;
+
   // Form actions
   clearForm: () => void;
   persistEventDraft: () => void;
@@ -140,6 +146,7 @@ type EventDraft = {
   selectedSubcategoryIds: string[];
   acceptedOrganizerTerms: boolean;
   externalEventUrl: string;
+  eventTheme: EventThemeConfig;
 };
 
 // Helper to format a Date to datetime-local input format
@@ -306,6 +313,11 @@ export function EventCreationProvider({
     storedDraft.externalEventUrl ?? ""
   );
 
+  // Theme
+  const [eventTheme, setEventTheme] = useState<EventThemeConfig>(
+    storedDraft.eventTheme ?? DEFAULT_THEME_CONFIG
+  );
+
   // Ticket management functions
   const addTicketType = useCallback((ticket: TicketType) => {
     setTicketTypes((prev) => [...prev, ticket]);
@@ -371,6 +383,7 @@ export function EventCreationProvider({
       selectedSubcategoryIds,
       acceptedOrganizerTerms,
       externalEventUrl,
+      eventTheme,
     };
 
     try {
@@ -409,6 +422,7 @@ export function EventCreationProvider({
     selectedSubcategoryIds,
     acceptedOrganizerTerms,
     externalEventUrl,
+    eventTheme,
   ]);
 
   useEffect(() => {
@@ -448,6 +462,7 @@ export function EventCreationProvider({
     setSelectedSubcategoryIds([]);
     setAcceptedOrganizerTerms(false);
     setExternalEventUrl("");
+    setEventTheme(DEFAULT_THEME_CONFIG);
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(STORAGE_KEY);
     }
@@ -520,6 +535,8 @@ export function EventCreationProvider({
         setAcceptedOrganizerTerms,
         externalEventUrl,
         setExternalEventUrl,
+        eventTheme,
+        setEventTheme,
         clearForm,
         persistEventDraft,
       }}
