@@ -1027,7 +1027,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-muted">
+              <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-card-background">
                 <span className="text-3xl font-serif text-foreground">
                   You Are Invited
                 </span>
