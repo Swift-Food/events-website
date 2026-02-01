@@ -225,7 +225,8 @@ function generateCheckers(color1: string, color2: string): string {
 }
 
 function generateCrosses(color: string): string {
-  return `<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'><path d='M13 9 L17 9 L17 13 L21 13 L21 17 L17 17 L17 21 L13 21 L13 17 L9 17 L9 13 L13 13 Z' fill='${color}'/></svg>`;
+  // Two crosses in a 60x60 tile, staggered: one at (15,15) and one offset at (45,45)
+  return `<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><path d='M13 9 L17 9 L17 13 L21 13 L21 17 L17 17 L17 21 L13 21 L13 17 L9 17 L9 13 L13 13 Z' fill='${color}'/><path d='M43 39 L47 39 L47 43 L51 43 L51 47 L47 47 L47 51 L43 51 L43 47 L39 47 L39 43 L43 43 Z' fill='${color}'/></svg>`;
 }
 
 /** Returns the CSS `background-image` value for a pattern */
