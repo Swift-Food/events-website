@@ -17,6 +17,8 @@ import {
   EventCreationProvider,
   useEventCreation,
 } from "@/context/EventCreationContext";
+import { resolveTheme, getThemeCSSVariables, PALETTE_MAP } from "@/lib/theme-presets";
+import ThemePicker from "@/components/theme/ThemePicker";
 import { TicketType, UpdateEventDto, EventStatus } from "@/types";
 import { FormField } from "@/types";
 import { EventCategoryResponseDto } from "@/types/category";
@@ -123,8 +125,18 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     acceptedOrganizerTerms,
     setAcceptedOrganizerTerms,
     externalEventUrl,
+    eventTheme,
+    setEventTheme,
     clearForm,
   } = useEventCreation();
+
+  // Theme
+  const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
+  const resolvedTheme = useMemo(() => resolveTheme(eventTheme), [eventTheme]);
+  const themeCSSVars = useMemo(
+    () => getThemeCSSVariables(resolvedTheme.palette),
+    [resolvedTheme.palette]
+  );
 
   // Local state for UI only
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
@@ -254,6 +266,16 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
         if (initialData.address.location) {
           setLatitude(initialData.address.location.latitude);
           setLongitude(initialData.address.location.longitude);
+        }
+      }
+
+      // Theme
+      if (initialData.eventTheme) {
+        try {
+          const parsed = JSON.parse(initialData.eventTheme);
+          setEventTheme(parsed);
+        } catch {
+          // Keep default theme if parsing fails
         }
       }
 
@@ -573,7 +595,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
         name: eventName,
         description: description || "",
         eventImage: coverPreview || undefined,
-        eventColor: "#6366f1",
+        eventColor: resolvedTheme.palette.primaryColor,
+        eventTheme: JSON.stringify(eventTheme),
         ownerEventUserId: eventUser.id,
         startDateTime: start,
         endDateTime: end,
@@ -961,7 +984,10 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] justify-center bg-background px-3 md:px-6 pb-4">
+    <div
+      className="flex min-h-[calc(100vh-64px)] justify-center bg-background px-3 md:px-6 pb-4 transition-colors duration-300"
+      style={themeCSSVars as React.CSSProperties}
+    >
       <div className="flex w-full max-w-5xl flex-col gap-6 text-foreground lg:flex-row">
         <section className="flex flex-col gap-5 rounded-3xl lg:p-7 lg:w-96 lg:shrink-0 lg:sticky lg:top-20 lg:self-start sm:flex-row lg:flex-col">
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background backdrop-blur-sm  sm:flex-1 sm:basis-0 lg:w-full lg:flex-none">
@@ -1148,6 +1174,34 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             <span>Edit Description</span>
           </button>
 
+
+          {/* Theme Row */}
+          <button
+            type="button"
+            onClick={() => setIsThemePickerOpen(!isThemePickerOpen)}
+            className="flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer"
+          >
+            {/* Preview swatch */}
+            <div className="flex h-8 w-8 rounded-lg overflow-hidden shrink-0">
+              {(PALETTE_MAP[eventTheme.colorPalette]?.colors ?? ["#222", "#2a2a2a"]).map(
+                (color, i) => (
+                  <div key={i} className="flex-1" style={{ backgroundColor: color }} />
+                )
+              )}
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-base font-semibold text-foreground">Theme</p>
+              <p className="text-sm text-muted-foreground">
+                {PALETTE_MAP[eventTheme.colorPalette]?.name ?? "Default"} &middot;{" "}
+                {eventTheme.type.charAt(0).toUpperCase() + eventTheme.type.slice(1)}
+              </p>
+            </div>
+            {isThemePickerOpen ? (
+              <ChevronUp className="h-5 w-5 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-muted-foreground" />
+            )}
+          </button>
 
           {/* Event Categories */}
           <div className="space-y-4">
@@ -1904,6 +1958,13 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
       <ImportEventModal
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
+      />
+
+      <ThemePicker
+        theme={eventTheme}
+        onChange={setEventTheme}
+        isOpen={isThemePickerOpen}
+        onToggle={() => setIsThemePickerOpen(!isThemePickerOpen)}
       />
     </div>
   );

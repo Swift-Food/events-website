@@ -263,3 +263,27 @@ export function resolveTheme(config: EventThemeConfig): {
     landscape: config.image ? LANDSCAPE_MAP[config.image] : undefined,
   };
 }
+
+// ---------------------------------------------------------------------------
+// CSS variable overrides for live preview
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns a React CSSProperties object that overrides Tailwind v4's
+ * --color-* CSS variables based on the resolved palette. Apply this
+ * to a wrapper div and all child Tailwind classes (bg-background,
+ * text-foreground, etc.) automatically pick up the theme colors.
+ */
+export function getThemeCSSVariables(
+  palette: ColorPalette
+): Record<string, string> {
+  return {
+    "--color-background": palette.pageBackground,
+    "--color-card-background": palette.cardBackground,
+    "--color-card-secondary-background": palette.cardSecondaryBackground,
+    "--color-foreground": palette.mainTextColor,
+    "--color-muted-foreground": palette.subTextColor,
+    "--color-primary": palette.primaryColor,
+    "--color-border": palette.borderColor,
+  };
+}
