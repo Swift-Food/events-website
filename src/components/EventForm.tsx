@@ -139,6 +139,16 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     [resolvedTheme.palette]
   );
 
+  // Apply theme CSS variables to document root so navbar inherits them
+  useEffect(() => {
+    const root = document.documentElement;
+    const entries = Object.entries(themeCSSVars);
+    entries.forEach(([key, value]) => root.style.setProperty(key, value));
+    return () => {
+      entries.forEach(([key]) => root.style.removeProperty(key));
+    };
+  }, [themeCSSVars]);
+
   // Local state for UI only
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [isTicketTypeModalOpen, setIsTicketTypeModalOpen] = useState(false);
