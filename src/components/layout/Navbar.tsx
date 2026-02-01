@@ -89,7 +89,9 @@ export default function Navbar() {
   // Dynamic classes based on landing page
   const textColor = isLandingPage ? "text-zinc-900" : "text-foreground";
   const hoverBg = isLandingPage ? "hover:bg-zinc-900/10" : "hover:bg-foreground/10";
-  const logoFilter = isLandingPage ? "" : "invert";
+  const logoStyle = isLandingPage
+    ? {}
+    : { WebkitMaskImage: "url(/logo.svg)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", maskImage: "url(/logo.svg)", maskSize: "contain", maskRepeat: "no-repeat" } as React.CSSProperties;
   const buttonBg = isLandingPage ? "bg-zinc-900 text-white" : "bg-foreground text-background";
   const borderColor = isLandingPage ? "border-zinc-900/20 hover:border-zinc-900/40" : "border-foreground/20 hover:border-foreground/40";
 
@@ -102,13 +104,21 @@ export default function Navbar() {
               href="/"
               className={`flex items-center gap-1 text-lg font-semibold tracking-tight hover:scale-105 ${isLandingPage ? "hover:drop-shadow-[0_0_8px_rgba(0,0,0,0.3)]" : "hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"} transition-transform duration-200`}
             >
-              <Image
-                src="/logo.svg"
-                alt="Prismo logo"
-                width={24}
-                height={24}
-                className={logoFilter}
-              />
+              {isLandingPage ? (
+                <Image
+                  src="/logo.svg"
+                  alt="Prismo logo"
+                  width={24}
+                  height={24}
+                />
+              ) : (
+                <div
+                  className="w-6 h-6 bg-foreground"
+                  style={logoStyle}
+                  role="img"
+                  aria-label="Prismo logo"
+                />
+              )}
               <span
                 className={`hidden sm:inline font-normal ${textColor}`}
                 style={{ fontFamily: "var(--font-satoshi), sans-serif" }}
