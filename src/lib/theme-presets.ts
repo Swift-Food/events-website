@@ -324,6 +324,8 @@ export function resolveTheme(config: EventThemeConfig): {
       cardBackground: withAlpha(basePalette.cardBackground, 0.1),
       cardSecondaryBackground: withAlpha(basePalette.cardSecondaryBackground, 0.06),
       ...(isDefault && {
+        cardBackground: "rgba(255, 255, 255, 0.15)",
+        cardSecondaryBackground: "rgba(255, 255, 255, 0.08)",
         mainTextColor: "rgba(0, 0, 0, 0.75)",
         subTextColor: "rgba(0, 0, 0, 0.5)",
         primaryColor: "rgba(0, 0, 0, 0.7)",
