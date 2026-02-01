@@ -178,10 +178,7 @@ export default function InlineThemePicker({
       </div>
 
       {/* Type preview thumbnails */}
-      <div
-        className="flex gap-3 overflow-x-auto p-1"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
-      >
+      <div className="flex gap-3 overflow-x-auto p-1 pb-2 scrollbar-dark">
         {TYPE_PREVIEWS.map(({ type, label }) => (
           <button
             key={type}
