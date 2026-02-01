@@ -329,8 +329,8 @@ export function resolveTheme(config: EventThemeConfig): {
     palette = {
       ...basePalette,
       pageBackground: isDefault ? "transparent" : basePalette.pageBackground,
-      cardBackground: withAlpha(basePalette.cardBackground, 0.2),
-      cardSecondaryBackground: withAlpha(basePalette.cardSecondaryBackground, 0.10),
+      cardBackground: withAlpha(basePalette.cardBackground, 0.5),
+      cardSecondaryBackground: withAlpha(basePalette.cardSecondaryBackground, 0.40),
       ...(isDefault && {
         cardBackground: "rgba(255, 255, 255, 0.15)",
         cardSecondaryBackground: "rgba(255, 255, 255, 0.08)",
