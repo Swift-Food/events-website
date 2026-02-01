@@ -166,10 +166,19 @@ export default function ThemePicker({
   );
 
   return (
-    <div
-      className="fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300"
-      style={{ transform: isOpen ? "translateY(0)" : "translateY(100%)" }}
-    >
+    <>
+      {/* Backdrop overlay - closes picker on tap */}
+      {isOpen && (
+        <div
+          className="fixed inset-0"
+          style={{ zIndex: 39 }}
+          onClick={onToggle}
+        />
+      )}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300"
+        style={{ transform: isOpen ? "translateY(0)" : "translateY(100%)" }}
+      >
       <div className="bg-white/35 backdrop-blur-md border-t border-white/10 rounded-t-2xl">
         {/* Drag handle */}
         <div
@@ -316,5 +325,6 @@ export default function ThemePicker({
         </div>
       </div>
     </div>
+    </>
   );
 }
