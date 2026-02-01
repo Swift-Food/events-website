@@ -986,7 +986,9 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
   return (
     <div
-      className="relative flex min-h-[calc(100vh-64px)] justify-center bg-background px-3 md:px-6 pb-4 transition-colors duration-300"
+      className={`relative flex min-h-[calc(100vh-64px)] justify-center px-3 md:px-6 pb-4 transition-colors duration-300 ${
+        eventTheme.type === "solid" ? "bg-background" : ""
+      }`}
       style={themeCSSVars as React.CSSProperties}
     >
       {/* Theme background layer for landscape/shader/pattern */}
