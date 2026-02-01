@@ -305,10 +305,26 @@ export function resolveTheme(config: EventThemeConfig): {
   const shader = config.shaderPreset ? SHADER_MAP[config.shaderPreset] : undefined;
 
   // Shader type uses the shader preset's built-in palette
-  const palette =
+  const basePalette =
     config.type === "shader" && shader
       ? shader.palette
       : (PALETTE_MAP[config.colorPalette] ?? PALETTE_MAP["default"]).palette;
+
+  // For landscape themes, adjust backgrounds so the image shows through.
+  let palette = basePalette;
+  if (config.type === "landscape") {
+    const isDefault = (config.colorPalette ?? "default") === "default";
+    const withAlpha = (color: string, alpha: number) => {
+      const { r, g, b } = parseColor(color);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    };
+    palette = {
+      ...basePalette,
+      pageBackground: isDefault ? "transparent" : basePalette.pageBackground,
+      cardBackground: withAlpha(basePalette.cardBackground, 0.75),
+      cardSecondaryBackground: withAlpha(basePalette.cardSecondaryBackground, 0.6),
+    };
+  }
 
   return {
     palette,

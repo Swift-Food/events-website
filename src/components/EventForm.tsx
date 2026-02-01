@@ -19,6 +19,7 @@ import {
 } from "@/context/EventCreationContext";
 import { resolveTheme, getThemeCSSVariables, PALETTE_MAP } from "@/lib/theme-presets";
 import ThemePicker from "@/components/theme/ThemePicker";
+import InlineThemePicker from "@/components/theme/InlineThemePicker";
 import EventThemeBackground from "@/components/theme/EventThemeBackground";
 import { TicketType, UpdateEventDto, EventStatus } from "@/types";
 import { FormField } from "@/types";
@@ -67,9 +68,11 @@ interface EventFormProps {
   onPublishToggle?: () => void;
   isPublishLoading?: boolean;
   onSaveSuccess?: () => void;
+  /** When true, edit mode renders identically to the create page (full theme preview + bottom-sheet picker). */
+  fullPage?: boolean;
 }
 
-function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishToggle, isPublishLoading, onSaveSuccess }: EventFormProps) {
+function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishToggle, isPublishLoading, onSaveSuccess, fullPage }: EventFormProps) {
   const {
     eventName,
     setEventName,
@@ -132,22 +135,25 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   } = useEventCreation();
 
   // Theme
+  const isCreateMode = mode === "create";
   const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
+  const showLiveTheme = isCreateMode || !!fullPage;
   const resolvedTheme = useMemo(() => resolveTheme(eventTheme), [eventTheme]);
   const themeCSSVars = useMemo(
-    () => getThemeCSSVariables(resolvedTheme.palette),
-    [resolvedTheme.palette]
+    () => (showLiveTheme ? getThemeCSSVariables(resolvedTheme.palette) : {}),
+    [resolvedTheme.palette, showLiveTheme]
   );
 
   // Apply theme CSS variables to document root so navbar inherits them
   useEffect(() => {
+    if (!showLiveTheme) return;
     const root = document.documentElement;
     const entries = Object.entries(themeCSSVars);
     entries.forEach(([key, value]) => root.style.setProperty(key, value));
     return () => {
       entries.forEach(([key]) => root.style.removeProperty(key));
     };
-  }, [themeCSSVars]);
+  }, [themeCSSVars, showLiveTheme]);
 
   // Local state for UI only
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
@@ -997,17 +1003,19 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   return (
     <div
       className={`relative flex min-h-[calc(100vh-64px)] justify-center px-3 md:px-6 pb-4 transition-colors duration-300 ${
-        eventTheme.type === "solid" ? "bg-background" : ""
+        showLiveTheme && eventTheme.type === "solid" ? "bg-background" : ""
       }`}
-      style={themeCSSVars as React.CSSProperties}
+      style={showLiveTheme ? (themeCSSVars as React.CSSProperties) : undefined}
     >
       {/* Theme background layer for landscape/shader/pattern */}
-      <EventThemeBackground
-        config={eventTheme}
-        palette={resolvedTheme.palette}
-        shader={resolvedTheme.shader}
-        landscape={resolvedTheme.landscape}
-      />
+      {showLiveTheme && (
+        <EventThemeBackground
+          config={eventTheme}
+          palette={resolvedTheme.palette}
+          shader={resolvedTheme.shader}
+          landscape={resolvedTheme.landscape}
+        />
+      )}
 
       <div className="relative z-10 flex w-full max-w-5xl flex-col gap-6 text-foreground lg:flex-row">
         <section className="flex flex-col gap-5 rounded-3xl lg:p-7 lg:w-96 lg:shrink-0 lg:sticky lg:top-20 lg:self-start sm:flex-row lg:flex-col">
@@ -1054,7 +1062,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               onChange={handleImageChange}
             />
           </div>
-          <div className="rounded-2xl bg-card-background backdrop-blur-xl text-sm sm:flex-1 lg:flex-none lg:aspect-auto">
+          {/* <div className="rounded-2xl bg-card-background backdrop-blur-xl text-sm sm:flex-1 lg:flex-none lg:aspect-auto">
             <div className="p-5">
               <div className="flex items-center justify-between text-muted-foreground">
                 <div>
@@ -1079,7 +1087,41 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 <span className="text-foreground font-medium">{coverName}</span>
               </div>
             </div>
-          </div>
+          </div> */}
+          {/* Theme Row */}
+          {showLiveTheme ? (
+            <button
+              type="button"
+              onClick={() => setIsThemePickerOpen(!isThemePickerOpen)}
+              className="flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer"
+            >
+              <div className="flex h-8 w-8 rounded-lg overflow-hidden shrink-0">
+                {(PALETTE_MAP[eventTheme.colorPalette]?.colors ?? ["#222", "#2a2a2a"]).map(
+                  (color, i) => (
+                    <div key={i} className="flex-1" style={{ backgroundColor: color }} />
+                  )
+                )}
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-base font-semibold text-foreground">Theme</p>
+                <p className="text-sm text-muted-foreground">
+                  {PALETTE_MAP[eventTheme.colorPalette]?.name ?? "Default"} &middot;{" "}
+                  {eventTheme.type.charAt(0).toUpperCase() + eventTheme.type.slice(1)}
+                </p>
+              </div>
+              {isThemePickerOpen ? (
+                <ChevronUp className="h-5 w-5 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="h-5 w-5 text-muted-foreground" />
+              )}
+            </button>
+          ) : (
+            <InlineThemePicker
+              theme={eventTheme}
+              onChange={setEventTheme}
+              onPreview={() => router.push(`/event-management/${eventId}/edit`)}
+            />
+          )}
         </section>
 
         <section className="flex-1 space-y-6">
@@ -1195,35 +1237,6 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             <span>Edit Description</span>
           </button>
 
-
-          {/* Theme Row */}
-          <button
-            type="button"
-            onClick={() => setIsThemePickerOpen(!isThemePickerOpen)}
-            className="flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer"
-          >
-            {/* Preview swatch */}
-            <div className="flex h-8 w-8 rounded-lg overflow-hidden shrink-0">
-              {(PALETTE_MAP[eventTheme.colorPalette]?.colors ?? ["#222", "#2a2a2a"]).map(
-                (color, i) => (
-                  <div key={i} className="flex-1" style={{ backgroundColor: color }} />
-                )
-              )}
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-base font-semibold text-foreground">Theme</p>
-              <p className="text-sm text-muted-foreground">
-                {PALETTE_MAP[eventTheme.colorPalette]?.name ?? "Default"} &middot;{" "}
-                {eventTheme.type.charAt(0).toUpperCase() + eventTheme.type.slice(1)}
-              </p>
-            </div>
-            {isThemePickerOpen ? (
-              <ChevronUp className="h-5 w-5 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="h-5 w-5 text-muted-foreground" />
-            )}
-          </button>
-
           {/* Event Categories */}
           <div className="space-y-4">
             <div className="relative">
@@ -1312,7 +1325,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           <div ref={locationRef} className="space-y-3">
             {/* Location validation errors indicator */}
             {(validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode) && (
-              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <div className="p-3 bg-red-950 border border-red-500/30 rounded-lg">
                 <p className="text-sm text-red-400 font-medium">Please complete the location details:</p>
                 <ul className="text-xs text-red-400/80 mt-1 list-disc list-inside">
                   {validationErrors.eventFormat && <li>{validationErrors.eventFormat}</li>}
@@ -1480,7 +1493,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
             {/* Stripe Connect Warning for Paid Tickets */}
             {hasPaidTickets && stripeConnectStatus && !stripeConnectStatus.onboardingComplete && (
-              <div ref={stripeConnectRef} className={`rounded-2xl p-4 ${validationErrors.stripeConnect ? "bg-red-500/10 border border-red-500/30" : "bg-amber-500/10 border border-amber-500/30"}`}>
+              <div ref={stripeConnectRef} className={`rounded-2xl p-4 ${validationErrors.stripeConnect ? "bg-red-950 border border-red-500/30" : "bg-amber-950 border border-amber-500/30"}`}>
                 <div className="flex items-start gap-3">
                   <AlertTriangle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${validationErrors.stripeConnect ? "text-red-400" : "text-amber-400"}`} />
                   <div className="flex-1">
@@ -1852,7 +1865,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
           {/* Organiser Terms Checkbox - Only shown in create mode */}
           {mode === "create" && (
-            <div ref={organizerTermsRef} className={`rounded-xl backdrop-blur-xl p-4 md:p-5 ${validationErrors.organizerTerms ? "bg-red-500/10 border border-red-500/30" : "bg-card-background"}`}>
+            <div ref={organizerTermsRef} className={`rounded-xl backdrop-blur-xl p-4 md:p-5 ${validationErrors.organizerTerms ? "bg-red-950 border border-red-500/30" : "bg-card-background"}`}>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -1981,12 +1994,14 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
         onClose={() => setIsImportModalOpen(false)}
       />
 
-      <ThemePicker
-        theme={eventTheme}
-        onChange={setEventTheme}
-        isOpen={isThemePickerOpen}
-        onToggle={() => setIsThemePickerOpen(!isThemePickerOpen)}
-      />
+      {showLiveTheme && (
+        <ThemePicker
+          theme={eventTheme}
+          onChange={setEventTheme}
+          isOpen={isThemePickerOpen}
+          onToggle={() => setIsThemePickerOpen(!isThemePickerOpen)}
+        />
+      )}
     </div>
   );
 }
