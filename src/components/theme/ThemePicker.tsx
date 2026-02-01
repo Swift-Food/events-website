@@ -10,6 +10,7 @@ import {
   SHADER_PRESETS,
   LANDSCAPE_OPTIONS,
   PATTERN_OPTIONS,
+  PALETTE_MAP,
 } from "@/lib/theme-presets";
 
 interface ThemePickerProps {
@@ -85,6 +86,29 @@ export default function ThemePicker({
   }, [handleScroll]);
 
   const isPaletteDisabled = theme.type === "shader";
+
+  const currentPalette = (PALETTE_MAP[theme.colorPalette] ?? PALETTE_MAP["default"]).palette;
+
+  const getPatternPreviewBg = (patternId: string) => {
+    const c = currentPalette.mainTextColor.replace(/,\s*[\d.]+\)$/, ", 0.35)");
+    const encode = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+    switch (patternId) {
+      case "dots":
+        return encode(`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><circle cx='10' cy='10' r='3' fill='${c}'/><circle cx='30' cy='10' r='3' fill='${c}'/><circle cx='0' cy='30' r='3' fill='${c}'/><circle cx='20' cy='30' r='3' fill='${c}'/><circle cx='40' cy='30' r='3' fill='${c}'/></svg>`);
+      case "grid":
+        return encode(`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><path d='M40 0 L40 40 M0 40 L40 40' fill='none' stroke='${c}' stroke-width='1'/></svg>`);
+      case "stripes":
+        return encode(`<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><rect x='8' y='0' width='4' height='20' fill='${c}'/></svg>`);
+      case "checkers": {
+        const c2 = currentPalette.cardBackground;
+        return encode(`<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><rect x='0' y='0' width='40' height='40' fill='${c}'/><rect x='40' y='40' width='40' height='40' fill='${c}'/><rect x='40' y='0' width='40' height='40' fill='${c2}'/><rect x='0' y='40' width='40' height='40' fill='${c2}'/></svg>`);
+      }
+      case "crosses":
+        return encode(`<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><path d='M13 9 L17 9 L17 13 L21 13 L21 17 L17 17 L17 21 L13 21 L13 17 L9 17 L9 13 L13 13 Z' fill='${c}'/><path d='M43 39 L47 39 L47 43 L51 43 L51 47 L47 47 L47 51 L43 51 L43 47 L39 47 L39 43 L43 43 Z' fill='${c}'/></svg>`);
+      default:
+        return "none";
+    }
+  };
 
   // Background type preview thumbnails
   const getBgPreview = (type: BackgroundType) => {
@@ -469,21 +493,36 @@ export default function ThemePicker({
 
                 {/* Pattern options */}
                 {theme.type === "pattern" && (
-                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                    {PATTERN_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() => onChange({ ...theme, pattern: opt.id })}
-                        className={`px-4 py-3 rounded-[1.25rem] border text-[11px] font-bold uppercase tracking-[0.2em] transition-all ${
-                          theme.pattern === opt.id
-                            ? "bg-white text-zinc-950 border-white shadow-2xl ring-4 lg:ring-8 ring-white/5"
-                            : "bg-white/5 border-white/5 text-zinc-300 hover:text-white hover:bg-white/10"
-                        }`}
-                      >
-                        {opt.name}
-                      </button>
-                    ))}
+                  <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-3 gap-3">
+                    {PATTERN_OPTIONS.map((opt) => {
+                      const isActive = theme.pattern === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => onChange({ ...theme, pattern: opt.id })}
+                          className="flex flex-col items-center gap-1.5 group"
+                        >
+                          <div
+                            className={`relative w-full aspect-square rounded-xl overflow-hidden border-2 transition-all ${
+                              isActive
+                                ? "border-white shadow-2xl scale-105 z-10 ring-4 ring-white/10"
+                                : "border-white/10 opacity-60 group-hover:opacity-100"
+                            }`}
+                            style={{
+                              backgroundColor: currentPalette.pageBackground,
+                              backgroundImage: getPatternPreviewBg(opt.id),
+                              backgroundRepeat: "repeat",
+                            }}
+                          />
+                          <span className={`text-[9px] font-bold uppercase tracking-widest ${
+                            isActive ? "text-white" : "text-zinc-400 group-hover:text-zinc-200"
+                          }`}>
+                            {opt.name}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
 
