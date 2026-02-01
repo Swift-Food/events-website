@@ -148,7 +148,7 @@ export default function ThemePicker({
 
       {/* Customizer Tray */}
       <div
-        className="relative w-full bg-black/60 backdrop-blur-md border-t border-white/10 overflow-hidden rounded-t-[2.0rem] lg:rounded-t-[2rem] pointer-events-auto"
+        className="relative w-full max-h-[60vh] overflow-y-auto bg-black/60 backdrop-blur-md border-t border-white/10 rounded-t-[2.0rem] lg:rounded-t-[2rem] pointer-events-auto"
         style={{
           animation: "themePickerSlideUp 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
         }}
@@ -218,7 +218,7 @@ export default function ThemePicker({
               <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] block mb-3">
                 Base Style
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-4 lg:grid-cols-2 gap-3">
                 {BG_TYPES.map(({ type, label }) => {
                   const isActive = theme.type === type;
                   return (
@@ -226,12 +226,12 @@ export default function ThemePicker({
                       key={type}
                       type="button"
                       onClick={() => handleTypeChange(type)}
-                      className="flex flex-col items-center gap-2.5 group w-full"
+                      className="flex flex-col items-center gap-1.5 lg:gap-2.5 group w-full"
                     >
                       <div
-                        className={`relative w-full aspect-[4/3] rounded-[1.5rem] overflow-hidden border-2 transition-all duration-300 ${
+                        className={`relative w-full aspect-[4/3] rounded-xl lg:rounded-[1.5rem] overflow-hidden border-2 transition-all duration-300 ${
                           isActive
-                            ? "border-white ring-4 lg:ring-8 ring-white/5 shadow-2xl scale-105 z-10"
+                            ? "border-white ring-2 lg:ring-8 ring-white/5 shadow-2xl scale-105 z-10"
                             : "border-white/5 hover:border-white/10"
                         }`}
                       >
