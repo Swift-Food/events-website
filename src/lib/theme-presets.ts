@@ -209,7 +209,7 @@ function svgDataUrl(svg: string): string {
 }
 
 function generateDots(color: string): string {
-  return `<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><circle cx='5' cy='5' r='1.5' fill='${color}'/><circle cx='15' cy='5' r='1.5' fill='${color}'/><circle cx='0' cy='15' r='1.5' fill='${color}'/><circle cx='10' cy='15' r='1.5' fill='${color}'/><circle cx='20' cy='15' r='1.5' fill='${color}'/></svg>`;
+  return `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><circle cx='10' cy='10' r='3' fill='${color}'/><circle cx='30' cy='10' r='3' fill='${color}'/><circle cx='0' cy='30' r='3' fill='${color}'/><circle cx='20' cy='30' r='3' fill='${color}'/><circle cx='40' cy='30' r='3' fill='${color}'/></svg>`;
 }
 
 function generateGrid(color: string): string {
