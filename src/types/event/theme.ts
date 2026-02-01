@@ -29,6 +29,7 @@ export interface ColorPalette {
   mainTextColor: string;
   subTextColor: string;
   primaryColor: string;
+  primaryForegroundColor: string;
   borderEnabled: boolean;
   borderColor: string;
 }

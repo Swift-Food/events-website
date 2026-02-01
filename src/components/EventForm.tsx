@@ -1900,7 +1900,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="w-full rounded-lg bg-foreground py-2 text-center text-lg font-semibold text-black transition-all hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-primary py-2 text-center text-lg font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting
               ? `${mode === "create" ? "Creating" : "Updating"} Event...`

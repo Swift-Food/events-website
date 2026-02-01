@@ -75,7 +75,8 @@ function singleColorPalette(
       cardSecondaryBackground: "rgba(255, 255, 255, 0.48)",
       mainTextColor: "rgba(0, 0, 0, 0.58)",
       subTextColor: "rgba(0, 0, 0, 0.58)",
-      primaryColor: "rgba(0, 0, 0, 0.58)",
+      primaryColor: "rgba(255, 255, 255, 1)",
+      primaryForegroundColor: "rgba(0, 0, 0, 0.8)",
       borderEnabled: false,
       borderColor: "rgba(255, 255, 255, 0)",
     },
@@ -95,6 +96,7 @@ export const SINGLE_COLOR_PALETTES: PalettePreset[] = [
       mainTextColor: "rgba(237, 237, 237, 1)",
       subTextColor: "rgba(153, 153, 153, 1)",
       primaryColor: "rgba(59, 130, 246, 1)",
+      primaryForegroundColor: "rgba(255, 255, 255, 1)",
       borderEnabled: false,
       borderColor: "rgba(64, 64, 64, 1)",
     },
@@ -129,6 +131,7 @@ function multiColorPalette(
       mainTextColor: hexToRgba(color1, 1),
       subTextColor: hexToRgba(color1, 0.65),
       primaryColor: hexToRgba(color1, 1),
+      primaryForegroundColor: hexToRgba(color3, 1),
       borderEnabled: false,
       borderColor: hexToRgba(color2, 0.3),
     },
@@ -169,6 +172,7 @@ const SHADER_PALETTE_LIGHT: Omit<ColorPalette, "primaryColor"> = {
   cardSecondaryBackground: "rgba(255, 255, 255, 0.12)",
   mainTextColor: "rgba(0, 0, 0, 0.75)",
   subTextColor: "rgba(0, 0, 0, 0.5)",
+  primaryForegroundColor: "rgba(255, 255, 255, 1)",
   borderEnabled: false,
   borderColor: "rgba(0, 0, 0, 0.08)",
 };
@@ -179,6 +183,7 @@ const SHADER_PALETTE_DARK: Omit<ColorPalette, "primaryColor"> = {
   cardSecondaryBackground: "rgba(0, 0, 0, 0.15)",
   mainTextColor: "rgba(255, 255, 255, 0.9)",
   subTextColor: "rgba(255, 255, 255, 0.6)",
+  primaryForegroundColor: "rgba(255, 255, 255, 1)",
   borderEnabled: false,
   borderColor: "rgba(255, 255, 255, 0.1)",
 };
@@ -363,6 +368,7 @@ export function getThemeCSSVariables(
     "--color-foreground": palette.mainTextColor,
     "--color-muted-foreground": palette.subTextColor,
     "--color-primary": palette.primaryColor,
+    "--color-primary-foreground": palette.primaryForegroundColor,
     "--color-border": palette.borderColor,
   };
 }
