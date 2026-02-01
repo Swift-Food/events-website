@@ -170,15 +170,14 @@ export default function ThemePicker({
       className="fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300"
       style={{ transform: isOpen ? "translateY(0)" : "translateY(100%)" }}
     >
-      {/* Drag handle */}
-      <div
-        className="mx-auto flex justify-center cursor-pointer pt-2 pb-1"
-        onClick={onToggle}
-      >
-        <div className="w-10 h-1 rounded-full bg-foreground/30" />
-      </div>
-
-      <div className="bg-white/15 backdrop-blur-md border-t border-white/10">
+      <div className="bg-white/35 backdrop-blur-md border-t border-white/10 rounded-t-2xl">
+        {/* Drag handle */}
+        <div
+          className="mx-auto flex justify-center cursor-pointer pt-2 pb-1"
+          onClick={onToggle}
+        >
+          <div className="w-10 h-1 rounded-full bg-foreground/30" />
+        </div>
         {/* Background type tabs */}
         <div className="flex gap-1 px-4 py-2 overflow-x-auto border-b border-white/10">
           {BG_TYPES.map(({ type, label }) => (
