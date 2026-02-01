@@ -1,6 +1,5 @@
 import type {
   EventThemeConfig,
-  BackgroundType,
   ColorPalette,
   PalettePreset,
   ShaderPreset,
@@ -164,13 +163,46 @@ export const PALETTE_MAP: Record<string, PalettePreset> = Object.fromEntries(
 // Shader gradient presets
 // ---------------------------------------------------------------------------
 
+const SHADER_PALETTE_LIGHT: Omit<ColorPalette, "primaryColor"> = {
+  pageBackground: "transparent",
+  cardBackground: "rgba(255, 255, 255, 0.22)",
+  cardSecondaryBackground: "rgba(255, 255, 255, 0.12)",
+  mainTextColor: "rgba(0, 0, 0, 0.75)",
+  subTextColor: "rgba(0, 0, 0, 0.5)",
+  borderEnabled: false,
+  borderColor: "rgba(0, 0, 0, 0.08)",
+};
+
+const SHADER_PALETTE_DARK: Omit<ColorPalette, "primaryColor"> = {
+  pageBackground: "transparent",
+  cardBackground: "rgba(0, 0, 0, 0.25)",
+  cardSecondaryBackground: "rgba(0, 0, 0, 0.15)",
+  mainTextColor: "rgba(255, 255, 255, 0.9)",
+  subTextColor: "rgba(255, 255, 255, 0.6)",
+  borderEnabled: false,
+  borderColor: "rgba(255, 255, 255, 0.1)",
+};
+
+function shaderPreset(
+  id: string,
+  name: string,
+  color1: string,
+  color2: string,
+  color3: string,
+  dark: boolean,
+  primaryColor: string
+): ShaderPreset {
+  const base = dark ? SHADER_PALETTE_DARK : SHADER_PALETTE_LIGHT;
+  return { id, name, color1, color2, color3, palette: { ...base, primaryColor } };
+}
+
 export const SHADER_PRESETS: ShaderPreset[] = [
-  { id: "aurora", name: "Aurora", color1: "#b8e7f5", color2: "#d9ccff", color3: "#faf9f6" },
-  { id: "sunset", name: "Sunset", color1: "#ff6d2a", color2: "#ffc2b3", color3: "#1c275f" },
-  { id: "ocean", name: "Ocean", color1: "#0e8622", color2: "#2e80e4", color3: "#afcff6" },
-  { id: "lavender", name: "Lavender", color1: "#d9ccff", color2: "#f9c8db", color3: "#f8f5e6" },
-  { id: "fire", name: "Fire", color1: "#ff6d2a", color2: "#f3a39c", color3: "#ffe9bd" },
-  { id: "forest", name: "Forest", color1: "#5f7b24", color2: "#7b9d2f", color3: "#ddf2eb" },
+  shaderPreset("aurora", "Aurora", "#b8e7f5", "#d9ccff", "#faf9f6", false, "#4a3d8f"),
+  shaderPreset("sunset", "Sunset", "#ff6d2a", "#ffc2b3", "#1c275f", true, "#ff8c5a"),
+  shaderPreset("ocean", "Ocean", "#0e8622", "#2e80e4", "#afcff6", false, "#1a5fb4"),
+  shaderPreset("lavender", "Lavender", "#d9ccff", "#f9c8db", "#f8f5e6", false, "#7c5cbf"),
+  shaderPreset("fire", "Fire", "#ff6d2a", "#f3a39c", "#ffe9bd", false, "#d4440f"),
+  shaderPreset("forest", "Forest", "#5f7b24", "#7b9d2f", "#ddf2eb", false, "#3d6b1e"),
 ];
 
 export const SHADER_MAP: Record<string, ShaderPreset> = Object.fromEntries(
@@ -270,12 +302,17 @@ export function resolveTheme(config: EventThemeConfig): {
   shader?: ShaderPreset;
   landscape?: LandscapeOption;
 } {
-  const preset = PALETTE_MAP[config.colorPalette] ?? PALETTE_MAP["default"];
-  const palette = preset.palette;
+  const shader = config.shaderPreset ? SHADER_MAP[config.shaderPreset] : undefined;
+
+  // Shader type uses the shader preset's built-in palette
+  const palette =
+    config.type === "shader" && shader
+      ? shader.palette
+      : (PALETTE_MAP[config.colorPalette] ?? PALETTE_MAP["default"]).palette;
 
   return {
     palette,
-    shader: config.shaderPreset ? SHADER_MAP[config.shaderPreset] : undefined,
+    shader,
     landscape: config.image ? LANDSCAPE_MAP[config.image] : undefined,
   };
 }
@@ -291,22 +328,8 @@ export function resolveTheme(config: EventThemeConfig): {
  * text-foreground, etc.) automatically pick up the theme colors.
  */
 export function getThemeCSSVariables(
-  palette: ColorPalette,
-  type?: BackgroundType
+  palette: ColorPalette
 ): Record<string, string> {
-  // Shader type: use semi-transparent cards so the gradient shows through
-  if (type === "shader") {
-    return {
-      "--color-background": "transparent",
-      "--color-card-background": "rgba(0, 0, 0, 0.25)",
-      "--color-card-secondary-background": "rgba(0, 0, 0, 0.15)",
-      "--color-foreground": palette.mainTextColor,
-      "--color-muted-foreground": palette.subTextColor,
-      "--color-primary": palette.primaryColor,
-      "--color-border": "rgba(255, 255, 255, 0.1)",
-    };
-  }
-
   return {
     "--color-background": palette.pageBackground,
     "--color-card-background": palette.cardBackground,

@@ -135,8 +135,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
   const resolvedTheme = useMemo(() => resolveTheme(eventTheme), [eventTheme]);
   const themeCSSVars = useMemo(
-    () => getThemeCSSVariables(resolvedTheme.palette, eventTheme.type),
-    [resolvedTheme.palette, eventTheme.type]
+    () => getThemeCSSVariables(resolvedTheme.palette),
+    [resolvedTheme.palette]
   );
 
   // Apply theme CSS variables to document root so navbar inherits them

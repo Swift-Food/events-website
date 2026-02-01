@@ -42,13 +42,14 @@ export interface PalettePreset {
   palette: ColorPalette;
 }
 
-/** Shader gradient preset */
+/** Shader gradient preset (includes its own fixed palette) */
 export interface ShaderPreset {
   id: string;
   name: string;
   color1: string;
   color2: string;
   color3: string;
+  palette: ColorPalette;
 }
 
 /** Landscape background option */
