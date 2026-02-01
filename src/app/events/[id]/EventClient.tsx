@@ -700,14 +700,14 @@ export default function EventClient({
           <div
             className={`sm:hidden ${
               userRole === "scanner"
-                ? "bg-blue-500/10"
+                ? "bg-blue-500"
                 : userRole === "admin"
-                ? "bg-purple-500/10"
-                : "bg-amber-500/10"
+                ? "bg-purple-500"
+                : "bg-amber-500"
             }`}
           >
             <div className="px-6 py-3 flex items-center justify-between gap-4">
-              <span className="text-sm text-neutral-300">
+              <span className="text-sm text-white font-medium">
                 {userRole === "scanner"
                   ? "You can scan tickets for this event."
                   : userRole === "owner"
@@ -717,7 +717,7 @@ export default function EventClient({
               {userRole === "scanner" ? (
                 <Link
                   href={`/event-management/${eventId}/scanner`}
-                  className="shrink-0 flex items-center gap-1.5 rounded-full bg-blue-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-blue-600"
+                  className="shrink-0 flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-blue-600 transition-colors hover:bg-white/90"
                 >
                   <ScanLine className="h-4 w-4" />
                   Scan
@@ -725,11 +725,7 @@ export default function EventClient({
               ) : (
                 <Link
                   href={`/event-management/${eventId}`}
-                  className={`shrink-0 flex items-center gap-1 rounded-full px-4 py-1.5 text-sm font-semibold text-white transition-colors ${
-                    userRole === "owner"
-                      ? "bg-amber-500 hover:bg-amber-600"
-                      : "bg-purple-500 hover:bg-purple-600"
-                  }`}
+                  className="shrink-0 flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-semibold transition-colors hover:bg-white/90 text-amber-600"
                 >
                   Manage
                   <span className="text-xs">↗</span>
@@ -745,22 +741,14 @@ export default function EventClient({
             <div
               className={`hidden sm:flex mb-6 items-center justify-between gap-4 rounded-lg px-4 py-3 ${
                 userRole === "scanner"
-                  ? "bg-blue-500/10"
+                  ? "bg-blue-500"
                   : userRole === "admin"
-                  ? "bg-purple-500/10"
-                  : "bg-amber-500/10"
+                  ? "bg-purple-500"
+                  : "bg-amber-500"
               }`}
             >
               <div className="flex items-center gap-3">
-                <span
-                  className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-                    userRole === "owner"
-                      ? "bg-amber-500/30 text-amber-400"
-                      : userRole === "admin"
-                      ? "bg-purple-500/30 text-purple-400"
-                      : "bg-blue-500/30 text-blue-400"
-                  }`}
-                >
+                <span className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white">
                   {userRole === "owner" && <Crown className="h-3 w-3" />}
                   {userRole === "admin" && <Shield className="h-3 w-3" />}
                   {userRole === "scanner" && <ScanLine className="h-3 w-3" />}
@@ -770,7 +758,7 @@ export default function EventClient({
                     ? "Admin"
                     : "Scanner"}
                 </span>
-                <span className="text-sm text-neutral-300">
+                <span className="text-sm text-white font-medium">
                   {userRole === "scanner"
                     ? "You can scan tickets for this event."
                     : userRole === "owner"
@@ -781,7 +769,7 @@ export default function EventClient({
               {userRole === "scanner" ? (
                 <Link
                   href={`/event-management/${eventId}/scanner`}
-                  className="flex items-center gap-1.5 rounded-full bg-blue-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-blue-600"
+                  className="flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-blue-600 transition-colors hover:bg-white/90"
                 >
                   <ScanLine className="h-4 w-4" />
                   Scan Tickets
@@ -789,11 +777,7 @@ export default function EventClient({
               ) : (
                 <Link
                   href={`/event-management/${eventId}`}
-                  className={`flex items-center gap-1 rounded-full px-4 py-1.5 text-sm font-semibold text-white transition-colors ${
-                    userRole === "owner"
-                      ? "bg-amber-500 hover:bg-amber-600"
-                      : "bg-purple-500 hover:bg-purple-600"
-                  }`}
+                  className="flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-sm font-semibold transition-colors hover:bg-white/90 text-amber-600"
                 >
                   Manage
                   <span className="text-xs">↗</span>
