@@ -187,7 +187,7 @@ export default function ThemePicker({
             {([
               { key: "base" as MobileTab, label: "Base" },
               { key: "palette" as MobileTab, label: "Palette", disabled: isPaletteDisabled },
-              { key: "details" as MobileTab, label: "Details", disabled: theme.type === "solid" },
+              { key: "details" as MobileTab, label: "Style", disabled: theme.type === "solid" },
             ]).map(({ key, label, disabled }) => (
               <button
                 key={key}
