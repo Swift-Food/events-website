@@ -209,40 +209,54 @@ function svgDataUrl(svg: string): string {
 }
 
 function generateDots(color: string): string {
-  return `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="2" fill="${color}"/></svg>`;
+  return `<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><circle cx='5' cy='5' r='1.5' fill='${color}'/><circle cx='15' cy='5' r='1.5' fill='${color}'/><circle cx='0' cy='15' r='1.5' fill='${color}'/><circle cx='10' cy='15' r='1.5' fill='${color}'/><circle cx='20' cy='15' r='1.5' fill='${color}'/></svg>`;
 }
 
 function generateGrid(color: string): string {
-  return `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="${color}" stroke-width="0.5"/></svg>`;
+  return `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><path d='M40 0 L40 40 M0 40 L40 40' fill='none' stroke='${color}' stroke-width='1'/></svg>`;
 }
 
 function generateStripes(color: string): string {
-  return `<svg width="10" height="10" xmlns="http://www.w3.org/2000/svg"><line x1="0" y1="10" x2="10" y2="0" stroke="${color}" stroke-width="1"/></svg>`;
+  return `<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><rect x='8' y='0' width='4' height='20' fill='${color}'/></svg>`;
 }
 
-function generateCheckers(color: string): string {
-  return `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10" fill="${color}"/><rect x="10" y="10" width="10" height="10" fill="${color}"/></svg>`;
+function generateCheckers(color1: string, color2: string): string {
+  return `<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><rect x='0' y='0' width='40' height='40' fill='${color1}'/><rect x='40' y='40' width='40' height='40' fill='${color1}'/><rect x='40' y='0' width='40' height='40' fill='${color2}'/><rect x='0' y='40' width='40' height='40' fill='${color2}'/></svg>`;
 }
 
 function generateCrosses(color: string): string {
-  return `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M8 4v12M4 8h12" stroke="${color}" stroke-width="1" fill="none"/></svg>`;
+  return `<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'><path d='M13 9 L17 9 L17 13 L21 13 L21 17 L17 17 L17 21 L13 21 L13 17 L9 17 L9 13 L13 13 Z' fill='${color}'/></svg>`;
 }
-
-const PATTERN_GENERATORS: Record<string, (color: string) => string> = {
-  dots: generateDots,
-  grid: generateGrid,
-  stripes: generateStripes,
-  checkers: generateCheckers,
-  crosses: generateCrosses,
-};
 
 /** Returns the CSS `background-image` value for a pattern */
 export function getPatternCSS(patternId: string, palette: ColorPalette): string {
-  const gen = PATTERN_GENERATORS[patternId];
-  if (!gen) return "none";
   const { r, g, b } = parseColor(palette.mainTextColor);
   const patternColor = `rgba(${r}, ${g}, ${b}, 0.15)`;
-  return svgDataUrl(gen(patternColor));
+
+  let svg: string;
+  switch (patternId) {
+    case "dots":
+      svg = generateDots(patternColor);
+      break;
+    case "grid":
+      svg = generateGrid(patternColor);
+      break;
+    case "stripes":
+      svg = generateStripes(patternColor);
+      break;
+    case "checkers": {
+      const { r: bgR, g: bgG, b: bgB } = parseColor(palette.pageBackground);
+      const bgColor = `rgba(${bgR}, ${bgG}, ${bgB}, 0.15)`;
+      svg = generateCheckers(patternColor, bgColor);
+      break;
+    }
+    case "crosses":
+      svg = generateCrosses(patternColor);
+      break;
+    default:
+      return "none";
+  }
+  return svgDataUrl(svg);
 }
 
 // ---------------------------------------------------------------------------
