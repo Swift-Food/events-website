@@ -1,5 +1,6 @@
 import type {
   EventThemeConfig,
+  BackgroundType,
   ColorPalette,
   PalettePreset,
   ShaderPreset,
@@ -290,8 +291,22 @@ export function resolveTheme(config: EventThemeConfig): {
  * text-foreground, etc.) automatically pick up the theme colors.
  */
 export function getThemeCSSVariables(
-  palette: ColorPalette
+  palette: ColorPalette,
+  type?: BackgroundType
 ): Record<string, string> {
+  // Shader type: use semi-transparent cards so the gradient shows through
+  if (type === "shader") {
+    return {
+      "--color-background": "transparent",
+      "--color-card-background": "rgba(0, 0, 0, 0.25)",
+      "--color-card-secondary-background": "rgba(0, 0, 0, 0.15)",
+      "--color-foreground": palette.mainTextColor,
+      "--color-muted-foreground": palette.subTextColor,
+      "--color-primary": palette.primaryColor,
+      "--color-border": "rgba(255, 255, 255, 0.1)",
+    };
+  }
+
   return {
     "--color-background": palette.pageBackground,
     "--color-card-background": palette.cardBackground,
