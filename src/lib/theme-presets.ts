@@ -1,0 +1,265 @@
+import type {
+  EventThemeConfig,
+  ColorPalette,
+  PalettePreset,
+  ShaderPreset,
+  LandscapeOption,
+  PatternOption,
+} from "@/types/event/theme";
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Parse any color string (hex or rgba) into RGBA components */
+export function parseColor(color: string): {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+} {
+  const rgbaMatch = color.match(
+    /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/
+  );
+  if (rgbaMatch) {
+    return {
+      r: parseInt(rgbaMatch[1]),
+      g: parseInt(rgbaMatch[2]),
+      b: parseInt(rgbaMatch[3]),
+      a: rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1,
+    };
+  }
+  const hex = color.replace("#", "");
+  if (hex.length >= 6) {
+    return {
+      r: parseInt(hex.substring(0, 2), 16) || 0,
+      g: parseInt(hex.substring(2, 4), 16) || 0,
+      b: parseInt(hex.substring(4, 6), 16) || 0,
+      a: 1,
+    };
+  }
+  return { r: 0, g: 0, b: 0, a: 1 };
+}
+
+function hexToRgba(hex: string, alpha: number): string {
+  const { r, g, b } = parseColor(hex);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ---------------------------------------------------------------------------
+// Default theme
+// ---------------------------------------------------------------------------
+
+export const DEFAULT_THEME_CONFIG: EventThemeConfig = {
+  type: "solid",
+  colorPalette: "default",
+};
+
+// ---------------------------------------------------------------------------
+// Single-color palettes (pastel / light backgrounds with dark text)
+// ---------------------------------------------------------------------------
+
+function singleColorPalette(
+  id: string,
+  name: string,
+  bgHex: string,
+  cardHex: string
+): PalettePreset {
+  return {
+    id,
+    name,
+    colors: [bgHex, cardHex],
+    palette: {
+      pageBackground: hexToRgba(bgHex, 1),
+      cardBackground: hexToRgba(cardHex, 0.48),
+      cardSecondaryBackground: "rgba(255, 255, 255, 0.48)",
+      mainTextColor: "rgba(0, 0, 0, 0.58)",
+      subTextColor: "rgba(0, 0, 0, 0.58)",
+      primaryColor: "rgba(0, 0, 0, 0.58)",
+      borderEnabled: false,
+      borderColor: "rgba(255, 255, 255, 0)",
+    },
+  };
+}
+
+export const SINGLE_COLOR_PALETTES: PalettePreset[] = [
+  // "default" is the exception - dark theme with light text
+  {
+    id: "default",
+    name: "Default",
+    colors: ["#222222", "#2a2a2a"],
+    palette: {
+      pageBackground: "rgba(34, 34, 34, 1)",
+      cardBackground: "rgba(42, 42, 42, 1)",
+      cardSecondaryBackground: "rgba(51, 51, 51, 1)",
+      mainTextColor: "rgba(237, 237, 237, 1)",
+      subTextColor: "rgba(153, 153, 153, 1)",
+      primaryColor: "rgba(59, 130, 246, 1)",
+      borderEnabled: false,
+      borderColor: "rgba(64, 64, 64, 1)",
+    },
+  },
+  singleColorPalette("sky", "Sky", "#a1bdf6", "#87aaf2"),
+  singleColorPalette("peach", "Peach", "#ffbee0", "#f89bcc"),
+  singleColorPalette("lime", "Lime", "#f6e57d", "#fcd905"),
+  singleColorPalette("tangerine", "Tangerine", "#fbb858", "#ff9806"),
+  singleColorPalette("lavender", "Lavender", "#d9bef5", "#caa2f4"),
+  singleColorPalette("sage", "Sage", "#c3e26c", "#9acb12"),
+];
+
+// ---------------------------------------------------------------------------
+// Multi-color palettes (3 colors)
+// ---------------------------------------------------------------------------
+
+function multiColorPalette(
+  id: string,
+  name: string,
+  color1: string,
+  color2: string,
+  color3: string
+): PalettePreset {
+  return {
+    id,
+    name,
+    colors: [color1, color2, color3],
+    palette: {
+      pageBackground: hexToRgba(color3, 1),
+      cardBackground: hexToRgba(color2, 1),
+      cardSecondaryBackground: hexToRgba(color2, 0.5),
+      mainTextColor: hexToRgba(color1, 1),
+      subTextColor: hexToRgba(color1, 0.65),
+      primaryColor: hexToRgba(color1, 1),
+      borderEnabled: false,
+      borderColor: hexToRgba(color2, 0.3),
+    },
+  };
+}
+
+export const MULTI_COLOR_PALETTES: PalettePreset[] = [
+  multiColorPalette("matcha", "Matcha", "#f9c8db", "#7b9d2f", "#5f7b24"),
+  multiColorPalette("desert", "Desert", "#ff6d2a", "#ffc2b3", "#ffe9bd"),
+  multiColorPalette("arctic", "Arctic", "#1c4074", "#c6dcda", "#f8f5e6"),
+  multiColorPalette("meadow", "Meadow", "#0e8622", "#cee29a", "#ddf2eb"),
+  multiColorPalette("dusk", "Dusk", "#402c61", "#92475c", "#f3a39c"),
+  multiColorPalette("beach", "Beach", "#2e80e4", "#afcff6", "#f8e6a8"),
+  multiColorPalette("garden", "Garden", "#929124", "#f6c9dd", "#d0e3f4"),
+  multiColorPalette("midnight", "Midnight", "#ececec", "#596394", "#1c275f"),
+];
+
+// ---------------------------------------------------------------------------
+// Combined + lookup
+// ---------------------------------------------------------------------------
+
+export const ALL_PALETTES: PalettePreset[] = [
+  ...SINGLE_COLOR_PALETTES,
+  ...MULTI_COLOR_PALETTES,
+];
+
+export const PALETTE_MAP: Record<string, PalettePreset> = Object.fromEntries(
+  ALL_PALETTES.map((p) => [p.id, p])
+);
+
+// ---------------------------------------------------------------------------
+// Shader gradient presets
+// ---------------------------------------------------------------------------
+
+export const SHADER_PRESETS: ShaderPreset[] = [
+  { id: "aurora", name: "Aurora", color1: "#b8e7f5", color2: "#d9ccff", color3: "#faf9f6" },
+  { id: "sunset", name: "Sunset", color1: "#ff6d2a", color2: "#ffc2b3", color3: "#1c275f" },
+  { id: "ocean", name: "Ocean", color1: "#0e8622", color2: "#2e80e4", color3: "#afcff6" },
+  { id: "lavender", name: "Lavender", color1: "#d9ccff", color2: "#f9c8db", color3: "#f8f5e6" },
+  { id: "fire", name: "Fire", color1: "#ff6d2a", color2: "#f3a39c", color3: "#ffe9bd" },
+  { id: "forest", name: "Forest", color1: "#5f7b24", color2: "#7b9d2f", color3: "#ddf2eb" },
+];
+
+export const SHADER_MAP: Record<string, ShaderPreset> = Object.fromEntries(
+  SHADER_PRESETS.map((s) => [s.id, s])
+);
+
+// ---------------------------------------------------------------------------
+// Landscape options
+// ---------------------------------------------------------------------------
+
+export const LANDSCAPE_OPTIONS: LandscapeOption[] = [
+  { id: "desert", name: "Desert", filename: "Desert.jpg" },
+  { id: "lake", name: "Lake", filename: "Lake.jpg" },
+  { id: "mountain", name: "Mountain", filename: "Mountain.jpg" },
+  { id: "night-sky", name: "Night Sky", filename: "Night Sky.jpg" },
+  { id: "ocean", name: "Ocean", filename: "Ocean.jpg" },
+];
+
+export const LANDSCAPE_MAP: Record<string, LandscapeOption> = Object.fromEntries(
+  LANDSCAPE_OPTIONS.map((l) => [l.id, l])
+);
+
+// ---------------------------------------------------------------------------
+// Pattern options + SVG generators
+// ---------------------------------------------------------------------------
+
+export const PATTERN_OPTIONS: PatternOption[] = [
+  { id: "dots", name: "Dots" },
+  { id: "grid", name: "Grid" },
+  { id: "stripes", name: "Stripes" },
+  { id: "checkers", name: "Checkers" },
+  { id: "crosses", name: "Crosses" },
+];
+
+function svgDataUrl(svg: string): string {
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
+function generateDots(color: string): string {
+  return `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="2" fill="${color}"/></svg>`;
+}
+
+function generateGrid(color: string): string {
+  return `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="${color}" stroke-width="0.5"/></svg>`;
+}
+
+function generateStripes(color: string): string {
+  return `<svg width="10" height="10" xmlns="http://www.w3.org/2000/svg"><line x1="0" y1="10" x2="10" y2="0" stroke="${color}" stroke-width="1"/></svg>`;
+}
+
+function generateCheckers(color: string): string {
+  return `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10" fill="${color}"/><rect x="10" y="10" width="10" height="10" fill="${color}"/></svg>`;
+}
+
+function generateCrosses(color: string): string {
+  return `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M8 4v12M4 8h12" stroke="${color}" stroke-width="1" fill="none"/></svg>`;
+}
+
+const PATTERN_GENERATORS: Record<string, (color: string) => string> = {
+  dots: generateDots,
+  grid: generateGrid,
+  stripes: generateStripes,
+  checkers: generateCheckers,
+  crosses: generateCrosses,
+};
+
+/** Returns the CSS `background-image` value for a pattern */
+export function getPatternCSS(patternId: string, palette: ColorPalette): string {
+  const gen = PATTERN_GENERATORS[patternId];
+  if (!gen) return "none";
+  const { r, g, b } = parseColor(palette.mainTextColor);
+  const patternColor = `rgba(${r}, ${g}, ${b}, 0.15)`;
+  return svgDataUrl(gen(patternColor));
+}
+
+// ---------------------------------------------------------------------------
+// Master resolver
+// ---------------------------------------------------------------------------
+
+export function resolveTheme(config: EventThemeConfig): {
+  palette: ColorPalette;
+  shader?: ShaderPreset;
+  landscape?: LandscapeOption;
+} {
+  const preset = PALETTE_MAP[config.colorPalette] ?? PALETTE_MAP["default"];
+  const palette = preset.palette;
+
+  return {
+    palette,
+    shader: config.shaderPreset ? SHADER_MAP[config.shaderPreset] : undefined,
+    landscape: config.image ? LANDSCAPE_MAP[config.image] : undefined,
+  };
+}
