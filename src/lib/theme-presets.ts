@@ -91,8 +91,8 @@ export const SINGLE_COLOR_PALETTES: PalettePreset[] = [
     colors: ["#222222", "#2a2a2a"],
     palette: {
       pageBackground: "rgba(34, 34, 34, 1)",
-      cardBackground: "rgba(42, 42, 42, 1)",
-      cardSecondaryBackground: "rgba(51, 51, 51, 1)",
+      cardBackground: "rgba(17, 17, 17, 1)",
+      cardSecondaryBackground: "rgba(255, 255, 255, 0.05)",
       mainTextColor: "rgba(237, 237, 237, 1)",
       subTextColor: "rgba(153, 153, 153, 1)",
       primaryColor: "rgba(59, 130, 246, 1)",
