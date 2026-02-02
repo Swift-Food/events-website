@@ -167,16 +167,18 @@ export default function ThemePicker({
     };
   }, [isOpen]);
 
-  // Scroll to the correct palette page when the picker opens
+  // Scroll to the correct palette page when the picker opens or palette tab is shown
   useEffect(() => {
     if (!isOpen) return;
     const el = scrollRef.current;
     if (!el) return;
     const targetPage = MULTI_COLOR_PALETTES.some((p) => p.id === theme.colorPalette) ? 1 : 0;
-    // Instant scroll (no animation) so it appears already on the right page
-    el.scrollTo({ left: targetPage * el.clientWidth, behavior: "instant" });
+    // Use rAF so the container has layout dimensions after tab switch
+    requestAnimationFrame(() => {
+      el.scrollTo({ left: targetPage * el.clientWidth, behavior: "instant" });
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, activeMobileTab]);
 
   // Track which page is visible using IntersectionObserver
   useEffect(() => {
@@ -241,27 +243,31 @@ export default function ThemePicker({
     return () => observer.disconnect();
   }, [isOpen, theme.type]);
 
-  // Scroll landscape to page with active item when opening
+  // Scroll landscape to page with active item when opening or switching to details tab
   useEffect(() => {
     if (!isOpen || theme.type !== "landscape") return;
     const el = landscapeScrollRef.current;
     if (!el) return;
     const activeIdx = LANDSCAPE_OPTIONS.findIndex((o) => o.id === theme.image);
     const targetPage = activeIdx >= 0 ? Math.floor(activeIdx / 3) : 0;
-    el.scrollTo({ left: targetPage * el.clientWidth, behavior: "instant" });
+    requestAnimationFrame(() => {
+      el.scrollTo({ left: targetPage * el.clientWidth, behavior: "instant" });
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, theme.type]);
+  }, [isOpen, theme.type, activeMobileTab]);
 
-  // Scroll pattern to page with active item when opening
+  // Scroll pattern to page with active item when opening or switching to details tab
   useEffect(() => {
     if (!isOpen || theme.type !== "pattern") return;
     const el = patternScrollRef.current;
     if (!el) return;
     const activeIdx = PATTERN_OPTIONS.findIndex((o) => o.id === theme.pattern);
     const targetPage = activeIdx >= 0 ? Math.floor(activeIdx / 3) : 0;
-    el.scrollTo({ left: targetPage * el.clientWidth, behavior: "instant" });
+    requestAnimationFrame(() => {
+      el.scrollTo({ left: targetPage * el.clientWidth, behavior: "instant" });
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, theme.type]);
+  }, [isOpen, theme.type, activeMobileTab]);
 
   // Track shader scroll page
   useEffect(() => {
@@ -283,16 +289,18 @@ export default function ThemePicker({
     return () => observer.disconnect();
   }, [isOpen, theme.type]);
 
-  // Scroll shader to page with active item when opening
+  // Scroll shader to page with active item when opening or switching to details tab
   useEffect(() => {
     if (!isOpen || theme.type !== "shader") return;
     const el = shaderScrollRef.current;
     if (!el) return;
     const activeIdx = SHADER_PRESETS.findIndex((s) => s.id === theme.shaderPreset);
     const targetPage = activeIdx >= 0 ? Math.floor(activeIdx / 4) : 0;
-    el.scrollTo({ left: targetPage * el.clientWidth, behavior: "instant" });
+    requestAnimationFrame(() => {
+      el.scrollTo({ left: targetPage * el.clientWidth, behavior: "instant" });
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, theme.type]);
+  }, [isOpen, theme.type, activeMobileTab]);
 
   const currentPalette = (PALETTE_MAP[theme.colorPalette] ?? PALETTE_MAP["default"]).palette;
 
