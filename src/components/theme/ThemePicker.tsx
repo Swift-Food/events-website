@@ -297,7 +297,7 @@ export default function ThemePicker({
       {/* Customizer Tray */}
       <div
         ref={trayRef}
-        className="relative w-full max-h-[60vh] overflow-y-auto bg-black/60 border-t border-white/10 rounded-t-[2.0rem] lg:rounded-t-[2rem] pointer-events-auto"
+        className="relative w-full max-h-[60vh] overflow-y-auto bg-black/60 backdrop-blur-sm border-t border-white/10 rounded-t-[2.0rem] lg:rounded-t-[2rem] pointer-events-auto"
         style={{
           animation: dragOffset === 0 ? "themePickerSlideUp 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards" : undefined,
           transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : undefined,
@@ -315,7 +315,7 @@ export default function ThemePicker({
         `}</style>
 
         {/* Sticky header: drag handle + mobile tabs */}
-        <div className="sticky top-0 z-10 rounded-t-[2.0rem] lg:rounded-t-[2rem] backdrop-blur-sm">
+        <div className="sticky top-0 z-10 rounded-t-[2.0rem] lg:rounded-t-[2rem]">
           {/* Drag handle */}
           <div
             className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none"
