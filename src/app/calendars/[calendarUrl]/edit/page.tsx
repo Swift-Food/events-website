@@ -133,6 +133,7 @@ export default function EditCalendarPage() {
           calendar.ownerEventUserId,
           { calendarId: calendar.id }
         );
+        console.log("console", JSON.stringify(response))
         setHighlights(response.highlights);
       } catch (err) {
         console.error("Failed to fetch highlights:", err);
@@ -153,6 +154,7 @@ export default function EditCalendarPage() {
         calendar.ownerEventUserId,
         { calendarId: calendar.id }
       );
+      console.log("console", JSON.stringify(response))
       setHighlights(response.highlights);
     } catch (err) {
       console.error("Failed to refresh highlights:", err);
@@ -206,7 +208,7 @@ export default function EditCalendarPage() {
     const expiry = new Date(expiresAt);
     const diffMs = expiry.getTime() - now.getTime();
 
-    if (diffMs <= 0) return "Expired";
+    if (diffMs <= 0) return "";
 
     const hours = Math.floor(diffMs / 3600000);
     const mins = Math.floor((diffMs % 3600000) / 60000);
@@ -620,8 +622,8 @@ export default function EditCalendarPage() {
               {highlights.map((highlight, index) => {
                 const firstMedia = highlight.mediaItems[0];
                 const thumbnailUrl =
-                  firstMedia?.type === "video" && firstMedia?.thumbnailUrl
-                    ? firstMedia.thumbnailUrl
+                  firstMedia?.type === "video"
+                    ? firstMedia?.thumbnailUrl
                     : firstMedia?.url;
                 const isEditingThis = editingCaption === highlight.id;
 
@@ -638,7 +640,15 @@ export default function EditCalendarPage() {
                       }}
                       className="relative aspect-video w-full overflow-hidden"
                     >
-                      {thumbnailUrl ? (
+                      {firstMedia?.type === "video" && !thumbnailUrl ? (
+                        <video
+                          src={firstMedia.url}
+                          muted
+                          playsInline
+                          preload="metadata"
+                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        />
+                      ) : thumbnailUrl ? (
                         <Image
                           src={thumbnailUrl}
                           alt=""

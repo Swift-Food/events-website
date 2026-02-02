@@ -53,7 +53,7 @@ export function useOAuth({
   // Initialize Google Sign-In
 
   const handleGoogleCallback = useCallback(async (response: any) => {
-    console.log("Google callback fired!", response);
+
     setIsLoading(true);
     try {
       const idToken = response.credential;
@@ -132,8 +132,6 @@ export function useOAuth({
   // Initialize Apple Sign-In
   useEffect(() => {
     const initializeApple = () => {
-      console.log('Apple Client ID:', process.env.NEXT_PUBLIC_APPLE_CLIENT_ID);
-      console.log('Apple Redirect:', process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI);
       if (window.AppleID?.auth && process.env.NEXT_PUBLIC_APPLE_CLIENT_ID) {
         try {
           window.AppleID.auth.init({
@@ -181,7 +179,7 @@ export function useOAuth({
       return;
     }
     console.log("trying to login with google")
-    console.log("Client ID:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+
     try {
       window.google?.accounts.id.prompt();
     } catch (error) {

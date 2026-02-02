@@ -15,6 +15,7 @@ class HighlightService {
    * Create a new highlight (auth required)
    */
   async createHighlight(data: CreateHighlightDto): Promise<HighlightResponseDto> {
+    console.log("the highlight data", JSON.stringify(data))
     const response: AxiosResponse<HighlightResponseDto> = await apiClient.post(
       this.baseUrl,
       data
