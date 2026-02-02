@@ -537,7 +537,7 @@ export default function ThemePicker({
                             (c, i) => (
                               <div
                                 key={i}
-                                className="w-6 h-6 lg:w-8 lg:h-8 rounded-full border-2 border-zinc-950 shadow-lg"
+                                className="w-6 h-6 lg:w-8 lg:h-8 rounded-full shadow-lg"
                                 style={{
                                   backgroundColor: c,
                                   zIndex: 3 - i,
