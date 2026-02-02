@@ -36,6 +36,7 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const isLandingPage = pathname === "/";
+  const hasSolidBackground = pathname?.startsWith("/event-management") || pathname?.startsWith("/event-creation");
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -110,7 +111,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 backdrop-blur-sm">
+      <header className={`sticky top-0 z-50 ${hasSolidBackground ? "bg-background" : "backdrop-blur-sm"}`}>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <Link
