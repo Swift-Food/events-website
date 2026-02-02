@@ -49,7 +49,7 @@ export default function EventThemeBackground({
           alt={landscape.name}
           fill
           className="object-cover"
-          style={{ opacity: config.imageOpacity ?? 0.4, filter: "blur(0px)", scale: "1.00" }}
+          style={{ opacity: (config.colorPalette ?? "default") === "default" ? 1 : (config.imageOpacity ?? 0.4), filter: "blur(0px)", scale: "1.00" }}
           priority
         />
       )}

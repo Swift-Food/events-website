@@ -401,7 +401,7 @@ export function resolveTheme(config: EventThemeConfig): {
     };
     palette = {
       ...basePalette,
-      pageBackground: isDefault ? "transparent" : basePalette.pageBackground,
+      pageBackground: isDefault ? "#000000" : basePalette.pageBackground,
       // cardBackground: "rgba(255, 255, 255, 0.25)",
       // cardSecondaryBackground: "rgba(255, 255, 255, 0.25)",
       cardBackground: withAlpha(basePalette.cardBackground, 0.5),
