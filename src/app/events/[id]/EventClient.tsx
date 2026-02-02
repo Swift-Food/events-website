@@ -827,7 +827,7 @@ export default function EventClient({
               {/* 2×2 Grid on sm-md, Flex column on lg+ */}
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:flex lg:flex-col">
                 {/* Top Left: Image with Status Badge */}
-                <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-secondary-background sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+                <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
                   {event.eventImage ? (
                     <Image
                       src={event.eventImage}
@@ -837,11 +837,8 @@ export default function EventClient({
                       priority
                     />
                   ) : (
-                    <div
-                      className="flex h-full items-center justify-center"
-                      style={{ backgroundColor: event.eventColor || "#3b82f6" }}
-                    >
-                      <Calendar className="h-24 w-24 text-white/30" />
+                    <div className="flex h-full items-center justify-center bg-card-background">
+                      <Calendar className="h-24 w-24 text-muted-foreground/30" />
                     </div>
                   )}
 
