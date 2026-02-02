@@ -190,6 +190,15 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            {!isAuthenticated && (
+              <button
+                onClick={handleSearchIconClick}
+                className={`flex h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg} cursor-pointer`}
+                aria-label="Search"
+              >
+                <Search className="h-5 w-5" />
+              </button>
+            )}
             <Link
               href="/event-creation"
               className={`flex lg:hidden h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg}`}
@@ -203,13 +212,15 @@ export default function Navbar() {
             >
               Create Event
             </Link>
-            <button
-              onClick={handleSearchIconClick}
-              className={`flex h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg} cursor-pointer`}
-              aria-label="Search"
-            >
-              <Search className="h-5 w-5" />
-            </button>
+            {isAuthenticated && (
+              <button
+                onClick={handleSearchIconClick}
+                className={`flex h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg} cursor-pointer`}
+                aria-label="Search"
+              >
+                <Search className="h-5 w-5" />
+              </button>
+            )}
             {isAuthenticated ? (
               <div className="relative" ref={userMenuRef}>
                 <div className="flex flex-row space-x-2">
