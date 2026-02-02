@@ -459,7 +459,7 @@ export default function CheckInPage() {
 
  if (authLoading || loading) {
   return (
-   <div className="flex min-h-screen items-center justify-center bg-background">
+   <div className="flex min-h-screen items-center justify-center">
     <Loader2 className="h-8 w-8 animate-spin text-primary" />
    </div>
   );
@@ -467,14 +467,14 @@ export default function CheckInPage() {
 
  if (!event) {
   return (
-   <div className="flex min-h-screen items-center justify-center bg-background">
+   <div className="flex min-h-screen items-center justify-center">
     <p className="text-muted-foreground">Event not found</p>
    </div>
   );
  }
 
  return (
-  <div className="min-h-screen bg-background">
+  <div className="min-h-screen">
    <div className="mx-auto max-w-4xl px-4 py-6">
     {/* Header */}
     <div className="mb-6">

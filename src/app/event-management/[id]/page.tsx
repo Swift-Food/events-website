@@ -235,7 +235,7 @@ export default function EventManagementPage() {
  // Loading state
  if (isLoading || authLoading) {
   return (
-   <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background">
+   <div className="flex min-h-[calc(100vh-64px)] items-center justify-center">
     <div className="text-center">
      <div className="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
      <p className="text-lg text-muted-foreground">Loading event...</p>
@@ -247,7 +247,7 @@ export default function EventManagementPage() {
  // Auth required
  if (!isAuthenticated) {
   return (
-   <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background px-6">
+   <div className="flex min-h-[calc(100vh-64px)] items-center justify-center px-6">
     <div className="text-center max-w-md">
      <div className="mb-4 text-6xl">🔒</div>
      <h1 className="mb-2 text-2xl font-bold text-foreground">
@@ -270,7 +270,7 @@ export default function EventManagementPage() {
  // Unauthorized
  if (isAuthorized === false) {
   return (
-   <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background px-6">
+   <div className="flex min-h-[calc(100vh-64px)] items-center justify-center px-6">
     <div className="text-center max-w-md">
      <div className="mb-4 text-6xl">🚫</div>
      <h1 className="mb-2 text-2xl font-bold text-foreground">
@@ -295,7 +295,7 @@ export default function EventManagementPage() {
  // Error state
  if (error || !eventData) {
   return (
-   <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background px-6">
+   <div className="flex min-h-[calc(100vh-64px)] items-center justify-center px-6">
     <div className="text-center max-w-md">
      <div className="mb-4 text-6xl">⚠️</div>
      <h1 className="mb-2 text-2xl font-bold text-foreground">
