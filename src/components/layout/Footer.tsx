@@ -38,7 +38,7 @@ export default function Footer() {
       className={
         isLanding
           ? "border-t border-zinc-900/10"
-          : "border-t border-white/10 bg-background"
+          : "relative z-10 border-t border-white/10 backdrop-blur-md"
       }
     >
       <div className="mx-auto max-w-6xl px-6 py-8">
