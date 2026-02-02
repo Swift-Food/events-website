@@ -716,7 +716,7 @@ export default function ThemePicker({
                                 className="flex flex-col items-center gap-1.5 group"
                               >
                                 <div
-                                  className={`relative w-full aspect-[4/3] sm:aspect-[3/2] rounded-xl overflow-hidden border-2 transition-all ${
+                                  className={`relative w-full aspect-[4/3] sm:aspect-[5/2] lg:aspect-[4/3] rounded-xl overflow-hidden border-2 transition-all ${
                                     theme.image === opt.id
                                       ? "border-white scale-105 z-10 ring-4 ring-white/10"
                                       : "border-white/5 opacity-50 group-hover:opacity-100"
