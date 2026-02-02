@@ -842,25 +842,6 @@ export default function EventClient({
                     </div>
                   )}
 
-                  {/* Status Badge - Only on lg+ and only for collaborators */}
-                  {userRole && (
-                    <div className="absolute right-4 top-4 hidden lg:flex lg:items-center lg:gap-2">
-                      {event.isPrivate && (
-                        <span className="flex items-center gap-1.5 rounded-full bg-purple-500/20 px-3 py-2 text-sm font-semibold text-purple-400 backdrop-blur-md">
-                          <Lock className="h-3.5 w-3.5" />
-                          Private
-                        </span>
-                      )}
-                      <span
-                        className={`rounded-full px-4 py-2 text-sm font-semibold backdrop-blur-md ${
-                          statusColors[event.status] ||
-                          "bg-gray-500/20 text-gray-400"
-                        }`}
-                      >
-                        {event.status || "Unknown"}
-                      </span>
-                    </div>
-                  )}
                 </div>
 
                 {/* Event Title & Categories - Show on mobile & tablet, hide on desktop */}
