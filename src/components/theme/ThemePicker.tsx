@@ -501,7 +501,7 @@ export default function ThemePicker({
         <div className="overflow-y-auto min-h-0 w-full">
         <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pt-3 pb-1 md:pb-4">
           {/* Content: 3-column grid on desktop, tabbed on mobile */}
-          <div className={`lg:grid ${isPaletteDisabled ? "lg:grid-cols-[180px_1fr]" : "lg:grid-cols-[180px_1fr_1.5fr]"} gap-8 xl:gap-12 items-start`}>
+          <div className={`lg:grid ${isPaletteDisabled ? "lg:grid-cols-[200px_1fr]" : "lg:grid-cols-[200px_1fr_1fr]"} gap-8 xl:gap-12 items-start`}>
             {/* Column 1: Base Style Selection */}
             <div
               className={`${
@@ -511,7 +511,7 @@ export default function ThemePicker({
               <label className="hidden lg:block text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] mb-3 text-center">
                 Base Style
               </label>
-              <div className="grid grid-cols-4 lg:grid-cols-2 gap-3 lg:gap-2.5">
+              <div className="grid grid-cols-4 lg:grid-cols-2 gap-3 lg:gap-3">
                 {BG_TYPES.map(({ type, label }) => {
                   const isActive = theme.type === type;
                   return (
@@ -531,7 +531,7 @@ export default function ThemePicker({
                         {getBgPreview(type)}
                       </div>
                       <span
-                        className={`text-[10px] lg:text-[9px] font-bold uppercase tracking-widest ${
+                        className={`text-[10px] font-bold uppercase tracking-widest ${
                           isActive
                             ? "text-white"
                             : "text-zinc-400 group-hover:text-zinc-200"
@@ -585,9 +585,9 @@ export default function ThemePicker({
                           className="flex flex-col items-center gap-1.5 transition-all hover:scale-110 active:scale-95 mx-auto"
                         >
                           <div
-                            className={`w-12 h-12 lg:w-10 lg:h-10 rounded-full flex items-center justify-center p-0.5 border-2 transition-all ${
+                            className={`w-12 h-12 lg:w-12 lg:h-12 rounded-full flex items-center justify-center p-0.5 border-2 transition-all ${
                               theme.colorPalette === preset.id
-                                ? "border-white ring-4 lg:ring-4 ring-white/10"
+                                ? "border-white ring-4 lg:ring-6 ring-white/10"
                                 : "border-transparent"
                             }`}
                           >
@@ -624,9 +624,9 @@ export default function ThemePicker({
                           className="flex flex-col items-center gap-1.5 transition-all hover:scale-110 active:scale-95 mx-auto"
                         >
                           <div
-                            className={`w-12 h-12 lg:w-10 lg:h-10 rounded-full flex items-center justify-center p-0.5 border-2 transition-all ${
+                            className={`w-12 h-12 lg:w-12 lg:h-12 rounded-full flex items-center justify-center p-0.5 border-2 transition-all ${
                               theme.colorPalette === preset.id
-                                ? "border-white ring-4 lg:ring-4 ring-white/10"
+                                ? "border-white ring-4 lg:ring-6 ring-white/10"
                                 : "border-transparent"
                             }`}
                           >
@@ -872,7 +872,7 @@ export default function ThemePicker({
                 {/* Pattern options */}
                 {theme.type === "pattern" && (<>
                   {/* sm+: all patterns in a single grid */}
-                  <div className="hidden sm:grid grid-cols-5 lg:grid-cols-3 gap-3">
+                  <div className="hidden sm:grid grid-cols-5 gap-3">
                     {PATTERN_OPTIONS.map((opt) => {
                       const isActive = theme.pattern === opt.id;
                       const patternStyle = getPatternPreviewBg(opt.id);
@@ -884,7 +884,7 @@ export default function ThemePicker({
                           className="flex flex-col items-center gap-1.5 group"
                         >
                           <div
-                            className={`relative w-full aspect-[2/1] lg:aspect-[3/2] rounded-xl overflow-hidden border-2 transition-all ${
+                            className={`relative w-full aspect-[2/1] rounded-xl overflow-hidden border-2 transition-all ${
                               isActive
                                 ? "border-white scale-105 z-10 ring-4 ring-white/10"
                                 : "border-white/10 opacity-60 group-hover:opacity-100"
