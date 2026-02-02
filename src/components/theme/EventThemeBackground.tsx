@@ -39,7 +39,10 @@ export default function EventThemeBackground({
   }
 
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none">
+    <div
+      className="fixed inset-0 z-0 pointer-events-none"
+      style={{ backgroundColor: palette.pageBackground }}
+    >
       {config.type === "landscape" && landscape && (
         <Image
           src={`/Landscape theme/${landscape.filename}`}
