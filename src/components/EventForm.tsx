@@ -17,7 +17,7 @@ import {
   EventCreationProvider,
   useEventCreation,
 } from "@/context/EventCreationContext";
-import { resolveTheme, getThemeCSSVariables, PALETTE_MAP, SHADER_MAP, LANDSCAPE_MAP, getPatternCSS } from "@/lib/theme-presets";
+import { resolveTheme, getThemeCSSVariables, PALETTE_MAP, SHADER_MAP, LANDSCAPE_MAP, getPatternPreviewCSS } from "@/lib/theme-presets";
 import ThemePicker from "@/components/theme/ThemePicker";
 import InlineThemePicker from "@/components/theme/InlineThemePicker";
 import EventThemeBackground from "@/components/theme/EventThemeBackground";
@@ -1110,14 +1110,20 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                     ) : null;
                   })()
                 ) : eventTheme.type === "pattern" ? (
-                  <div
-                    className="w-full h-full"
-                    style={{
-                      backgroundColor: resolvedTheme.palette.pageBackground,
-                      backgroundImage: getPatternCSS(eventTheme.pattern ?? "dots", resolvedTheme.palette),
-                      backgroundSize: "20px 20px",
-                    }}
-                  />
+                  (() => {
+                    const patternStyle = getPatternPreviewCSS(eventTheme.pattern ?? "dots", resolvedTheme.palette);
+                    return (
+                      <div
+                        className="w-full h-full"
+                        style={{
+                          backgroundColor: resolvedTheme.palette.pageBackground,
+                          backgroundImage: patternStyle.backgroundImage,
+                          backgroundSize: patternStyle.backgroundSize,
+                          backgroundRepeat: "repeat",
+                        }}
+                      />
+                    );
+                  })()
                 ) : eventTheme.type === "landscape" ? (
                   (() => {
                     const landscape = LANDSCAPE_MAP[eventTheme.image ?? ""];

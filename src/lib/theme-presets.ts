@@ -297,6 +297,44 @@ function darkenColor(r: number, g: number, b: number, amount: number, alpha: num
   return `rgba(${Math.round(hue2rgb(p, q, h + 1/3) * 255)}, ${Math.round(hue2rgb(p, q, h) * 255)}, ${Math.round(hue2rgb(p, q, h - 1/3) * 255)}, ${alpha})`;
 }
 
+/** Returns { backgroundImage, backgroundSize } for a pattern preview thumbnail (sizes are factors of 32 so they tile cleanly in a 32×32 swatch) */
+export function getPatternPreviewCSS(patternId: string, palette: ColorPalette): { backgroundImage: string; backgroundSize: string } {
+  const { r, g, b } = parseColor(palette.pageBackground);
+  const c = darkenColor(r, g, b, 0.6, 0.45);
+  const encode = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  switch (patternId) {
+    case "dots":
+      return {
+        backgroundImage: encode(`<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><circle cx='4' cy='4' r='2' fill='${c}'/><circle cx='12' cy='12' r='2' fill='${c}'/></svg>`),
+        backgroundSize: "16px 16px",
+      };
+    case "grid":
+      return {
+        backgroundImage: encode(`<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'><path d='M8 0V8H0' fill='none' stroke='${c}' stroke-width='0.5'/></svg>`),
+        backgroundSize: "8px 8px",
+      };
+    case "stripes":
+      return {
+        backgroundImage: encode(`<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'><rect x='2' y='0' width='3' height='8' fill='${c}'/></svg>`),
+        backgroundSize: "8px 8px",
+      };
+    case "checkers": {
+      const bgColor = darkenColor(r, g, b, 0.88, 0.25);
+      return {
+        backgroundImage: encode(`<svg xmlns='http://www.w3.org/2000/svg' width='2' height='2' viewBox='0 0 2 2'><rect x='0' y='0' width='1' height='1' fill='${c}'/><rect x='1' y='1' width='1' height='1' fill='${c}'/><rect x='1' y='0' width='1' height='1' fill='${bgColor}'/><rect x='0' y='1' width='1' height='1' fill='${bgColor}'/></svg>`),
+        backgroundSize: "16px 16px",
+      };
+    }
+    case "crosses":
+      return {
+        backgroundImage: encode(`<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 60 60'><path d='M13 9L17 9L17 13L21 13L21 17L17 17L17 21L13 21L13 17L9 17L9 13L13 13Z' fill='${c}'/><path d='M43 39L47 39L47 43L51 43L51 47L47 47L47 51L43 51L43 47L39 47L39 43L43 43Z' fill='${c}'/></svg>`),
+        backgroundSize: "32px 32px",
+      };
+    default:
+      return { backgroundImage: "none", backgroundSize: "auto" };
+  }
+}
+
 /** Returns the CSS `background-image` value for a pattern */
 export function getPatternCSS(patternId: string, palette: ColorPalette): string {
   const { r, g, b } = parseColor(palette.pageBackground);
