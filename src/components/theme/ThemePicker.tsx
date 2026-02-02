@@ -140,39 +140,34 @@ export default function ThemePicker({
     const encode = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
     switch (patternId) {
       case "dots":
-        // Staggered dots: 2 dots per tile (one top-left, one center), tiles 6x6
         return {
           backgroundImage: encode(`<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><circle cx='5' cy='5' r='2.5' fill='${c}'/><circle cx='15' cy='15' r='2.5' fill='${c}'/></svg>`),
-          backgroundSize: "16.666% 16.666%",
+          backgroundSize: "20px 20px",
         };
       case "grid":
-        // Lines on right and bottom edges, tiles 4x4
         return {
           backgroundImage: encode(`<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M10 0V10H0' fill='none' stroke='${c}' stroke-width='0.5'/></svg>`),
-          backgroundSize: "25% 25%",
+          backgroundSize: "20px 20px",
         };
       case "stripes":
-        // Vertical stripe centered, tiles 5 across
         return {
           backgroundImage: encode(`<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><rect x='3' y='0' width='4' height='10' fill='${c}'/></svg>`),
-          backgroundSize: "20% 20%",
+          backgroundSize: "16px 16px",
         };
       case "checkers": {
-        // 2x2 checker per tile, tiles 4x4 (8 squares across)
         const m2 = currentPalette.pageBackground.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/);
         const c2 = m2
           ? `rgba(${Math.round(Number(m2[1]) * 0.88)}, ${Math.round(Number(m2[2]) * 0.88)}, ${Math.round(Number(m2[3]) * 0.88)}, 1)`
           : currentPalette.cardBackground;
         return {
           backgroundImage: encode(`<svg xmlns='http://www.w3.org/2000/svg' width='2' height='2' viewBox='0 0 2 2'><rect x='0' y='0' width='1' height='1' fill='${c}'/><rect x='1' y='1' width='1' height='1' fill='${c}'/><rect x='1' y='0' width='1' height='1' fill='${c2}'/><rect x='0' y='1' width='1' height='1' fill='${c2}'/></svg>`),
-          backgroundSize: "25% 25%",
+          backgroundSize: "20px 20px",
         };
       }
       case "crosses":
-        // Staggered crosses: 2 per tile offset, tiles 3x3
         return {
           backgroundImage: encode(`<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><path d='M13 9L17 9L17 13L21 13L21 17L17 17L17 21L13 21L13 17L9 17L9 13L13 13Z' fill='${c}'/><path d='M43 39L47 39L47 43L51 43L51 47L47 47L47 51L43 51L43 47L39 47L39 43L43 43Z' fill='${c}'/></svg>`),
-          backgroundSize: "33.333% 33.333%",
+          backgroundSize: "40px 40px",
         };
       default:
         return { backgroundImage: "none", backgroundSize: "auto" };
@@ -574,7 +569,7 @@ export default function ThemePicker({
                           className="flex flex-col items-center gap-1.5 group"
                         >
                           <div
-                            className={`relative w-full aspect-square rounded-xl overflow-hidden border-2 transition-all ${
+                            className={`relative w-full aspect-[3/2] rounded-xl overflow-hidden border-2 transition-all ${
                               isActive
                                 ? "border-white shadow-2xl scale-105 z-10 ring-4 ring-white/10"
                                 : "border-white/10 opacity-60 group-hover:opacity-100"
