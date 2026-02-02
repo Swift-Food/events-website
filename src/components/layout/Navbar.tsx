@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import {
   User,
   LogOut,
@@ -30,6 +31,8 @@ export default function Navbar() {
   const { isAuthenticated, logout, user, eventUser, refreshProfile } = useAuth();
   const { openSearchModal } = useSearchModal();
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
   const router = useRouter();
   const pathname = usePathname();
   const isLandingPage = pathname === "/";
@@ -37,9 +40,12 @@ export default function Navbar() {
   // Close user menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
       if (
         userMenuRef.current &&
-        !userMenuRef.current.contains(event.target as Node)
+        !userMenuRef.current.contains(target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target)
       ) {
         setIsUserMenuOpen(false);
       }
@@ -60,7 +66,14 @@ export default function Navbar() {
   };
 
   const handleUserIconClick = async () => {
-    // Fetch profile when opening the menu
+    // Calculate dropdown position from the trigger button
+    if (!isUserMenuOpen && userMenuRef.current) {
+      const rect = userMenuRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
     setIsUserMenuOpen(!isUserMenuOpen);
     if (!isUserMenuOpen) {
       try {
@@ -200,63 +213,7 @@ export default function Navbar() {
                   </button>
                 </div>
 
-                {/* User Dropdown Menu */}
-                {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-xl border border-foreground/10 bg-card-background shadow-2xl backdrop-blur-xl">
-                    {/* User Info Section */}
-                    <div className="border-b border-foreground/10 px-4 py-3">
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {user?.email}
-                      </p>
-                      <p className="text-xs text-foreground/60 mt-0.5">
-                        Signed in
-                      </p>
-                    </div>
-
-                    {/* Menu Items */}
-                    <div className="py-2">
-                      <button
-                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
-                        onClick={() => {
-                          if (eventUser?.id) {
-                            router.push(`/user/${eventUser.id}`);
-                          }
-                          setIsUserMenuOpen(false);
-                        }}
-                      >
-                        <UserCircle className="h-4 w-4" />
-                        Profile
-                      </button>
-                      <button
-                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
-                        onClick={() => {
-                          router.push("/friends");
-                          setIsUserMenuOpen(false);
-                        }}
-                      >
-                        <Users className="h-4 w-4" />
-                        Friends
-                      </button>
-                      <button
-                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
-                        onClick={() => {
-                          router.push("/profile/edit");
-                          setIsUserMenuOpen(false);
-                        }}
-                      >
-                        <Settings className="h-4 w-4" />
-                        Settings
-                      </button>
-                      <button
-                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5 hover:text-red-400"
-                        onClick={handleLogout}
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Logout
-                      </button>
-                    </div>
-                  </div>
-                )}
+                {/* User Dropdown Menu - rendered via portal to escape header's backdrop-filter */}
               </div>
             ) : (
               <Link
@@ -270,6 +227,69 @@ export default function Navbar() {
           </div>
         </div>
       </header>
+
+      {/* User Dropdown Menu - portaled outside header to allow backdrop-blur */}
+      {isUserMenuOpen && createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed z-[60] w-56 rounded-xl border border-foreground/10 bg-card-background shadow-2xl backdrop-blur-sm"
+          style={{ top: dropdownPos.top, right: dropdownPos.right }}
+        >
+          {/* User Info Section */}
+          <div className="border-b border-foreground/10 px-4 py-3">
+            <p className="text-sm font-medium text-foreground truncate">
+              {user?.email}
+            </p>
+            <p className="text-xs text-foreground/60 mt-0.5">
+              Signed in
+            </p>
+          </div>
+
+          {/* Menu Items */}
+          <div className="py-2">
+            <button
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
+              onClick={() => {
+                if (eventUser?.id) {
+                  router.push(`/user/${eventUser.id}`);
+                }
+                setIsUserMenuOpen(false);
+              }}
+            >
+              <UserCircle className="h-4 w-4" />
+              Profile
+            </button>
+            <button
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
+              onClick={() => {
+                router.push("/friends");
+                setIsUserMenuOpen(false);
+              }}
+            >
+              <Users className="h-4 w-4" />
+              Friends
+            </button>
+            <button
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
+              onClick={() => {
+                router.push("/profile/edit");
+                setIsUserMenuOpen(false);
+              }}
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </button>
+            <button
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5 hover:text-red-400"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
     </>
   );
 }
