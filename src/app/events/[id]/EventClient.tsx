@@ -713,10 +713,10 @@ export default function EventClient({
 
         <div className={`flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border backdrop-blur-md ${
          userRole === "scanner"
-          ? "border-blue-400/30 bg-blue-500/20 text-blue-200 shadow-[0_0_12px_rgba(59,130,246,0.15)]"
+          ? "border-blue-500/40 bg-blue-500/25 text-blue-800 dark:text-blue-200 shadow-[0_0_12px_rgba(59,130,246,0.15)]"
           : userRole === "admin"
-          ? "border-purple-400/30 bg-purple-500/20 text-purple-200 shadow-[0_0_12px_rgba(168,85,247,0.15)]"
-          : "border-amber-400/30 bg-amber-500/20 text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.15)]"
+          ? "border-purple-500/40 bg-purple-500/25 text-purple-800 dark:text-purple-200 shadow-[0_0_12px_rgba(168,85,247,0.15)]"
+          : "border-amber-500/40 bg-amber-500/25 text-amber-800 dark:text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.15)]"
         }`}>
          {userRole === "owner" && <Crown className="w-3.5 h-3.5" />}
          {userRole === "admin" && <Shield className="w-3.5 h-3.5" />}
@@ -763,10 +763,10 @@ export default function EventClient({
         <div className="flex items-center gap-4 lg:gap-8">
          <div className={`flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border backdrop-blur-md ${
           userRole === "scanner"
-           ? "border-blue-400/30 bg-blue-500/20 text-blue-200 shadow-[0_0_12px_rgba(59,130,246,0.15)]"
+           ? "border-blue-500/40 bg-blue-500/25 text-blue-800 dark:text-blue-200 shadow-[0_0_12px_rgba(59,130,246,0.15)]"
            : userRole === "admin"
-           ? "border-purple-400/30 bg-purple-500/20 text-purple-200 shadow-[0_0_12px_rgba(168,85,247,0.15)]"
-           : "border-amber-400/30 bg-amber-500/20 text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.15)]"
+           ? "border-purple-500/40 bg-purple-500/25 text-purple-800 dark:text-purple-200 shadow-[0_0_12px_rgba(168,85,247,0.15)]"
+           : "border-amber-500/40 bg-amber-500/25 text-amber-800 dark:text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.15)]"
          }`}>
           {userRole === "owner" && <Crown className="w-3.5 h-3.5" />}
           {userRole === "admin" && <Shield className="w-3.5 h-3.5" />}
