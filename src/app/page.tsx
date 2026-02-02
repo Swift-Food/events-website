@@ -105,7 +105,7 @@ export default function LandingPage() {
       <div className="scanline" />
 
       {/* Grid overlay */}
-      <div className="fixed inset-0 bg-grid-landing pointer-events-none z-0" />
+      {/* <div className="fixed inset-0 bg-grid-landing pointer-events-none z-0" /> */}
 
       {/* Hero Section */}
       <main className="relative flex flex-col items-center justify-center h-[calc(100vh-72px)] px-6 z-10 overflow-hidden">
