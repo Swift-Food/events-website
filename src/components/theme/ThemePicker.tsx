@@ -507,7 +507,7 @@ export default function ThemePicker({
         </div>
 
         <div className="overflow-y-auto min-h-0 w-full">
-        <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pt-1 pb-1 md:pb-4">
+        <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pt-2 pb-1 md:pb-4">
           {/* Content: 3-column grid on desktop, tabbed on mobile */}
           <div className={`lg:grid ${isPaletteDisabled ? "lg:grid-cols-[200px_1fr]" : "lg:grid-cols-[200px_1fr_1fr]"} gap-8 xl:gap-12 items-start`}>
             {/* Column 1: Base Style Selection */}
@@ -582,7 +582,7 @@ export default function ThemePicker({
                 >
                   {/* Page 1: Monotone */}
                   <div ref={page0Ref} className="min-w-full snap-start px-4 lg:px-6">
-                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-4 sm:flex sm:flex-wrap sm:justify-center sm:gap-4 sm:py-3 lg:grid lg:grid-cols-4 lg:grid-rows-2 lg:py-3 lg:gap-y-3 lg:gap-x-3">
+                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-2 sm:flex sm:flex-wrap sm:justify-center sm:gap-4 sm:py-2 lg:grid lg:grid-cols-4 lg:grid-rows-2 lg:py-3 lg:gap-y-3 lg:gap-x-3">
                       {SINGLE_COLOR_PALETTES.map((preset) => (
                         <button
                           key={preset.id}
@@ -621,7 +621,7 @@ export default function ThemePicker({
 
                   {/* Page 2: Themes */}
                   <div ref={page1Ref} className="min-w-full snap-start px-4 lg:px-6">
-                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-4 sm:flex sm:flex-wrap sm:justify-center sm:gap-4 sm:py-3 lg:grid lg:grid-cols-4 lg:grid-rows-2 lg:py-3 lg:gap-y-3 lg:gap-x-3">
+                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-2 sm:flex sm:flex-wrap sm:justify-center sm:gap-4 sm:py-2 lg:grid lg:grid-cols-4 lg:grid-rows-2 lg:py-3 lg:gap-y-3 lg:gap-x-3">
                       {MULTI_COLOR_PALETTES.map((preset) => (
                         <button
                           key={preset.id}
