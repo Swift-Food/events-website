@@ -57,6 +57,14 @@ export default function EventManagementPage() {
   const [showUnpublishConfirm, setShowUnpublishConfirm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Lock body scroll when edit modal is open
+  useEffect(() => {
+    if (showEditModal) {
+      document.body.style.overflow = "hidden";
+      return () => { document.body.style.overflow = ""; };
+    }
+  }, [showEditModal]);
+
   const setTab = (tab: TabType, filter?: string) => {
     const url = filter
       ? `/event-management/${eventId}?tab=${tab}&filter=${filter}`
@@ -440,7 +448,7 @@ export default function EventManagementPage() {
           />
 
           {/* Slide-out Panel */}
-          <div className="fixed right-0 top-0 z-50 h-full w-full max-w-4xl overflow-y-auto bg-background shadow-2xl animate-in slide-in-from-right duration-300">
+          <div className="fixed right-0 top-0 z-50 h-full w-full max-w-4xl overflow-y-auto overscroll-contain bg-background shadow-2xl animate-in slide-in-from-right duration-300">
             {/* Modal Header */}
             <div className="sticky top-0 z-10 flex items-center justify-end  bg-background px-6 py-4">
               {/* <h2 className="text-lg font-semibold text-foreground">Edit Event</h2> */}

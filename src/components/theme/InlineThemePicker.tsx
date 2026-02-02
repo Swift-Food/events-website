@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { ChevronDown, Maximize2 } from "lucide-react";
 import type { EventThemeConfig, BackgroundType } from "@/types/event/theme";
@@ -40,6 +40,20 @@ export default function InlineThemePicker({
   const styleRef = useRef<HTMLDivElement>(null);
 
   const currentPalette = PALETTE_MAP[theme.colorPalette] ?? PALETTE_MAP["default"];
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (colorOpen && colorRef.current && !colorRef.current.contains(e.target as Node)) {
+        setColorOpen(false);
+      }
+      if (styleOpen && styleRef.current && !styleRef.current.contains(e.target as Node)) {
+        setStyleOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [colorOpen, styleOpen]);
 
   const handleTypeChange = (type: BackgroundType) => {
     const updated: EventThemeConfig = { ...theme, type };
@@ -269,8 +283,6 @@ export default function InlineThemePicker({
           </button>
 
           {colorOpen && (
-            <>
-              <div className="fixed inset-0 z-10" onClick={() => setColorOpen(false)} />
               <div className="absolute top-full left-0 right-0 z-20 mt-1 rounded-xl bg-card-background border border-foreground/10 shadow-lg max-h-60 overflow-y-auto">
                 {ALL_PALETTES.map((p) => (
                   <button
@@ -293,7 +305,6 @@ export default function InlineThemePicker({
                   </button>
                 ))}
               </div>
-            </>
           )}
         </div>
 
@@ -326,8 +337,6 @@ export default function InlineThemePicker({
           </button>
 
           {styleOpen && hasStyleOptions && (
-            <>
-              <div className="fixed inset-0 z-10" onClick={() => setStyleOpen(false)} />
               <div className="absolute top-full left-0 right-0 z-20 mt-1 rounded-xl bg-card-background border border-foreground/10 shadow-lg max-h-60 overflow-y-auto">
                 {styleOptions.map((opt) => (
                   <button
@@ -346,7 +355,6 @@ export default function InlineThemePicker({
                   </button>
                 ))}
               </div>
-            </>
           )}
         </div>
       </div>
