@@ -11,14 +11,9 @@ import { HighlightResponseDto } from "@/types/highlight";
 import {
  Calendar as CalendarIcon,
  MapPin,
- Users,
- ArrowLeft,
  User,
- Bell,
  BellOff,
- Settings,
  Trash2,
- UserPlus,
  Crown,
  Shield,
  Edit3,
@@ -310,7 +305,7 @@ export default function CalendarClient({
     </div>
    )}
 
-   <div className="mx-auto max-w-6xl px-6 py-8">
+   <div className="mx-auto max-w-6xl px-6 pt-0 pb-8 sm:py-8">
     {/* Management Banner - Desktop */}
     {canManage && (
      <div
@@ -352,14 +347,112 @@ export default function CalendarClient({
      </div>
     )}
 
-    {/* Back Button */}
-    <button
-     onClick={() => router.push("/calendars")}
-     className="mb-6 flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
-    >
-     <ArrowLeft className="h-5 w-5" />
-     Back to Calendars
-    </button>
+    {/* Banner Section - full bleed on mobile */}
+    <div className="relative -mx-6 sm:mx-0">
+     {/* Banner Image / Color */}
+     <div
+      className="relative aspect-[4/1] w-full overflow-hidden sm:rounded-2xl"
+      style={{ backgroundColor: calendar.calendarColor || "#6366f1" }}
+     >
+      {calendar.calendarImage && (
+       <Image
+        src={calendar.calendarImage}
+        alt={`${calendar.name} banner`}
+        fill
+        className="object-cover"
+        priority
+       />
+      )}
+     </div>
+    </div>
+
+    {/* Profile image row with subscribe/manage buttons */}
+    <div className="flex items-end justify-between mb-6 px-4 sm:px-6 -mt-12 sm:-mt-14">
+     {/* Calendar Profile Image - overlapping banner */}
+     <div className="relative h-24 w-24 sm:h-28 sm:w-28 overflow-hidden rounded-xl border-4 border-[var(--background)] bg-card-secondary-background shadow-lg shrink-0">
+      {calendar.calendarImage ? (
+       <Image
+        src={calendar.calendarImage}
+        alt={calendar.name}
+        fill
+        className="object-cover"
+       />
+      ) : (
+       <div
+        className="flex h-full items-center justify-center"
+        style={{ backgroundColor: calendar.calendarColor || "#6366f1" }}
+       >
+        <CalendarIcon className="h-10 w-10 sm:h-12 sm:w-12 text-white/30" />
+       </div>
+      )}
+     </div>
+
+     {/* Subscribe Button */}
+     {!canManage && (
+      <button
+       onClick={handleSubscribe}
+       disabled={loadingSubscription}
+       className={`flex items-center gap-1.5 sm:gap-2 rounded-lg px-4 py-2 sm:px-6 sm:py-2.5 text-sm sm:text-base font-semibold transition-all ${
+        isSubscribed
+         ? "border border-white/10 bg-card-background text-foreground hover:bg-white/5"
+         : "bg-primary text-white hover:bg-primary/80"
+       } disabled:opacity-50 disabled:cursor-not-allowed`}
+      >
+       {isSubscribed ? (
+        <>
+         <BellOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+         Unsubscribe
+        </>
+       ) : (
+        <>
+         Subscribe
+        </>
+       )}
+      </button>
+     )}
+
+     {/* Management Buttons */}
+     {canManage && (
+      <div className="flex gap-2">
+       <button
+        onClick={() => setShowAddEventsModal(true)}
+        className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 font-semibold text-white transition-all hover:bg-primary/80 text-sm"
+       >
+        <Plus className="h-4 w-4" />
+        Add Events
+       </button>
+       <Link
+        href={`/calendars/${calendar.calendarUrl}/edit`}
+        className="flex items-center gap-2 rounded-lg border border-white/10 bg-card-background px-5 py-2.5 font-semibold text-foreground transition-all hover:bg-white/5 text-sm"
+       >
+        <Edit3 className="h-4 w-4" />
+        Edit
+       </Link>
+       {isOwner && (
+        <button
+         onClick={handleDelete}
+         className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-5 py-2.5 font-semibold text-red-400 transition-all hover:bg-red-500/20 text-sm"
+        >
+         <Trash2 className="h-4 w-4" />
+        </button>
+       )}
+      </div>
+     )}
+    </div>
+
+    {/* Calendar Name and Description */}
+    <div className="mb-6 mt-4">
+     <h1 className="mb-2 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+      {calendar.name}
+     </h1>
+
+     {calendar.description && (
+      <div
+       className="tiptap-editor tiptap-view-mode text-muted-foreground mt-3"
+       dangerouslySetInnerHTML={{ __html: calendar.description }}
+      />
+     )}
+    </div>
 
     {/* Highlights Bar */}
     {(highlights.length > 0 || canManage) && !loadingHighlights && (
@@ -372,35 +465,77 @@ export default function CalendarClient({
      </div>
     )}
 
-    {/* Main Content */}
-    <div className="flex flex-col gap-6 lg:flex-row-reverse">
-     {/* Left Column - Image and Sidebar */}
-     <section className="flex flex-col gap-6 lg:w-96 lg:shrink-0">
-      {/* Calendar Image */}
-      <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-neutral-700 bg-card-secondary-background">
-       {calendar.calendarImage ? (
-        <Image
-         src={calendar.calendarImage}
-         alt={calendar.name}
-         fill
-         className="object-cover"
-         priority
-        />
+    {/* Content Below Banner */}
+    <div className="flex flex-col gap-6 lg:flex-row">
+     {/* Main Content */}
+     <section className="flex-1 min-w-0 space-y-6">
+      {/* Events Section */}
+      <div className="pt-6">
+       <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-semibold text-foreground">
+         Events
+        </h2>
+        <div className="flex gap-2">
+         <button
+          onClick={() => setActiveTab("upcoming")}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+           activeTab === "upcoming"
+            ? "bg-primary text-white"
+            : "bg-card-background border border-white/10 text-muted-foreground hover:text-foreground"
+          }`}
+         >
+          Upcoming ({upcomingCount})
+         </button>
+         <button
+          onClick={() => setActiveTab("past")}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+           activeTab === "past"
+            ? "bg-primary text-white"
+            : "bg-card-background border border-white/10 text-muted-foreground hover:text-foreground"
+          }`}
+         >
+          Past ({pastCount})
+         </button>
+        </div>
+       </div>
+
+       {loadingEvents ? (
+        <div className="flex min-h-[200px] items-center justify-center">
+         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+        </div>
+       ) : events.length === 0 ? (
+        <div className="rounded-xl border border-white/10 bg-card-background p-12 text-center">
+         <CalendarIcon className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+         <h3 className="mb-2 text-xl font-semibold text-foreground">
+          {activeTab === "upcoming" ? "No upcoming events" : "No past events"}
+         </h3>
+         <p className="text-muted-foreground">
+          {activeTab === "upcoming"
+           ? canManage
+            ? "Add events to this calendar to get started"
+            : "Check back later for new events"
+           : "Past events will appear here after they end"}
+         </p>
+        </div>
        ) : (
-        <div
-         className="flex h-full items-center justify-center"
-         style={{ backgroundColor: calendar.calendarColor || "#6366f1" }}
-        >
-         <CalendarIcon className="h-24 w-24 text-white/30" />
+        <div className="space-y-3">
+         {events.map((event) => (
+          <HorizontalEventCard
+           key={event.id}
+           event={event}
+           onClick={handleEventClick}
+          />
+         ))}
         </div>
        )}
-
       </div>
+     </section>
 
+     {/* Sidebar */}
+     <aside className="flex flex-col gap-6 lg:w-80 lg:shrink-0">
       {/* Location Card */}
       {calendar.address && (
        <div className="rounded-xl border border-neutral-700 bg-card-background overflow-hidden">
-        {/* Map */}
         {calendar.address.location?.latitude &&
         calendar.address.location?.longitude ? (
          <GoogleMap
@@ -416,8 +551,6 @@ export default function CalendarClient({
           <span className="text-sm text-muted-foreground">Map</span>
          </div>
         )}
-
-        {/* Address Details */}
         <div className="p-4">
          {calendar.address.name && (
           <h3 className="font-semibold text-foreground mb-1">
@@ -490,170 +623,7 @@ export default function CalendarClient({
         </div>
        )}
       </div>
-
-      {/* Stats Card */}
-      {/* <div className="rounded-xl border border-neutral-700 bg-card-background p-4 sm:p-6">
-       <h3 className="mb-4 text-lg font-semibold text-foreground">
-        Calendar Stats
-       </h3>
-       <div className="space-y-3">
-        {(calendar.showSubscriberCount ?? true) || canManage ? (
-         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-muted-foreground">
-           <Users className="h-5 w-5" />
-           <span>Subscribers</span>
-          </div>
-          <span className="font-semibold text-foreground">
-           {calendar.subscriberCount || 0}
-          </span>
-         </div>
-        ) : null}
-        <div className="flex items-center justify-between">
-         <div className="flex items-center gap-2 text-muted-foreground">
-          <CalendarIcon className="h-5 w-5" />
-          <span>Events</span>
-         </div>
-         <span className="font-semibold text-foreground">
-          {events.length}
-         </span>
-        </div>
-       </div>
-      </div> */}
-     </section>
-
-     {/* Right Column - Main Content */}
-     <section className="flex-1 min-w-0 space-y-6">
-      {/* Calendar Name and Description */}
-      <div>
-       <h1 className="mb-4 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
-        {calendar.name}
-       </h1>
-
-       {calendar.description && (
-        <div
-         className="tiptap-editor tiptap-view-mode text-muted-foreground"
-         dangerouslySetInnerHTML={{ __html: calendar.description }}
-        />
-       )}
-      </div>
-
-      {/* Action Buttons */}
-      {!canManage && (
-       <div className="flex flex-wrap gap-3">
-        <button
-         onClick={handleSubscribe}
-         disabled={loadingSubscription}
-         className={`flex items-center gap-2 rounded-lg px-6 py-2.5 font-semibold transition-all ${
-          isSubscribed
-           ? "border border-white/10 bg-card-background text-foreground hover:bg-white/5"
-           : "bg-primary text-white hover:bg-primary/80"
-         } disabled:opacity-50 disabled:cursor-not-allowed`}
-        >
-         {isSubscribed ? (
-          <>
-           <BellOff className="h-5 w-5" />
-           Unsubscribe
-          </>
-         ) : (
-          <>
-           <Bell className="h-5 w-5" />
-           Subscribe
-          </>
-         )}
-        </button>
-       </div>
-      )}
-
-      {/* Management Buttons (Owner/Admin) */}
-      {canManage && (
-       <div className="flex flex-wrap gap-3">
-        <button
-         onClick={() => setShowAddEventsModal(true)}
-         className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 font-semibold text-white transition-all hover:bg-primary/80"
-        >
-         <Plus className="h-5 w-5" />
-         Add Events
-        </button>
-        <Link
-         href={`/calendars/${calendar.calendarUrl}/edit`}
-         className="flex items-center gap-2 rounded-lg border border-white/10 bg-card-background px-6 py-2.5 font-semibold text-foreground transition-all hover:bg-white/5"
-        >
-         <Edit3 className="h-5 w-5" />
-         Edit Calendar
-        </Link>
-        {isOwner && (
-         <button
-          onClick={handleDelete}
-          className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-6 py-2.5 font-semibold text-red-400 transition-all hover:bg-red-500/20"
-         >
-          <Trash2 className="h-5 w-5" />
-          Delete
-         </button>
-        )}
-       </div>
-      )}
-
-      {/* Events Section */}
-      <div className="pt-6">
-       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold text-foreground">
-         Events
-        </h2>
-        <div className="flex gap-2">
-         <button
-          onClick={() => setActiveTab("upcoming")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-           activeTab === "upcoming"
-            ? "bg-primary text-white"
-            : "bg-card-background border border-white/10 text-muted-foreground hover:text-foreground"
-          }`}
-         >
-          Upcoming ({upcomingCount})
-         </button>
-         <button
-          onClick={() => setActiveTab("past")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-           activeTab === "past"
-            ? "bg-primary text-white"
-            : "bg-card-background border border-white/10 text-muted-foreground hover:text-foreground"
-          }`}
-         >
-          Past ({pastCount})
-         </button>
-        </div>
-       </div>
-
-       {loadingEvents ? (
-        <div className="flex min-h-[200px] items-center justify-center">
-         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-        </div>
-       ) : events.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-card-background p-12 text-center">
-         <CalendarIcon className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
-         <h3 className="mb-2 text-xl font-semibold text-foreground">
-          {activeTab === "upcoming" ? "No upcoming events" : "No past events"}
-         </h3>
-         <p className="text-muted-foreground">
-          {activeTab === "upcoming"
-           ? canManage
-            ? "Add events to this calendar to get started"
-            : "Check back later for new events"
-           : "Past events will appear here after they end"}
-         </p>
-        </div>
-       ) : (
-        <div className="space-y-3">
-         {events.map((event) => (
-          <HorizontalEventCard
-           key={event.id}
-           event={event}
-           onClick={handleEventClick}
-          />
-         ))}
-        </div>
-       )}
-      </div>
-     </section>
+     </aside>
     </div>
    </div>
 
