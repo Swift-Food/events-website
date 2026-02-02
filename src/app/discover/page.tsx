@@ -73,7 +73,8 @@ export default function DiscoverPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative min-h-screen">
+      <div className="fixed inset-0 -z-10" style={{ background: "linear-gradient(to bottom, #41296e, #000000)" }} />
       <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="mb-8">
