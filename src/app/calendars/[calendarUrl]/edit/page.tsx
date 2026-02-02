@@ -133,6 +133,7 @@ export default function EditCalendarPage() {
      calendar.ownerEventUserId,
      { calendarId: calendar.id }
     );
+        console.log("console", JSON.stringify(response))
     setHighlights(response.highlights);
    } catch (err) {
     console.error("Failed to fetch highlights:", err);
@@ -153,6 +154,7 @@ export default function EditCalendarPage() {
     calendar.ownerEventUserId,
     { calendarId: calendar.id }
    );
+      console.log("console", JSON.stringify(response))
    setHighlights(response.highlights);
   } catch (err) {
    console.error("Failed to refresh highlights:", err);
@@ -595,61 +597,69 @@ export default function EditCalendarPage() {
       </button>
      </div>
 
-     {loadingHighlights ? (
-      <div className="flex items-center justify-center py-12">
-       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-     ) : highlights.length === 0 ? (
-      <div className="rounded-xl border border-white/10 bg-card-background p-8 text-center">
-       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-purple-500/20 via-pink-500/20 to-orange-500/20">
-        <Sparkles className="h-8 w-8 text-pink-400" />
-       </div>
-       <h3 className="mb-2 text-lg font-semibold text-foreground">No highlights yet</h3>
-       <p className="text-sm text-muted-foreground mb-4">
-        Create highlights to share temporary content with your subscribers
-       </p>
-       <button
-        onClick={() => setShowAddHighlightModal(true)}
-        className="rounded-lg bg-primary px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
-       >
-        Create First Highlight
-       </button>
-      </div>
-     ) : (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-       {highlights.map((highlight, index) => {
-        const firstMedia = highlight.mediaItems[0];
-        const thumbnailUrl =
-         firstMedia?.type === "video" && firstMedia?.thumbnailUrl
-          ? firstMedia.thumbnailUrl
-          : firstMedia?.url;
-        const isEditingThis = editingCaption === highlight.id;
-
-        return (
-         <div
-          key={highlight.id}
-          className="rounded-xl border border-white/10 bg-card-background overflow-hidden group"
-         >
-          {/* Thumbnail */}
-          <button
-           onClick={() => {
-            setSelectedHighlightIndex(index);
-            setShowHighlightViewer(true);
-           }}
-           className="relative aspect-video w-full overflow-hidden"
-          >
-           {thumbnailUrl ? (
-            <Image
-             src={thumbnailUrl}
-             alt=""
-             fill
-             className="object-cover transition-transform group-hover:scale-105"
-            />
-           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-card-secondary-background">
-             <ImageIcon className="h-8 w-8 text-muted-foreground" />
+          {loadingHighlights ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-           )}
+          ) : highlights.length === 0 ? (
+            <div className="rounded-xl border border-white/10 bg-card-background p-8 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-purple-500/20 via-pink-500/20 to-orange-500/20">
+                <Sparkles className="h-8 w-8 text-pink-400" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-foreground">No highlights yet</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Create highlights to share temporary content with your subscribers
+              </p>
+              <button
+                onClick={() => setShowAddHighlightModal(true)}
+                className="rounded-lg bg-primary px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+              >
+                Create First Highlight
+              </button>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {highlights.map((highlight, index) => {
+                const firstMedia = highlight.mediaItems[0];
+                const thumbnailUrl =
+                  firstMedia?.type === "video"
+                    ? firstMedia?.thumbnailUrl
+                    : firstMedia?.url;
+                const isEditingThis = editingCaption === highlight.id;
+
+                return (
+                  <div
+                    key={highlight.id}
+                    className="rounded-xl border border-white/10 bg-card-background overflow-hidden group"
+                  >
+                    {/* Thumbnail */}
+                    <button
+                      onClick={() => {
+                        setSelectedHighlightIndex(index);
+                        setShowHighlightViewer(true);
+                      }}
+                      className="relative aspect-video w-full overflow-hidden"
+                    >
+                      {firstMedia?.type === "video" && !thumbnailUrl ? (
+                        <video
+                          src={firstMedia.url}
+                          muted
+                          playsInline
+                          preload="metadata"
+                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        />
+                      ) : thumbnailUrl ? (
+                        <Image
+                          src={thumbnailUrl}
+                          alt=""
+                          fill
+                          className="object-cover transition-transform group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-card-secondary-background">
+                          <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                      )}
 
            {/* Media count badge */}
            {highlight.mediaItems.length > 1 && (

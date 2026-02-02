@@ -131,6 +131,7 @@ export default function CalendarClient({
      calendar.ownerEventUserId,
      { calendarId: calendar.id }
     );
+        console.log("hights", JSON.stringify(response))
     setHighlights(response.highlights);
    } catch (err) {
     console.error("Failed to fetch highlights:", err);

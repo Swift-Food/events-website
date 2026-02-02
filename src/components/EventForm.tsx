@@ -12,6 +12,7 @@ import LocationModal, { LocationEditMode } from "@/components/event-edit/Locatio
 import { VenueCard, VirtualLinkCard } from "@/components/event-edit/LocationCards";
 import CategoryModal from "@/components/event-edit/CategoryModal";
 import ImportEventModal from "@/components/event-edit/ImportEventModal";
+import EventCoverPicker from "@/components/event-edit/EventCoverPicker";
 import GoogleMap from "@/components/GoogleMap";
 import {
   EventCreationProvider,
@@ -29,6 +30,7 @@ import { eventService } from "@/services/event.service";
 import { imageService } from "@/services/image.service";
 import { paymentService } from "@/services/payment.service";
 import { categoriesApi } from "@/services/categories";
+import { eventCoverService } from "@/services/event-cover.service";
 import { useCategoriesContext } from "@/lib/categories-context";
 import { CreateEventDto, QuestionType, CreateEventTicketDto } from "@/types";
 import type { EventTicketResponseDto, QuestionBlock } from "@/types/event-ticket/response/ticket.dto";
@@ -171,6 +173,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isCoverPickerOpen, setIsCoverPickerOpen] = useState(false);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
@@ -241,6 +244,31 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
     fetchCategories();
   }, []);
+
+  // Preselect a random cover image on mount (create mode only, no existing cover)
+  useEffect(() => {
+    if (mode !== "create" || coverPreview) return;
+
+    const preselectRandomCover = async () => {
+      try {
+        const allCovers = await eventCoverService.getAll();
+        const categories = Object.keys(allCovers);
+        if (categories.length === 0) return;
+        const randomCategory =
+          categories[Math.floor(Math.random() * categories.length)];
+        const images = allCovers[randomCategory];
+        if (!images || images.length === 0) return;
+        const randomImage = images[Math.floor(Math.random() * images.length)];
+        setCoverPreview(randomImage);
+        setCoverName("gallery-cover.png");
+      } catch (error) {
+        console.error("Failed to preselect random cover:", error);
+      }
+    };
+
+    preselectRandomCover();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   // Load initial data for edit mode
   useEffect(() => {
@@ -802,13 +830,18 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     }
   };
 
-  const handleImageRemove = () => {
-    setCoverPreview(null);
-    setCoverName("invite-cover.png");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+  const handleCoverSelect = (imageUrl: string) => {
+    setCoverPreview(imageUrl);
+    setCoverName("gallery-cover.png");
   };
+
+  // const handleImageRemove = () => {
+  //   setCoverPreview(null);
+  //   setCoverName("invite-cover.png");
+  //   if (fileInputRef.current) {
+  //     fileInputRef.current.value = "";
+  //   }
+  // };
 
   const handleDescriptionClick = () => {
     setIsDescriptionModalOpen(true);
@@ -1037,21 +1070,14 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               </div>
             )}
             <div className="absolute bottom-4 right-4 flex flex-wrap gap-2">
-              <label
-                htmlFor="cover-upload"
+              <button
+                type="button"
+                onClick={() => setIsCoverPickerOpen(true)}
                 className="rounded-full bg-primary/90 backdrop-blur-md px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary hover:scale-105 cursor-pointer"
               >
                 Change cover
-              </label>
-              {coverPreview && (
-                <button
-                  type="button"
-                  onClick={handleImageRemove}
-                  className="rounded-full bg-white/20 backdrop-blur-md px-5 py-2.5 text-sm font-medium text-foreground transition-all hover:bg-white/30 hover:scale-105"
-                >
-                  Remove
-                </button>
-              )}
+              </button>
+        
             </div>
             <input
               id="cover-upload"
@@ -2043,6 +2069,14 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           onToggle={() => setIsThemePickerOpen(!isThemePickerOpen)}
         />
       )}
+
+      <EventCoverPicker
+        isOpen={isCoverPickerOpen}
+        onClose={() => setIsCoverPickerOpen(false)}
+        onSelect={handleCoverSelect}
+        onUploadClick={() => fileInputRef.current?.click()}
+        currentCover={coverPreview}
+      />
     </div>
   );
 }

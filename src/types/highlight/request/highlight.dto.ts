@@ -16,7 +16,7 @@ export interface CreateHighlightDto {
   mediaItems: HighlightMediaItem[];
   caption?: string; // max 500 chars
   calendarId?: string; // UUID to link to calendar
-  expiresInHours?: number; // default 24
+  expiresInHours?: number | null; // default 24
 }
 
 // Update highlight request
