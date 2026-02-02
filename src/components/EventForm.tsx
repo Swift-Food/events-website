@@ -17,7 +17,7 @@ import {
   EventCreationProvider,
   useEventCreation,
 } from "@/context/EventCreationContext";
-import { resolveTheme, getThemeCSSVariables, PALETTE_MAP } from "@/lib/theme-presets";
+import { resolveTheme, getThemeCSSVariables, PALETTE_MAP, SHADER_MAP, LANDSCAPE_MAP, getPatternCSS } from "@/lib/theme-presets";
 import ThemePicker from "@/components/theme/ThemePicker";
 import InlineThemePicker from "@/components/theme/InlineThemePicker";
 import EventThemeBackground from "@/components/theme/EventThemeBackground";
@@ -1096,9 +1096,44 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               className="flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer"
             >
               <div className="flex h-8 w-8 rounded-lg overflow-hidden shrink-0">
-                {(PALETTE_MAP[eventTheme.colorPalette]?.colors ?? ["#222", "#2a2a2a"]).map(
-                  (color, i) => (
-                    <div key={i} className="flex-1" style={{ backgroundColor: color }} />
+                {eventTheme.type === "shader" ? (
+                  (() => {
+                    const shader = SHADER_MAP[eventTheme.shaderPreset ?? ""];
+                    return shader ? (
+                      <div className="flex items-center justify-center w-full h-full" style={{ background: resolvedTheme.palette.pageBackground }}>
+                        <div className="flex -space-x-1.5">
+                          {[shader.color1, shader.color2, shader.color3].map((c, i) => (
+                            <div key={i} className="w-3 h-3 rounded-full" style={{ backgroundColor: c, zIndex: 3 - i }} />
+                          ))}
+                        </div>
+                      </div>
+                    ) : null;
+                  })()
+                ) : eventTheme.type === "pattern" ? (
+                  <div
+                    className="w-full h-full"
+                    style={{
+                      backgroundColor: resolvedTheme.palette.pageBackground,
+                      backgroundImage: getPatternCSS(eventTheme.pattern ?? "dots", resolvedTheme.palette),
+                      backgroundSize: "20px 20px",
+                    }}
+                  />
+                ) : eventTheme.type === "landscape" ? (
+                  (() => {
+                    const landscape = LANDSCAPE_MAP[eventTheme.image ?? ""];
+                    return landscape ? (
+                      <img
+                        src={`/Landscape theme/${landscape.filename}`}
+                        alt={landscape.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : null;
+                  })()
+                ) : (
+                  (PALETTE_MAP[eventTheme.colorPalette]?.colors ?? ["#222", "#2a2a2a"]).map(
+                    (color, i) => (
+                      <div key={i} className="flex-1" style={{ backgroundColor: color }} />
+                    )
                   )
                 )}
               </div>
