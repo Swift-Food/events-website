@@ -156,10 +156,10 @@ export default function RootLayout({
      <CategoriesProvider>
       <NotificationProvider>
        <SearchModalProvider>
-        <div className="flex h-screen flex-col overflow-hidden">
+        <div className="relative h-screen overflow-hidden">
          <div className="fixed inset-0 -z-10" style={{ background: "linear-gradient(to bottom, #41296e 0%, #000000 15%)" }} />
          <Navbar />
-         <main className="flex-1 overflow-y-auto overscroll-none">
+         <main className="h-screen overflow-y-auto overscroll-none pt-[72px]">
           {children}
           <Footer />
          </main>

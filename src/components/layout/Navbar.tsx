@@ -111,7 +111,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50">
+      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             {/* Mobile logo links to /discover, desktop logo links to / */}
