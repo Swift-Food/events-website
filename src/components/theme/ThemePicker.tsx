@@ -323,7 +323,7 @@ export default function ThemePicker({
                   : activeMobileTab === "palette"
                   ? "block"
                   : "hidden"
-              } ${isPaletteDisabled ? "lg:hidden" : "lg:block"} space-y-3 lg:border-l lg:border-white/5 lg:pl-8 overflow-hidden`}
+              } ${isPaletteDisabled ? "lg:hidden" : "lg:block"} space-y-3 lg:border-l lg:border-white/5 lg:pl-8`}
             >
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between mb-4">
@@ -343,8 +343,8 @@ export default function ThemePicker({
                   }}
                 >
                   {/* Page 1: Monotone */}
-                  <div className="min-w-full snap-start px-1">
-                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-1">
+                  <div className="min-w-full snap-start px-4 lg:px-6">
+                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-4 lg:py-6">
                       {SINGLE_COLOR_PALETTES.map((preset) => (
                         <button
                           key={preset.id}
@@ -382,8 +382,8 @@ export default function ThemePicker({
                   </div>
 
                   {/* Page 2: Themes */}
-                  <div className="min-w-full snap-start px-1">
-                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-1">
+                  <div className="min-w-full snap-start px-4 lg:px-6">
+                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-4 lg:py-6">
                       {MULTI_COLOR_PALETTES.map((preset) => (
                         <button
                           key={preset.id}
@@ -431,7 +431,7 @@ export default function ThemePicker({
                       className={`h-2 rounded-full transition-all duration-500 ease-out ${
                         palettePage === p
                           ? "w-10 bg-white"
-                          : "w-2 bg-zinc-600 hover:bg-zinc-400"
+                          : "w-3 bg-zinc-400 hover:bg-zinc-300"
                       }`}
                     />
                   ))}
