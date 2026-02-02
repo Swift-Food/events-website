@@ -656,7 +656,7 @@ export default function ThemePicker({
                 </div>
 
                 {/* Page dots */}
-                <div className="flex justify-center gap-3 mt-6">
+                <div className="flex justify-center gap-3 mt-1">
                   {[0, 1].map((p) => (
                     <button
                       key={p}
