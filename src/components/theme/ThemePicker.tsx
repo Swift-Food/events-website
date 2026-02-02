@@ -501,7 +501,7 @@ export default function ThemePicker({
         </div>
 
         <div className="overflow-y-auto min-h-0 w-full">
-        <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pt-3 pb-3 md:pb-8">
+        <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pt-3 pb-1 md:pb-4">
           {/* Content: 3-column grid on desktop, tabbed on mobile */}
           <div className={`lg:grid ${isPaletteDisabled ? "lg:grid-cols-[180px_1fr]" : "lg:grid-cols-[180px_1fr_1.5fr]"} gap-8 xl:gap-12 items-start`}>
             {/* Column 1: Base Style Selection */}
@@ -683,7 +683,7 @@ export default function ThemePicker({
                   : `${theme.type.charAt(0).toUpperCase() + theme.type.slice(1)} Styles`}
               </label>
 
-              <div className="min-h-[180px]">
+              <div>
                 {/* Landscape options */}
                 {theme.type === "landscape" && (
                   <div className="flex flex-col">
@@ -872,8 +872,44 @@ export default function ThemePicker({
                 </>)}
 
                 {/* Pattern options */}
-                {theme.type === "pattern" && (
-                  <div className="flex flex-col">
+                {theme.type === "pattern" && (<>
+                  {/* sm+: all patterns in a single grid */}
+                  <div className="hidden sm:grid grid-cols-5 lg:grid-cols-3 gap-3">
+                    {PATTERN_OPTIONS.map((opt) => {
+                      const isActive = theme.pattern === opt.id;
+                      const patternStyle = getPatternPreviewBg(opt.id);
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => onChange({ ...theme, pattern: opt.id })}
+                          className="flex flex-col items-center gap-1.5 group"
+                        >
+                          <div
+                            className={`relative w-full aspect-[2/1] lg:aspect-[3/2] rounded-xl overflow-hidden border-2 transition-all ${
+                              isActive
+                                ? "border-white scale-105 z-10 ring-4 ring-white/10"
+                                : "border-white/10 opacity-60 group-hover:opacity-100"
+                            }`}
+                            style={{
+                              backgroundColor: currentPalette.pageBackground,
+                              backgroundImage: patternStyle.backgroundImage,
+                              backgroundSize: patternStyle.backgroundSize,
+                              backgroundRepeat: "repeat",
+                            }}
+                          />
+                          <span className={`text-[9px] font-bold uppercase tracking-widest ${
+                            isActive ? "text-white" : "text-zinc-400 group-hover:text-zinc-200"
+                          }`}>
+                            {opt.name}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Mobile: paginated scroll */}
+                  <div className="flex flex-col sm:hidden">
                     <div
                       ref={patternScrollRef}
                       className="flex overflow-x-auto snap-x snap-mandatory"
@@ -890,7 +926,7 @@ export default function ThemePicker({
                           ref={(el) => { patternPageRefs.current[pageIdx] = el; }}
                           className="min-w-full snap-start px-4"
                         >
-                          <div className="grid grid-cols-3 gap-3 py-2 sm:py-3">
+                          <div className="grid grid-cols-3 gap-3 py-2">
                             {pageItems.map((opt) => {
                               const isActive = theme.pattern === opt.id;
                               const patternStyle = getPatternPreviewBg(opt.id);
@@ -902,7 +938,7 @@ export default function ThemePicker({
                                   className="flex flex-col items-center gap-1.5 group"
                                 >
                                   <div
-                                    className={`relative w-full aspect-[3/2] sm:aspect-[2/1] rounded-xl overflow-hidden border-2 transition-all ${
+                                    className={`relative w-full aspect-[3/2] rounded-xl overflow-hidden border-2 transition-all ${
                                       isActive
                                         ? "border-white scale-105 z-10 ring-4 ring-white/10"
                                         : "border-white/10 opacity-60 group-hover:opacity-100"
@@ -926,7 +962,6 @@ export default function ThemePicker({
                         </div>
                       ))}
                     </div>
-                    {/* Page dots */}
                     {patternPages.length > 1 && (
                       <div className="flex justify-center gap-3 mt-4">
                         {patternPages.map((_, p) => (
@@ -944,7 +979,7 @@ export default function ThemePicker({
                       </div>
                     )}
                   </div>
-                )}
+                </>)}
 
                 {/* Solid - empty state */}
                 {theme.type === "solid" && (
