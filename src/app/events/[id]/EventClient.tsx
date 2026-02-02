@@ -1513,74 +1513,35 @@ export default function EventClient({
                           (t) => t.name === event.userTicket?.ticketName
                         );
                         if (!ownedTicket) return null;
-                        const isActive = isTicketUsable(event.userTicket!.status as GuestTicketStatus);
                         return (
                           <div>
                             <h2 className="text-lg font-semibold text-foreground mb-3">
                               Your Passes
                             </h2>
-                            <div className={`rounded-xl p-3 sm:p-4 border-2 ${
-                              isActive
-                                ? "bg-card-secondary-background border-green-500/50"
-                                : "bg-card-secondary-background border-yellow-500/50"
-                            }`}>
+                            <div className="rounded-xl p-3 sm:p-4 border-2 bg-card-secondary-background border-white/50">
                               <div className="flex items-center justify-between gap-2 sm:gap-4">
-                                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                                  <CheckCircle2
-                                    className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 ${
-                                      isActive ? "text-green-400" : "text-yellow-400"
-                                    }`}
-                                  />
-                                  <div className="min-w-0 flex-1">
-                                    <h3 className="text-sm sm:text-base font-semibold text-foreground">
-                                      {ownedTicket.name}
-                                    </h3>
-                                    <p className="text-xs sm:text-sm">
-                                      {isActive ? (
-                                        <span className="text-green-400">Active</span>
-                                      ) : (
-                                        <span className="text-yellow-400">
-                                          {getTicketStatusText(event.userTicket!.status as GuestTicketStatus)}
-                                        </span>
-                                      )}
-                                    </p>
-                                  </div>
+                                <div className="min-w-0 flex-1">
+                                  <h3 className="text-sm sm:text-base font-semibold text-foreground">
+                                    {ownedTicket.name}
+                                  </h3>
+                                  <p className="text-xs sm:text-sm text-muted-foreground">
+                                    {getTicketStatusText(event.userTicket!.status as GuestTicketStatus)}
+                                  </p>
                                 </div>
-                                <div className="text-right">
+                                <div className="flex items-center gap-3">
                                   <p className="text-base sm:text-xl font-bold text-foreground">
                                     {Number(ownedTicket.price) === 0
                                       ? "Free"
                                       : `£${Number(ownedTicket.price).toFixed(2)}`}
                                   </p>
-                                </div>
-                              </div>
-                              <div className="mt-3 pt-3 border-t border-foreground/10 flex flex-wrap items-center justify-between gap-2">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <span
-                                    className={getTicketStatusBadgeClasses(
-                                      event.userTicket!.status as GuestTicketStatus
-                                    )}
+                                  <Link
+                                    href={`/my-tickets?ticketId=${event.userTicket!.id}`}
+                                    className="relative flex items-center gap-2 bg-white text-zinc-950 px-5 py-2.5 rounded-2xl text-xs font-bold hover:bg-zinc-100 transition-all active:scale-[0.96] group/btn shadow-xl shadow-white/5"
                                   >
-                                    {getTicketStatusText(
-                                      event.userTicket!.status as GuestTicketStatus
-                                    )}
-                                  </span>
-                                  {event.userTicket!.checkInCode &&
-                                    isTicketUsable(event.userTicket!.status as GuestTicketStatus) && (
-                                      <span className="text-xs text-muted-foreground">
-                                        Code:{" "}
-                                        <span className="font-mono font-semibold text-foreground">
-                                          {event.userTicket!.checkInCode}
-                                        </span>
-                                      </span>
-                                    )}
+                                    View Ticket
+                                    <ArrowUpRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                                  </Link>
                                 </div>
-                                <Link
-                                  href={`/my-tickets?ticketId=${event.userTicket!.id}`}
-                                  className="text-sm text-green-400 hover:text-green-300 transition-colors shrink-0"
-                                >
-                                  View Ticket →
-                                </Link>
                               </div>
                             </div>
                           </div>
