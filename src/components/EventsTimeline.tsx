@@ -119,7 +119,7 @@ export default function EventsTimeline({
                 {/* Continuous line */}
                 <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-white/20" />
                 {/* Dot positioned at header level */}
-                <div className={`sticky ${stickyTopClass} z-40 flex h-8 items-center justify-center`}>
+                <div className={`sticky ${stickyTopClass} z-10 flex h-8 items-center justify-center`}>
                   <div
                     className={`h-2 w-2 rounded-full transition-colors ${
                       stuckHeaders.has(dateKey)
@@ -142,7 +142,7 @@ export default function EventsTimeline({
                 />
 
                 {/* Sticky Date Header */}
-                <div className={`sticky ${stickyTopClass} z-30 pb-3`}>
+                <div className={`sticky ${stickyTopClass} z-10 pb-3`}>
                   <div
                     className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors ${
                       stuckHeaders.has(dateKey)
