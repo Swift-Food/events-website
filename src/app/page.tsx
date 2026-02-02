@@ -110,9 +110,9 @@ export default function LandingPage() {
    {/* Hero Section */}
    <main className="relative flex flex-col items-center justify-center h-[calc(100vh-72px)] px-6 z-10 overflow-hidden">
     {/* Main Content Wrapper */}
-    <div className="w-full max-w-5xl flex flex-col items-center text-center gap-8 md:gap-10">
+    <div className="w-full max-w-5xl flex flex-col items-center text-center gap-6 md:gap-10">
      <h1
-      className="text-glow text-5xl md:text-6xl lg:text-[6rem] font-black leading-[1.4] md:leading-[1.1] tracking-tighter text-white uppercase max-w-5xl select-none"
+      className="text-5xl md:text-6xl lg:text-[6rem] font-black leading-[1.4] md:leading-[1.1] tracking-tighter text-white uppercase max-w-5xl select-none"
       style={{ fontFamily: "var(--font-satoshi), sans-serif" }}
      >
       <AnimatedWord text="Plan it." delayOffset={100} />
@@ -131,7 +131,7 @@ export default function LandingPage() {
      </p>
 
      <div
-      className="animate-reveal pt-6 flex flex-col items-center gap-6 opacity-0"
+      className="animate-reveal pt-2 md:pt-6 flex flex-col items-center gap-6 opacity-0"
       style={{ animationDelay: "1400ms" }}
      >
       <Link
