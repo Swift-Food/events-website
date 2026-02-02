@@ -1771,7 +1771,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               <button
                 type="button"
                 onClick={() => setIsPrivate((prev) => !prev)}
-                className={`h-7 w-14 rounded-full transition-all ${
+                className={`h-7 w-14 rounded-full transition-all ring-4 ring-white/10 ${
                   isPrivate
                     ? "bg-primary"
                     : "bg-card-secondary-background"
@@ -1800,7 +1800,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               <button
                 type="button"
                 onClick={() => setRequireApproval((prev) => !prev)}
-                className={`h-7 w-14 rounded-full transition-all ${
+                className={`h-7 w-14 rounded-full transition-all ring-4 ring-white/10 ${
                   requireApproval
                     ? "bg-primary"
                     : "bg-card-secondary-background"

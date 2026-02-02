@@ -127,7 +127,7 @@ function multiColorPalette(
     palette: {
       pageBackground: hexToRgba(color3, 1),
       cardBackground: hexToRgba(color2, 1),
-      cardSecondaryBackground: hexToRgba(color2, 0.5),
+      cardSecondaryBackground: "rgba(255, 255, 255, 0.15)",
       mainTextColor: hexToRgba(color1, 1),
       subTextColor: hexToRgba(color1, 0.65),
       primaryColor: hexToRgba(color1, 1),
