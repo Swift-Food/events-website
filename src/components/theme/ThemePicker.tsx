@@ -892,7 +892,7 @@ export default function ThemePicker({
                           className="flex flex-col items-center gap-1.5 group"
                         >
                           <div
-                            className={`relative w-full aspect-[2/1] rounded-xl overflow-hidden border-2 transition-all ${
+                            className={`relative w-full aspect-[3/1] rounded-xl overflow-hidden border-2 transition-all ${
                               isActive
                                 ? "border-white scale-105 z-10 ring-4 ring-white/10"
                                 : "border-white/10 opacity-60 group-hover:opacity-100"
