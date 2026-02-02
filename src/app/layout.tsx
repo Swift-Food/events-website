@@ -156,10 +156,12 @@ export default function RootLayout({
           <CategoriesProvider>
             <NotificationProvider>
               <SearchModalProvider>
-                <div className="flex min-h-screen flex-col">
+                <div className="flex h-screen flex-col overflow-hidden">
                   <Navbar />
-                  <main className="flex-1">{children}</main>
-                  <Footer />
+                  <main className="flex-1 overflow-y-auto overscroll-none">
+                    {children}
+                    <Footer />
+                  </main>
                 </div>
               </SearchModalProvider>
             </NotificationProvider>
