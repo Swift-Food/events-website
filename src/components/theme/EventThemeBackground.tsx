@@ -25,7 +25,17 @@ export default function EventThemeBackground({
   landscape,
 }: EventThemeBackgroundProps) {
   if (config.type === "solid") {
-    return null;
+    // Default palette uses transparent bg so the layout gradient shows through
+    if ((config.colorPalette ?? "default") === "default") {
+      return null;
+    }
+    // Non-default palettes render their own solid background
+    return (
+      <div
+        className="fixed inset-0 z-0 pointer-events-none"
+        style={{ backgroundColor: palette.pageBackground }}
+      />
+    );
   }
 
   return (
