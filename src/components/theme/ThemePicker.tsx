@@ -125,27 +125,48 @@ export default function ThemePicker({
     return `rgba(${rr}, ${gg}, ${bb}, 0.45)`;
   };
 
-  const getPatternPreviewBg = (patternId: string) => {
+  // Returns { backgroundImage, backgroundSize } for seamless tiling in preview squares
+  const getPatternPreviewBg = (patternId: string): { backgroundImage: string; backgroundSize: string } => {
     const c = getPatternColor();
     const encode = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
     switch (patternId) {
       case "dots":
-        return encode(`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><circle cx='10' cy='10' r='3' fill='${c}'/><circle cx='30' cy='10' r='3' fill='${c}'/><circle cx='0' cy='30' r='3' fill='${c}'/><circle cx='20' cy='30' r='3' fill='${c}'/><circle cx='40' cy='30' r='3' fill='${c}'/></svg>`);
+        // Staggered dots: 2 dots per tile (one top-left, one center), tiles 6x6
+        return {
+          backgroundImage: encode(`<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><circle cx='5' cy='5' r='2.5' fill='${c}'/><circle cx='15' cy='15' r='2.5' fill='${c}'/></svg>`),
+          backgroundSize: "16.666% 16.666%",
+        };
       case "grid":
-        return encode(`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><path d='M40 0 L40 40 M0 40 L40 40' fill='none' stroke='${c}' stroke-width='1'/></svg>`);
+        // Lines on right and bottom edges, tiles 4x4
+        return {
+          backgroundImage: encode(`<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M10 0V10H0' fill='none' stroke='${c}' stroke-width='0.5'/></svg>`),
+          backgroundSize: "25% 25%",
+        };
       case "stripes":
-        return encode(`<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><rect x='8' y='0' width='4' height='20' fill='${c}'/></svg>`);
+        // Vertical stripe centered, tiles 5 across
+        return {
+          backgroundImage: encode(`<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><rect x='3' y='0' width='4' height='10' fill='${c}'/></svg>`),
+          backgroundSize: "20% 20%",
+        };
       case "checkers": {
+        // 2x2 checker per tile, tiles 4x4 (8 squares across)
         const m2 = currentPalette.pageBackground.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/);
         const c2 = m2
           ? `rgba(${Math.round(Number(m2[1]) * 0.88)}, ${Math.round(Number(m2[2]) * 0.88)}, ${Math.round(Number(m2[3]) * 0.88)}, 1)`
           : currentPalette.cardBackground;
-        return encode(`<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><rect x='0' y='0' width='40' height='40' fill='${c}'/><rect x='40' y='40' width='40' height='40' fill='${c}'/><rect x='40' y='0' width='40' height='40' fill='${c2}'/><rect x='0' y='40' width='40' height='40' fill='${c2}'/></svg>`);
+        return {
+          backgroundImage: encode(`<svg xmlns='http://www.w3.org/2000/svg' width='2' height='2' viewBox='0 0 2 2'><rect x='0' y='0' width='1' height='1' fill='${c}'/><rect x='1' y='1' width='1' height='1' fill='${c}'/><rect x='1' y='0' width='1' height='1' fill='${c2}'/><rect x='0' y='1' width='1' height='1' fill='${c2}'/></svg>`),
+          backgroundSize: "25% 25%",
+        };
       }
       case "crosses":
-        return encode(`<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><path d='M13 9 L17 9 L17 13 L21 13 L21 17 L17 17 L17 21 L13 21 L13 17 L9 17 L9 13 L13 13 Z' fill='${c}'/><path d='M43 39 L47 39 L47 43 L51 43 L51 47 L47 47 L47 51 L43 51 L43 47 L39 47 L39 43 L43 43 Z' fill='${c}'/></svg>`);
+        // Staggered crosses: 2 per tile offset, tiles 3x3
+        return {
+          backgroundImage: encode(`<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><path d='M13 9L17 9L17 13L21 13L21 17L17 17L17 21L13 21L13 17L9 17L9 13L13 13Z' fill='${c}'/><path d='M43 39L47 39L47 43L51 43L51 47L47 47L47 51L43 51L43 47L39 47L39 43L43 43Z' fill='${c}'/></svg>`),
+          backgroundSize: "33.333% 33.333%",
+        };
       default:
-        return "none";
+        return { backgroundImage: "none", backgroundSize: "auto" };
     }
   };
 
@@ -535,6 +556,7 @@ export default function ThemePicker({
                   <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-3 gap-3">
                     {PATTERN_OPTIONS.map((opt) => {
                       const isActive = theme.pattern === opt.id;
+                      const patternStyle = getPatternPreviewBg(opt.id);
                       return (
                         <button
                           key={opt.id}
@@ -550,7 +572,8 @@ export default function ThemePicker({
                             }`}
                             style={{
                               backgroundColor: currentPalette.pageBackground,
-                              backgroundImage: getPatternPreviewBg(opt.id),
+                              backgroundImage: patternStyle.backgroundImage,
+                              backgroundSize: patternStyle.backgroundSize,
                               backgroundRepeat: "repeat",
                             }}
                           />
