@@ -1053,10 +1053,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   </p>
                 </div>
               </div>
-              <div className="mt-5 pt-4 border-t border-foreground/10 text-xs text-muted-foreground">
-                <span className="font-medium">Cover:</span>{" "}
-                <span className="text-foreground font-medium">{coverName}</span>
-              </div>
+
             </div>
           </div>
         </section>
