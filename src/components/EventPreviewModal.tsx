@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
@@ -30,6 +30,8 @@ import Link from "next/link";
 import Image from "next/image";
 import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
+import { resolveTheme } from "@/lib/theme-presets";
+import type { EventThemeConfig } from "@/types/event/theme";
 import PaymentModal, { PaymentSuccessModal } from "@/components/payments/PaymentModal";
 import ExternalLinkConfirmModal from "@/components/ExternalLinkConfirmModal";
 import RegistrationConfirmModal from "@/components/RegistrationConfirmModal";
@@ -108,6 +110,17 @@ export default function EventPreviewModal({
 
   // Modal always uses the default purple-black gradient regardless of event theme
   const modalBackground = "linear-gradient(to bottom, #41296e 0%, #000000 15%)";
+
+  // Resolve event theme palette for placeholder image background
+  const themePalette = useMemo(() => {
+    if (!event?.eventTheme) return null;
+    try {
+      const config: EventThemeConfig = JSON.parse(event.eventTheme);
+      return resolveTheme(config).palette;
+    } catch {
+      return null;
+    }
+  }, [event?.eventTheme]);
 
   // Registration confirmation modal state
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -487,23 +500,9 @@ export default function EventPreviewModal({
                 ) : (
                   <div
                     className="flex h-full items-center justify-center"
-                    style={{ backgroundColor: event.eventColor || "#3b82f6" }}
+                    style={{ backgroundColor: themePalette?.pageBackground ?? event.eventColor }}
                   >
-                    <Calendar className="h-16 w-16 text-white/30" />
-                  </div>
-                )}
-
-                {/* Status Badge - only for collaborators */}
-                {userRole && (
-                  <div className="absolute right-4 top-4">
-                    <span
-                      className={`rounded-full border px-3 py-1.5 text-xs font-semibold backdrop-blur-md ${
-                        statusColors[event.status] ||
-                        "bg-gray-500/20 text-gray-400 border-gray-500/30"
-                      }`}
-                    >
-                      {event.status || "Unknown"}
-                    </span>
+                    <Calendar className="h-16 w-16" style={{ color: themePalette?.subTextColor ?? "rgba(255,255,255,0.3)" }} />
                   </div>
                 )}
               </div>
