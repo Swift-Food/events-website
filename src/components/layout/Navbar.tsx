@@ -92,7 +92,7 @@ export default function Navbar() {
   const logoStyle = isLandingPage
     ? {}
     : { WebkitMaskImage: "url(/logo.svg)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", maskImage: "url(/logo.svg)", maskSize: "contain", maskRepeat: "no-repeat" } as React.CSSProperties;
-  const buttonBg = isLandingPage ? "bg-zinc-900 text-white" : "bg-foreground text-background";
+  const buttonBg = isLandingPage ? "bg-zinc-900 text-white" : "bg-primary text-primary-foreground";
   const borderColor = isLandingPage ? "border-zinc-900/20 hover:border-zinc-900/40" : "border-foreground/20 hover:border-foreground/40";
 
   return (

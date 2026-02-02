@@ -1648,8 +1648,8 @@ export default function EventClient({
                               className={`flex items-center justify-between gap-2 sm:gap-4 rounded-xl p-3 sm:p-4 transition-all border-2 ${
                                 isOwnedTicket
                                   ? isActiveTicket
-                                    ? "bg-green-500/10 border-transparent cursor-default"
-                                    : "bg-yellow-500/10 border-transparent cursor-default"
+                                    ? "bg-card-secondary-background border-green-500/50 cursor-default"
+                                    : "bg-card-secondary-background border-yellow-500/50 cursor-default"
                                   : isInvitedTicket
                                   ? "bg-emerald-500/10 border-transparent cursor-pointer ring-2 ring-emerald-500/30"
                                   : isDisabledByInvitation

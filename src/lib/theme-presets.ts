@@ -169,7 +169,7 @@ export const PALETTE_MAP: Record<string, PalettePreset> = Object.fromEntries(
 const SHADER_PALETTE_LIGHT: Omit<ColorPalette, "primaryColor"> = {
   pageBackground: "transparent",
   cardBackground: "rgba(255, 255, 255, 0.22)",
-  cardSecondaryBackground: "rgba(255, 255, 255, 0.12)",
+  cardSecondaryBackground: "rgba(255, 255, 255, 0.2)",
   mainTextColor: "rgba(0, 0, 0, 0.75)",
   subTextColor: "rgba(0, 0, 0, 0.5)",
   primaryForegroundColor: "rgba(255, 255, 255, 1)",
@@ -358,7 +358,7 @@ export function resolveTheme(config: EventThemeConfig): {
       // cardBackground: "rgba(255, 255, 255, 0.25)",
       // cardSecondaryBackground: "rgba(255, 255, 255, 0.25)",
       cardBackground: withAlpha(basePalette.cardBackground, 0.5),
-      cardSecondaryBackground: withAlpha(basePalette.cardSecondaryBackground, 0.40),
+      cardSecondaryBackground: withAlpha(basePalette.cardSecondaryBackground, 0.20),
       ...(isDefault && {
         cardBackground: "rgba(255, 255, 255, 0.15)",
         cardSecondaryBackground: "rgba(255, 255, 255, 0.08)",
