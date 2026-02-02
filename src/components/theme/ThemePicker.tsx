@@ -352,7 +352,7 @@ export default function ThemePicker({
 
           {/* Mobile section label */}
           <div className="px-4 pb-3 lg:hidden">
-            <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] block">
+            <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] block text-center">
               {activeMobileTab === "base"
                 ? "Base Style"
                 : activeMobileTab === "palette"
@@ -374,7 +374,7 @@ export default function ThemePicker({
                 activeMobileTab === "base" ? "block" : "hidden"
               } lg:block space-y-3`}
             >
-              <label className="hidden lg:block text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] mb-3">
+              <label className="hidden lg:block text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] mb-3 text-center">
                 Base Style
               </label>
               <div className="grid grid-cols-4 lg:grid-cols-2 gap-3">
@@ -422,7 +422,7 @@ export default function ThemePicker({
               } ${isPaletteDisabled ? "lg:hidden" : "lg:block"} space-y-3 lg:border-l lg:border-white/5 lg:pl-8`}
             >
               <div className="flex flex-col h-full">
-                <div className="hidden lg:flex items-center justify-between mb-4">
+                <div className="hidden lg:flex items-center justify-center mb-4">
                   <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] transition-opacity duration-300">
                     {palettePage === 0 ? "Monotone" : "Themes"} Palette
                   </label>
@@ -541,7 +541,7 @@ export default function ThemePicker({
                 activeMobileTab === "details" ? "block" : "hidden"
               } lg:block space-y-3 lg:border-l lg:border-white/5 lg:pl-8`}
             >
-              <label className="hidden lg:block text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] mb-3">
+              <label className="hidden lg:block text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] mb-3 text-center">
                 {theme.type === "solid"
                   ? "Solid Detail"
                   : `${theme.type.charAt(0).toUpperCase() + theme.type.slice(1)} Styles`}
