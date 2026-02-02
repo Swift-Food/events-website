@@ -23,7 +23,7 @@ import Link from "next/link";
 import Image from "next/image";
 import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
-import HorizontalEventCard from "@/components/HorizontalEventCard";
+import EventsTimeline from "@/components/EventsTimeline";
 import AddEventsToCalendarModal from "@/components/AddEventsToCalendarModal";
 import { HighlightsBar, AddHighlightModal } from "@/components/highlights";
 
@@ -253,10 +253,6 @@ export default function CalendarClient({
    console.error("Failed to delete calendar:", error);
    toast.error(error.response?.data?.message || "Failed to delete calendar");
   }
- };
-
- const handleEventClick = (_e: React.MouseEvent, event: EventResponseDto) => {
-  router.push(`/events/${event.id}`);
  };
 
  const refreshEvents = async () => {
@@ -518,15 +514,7 @@ export default function CalendarClient({
          </p>
         </div>
        ) : (
-        <div className="space-y-3">
-         {events.map((event) => (
-          <HorizontalEventCard
-           key={event.id}
-           event={event}
-           onClick={handleEventClick}
-          />
-         ))}
-        </div>
+        <EventsTimeline events={events}   stickyTopClass = "top-2"/>
        )}
       </div>
      </section>
