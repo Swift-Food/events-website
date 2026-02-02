@@ -503,7 +503,7 @@ export default function ThemePicker({
         </div>
 
         <div className="overflow-y-auto min-h-0 w-full">
-        <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pb-6">
+        <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pt-3 pb-6">
           {/* Content: 3-column grid on desktop, tabbed on mobile */}
           <div className={`lg:grid ${isPaletteDisabled ? "lg:grid-cols-[180px_1fr]" : "lg:grid-cols-[180px_1fr_1.5fr]"} gap-8 xl:gap-12 items-start`}>
             {/* Column 1: Base Style Selection */}
@@ -705,7 +705,7 @@ export default function ThemePicker({
                           ref={(el) => { landscapePageRefs.current[pageIdx] = el; }}
                           className="min-w-full snap-start px-4"
                         >
-                          <div className="grid grid-cols-3 gap-3 py-2">
+                          <div className="grid grid-cols-3 gap-3 py-4">
                             {pageItems.map((opt) => (
                               <button
                                 key={opt.id}
@@ -818,7 +818,7 @@ export default function ThemePicker({
                           ref={(el) => { shaderPageRefs.current[pageIdx] = el; }}
                           className="min-w-full snap-start px-4"
                         >
-                          <div className="grid grid-cols-2 gap-3 py-2">
+                          <div className="grid grid-cols-2 gap-3 py-4">
                             {pageItems.map((preset) => (
                               <button
                                 key={preset.id}
@@ -892,7 +892,7 @@ export default function ThemePicker({
                           ref={(el) => { patternPageRefs.current[pageIdx] = el; }}
                           className="min-w-full snap-start px-4"
                         >
-                          <div className="grid grid-cols-3 gap-3 py-2">
+                          <div className="grid grid-cols-3 gap-3 py-4">
                             {pageItems.map((opt) => {
                               const isActive = theme.pattern === opt.id;
                               const patternStyle = getPatternPreviewBg(opt.id);
