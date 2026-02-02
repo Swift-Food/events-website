@@ -969,7 +969,7 @@ export default function EventClient({
                 </div>
 
                 {/* Date & Time Card - Bottom left on tablet, normal on mobile/desktop */}
-                <div className="rounded-xl bg-card-background p-4 sm:p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+                <div className="rounded-xl bg-card-background backdrop-blur-sm p-4 sm:p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
                   <h3 className="mb-4 text-lg font-semibold text-foreground">
                     Date & Time
                   </h3>
@@ -1030,7 +1030,7 @@ export default function EventClient({
                       onClick={() =>
                         setShowCalendarDropdown(!showCalendarDropdown)
                       }
-                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
+                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-card-secondary-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
                     >
                       <CalendarPlus className="h-4 w-4" />
                       Add to Calendar
@@ -1150,7 +1150,7 @@ export default function EventClient({
                 </div>
 
                 {/* Location Card - Bottom right */}
-                <div className="rounded-xl bg-card-background overflow-hidden sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+                <div className="rounded-xl bg-card-background backdrop-blur-sm overflow-hidden sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
                   {isVirtualEvent(event.format) ? (
                     <div className="p-4 sm:p-6">
                       <div className="h-32 w-full bg-primary/10 rounded-lg flex flex-col items-center justify-center gap-2 mb-4">
@@ -1528,7 +1528,7 @@ export default function EventClient({
                   const invitedTicketId = invitationPreview?.ticket?.id;
 
                   return (
-                    <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 sm:p-6">
+                    <div className="rounded-xl bg-card-background backdrop-blur-sm p-4 sm:p-6">
                       <div className="flex items-center justify-between mb-4">
                         <h2 className="text-2xl font-semibold text-foreground">
                           Tickets
