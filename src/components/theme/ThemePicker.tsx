@@ -472,7 +472,7 @@ export default function ThemePicker({
           </div>
 
           {/* Mobile Tab Buttons */}
-          <div className="flex gap-2 px-4 pb-2 lg:hidden">
+          <div className="flex gap-2 px-4 pb-1 lg:hidden">
             {([
               { key: "base" as MobileTab, label: "Base" },
               { key: "palette" as MobileTab, label: "Palette", disabled: isPaletteDisabled },
@@ -498,7 +498,7 @@ export default function ThemePicker({
 
           {/* Mobile section label (only for palette tab) */}
           {activeMobileTab === "palette" && (
-            <div className="px-4 pb-3 lg:hidden">
+            <div className="px-4 pb-1 lg:hidden">
               <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] block text-center">
                 {(palettePage === 0 ? "Monotone" : "Themes") + " Palette"}
               </label>
@@ -507,7 +507,7 @@ export default function ThemePicker({
         </div>
 
         <div className="overflow-y-auto min-h-0 w-full">
-        <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pt-3 pb-1 md:pb-4">
+        <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pt-1 pb-1 md:pb-4">
           {/* Content: 3-column grid on desktop, tabbed on mobile */}
           <div className={`lg:grid ${isPaletteDisabled ? "lg:grid-cols-[200px_1fr]" : "lg:grid-cols-[200px_1fr_1fr]"} gap-8 xl:gap-12 items-start`}>
             {/* Column 1: Base Style Selection */}
