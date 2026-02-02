@@ -497,13 +497,13 @@ export default function ThemePicker({
           </div>
 
           {/* Mobile section label (only for palette tab) */}
-          {activeMobileTab === "palette" && (
-            <div className="px-4 pb-1 lg:hidden">
+          {/* {activeMobileTab === "palette" && (
+            <div className="px-4 pt-2 pb-0 lg:hidden">
               <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] block text-center">
                 {(palettePage === 0 ? "Monotone" : "Themes") + " Palette"}
               </label>
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="overflow-y-auto min-h-0 w-full">
