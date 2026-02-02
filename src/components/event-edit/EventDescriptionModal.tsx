@@ -189,7 +189,7 @@ export default function EventDescriptionModal({
 
       {/* Discard Changes Confirmation Modal */}
       {showDiscardModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-lg">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/10 backdrop-blur-lg">
           <div className="w-full max-w-sm mx-4 rounded-xl bg-card-background shadow-2xl">
             <div className="p-6">
               <div className="flex items-center gap-3 mb-4">
