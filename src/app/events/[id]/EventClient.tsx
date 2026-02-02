@@ -689,7 +689,7 @@ export default function EventClient({
  return (
   <>
    {/* Smart App Banner - shown on mobile when viewing invite */}
-   <SmartAppBanner currentPath={currentPath} />
+   {/* <SmartAppBanner currentPath={currentPath} /> */}
 
    <div
     className="relative min-h-screen"
