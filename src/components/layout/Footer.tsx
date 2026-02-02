@@ -33,12 +33,16 @@ export default function Footer() {
   const pathname = usePathname();
   const isLanding = pathname === "/";
 
+  const textColor = isLanding ? "text-zinc-900" : "text-foreground";
+  const mutedTextColor = isLanding ? "text-zinc-900/60" : "text-foreground/60";
+  const iconColor = isLanding ? "text-zinc-900/60 hover:text-zinc-900" : "text-foreground/60 hover:text-foreground";
+
   return (
     <footer
       className={
         isLanding
-          ? "border-t border-zinc-900/10"
-          : "relative z-10 border-t border-white/10 backdrop-blur-md"
+          ? "bg-white/10"
+          : "relative z-10 bg-white/10 backdrop-blur-xl"
       }
     >
       <div className="mx-auto max-w-6xl px-6 py-8">
@@ -46,34 +50,48 @@ export default function Footer() {
           {/* Logo and Links */}
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
             <Link href="/">
-              <Image
-                src="/logo.svg"
-                alt="Prismo logo"
-                width={32}
-                height={32}
-                className={`sm:w-5 sm:h-5 ${isLanding ? "" : "invert"}`}
-              />
+              {isLanding ? (
+                <Image
+                  src="/logo.svg"
+                  alt="Prismo logo"
+                  width={32}
+                  height={32}
+                  className="sm:w-5 sm:h-5"
+                />
+              ) : (
+                <div
+                  className="w-8 h-8 sm:w-5 sm:h-5 bg-foreground"
+                  style={{
+                    WebkitMaskImage: "url(/logo.svg)",
+                    WebkitMaskSize: "contain",
+                    WebkitMaskRepeat: "no-repeat",
+                    maskImage: "url(/logo.svg)",
+                    maskSize: "contain",
+                    maskRepeat: "no-repeat",
+                  } as React.CSSProperties}
+                  role="img"
+                  aria-label="Prismo logo"
+                />
+              )}
             </Link>
             <nav
-              className={`flex items-center gap-4 sm:gap-6 text-sm ${
-                isLanding ? "text-zinc-800" : "text-zinc-400"
-              }`}
+              className={`flex items-center gap-4 sm:gap-6 text-sm ${textColor}`}
             >
               <Link
                 href="/"
-                className={`transition-colors ${isLanding ? "hover:text-black" : "hover:text-white"}`}
+                className="transition-colors hover:opacity-80"
               >
                 Discover
               </Link>
               <Link
                 href="/event-creation"
-                className={`transition-colors ${isLanding ? "hover:text-black" : "hover:text-white"}`}
+                className="transition-colors hover:opacity-80"
               >
                 Create
               </Link>
               <Link
                 href="/terms/ticket"
-                className={`transition-colors ${isLanding ? "hover:text-black" : "hover:text-white"}`}
+                className="transition-colors hover:opacity-80"
               >
                 Terms
               </Link>
@@ -85,7 +103,7 @@ export default function Footer() {
               href="https://www.linkedin.com/company/prismolive/"
               target="_blank"
               rel="noopener noreferrer"
-              className={`transition-colors ${isLanding ? "text-zinc-600 hover:text-zinc-900" : "text-zinc-400 hover:text-white"}`}
+              className={`transition-colors ${iconColor}`}
               aria-label="LinkedIn"
             >
               <IconLinkedIn className="h-[18px] w-[18px]" />
@@ -94,7 +112,7 @@ export default function Footer() {
               href="https://www.instagram.com/prismo.live/"
               target="_blank"
               rel="noopener noreferrer"
-              className={`transition-colors ${isLanding ? "text-zinc-600 hover:text-zinc-900" : "text-zinc-400 hover:text-white"}`}
+              className={`transition-colors ${iconColor}`}
               aria-label="Instagram"
             >
               <IconInstagram className="h-[18px] w-[18px]" />
@@ -103,7 +121,7 @@ export default function Footer() {
               href="https://www.tiktok.com/@prismo.live"
               target="_blank"
               rel="noopener noreferrer"
-              className={`transition-colors ${isLanding ? "text-zinc-600 hover:text-zinc-900" : "text-zinc-400 hover:text-white"}`}
+              className={`transition-colors ${iconColor}`}
               aria-label="TikTok"
             >
               <IconTikTok className="h-[16px] w-[16px]" />
@@ -112,7 +130,7 @@ export default function Footer() {
               href="https://www.youtube.com/@prismolive"
               target="_blank"
               rel="noopener noreferrer"
-              className={`transition-colors ${isLanding ? "text-zinc-600 hover:text-zinc-900" : "text-zinc-400 hover:text-white"}`}
+              className={`transition-colors ${iconColor}`}
               aria-label="YouTube"
             >
               <IconYouTube className="h-[18px] w-[18px]" />
@@ -122,7 +140,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div
-          className={`mt-6 text-center text-xs ${isLanding ? "text-zinc-700" : "text-zinc-500"}`}
+          className={`mt-6 text-center text-xs ${mutedTextColor}`}
         >
           <p>&copy; {new Date().getFullYear()} Prismo. All rights reserved.</p>
         </div>
