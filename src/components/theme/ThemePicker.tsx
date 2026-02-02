@@ -113,6 +113,15 @@ export default function ThemePicker({
 
   const isPaletteDisabled = theme.type === "shader";
 
+  // Lock body scroll when picker is open
+  useEffect(() => {
+    if (!isOpen) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   // Scroll to the correct palette page when the picker opens
   useEffect(() => {
     if (!isOpen) return;
