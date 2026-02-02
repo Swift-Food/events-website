@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
@@ -121,6 +122,8 @@ export default function EventClient({
   // Calendar dropdown state
   const [showCalendarDropdown, setShowCalendarDropdown] = useState(false);
   const calendarDropdownRef = useRef<HTMLDivElement>(null);
+  const calendarButtonRef = useRef<HTMLButtonElement>(null);
+  const [calendarDropdownPos, setCalendarDropdownPos] = useState({ top: 0, left: 0, width: 0 });
 
   // Save to calendar modal state
   const [showSaveToCalendarModal, setShowSaveToCalendarModal] = useState(false);
@@ -1005,17 +1008,30 @@ export default function EventClient({
                   {/* Add to Calendar Button */}
                   <div className="relative mt-4" ref={calendarDropdownRef}>
                     <button
-                      onClick={() =>
-                        setShowCalendarDropdown(!showCalendarDropdown)
-                      }
+                      ref={calendarButtonRef}
+                      onClick={() => {
+                        if (!showCalendarDropdown && calendarButtonRef.current) {
+                          const rect = calendarButtonRef.current.getBoundingClientRect();
+                          setCalendarDropdownPos({
+                            top: rect.bottom + 8,
+                            left: rect.left,
+                            width: rect.width,
+                          });
+                        }
+                        setShowCalendarDropdown(!showCalendarDropdown);
+                      }}
                       className="flex w-full items-center justify-center gap-2 rounded-lg bg-card-secondary-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
                     >
                       <CalendarPlus className="h-4 w-4" />
                       Add to Calendar
                     </button>
 
-                    {showCalendarDropdown && (
-                      <div className="absolute left-0 right-0 top-full z-10 mt-2 overflow-hidden rounded-lg bg-card-background shadow-xl">
+                    {showCalendarDropdown && createPortal(
+                      <div
+                        ref={calendarDropdownRef}
+                        className="fixed z-[60] overflow-hidden rounded-lg bg-card-secondary-background backdrop-blur-lg shadow-xl border border-foreground/10"
+                        style={{ top: calendarDropdownPos.top, left: calendarDropdownPos.left, width: calendarDropdownPos.width }}
+                      >
                         <button
                           onClick={() => {
                             window.open(
@@ -1122,7 +1138,8 @@ export default function EventClient({
                             </button>
                           </>
                         )}
-                      </div>
+                      </div>,
+                      document.body
                     )}
                   </div>
                 </div>
