@@ -250,7 +250,7 @@ function svgDataUrl(svg: string): string {
 }
 
 function generateDots(color: string): string {
-  return `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><circle cx='10' cy='10' r='3' fill='${color}'/><circle cx='30' cy='10' r='3' fill='${color}'/><circle cx='0' cy='30' r='3' fill='${color}'/><circle cx='20' cy='30' r='3' fill='${color}'/><circle cx='40' cy='30' r='3' fill='${color}'/></svg>`;
+  return `<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><circle cx='15' cy='15' r='4' fill='${color}'/><circle cx='45' cy='15' r='4' fill='${color}'/><circle cx='0' cy='45' r='4' fill='${color}'/><circle cx='30' cy='45' r='4' fill='${color}'/><circle cx='60' cy='45' r='4' fill='${color}'/></svg>`;
 }
 
 function generateGrid(color: string): string {
@@ -300,7 +300,7 @@ function darkenColor(r: number, g: number, b: number, amount: number, alpha: num
 /** Returns the CSS `background-image` value for a pattern */
 export function getPatternCSS(patternId: string, palette: ColorPalette): string {
   const { r, g, b } = parseColor(palette.pageBackground);
-  const patternColor = darkenColor(r, g, b, 0.45, 0.25);
+  const patternColor = darkenColor(r, g, b, 0.6, 0.2);
 
   let svg: string;
   switch (patternId) {
