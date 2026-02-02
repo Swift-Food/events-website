@@ -29,7 +29,7 @@ export default function EventThemeBackground({
   }
 
   return (
-    <div className="fixed inset-0 z-0">
+    <div className="fixed inset-0 z-0 pointer-events-none">
       {config.type === "landscape" && landscape && (
         <Image
           src={`/Landscape theme/${landscape.filename}`}
