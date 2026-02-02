@@ -42,6 +42,33 @@ export default function ThemePicker({
   const page0Ref = useRef<HTMLDivElement>(null);
   const page1Ref = useRef<HTMLDivElement>(null);
   const trayRef = useRef<HTMLDivElement>(null);
+
+  // Landscape paging (6 items → 2 pages of 3)
+  const [landscapePage, setLandscapePage] = useState(0);
+  const landscapeScrollRef = useRef<HTMLDivElement>(null);
+  const landscapePageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const landscapePages = [];
+  for (let i = 0; i < LANDSCAPE_OPTIONS.length; i += 3) {
+    landscapePages.push(LANDSCAPE_OPTIONS.slice(i, i + 3));
+  }
+
+  // Pattern paging (5 items → 2 pages of 3)
+  const [patternPage, setPatternPage] = useState(0);
+  const patternScrollRef = useRef<HTMLDivElement>(null);
+  const patternPageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const patternPages = [];
+  for (let i = 0; i < PATTERN_OPTIONS.length; i += 3) {
+    patternPages.push(PATTERN_OPTIONS.slice(i, i + 3));
+  }
+
+  // Shader paging (8 items → 2 pages of 4)
+  const [shaderPage, setShaderPage] = useState(0);
+  const shaderScrollRef = useRef<HTMLDivElement>(null);
+  const shaderPageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const shaderPages = [];
+  for (let i = 0; i < SHADER_PRESETS.length; i += 4) {
+    shaderPages.push(SHADER_PRESETS.slice(i, i + 4));
+  }
   const dragState = useRef<{ startY: number; dragging: boolean }>({ startY: 0, dragging: false });
   const [dragOffset, setDragOffset] = useState(0);
 
@@ -111,6 +138,24 @@ export default function ThemePicker({
     el.scrollTo({ left: page * el.clientWidth, behavior: "smooth" });
   };
 
+  const scrollLandscapeTo = (page: number) => {
+    const el = landscapeScrollRef.current;
+    if (!el) return;
+    el.scrollTo({ left: page * el.clientWidth, behavior: "smooth" });
+  };
+
+  const scrollPatternTo = (page: number) => {
+    const el = patternScrollRef.current;
+    if (!el) return;
+    el.scrollTo({ left: page * el.clientWidth, behavior: "smooth" });
+  };
+
+  const scrollShaderTo = (page: number) => {
+    const el = shaderScrollRef.current;
+    if (!el) return;
+    el.scrollTo({ left: page * el.clientWidth, behavior: "smooth" });
+  };
+
   const isPaletteDisabled = theme.type === "shader";
 
   // Lock body scroll when picker is open
@@ -155,6 +200,99 @@ export default function ThemePicker({
     observer.observe(p1);
     return () => observer.disconnect();
   }, [isOpen, activeMobileTab, isPaletteDisabled]);
+
+  // Track landscape scroll page
+  useEffect(() => {
+    const container = landscapeScrollRef.current;
+    const pages = landscapePageRefs.current.filter(Boolean) as HTMLDivElement[];
+    if (!container || pages.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+            const idx = pages.indexOf(entry.target as HTMLDivElement);
+            if (idx >= 0) setLandscapePage(idx);
+          }
+        }
+      },
+      { root: container, threshold: 0.5 }
+    );
+    pages.forEach((p) => observer.observe(p));
+    return () => observer.disconnect();
+  }, [isOpen, theme.type]);
+
+  // Track pattern scroll page
+  useEffect(() => {
+    const container = patternScrollRef.current;
+    const pages = patternPageRefs.current.filter(Boolean) as HTMLDivElement[];
+    if (!container || pages.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+            const idx = pages.indexOf(entry.target as HTMLDivElement);
+            if (idx >= 0) setPatternPage(idx);
+          }
+        }
+      },
+      { root: container, threshold: 0.5 }
+    );
+    pages.forEach((p) => observer.observe(p));
+    return () => observer.disconnect();
+  }, [isOpen, theme.type]);
+
+  // Scroll landscape to page with active item when opening
+  useEffect(() => {
+    if (!isOpen || theme.type !== "landscape") return;
+    const el = landscapeScrollRef.current;
+    if (!el) return;
+    const activeIdx = LANDSCAPE_OPTIONS.findIndex((o) => o.id === theme.image);
+    const targetPage = activeIdx >= 0 ? Math.floor(activeIdx / 3) : 0;
+    el.scrollTo({ left: targetPage * el.clientWidth, behavior: "instant" });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, theme.type]);
+
+  // Scroll pattern to page with active item when opening
+  useEffect(() => {
+    if (!isOpen || theme.type !== "pattern") return;
+    const el = patternScrollRef.current;
+    if (!el) return;
+    const activeIdx = PATTERN_OPTIONS.findIndex((o) => o.id === theme.pattern);
+    const targetPage = activeIdx >= 0 ? Math.floor(activeIdx / 3) : 0;
+    el.scrollTo({ left: targetPage * el.clientWidth, behavior: "instant" });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, theme.type]);
+
+  // Track shader scroll page
+  useEffect(() => {
+    const container = shaderScrollRef.current;
+    const pages = shaderPageRefs.current.filter(Boolean) as HTMLDivElement[];
+    if (!container || pages.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+            const idx = pages.indexOf(entry.target as HTMLDivElement);
+            if (idx >= 0) setShaderPage(idx);
+          }
+        }
+      },
+      { root: container, threshold: 0.5 }
+    );
+    pages.forEach((p) => observer.observe(p));
+    return () => observer.disconnect();
+  }, [isOpen, theme.type]);
+
+  // Scroll shader to page with active item when opening
+  useEffect(() => {
+    if (!isOpen || theme.type !== "shader") return;
+    const el = shaderScrollRef.current;
+    if (!el) return;
+    const activeIdx = SHADER_PRESETS.findIndex((s) => s.id === theme.shaderPreset);
+    const targetPage = activeIdx >= 0 ? Math.floor(activeIdx / 4) : 0;
+    el.scrollTo({ left: targetPage * el.clientWidth, behavior: "instant" });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, theme.type]);
 
   const currentPalette = (PALETTE_MAP[theme.colorPalette] ?? PALETTE_MAP["default"]).palette;
 
@@ -550,116 +688,228 @@ export default function ThemePicker({
               <div className="min-h-[180px]">
                 {/* Landscape options */}
                 {theme.type === "landscape" && (
-                  <div className="grid grid-cols-3 gap-3">
-                    {LANDSCAPE_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() =>
-                          onChange({
-                            ...theme,
-                            image: opt.id,
-                            imageOpacity: theme.imageOpacity ?? 0.4,
-                          })
-                        }
-                        className="flex flex-col items-center gap-1.5 group"
-                      >
+                  <div className="flex flex-col">
+                    <div
+                      ref={landscapeScrollRef}
+                      className="flex overflow-x-auto snap-x snap-mandatory"
+                      style={{
+                        scrollbarWidth: "none",
+                        msOverflowStyle: "none",
+                        WebkitOverflowScrolling: "touch",
+                        scrollBehavior: "smooth",
+                      }}
+                    >
+                      {landscapePages.map((pageItems, pageIdx) => (
                         <div
-                          className={`relative w-full aspect-[4/3] rounded-xl overflow-hidden border-2 transition-all ${
-                            theme.image === opt.id
-                              ? "border-white shadow-2xl scale-105 z-10 ring-4 ring-white/10"
-                              : "border-white/5 opacity-50 group-hover:opacity-100"
-                          }`}
+                          key={pageIdx}
+                          ref={(el) => { landscapePageRefs.current[pageIdx] = el; }}
+                          className="min-w-full snap-start px-4"
                         >
-                          <Image
-                            src={`/Landscape theme/${opt.filename}`}
-                            alt={opt.name}
-                            fill
-                            className="object-cover"
-                            sizes="100px"
-                          />
-                          <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
+                          <div className="grid grid-cols-3 gap-3 py-2">
+                            {pageItems.map((opt) => (
+                              <button
+                                key={opt.id}
+                                type="button"
+                                onClick={() =>
+                                  onChange({
+                                    ...theme,
+                                    image: opt.id,
+                                    imageOpacity: theme.imageOpacity ?? 0.4,
+                                  })
+                                }
+                                className="flex flex-col items-center gap-1.5 group"
+                              >
+                                <div
+                                  className={`relative w-full aspect-[4/3] rounded-xl overflow-hidden border-2 transition-all ${
+                                    theme.image === opt.id
+                                      ? "border-white scale-105 z-10 ring-4 ring-white/10"
+                                      : "border-white/5 opacity-50 group-hover:opacity-100"
+                                  }`}
+                                >
+                                  <Image
+                                    src={`/Landscape theme/${opt.filename}`}
+                                    alt={opt.name}
+                                    fill
+                                    className="object-cover"
+                                    sizes="100px"
+                                  />
+                                  <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
+                                </div>
+                                <span className={`text-[9px] font-bold uppercase tracking-widest ${
+                                  theme.image === opt.id ? "text-white" : "text-zinc-400 group-hover:text-zinc-200"
+                                }`}>
+                                  {opt.name}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
                         </div>
-                        <span className={`text-[9px] font-bold uppercase tracking-widest ${
-                          theme.image === opt.id ? "text-white" : "text-zinc-400 group-hover:text-zinc-200"
-                        }`}>
-                          {opt.name}
-                        </span>
-                      </button>
-                    ))}
+                      ))}
+                    </div>
+                    {/* Page dots */}
+                    <div className="flex justify-center gap-3 mt-4">
+                      {landscapePages.map((_, p) => (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => scrollLandscapeTo(p)}
+                          className={`h-2 rounded-full transition-all duration-500 ease-out ${
+                            landscapePage === p
+                              ? "w-10 bg-white"
+                              : "w-3 bg-zinc-400 hover:bg-zinc-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
 
                 {/* Shader options */}
                 {theme.type === "shader" && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {SHADER_PRESETS.map((preset) => (
-                      <button
-                        key={preset.id}
-                        type="button"
-                        onClick={() =>
-                          onChange({ ...theme, shaderPreset: preset.id })
-                        }
-                        className={`px-4 lg:px-6 py-3 lg:py-4 rounded-[1.25rem] lg:rounded-[1.5rem] border text-[11px] lg:text-[12px] font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-between group h-16 lg:h-18 ${
-                          theme.shaderPreset === preset.id
-                            ? "bg-white text-zinc-950 border-white shadow-2xl ring-4 lg:ring-8 ring-white/5"
-                            : "bg-white/5 border-white/5 text-zinc-300 hover:text-white hover:bg-white/10"
-                        }`}
-                      >
-                        {preset.name}
-                        <div className="flex -space-x-2 lg:-space-x-3">
-                          {[preset.color1, preset.color2, preset.color3].map(
-                            (c, i) => (
-                              <div
-                                key={i}
-                                className="w-6 h-6 lg:w-8 lg:h-8 rounded-full shadow-lg"
-                                style={{
-                                  backgroundColor: c,
-                                  zIndex: 3 - i,
-                                }}
-                              />
-                            )
-                          )}
+                  <div className="flex flex-col">
+                    <div
+                      ref={shaderScrollRef}
+                      className="flex overflow-x-auto snap-x snap-mandatory"
+                      style={{
+                        scrollbarWidth: "none",
+                        msOverflowStyle: "none",
+                        WebkitOverflowScrolling: "touch",
+                        scrollBehavior: "smooth",
+                      }}
+                    >
+                      {shaderPages.map((pageItems, pageIdx) => (
+                        <div
+                          key={pageIdx}
+                          ref={(el) => { shaderPageRefs.current[pageIdx] = el; }}
+                          className="min-w-full snap-start px-4"
+                        >
+                          <div className="grid grid-cols-2 gap-3 py-2">
+                            {pageItems.map((preset) => (
+                              <button
+                                key={preset.id}
+                                type="button"
+                                onClick={() =>
+                                  onChange({ ...theme, shaderPreset: preset.id })
+                                }
+                                className={`px-4 lg:px-6 py-3 lg:py-4 rounded-[1.25rem] lg:rounded-[1.5rem] border text-[11px] lg:text-[12px] font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-between group h-16 lg:h-18 ${
+                                  theme.shaderPreset === preset.id
+                                    ? "bg-white text-zinc-950 border-white ring-4 lg:ring-8 ring-white/5"
+                                    : "bg-white/5 border-white/5 text-zinc-300 hover:text-white hover:bg-white/10"
+                                }`}
+                              >
+                                {preset.name}
+                                <div className="flex -space-x-2 lg:-space-x-3">
+                                  {[preset.color1, preset.color2, preset.color3].map(
+                                    (c, i) => (
+                                      <div
+                                        key={i}
+                                        className="w-6 h-6 lg:w-8 lg:h-8 rounded-full shadow-lg"
+                                        style={{
+                                          backgroundColor: c,
+                                          zIndex: 3 - i,
+                                        }}
+                                      />
+                                    )
+                                  )}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
                         </div>
-                      </button>
-                    ))}
+                      ))}
+                    </div>
+                    {/* Page dots */}
+                    {shaderPages.length > 1 && (
+                      <div className="flex justify-center gap-3 mt-4">
+                        {shaderPages.map((_, p) => (
+                          <button
+                            key={p}
+                            type="button"
+                            onClick={() => scrollShaderTo(p)}
+                            className={`h-2 rounded-full transition-all duration-500 ease-out ${
+                              shaderPage === p
+                                ? "w-10 bg-white"
+                                : "w-3 bg-zinc-400 hover:bg-zinc-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
                 {/* Pattern options */}
                 {theme.type === "pattern" && (
-                  <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-3 gap-3">
-                    {PATTERN_OPTIONS.map((opt) => {
-                      const isActive = theme.pattern === opt.id;
-                      const patternStyle = getPatternPreviewBg(opt.id);
-                      return (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          onClick={() => onChange({ ...theme, pattern: opt.id })}
-                          className="flex flex-col items-center gap-1.5 group"
+                  <div className="flex flex-col">
+                    <div
+                      ref={patternScrollRef}
+                      className="flex overflow-x-auto snap-x snap-mandatory"
+                      style={{
+                        scrollbarWidth: "none",
+                        msOverflowStyle: "none",
+                        WebkitOverflowScrolling: "touch",
+                        scrollBehavior: "smooth",
+                      }}
+                    >
+                      {patternPages.map((pageItems, pageIdx) => (
+                        <div
+                          key={pageIdx}
+                          ref={(el) => { patternPageRefs.current[pageIdx] = el; }}
+                          className="min-w-full snap-start px-4"
                         >
-                          <div
-                            className={`relative w-full aspect-[3/2] rounded-xl overflow-hidden border-2 transition-all ${
-                              isActive
-                                ? "border-white shadow-2xl scale-105 z-10 ring-4 ring-white/10"
-                                : "border-white/10 opacity-60 group-hover:opacity-100"
+                          <div className="grid grid-cols-3 gap-3 py-2">
+                            {pageItems.map((opt) => {
+                              const isActive = theme.pattern === opt.id;
+                              const patternStyle = getPatternPreviewBg(opt.id);
+                              return (
+                                <button
+                                  key={opt.id}
+                                  type="button"
+                                  onClick={() => onChange({ ...theme, pattern: opt.id })}
+                                  className="flex flex-col items-center gap-1.5 group"
+                                >
+                                  <div
+                                    className={`relative w-full aspect-[3/2] rounded-xl overflow-hidden border-2 transition-all ${
+                                      isActive
+                                        ? "border-white scale-105 z-10 ring-4 ring-white/10"
+                                        : "border-white/10 opacity-60 group-hover:opacity-100"
+                                    }`}
+                                    style={{
+                                      backgroundColor: currentPalette.pageBackground,
+                                      backgroundImage: patternStyle.backgroundImage,
+                                      backgroundSize: patternStyle.backgroundSize,
+                                      backgroundRepeat: "repeat",
+                                    }}
+                                  />
+                                  <span className={`text-[9px] font-bold uppercase tracking-widest ${
+                                    isActive ? "text-white" : "text-zinc-400 group-hover:text-zinc-200"
+                                  }`}>
+                                    {opt.name}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Page dots */}
+                    {patternPages.length > 1 && (
+                      <div className="flex justify-center gap-3 mt-4">
+                        {patternPages.map((_, p) => (
+                          <button
+                            key={p}
+                            type="button"
+                            onClick={() => scrollPatternTo(p)}
+                            className={`h-2 rounded-full transition-all duration-500 ease-out ${
+                              patternPage === p
+                                ? "w-10 bg-white"
+                                : "w-3 bg-zinc-400 hover:bg-zinc-300"
                             }`}
-                            style={{
-                              backgroundColor: currentPalette.pageBackground,
-                              backgroundImage: patternStyle.backgroundImage,
-                              backgroundSize: patternStyle.backgroundSize,
-                              backgroundRepeat: "repeat",
-                            }}
                           />
-                          <span className={`text-[9px] font-bold uppercase tracking-widest ${
-                            isActive ? "text-white" : "text-zinc-400 group-hover:text-zinc-200"
-                          }`}>
-                            {opt.name}
-                          </span>
-                        </button>
-                      );
-                    })}
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
