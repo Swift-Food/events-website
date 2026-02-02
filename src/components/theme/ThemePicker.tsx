@@ -578,7 +578,7 @@ export default function ThemePicker({
                 >
                   {/* Page 1: Monotone */}
                   <div ref={page0Ref} className="min-w-full snap-start px-4 lg:px-6">
-                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-4 lg:py-6">
+                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-4 lg:py-3 lg:gap-y-3 lg:gap-x-3">
                       {SINGLE_COLOR_PALETTES.map((preset) => (
                         <button
                           key={preset.id}
@@ -589,9 +589,9 @@ export default function ThemePicker({
                           className="flex flex-col items-center gap-1.5 transition-all hover:scale-110 active:scale-95 mx-auto"
                         >
                           <div
-                            className={`w-12 h-12 lg:w-14 lg:h-14 rounded-full flex items-center justify-center p-0.5 border-2 transition-all ${
+                            className={`w-12 h-12 lg:w-10 lg:h-10 rounded-full flex items-center justify-center p-0.5 border-2 transition-all ${
                               theme.colorPalette === preset.id
-                                ? "border-white ring-4 lg:ring-8 ring-white/10"
+                                ? "border-white ring-4 lg:ring-4 ring-white/10"
                                 : "border-transparent"
                             }`}
                           >
@@ -605,7 +605,7 @@ export default function ThemePicker({
                               ))}
                             </div>
                           </div>
-                          <span className={`text-[10px] truncate w-14 text-center ${
+                          <span className={`text-[10px] lg:text-[9px] truncate w-14 lg:w-12 text-center ${
                             theme.colorPalette === preset.id ? "text-white font-semibold" : "text-zinc-400"
                           }`}>
                             {preset.name}
@@ -617,7 +617,7 @@ export default function ThemePicker({
 
                   {/* Page 2: Themes */}
                   <div ref={page1Ref} className="min-w-full snap-start px-4 lg:px-6">
-                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-4 lg:py-6">
+                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-4 lg:py-3 lg:gap-y-3 lg:gap-x-3">
                       {MULTI_COLOR_PALETTES.map((preset) => (
                         <button
                           key={preset.id}
@@ -628,9 +628,9 @@ export default function ThemePicker({
                           className="flex flex-col items-center gap-1.5 transition-all hover:scale-110 active:scale-95 mx-auto"
                         >
                           <div
-                            className={`w-12 h-12 lg:w-14 lg:h-14 rounded-full flex items-center justify-center p-0.5 border-2 transition-all ${
+                            className={`w-12 h-12 lg:w-10 lg:h-10 rounded-full flex items-center justify-center p-0.5 border-2 transition-all ${
                               theme.colorPalette === preset.id
-                                ? "border-white ring-4 lg:ring-8 ring-white/10"
+                                ? "border-white ring-4 lg:ring-4 ring-white/10"
                                 : "border-transparent"
                             }`}
                           >
@@ -644,7 +644,7 @@ export default function ThemePicker({
                               ))}
                             </div>
                           </div>
-                          <span className={`text-[10px] truncate w-14 text-center ${
+                          <span className={`text-[10px] lg:text-[9px] truncate w-14 lg:w-12 text-center ${
                             theme.colorPalette === preset.id ? "text-white font-semibold" : "text-zinc-400"
                           }`}>
                             {preset.name}
