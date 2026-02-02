@@ -1550,11 +1550,6 @@ export default function EventClient({
                  </p>
                 </div>
                 <div className="flex items-center gap-3">
-                 <p className="text-base sm:text-xl font-bold text-foreground">
-                  {Number(ownedTicket.price) === 0
-                   ? "Free"
-                   : `£${Number(ownedTicket.price).toFixed(2)}`}
-                 </p>
                  <Link
                   href={`/my-tickets?ticketId=${event.userTicket!.id}`}
                   className="relative flex items-center gap-2 bg-white text-zinc-950 px-5 py-2.5 rounded-2xl text-xs font-bold hover:bg-zinc-100 transition-all active:scale-[0.96] group/btn shadow-xl shadow-white/5"
