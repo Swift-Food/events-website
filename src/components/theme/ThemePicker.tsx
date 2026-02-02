@@ -488,13 +488,11 @@ export default function ThemePicker({
             ))}
           </div>
 
-          {/* Mobile section label (hidden for style tab — the tab name is sufficient) */}
-          {activeMobileTab !== "details" && (
+          {/* Mobile section label (only for palette tab) */}
+          {activeMobileTab === "palette" && (
             <div className="px-4 pb-3 lg:hidden">
               <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] block text-center">
-                {activeMobileTab === "base"
-                  ? "Base Style"
-                  : (palettePage === 0 ? "Monotone" : "Themes") + " Palette"}
+                {(palettePage === 0 ? "Monotone" : "Themes") + " Palette"}
               </label>
             </div>
           )}
@@ -524,7 +522,7 @@ export default function ThemePicker({
                       className="flex flex-col items-center gap-1.5 lg:gap-2 group w-full"
                     >
                       <div
-                        className={`relative w-full aspect-[4/3] sm:aspect-[3/2] rounded-xl lg:rounded-xl overflow-hidden border-2 transition-all duration-300 ${
+                        className={`relative w-full aspect-[4/3] sm:aspect-[5/2] lg:aspect-[4/3] rounded-xl lg:rounded-xl overflow-hidden border-2 transition-all duration-300 ${
                           isActive
                             ? "border-white ring-2 lg:ring-6 ring-white/5 scale-105 z-10"
                             : "border-white/5 hover:border-white/10"
