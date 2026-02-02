@@ -382,8 +382,17 @@ export function resolveTheme(config: EventThemeConfig): {
       ? shader.palette
       : (PALETTE_MAP[config.colorPalette] ?? PALETTE_MAP["default"]).palette;
 
-  // For landscape themes, adjust backgrounds so the image shows through.
+  // For solid type with default palette, make page background transparent
+  // so the layout gradient shows through.
   let palette = basePalette;
+  if (config.type === "solid" && (config.colorPalette ?? "default") === "default") {
+    palette = {
+      ...basePalette,
+      pageBackground: "transparent",
+    };
+  }
+
+  // For landscape themes, adjust backgrounds so the image shows through.
   if (config.type === "landscape") {
     const isDefault = (config.colorPalette ?? "default") === "default";
     const withAlpha = (color: string, alpha: number) => {

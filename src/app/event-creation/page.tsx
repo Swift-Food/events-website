@@ -27,5 +27,5 @@ export default function EventCreationPage() {
   return null;
  }
  
- return <div className="min-h-screen bg-background py-6"><EventForm mode="create" /></div>;
+ return <div className="min-h-screen py-6"><EventForm mode="create" /></div>;
 }

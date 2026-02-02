@@ -315,7 +315,7 @@ export default function EventManagementPage() {
    : allTabs;
 
  return (
-  <div className="relative min-h-screen bg-background">
+  <div className="relative min-h-screen">
    {/* Preview Banner - Mobile only */}
    <div className="sm:hidden border-y border-purple-500/30 bg-purple-500/10">
     <div className="px-6 py-3 flex items-center justify-between">

@@ -692,7 +692,7 @@ export default function EventClient({
    <SmartAppBanner currentPath={currentPath} />
 
    <div
-    className={`relative min-h-screen ${themeConfig.type === "solid" ? "bg-background" : ""}`}
+    className="relative min-h-screen"
     style={themeCSSVars as React.CSSProperties}
    >
     <EventThemeBackground
