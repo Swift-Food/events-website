@@ -1645,20 +1645,20 @@ export default function EventClient({
                               onClick={() =>
                                 !isDisabled && setSelectedTicketId(ticket.id)
                               }
-                              className={`flex items-center justify-between gap-2 sm:gap-4 rounded-xl p-3 sm:p-4 transition-all ${
+                              className={`flex items-center justify-between gap-2 sm:gap-4 rounded-xl p-3 sm:p-4 transition-all border-2 ${
                                 isOwnedTicket
                                   ? isActiveTicket
-                                    ? "bg-green-500/10 cursor-default"
-                                    : "bg-yellow-500/10 cursor-default"
+                                    ? "bg-green-500/10 border-transparent cursor-default"
+                                    : "bg-yellow-500/10 border-transparent cursor-default"
                                   : isInvitedTicket
-                                  ? "bg-emerald-500/10 cursor-pointer ring-2 ring-emerald-500/30"
+                                  ? "bg-emerald-500/10 border-transparent cursor-pointer ring-2 ring-emerald-500/30"
                                   : isDisabledByInvitation
-                                  ? "bg-card-secondary-background opacity-40 cursor-not-allowed"
+                                  ? "bg-card-secondary-background border-transparent opacity-40 cursor-not-allowed"
                                   : isDisabled
-                                  ? "bg-card-secondary-background opacity-50 cursor-not-allowed"
+                                  ? "bg-card-secondary-background border-transparent opacity-50 cursor-not-allowed"
                                   : isSelected
-                                  ? "bg-card-secondary-background border-2 border-white/50 ring-4 ring-white/20 cursor-pointer"
-                                  : "bg-card-secondary-background cursor-pointer"
+                                  ? "bg-card-secondary-background border-white/50 cursor-pointer"
+                                  : "bg-card-secondary-background border-transparent cursor-pointer"
                               }`}
                             >
                               <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
