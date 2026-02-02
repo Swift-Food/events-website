@@ -464,7 +464,7 @@ export default function ThemePicker({
         <div className="shrink-0 rounded-t-[2.0rem] lg:rounded-t-[2rem]">
           {/* Drag handle */}
           <div
-            className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none"
+            className="flex justify-center pt-3 pb-3 cursor-grab active:cursor-grabbing touch-none"
             onMouseDown={(e) => { e.preventDefault(); handleDragStart(e.clientY); }}
             onTouchStart={(e) => handleDragStart(e.touches[0].clientY)}
           >
