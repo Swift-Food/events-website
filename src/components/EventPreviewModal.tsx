@@ -16,8 +16,6 @@ import {
   Calendar,
   CalendarPlus,
   MapPin,
-  Users,
-  Clock,
   User,
   Loader2,
   X,
@@ -540,6 +538,55 @@ export default function EventPreviewModal({
                 </div>
               )}
 
+              {/* Organizer */}
+              <div className="mb-6">
+                <div className="h-px bg-white/10" />
+                <div className="py-4 flex items-center gap-3">
+                  {event.owner?.user ? (
+                    <Link
+                      href={`/user/${event.owner.id}`}
+                      onClick={handleClose}
+                      className="flex items-center gap-3 group"
+                    >
+                      {event.owner.user.profilePicture ? (
+                        <Image
+                          src={event.owner.user.profilePicture}
+                          alt={event.owner.firstName || event.owner.lastName
+                            ? [event.owner.firstName, event.owner.lastName].filter(Boolean).join(" ")
+                            : event.owner.user.username || "Organizer"}
+                          width={48}
+                          height={48}
+                          className="rounded-full"
+                        />
+                      ) : (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground/10">
+                          <User className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                          {event.owner.firstName || event.owner.lastName
+                            ? [event.owner.firstName, event.owner.lastName].filter(Boolean).join(" ")
+                            : event.owner.user.username || "Anonymous"}
+                        </p>
+                        <p className="text-sm text-muted-foreground">Organizer</p>
+                      </div>
+                    </Link>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground/10">
+                        <User className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-foreground">Event Organizer</p>
+                        <p className="text-sm text-muted-foreground">Organizer</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="h-px bg-white/10" />
+              </div>
+
               {/* Date & Time */}
               <div className="rounded-xl bg-card-background p-4 mb-4">
                 <div className="flex gap-4">
@@ -1030,73 +1077,6 @@ export default function EventPreviewModal({
                 )}
               </div>
 
-              {/* Organizer & Stats Row */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                {/* Organizer */}
-                <div className="rounded-xl bg-card-background p-4">
-                  <p className="text-xs text-muted-foreground mb-2">Organized by</p>
-                  {event.owner?.user ? (
-                    <Link
-                      href={`/user/${event.owner.id}`}
-                      onClick={handleClose}
-                      className="flex items-center gap-2 group"
-                    >
-                      {event.owner.user.profilePicture ? (
-                        <Image
-                          src={event.owner.user.profilePicture}
-                          alt={event.owner.user.username || "Organizer"}
-                          width={32}
-                          height={32}
-                          className="rounded-full"
-                        />
-                      ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                          <User className="h-4 w-4 text-primary" />
-                        </div>
-                      )}
-                      <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
-                        {[event.owner.firstName, event.owner.lastName].filter(Boolean).join(" ") ||
-                          event.owner.user.username ||
-                          "Anonymous"}
-                      </p>
-                    </Link>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                        <User className="h-4 w-4 text-primary" />
-                      </div>
-                      <p className="text-sm font-medium text-foreground">
-                        Event Organizer
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Stats */}
-                <div className="rounded-xl bg-card-background p-4">
-                  <p className="text-xs text-muted-foreground mb-2">Stats</p>
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <Users className="h-3 w-3" />
-                        Attendees
-                      </span>
-                      <span className="font-medium text-foreground">
-                        {event.attendeesCount || 0}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        Views
-                      </span>
-                      <span className="font-medium text-foreground">
-                        {event.viewCount ?? 0}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
         </div>
