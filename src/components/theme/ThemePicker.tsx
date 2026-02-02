@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
 import type { EventThemeConfig, BackgroundType } from "@/types/event/theme";
@@ -38,6 +38,8 @@ export default function ThemePicker({
   const [palettePage, setPalettePage] = useState<0 | 1>(0);
   const [activeMobileTab, setActiveMobileTab] = useState<MobileTab>("base");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const page0Ref = useRef<HTMLDivElement>(null);
+  const page1Ref = useRef<HTMLDivElement>(null);
 
   const handleTypeChange = (type: BackgroundType) => {
     const updated: EventThemeConfig = { ...theme, type };
@@ -62,14 +64,6 @@ export default function ThemePicker({
     }
   };
 
-  // Sync scroll position to page indicator
-  const handleScroll = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const page = el.scrollLeft > el.clientWidth * 0.5 ? 1 : 0;
-    setPalettePage(page as 0 | 1);
-  }, []);
-
   // Scroll to page when dot is tapped
   const scrollToPage = (page: 0 | 1) => {
     const el = scrollRef.current;
@@ -77,15 +71,30 @@ export default function ThemePicker({
     el.scrollTo({ left: page * el.clientWidth, behavior: "smooth" });
   };
 
-  // Snap scroll ref listener
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.addEventListener("scroll", handleScroll, { passive: true });
-    return () => el.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
-
   const isPaletteDisabled = theme.type === "shader";
+
+  // Track which page is visible using IntersectionObserver
+  useEffect(() => {
+    const container = scrollRef.current;
+    const p0 = page0Ref.current;
+    const p1 = page1Ref.current;
+    if (!container || !p0 || !p1) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+            setPalettePage(entry.target === p0 ? 0 : 1);
+          }
+        }
+      },
+      { root: container, threshold: 0.5 }
+    );
+
+    observer.observe(p0);
+    observer.observe(p1);
+    return () => observer.disconnect();
+  }, [isOpen, activeMobileTab, isPaletteDisabled]);
 
   const currentPalette = (PALETTE_MAP[theme.colorPalette] ?? PALETTE_MAP["default"]).palette;
 
@@ -250,7 +259,7 @@ export default function ThemePicker({
 
         <div className="max-w-[1800px] mx-auto p-4 lg:p-6 xl:p-8 pb-6">
           {/* Header */}
-          <div className="flex items-center justify-between mb-4 lg:mb-6">
+          {/* <div className="flex items-center justify-between mb-4 lg:mb-6">
             <div>
               <h2 className="text-[10px] lg:text-[11px] font-black uppercase tracking-[0.4em] text-zinc-300 mb-1">
                 Customizer
@@ -264,7 +273,7 @@ export default function ThemePicker({
             >
               <X className="w-5 h-5 text-zinc-300 group-hover:text-white transition-colors" />
             </button>
-          </div>
+          </div> */}
 
           {/* Mobile Tab Buttons */}
           <div className="flex gap-2 mb-4 lg:hidden">
@@ -364,7 +373,7 @@ export default function ThemePicker({
                   }}
                 >
                   {/* Page 1: Monotone */}
-                  <div className="min-w-full snap-start px-4 lg:px-6">
+                  <div ref={page0Ref} className="min-w-full snap-start px-4 lg:px-6">
                     <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-4 lg:py-6">
                       {SINGLE_COLOR_PALETTES.map((preset) => (
                         <button
@@ -403,7 +412,7 @@ export default function ThemePicker({
                   </div>
 
                   {/* Page 2: Themes */}
-                  <div className="min-w-full snap-start px-4 lg:px-6">
+                  <div ref={page1Ref} className="min-w-full snap-start px-4 lg:px-6">
                     <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-4 lg:py-6">
                       {MULTI_COLOR_PALETTES.map((preset) => (
                         <button
