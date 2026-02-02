@@ -108,7 +108,7 @@ export default function LandingPage() {
    {/* <div className="fixed inset-0 bg-grid-landing pointer-events-none z-0" /> */}
 
    {/* Hero Section */}
-   <main className="relative flex flex-col items-center justify-center h-[calc(100vh-72px)] px-6 z-10 overflow-hidden">
+   <main className="relative flex flex-col items-center justify-center h-[calc(100vh-72px)] px-6 z-10">
     {/* Main Content Wrapper */}
     <div className="w-full max-w-5xl flex flex-col items-center text-center gap-6 md:gap-10">
      <h1
