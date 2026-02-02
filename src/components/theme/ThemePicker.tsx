@@ -297,7 +297,7 @@ export default function ThemePicker({
       {/* Customizer Tray */}
       <div
         ref={trayRef}
-        className="relative w-full max-h-[60vh] overflow-y-auto bg-black/60 backdrop-blur-sm border-t border-white/10 rounded-t-[2.0rem] lg:rounded-t-[2rem] pointer-events-auto"
+        className="relative w-full max-h-[60vh] flex flex-col bg-black/60 backdrop-blur-sm border-t border-white/10 rounded-t-[2.0rem] lg:rounded-t-[2rem] pointer-events-auto"
         style={{
           animation: dragOffset === 0 ? "themePickerSlideUp 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards" : undefined,
           transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : undefined,
@@ -314,8 +314,8 @@ export default function ThemePicker({
           }
         `}</style>
 
-        {/* Sticky header: drag handle + mobile tabs */}
-        <div className="sticky top-0 z-10 rounded-t-[2.0rem] lg:rounded-t-[2rem]">
+        {/* Header: drag handle + mobile tabs */}
+        <div className="shrink-0 rounded-t-[2.0rem] lg:rounded-t-[2rem]">
           {/* Drag handle */}
           <div
             className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none"
@@ -364,6 +364,7 @@ export default function ThemePicker({
           </div>
         </div>
 
+        <div className="overflow-y-auto min-h-0 w-full">
         <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pb-6">
           {/* Content: 3-column grid on desktop, tabbed on mobile */}
           <div className={`lg:grid ${isPaletteDisabled ? "lg:grid-cols-[220px_1fr]" : "lg:grid-cols-[220px_1fr_1.5fr]"} gap-8 xl:gap-12 items-start`}>
@@ -692,6 +693,7 @@ export default function ThemePicker({
               </div>
             </div>
           </div>
+        </div>
         </div>
 
       </div>
