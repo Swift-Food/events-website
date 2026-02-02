@@ -288,7 +288,7 @@ export default function ThemePicker({
       {/* Customizer Tray */}
       <div
         ref={trayRef}
-        className="relative w-full max-h-[60vh] overflow-y-auto bg-black/60 backdrop-blur-md border-t border-white/10 rounded-t-[2.0rem] lg:rounded-t-[2rem] pointer-events-auto"
+        className="relative w-full max-h-[60vh] overflow-y-auto bg-black/60 border-t border-white/10 rounded-t-[2.0rem] lg:rounded-t-[2rem] pointer-events-auto"
         style={{
           animation: dragOffset === 0 ? "themePickerSlideUp 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards" : undefined,
           transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : undefined,
@@ -305,35 +305,19 @@ export default function ThemePicker({
           }
         `}</style>
 
-        {/* Drag handle */}
-        <div
-          className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none"
-          onMouseDown={(e) => { e.preventDefault(); handleDragStart(e.clientY); }}
-          onTouchStart={(e) => handleDragStart(e.touches[0].clientY)}
-        >
-          <div className="w-10 h-1 rounded-full bg-white/30" />
-        </div>
-
-        <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pb-6">
-          {/* Header */}
-          {/* <div className="flex items-center justify-between mb-4 lg:mb-6">
-            <div>
-              <h2 className="text-[10px] lg:text-[11px] font-black uppercase tracking-[0.4em] text-zinc-300 mb-1">
-                Customizer
-              </h2>
-              <div className="h-0.5 lg:h-1 w-12 bg-white/20 rounded-full" />
-            </div>
-            <button
-              type="button"
-              onClick={onToggle}
-              className="p-2 lg:p-3 rounded-full hover:bg-white/5 transition-colors group"
-            >
-              <X className="w-5 h-5 text-zinc-300 group-hover:text-white transition-colors" />
-            </button>
-          </div> */}
+        {/* Sticky header: drag handle + mobile tabs */}
+        <div className="sticky top-0 z-10 rounded-t-[2.0rem] lg:rounded-t-[2rem] backdrop-blur-sm">
+          {/* Drag handle */}
+          <div
+            className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none"
+            onMouseDown={(e) => { e.preventDefault(); handleDragStart(e.clientY); }}
+            onTouchStart={(e) => handleDragStart(e.touches[0].clientY)}
+          >
+            <div className="w-10 h-1 rounded-full bg-white/30" />
+          </div>
 
           {/* Mobile Tab Buttons */}
-          <div className="flex gap-2 mb-4 lg:hidden">
+          <div className="flex gap-2 px-4 pb-2 lg:hidden">
             {([
               { key: "base" as MobileTab, label: "Base" },
               { key: "palette" as MobileTab, label: "Palette", disabled: isPaletteDisabled },
@@ -357,6 +341,21 @@ export default function ThemePicker({
             ))}
           </div>
 
+          {/* Mobile section label */}
+          <div className="px-4 pb-3 lg:hidden">
+            <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] block">
+              {activeMobileTab === "base"
+                ? "Base Style"
+                : activeMobileTab === "palette"
+                ? (palettePage === 0 ? "Monotone" : "Themes") + " Palette"
+                : theme.type === "solid"
+                ? "Solid Detail"
+                : `${theme.type.charAt(0).toUpperCase() + theme.type.slice(1)} Styles`}
+            </label>
+          </div>
+        </div>
+
+        <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pb-6">
           {/* Content: 3-column grid on desktop, tabbed on mobile */}
           <div className={`lg:grid ${isPaletteDisabled ? "lg:grid-cols-[220px_1fr]" : "lg:grid-cols-[220px_1fr_1.5fr]"} gap-8 xl:gap-12 items-start`}>
             {/* Column 1: Base Style Selection */}
@@ -365,7 +364,7 @@ export default function ThemePicker({
                 activeMobileTab === "base" ? "block" : "hidden"
               } lg:block space-y-3`}
             >
-              <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] block mb-3">
+              <label className="hidden lg:block text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] mb-3">
                 Base Style
               </label>
               <div className="grid grid-cols-4 lg:grid-cols-2 gap-3">
@@ -413,7 +412,7 @@ export default function ThemePicker({
               } ${isPaletteDisabled ? "lg:hidden" : "lg:block"} space-y-3 lg:border-l lg:border-white/5 lg:pl-8`}
             >
               <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between mb-4">
+                <div className="hidden lg:flex items-center justify-between mb-4">
                   <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] transition-opacity duration-300">
                     {palettePage === 0 ? "Monotone" : "Themes"} Palette
                   </label>
@@ -532,7 +531,7 @@ export default function ThemePicker({
                 activeMobileTab === "details" ? "block" : "hidden"
               } lg:block space-y-3 lg:border-l lg:border-white/5 lg:pl-8`}
             >
-              <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] block mb-3">
+              <label className="hidden lg:block text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] mb-3">
                 {theme.type === "solid"
                   ? "Solid Detail"
                   : `${theme.type.charAt(0).toUpperCase() + theme.type.slice(1)} Styles`}
