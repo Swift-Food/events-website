@@ -142,12 +142,16 @@ export default function EventClient({
       }
     };
 
+    const handleScroll = () => setShowCalendarDropdown(false);
+
     if (showCalendarDropdown) {
       document.addEventListener("mousedown", handleClickOutside);
+      window.addEventListener("scroll", handleScroll, true);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, true);
     };
   }, [showCalendarDropdown]);
 
