@@ -34,9 +34,7 @@ export default function Footer() {
   const isLanding = pathname === "/";
   const hasSolidBg = false;
   const hasBlurBg =
-    !hasSolidBg &&
-    (isLanding ||
-    /^\/events\/[^/]+$/.test(pathname));
+    !hasSolidBg && isLanding;
 
   const textColor = isLanding ? "text-zinc-900" : "text-foreground";
   const mutedTextColor = isLanding ? "text-zinc-900/60" : "text-foreground/60";
