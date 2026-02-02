@@ -59,6 +59,8 @@ export interface LandscapeOption {
   name: string;
   /** Filename under /Landscape theme/ */
   filename: string;
+  /** Whether the image is predominantly dark (use light text) */
+  dark?: boolean;
 }
 
 /** Pattern background option */

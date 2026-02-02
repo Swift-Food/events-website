@@ -224,7 +224,7 @@ export const LANDSCAPE_OPTIONS: LandscapeOption[] = [
   { id: "desert", name: "Desert", filename: "Desert.jpg" },
   { id: "lake", name: "Lake", filename: "Lake.jpg" },
   { id: "mountain", name: "Mountain", filename: "Mountain.jpg" },
-  { id: "night-sky", name: "Night Sky", filename: "Night Sky.jpg" },
+  { id: "night-sky", name: "Night Sky", filename: "Night Sky.jpg", dark: true },
   { id: "ocean", name: "Ocean", filename: "Ocean.jpg" },
   { id: "city", name: "City", filename: "City.jpg" },
 ];
@@ -395,6 +395,8 @@ export function resolveTheme(config: EventThemeConfig): {
   // For landscape themes, adjust backgrounds so the image shows through.
   if (config.type === "landscape") {
     const isDefault = (config.colorPalette ?? "default") === "default";
+    const landscapeOption = config.image ? LANDSCAPE_MAP[config.image] : undefined;
+    const isDarkLandscape = landscapeOption?.dark ?? false;
     const withAlpha = (color: string, alpha: number) => {
       const { r, g, b } = parseColor(color);
       return `rgba(${r}, ${g}, ${b}, ${alpha})`;
@@ -402,17 +404,23 @@ export function resolveTheme(config: EventThemeConfig): {
     palette = {
       ...basePalette,
       pageBackground: isDefault ? "#000000" : basePalette.pageBackground,
-      // cardBackground: "rgba(255, 255, 255, 0.25)",
-      // cardSecondaryBackground: "rgba(255, 255, 255, 0.25)",
       cardBackground: withAlpha(basePalette.cardBackground, 0.5),
       cardSecondaryBackground: withAlpha(basePalette.cardSecondaryBackground, 0.20),
-      ...(isDefault && {
+      ...(isDefault && !isDarkLandscape && {
         cardBackground: "rgba(255, 255, 255, 0.15)",
         cardSecondaryBackground: "rgba(255, 255, 255, 0.08)",
         mainTextColor: "rgba(0, 0, 0, 0.75)",
         subTextColor: "rgba(0, 0, 0, 0.5)",
         primaryColor: "rgba(0, 0, 0, 0.7)",
         borderColor: "rgba(0, 0, 0, 0.1)",
+      }),
+      ...(isDefault && isDarkLandscape && {
+        cardBackground: "rgba(0, 0, 0, 0.3)",
+        cardSecondaryBackground: "rgba(0, 0, 0, 0.15)",
+        mainTextColor: "rgba(255, 255, 255, 0.9)",
+        subTextColor: "rgba(255, 255, 255, 0.6)",
+        primaryColor: "rgba(255, 255, 255, 0.8)",
+        borderColor: "rgba(255, 255, 255, 0.1)",
       }),
     };
   }
