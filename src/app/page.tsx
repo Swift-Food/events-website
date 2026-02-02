@@ -14,7 +14,7 @@ const AnimatedWord: React.FC<{ text: string; delayOffset: number }> = ({
    {text.split("").map((char, i) => (
     <span
      key={i}
-     className="inline-block transition-colors duration-300 cursor-default text-white will-change-[transform,opacity]"
+     className="inline-block cursor-default text-white will-change-[transform,opacity]"
      style={{
       opacity: 0,
       animationName: "reveal-up-color",
@@ -28,7 +28,7 @@ const AnimatedWord: React.FC<{ text: string; delayOffset: number }> = ({
       const target = e.currentTarget;
       target.style.animation = "none";
       void target.offsetWidth;
-      target.style.animation = "letter-jump 0.8s ease-in-out forwards";
+      target.style.animation = "letter-jump 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards";
       target.style.opacity = "1";
       target.style.color = "#3b82f6";
      }}
