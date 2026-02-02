@@ -116,12 +116,12 @@ export default function EventDescriptionModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center bg-black/80 sm:p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center bg-black/40 backdrop-blur-lg sm:p-4"
       style={hasKeyboard ? { height: `${viewportHeight}px`, top: `${viewportOffset}px` } : {}}
     >
       <div
         style={hasKeyboard ? { maxHeight: `${viewportHeight}px` } : {}}
-        className={`flex h-full sm:h-[90vh] w-full sm:max-w-4xl flex-col rounded-t-2xl sm:rounded-2xl bg-card-background p-4 sm:p-6 text-foreground border border-foreground/10 transition-transform duration-300 ease-out ${
+        className={`flex h-full sm:h-[90vh] w-full sm:max-w-4xl flex-col rounded-t-2xl sm:rounded-2xl bg-card-background/80 shadow-2xl p-4 sm:p-6 text-foreground transition-transform duration-300 ease-out ${
           isVisible ? "translate-y-0" : "translate-y-full sm:translate-y-0"
         }`}
       >
@@ -189,7 +189,7 @@ export default function EventDescriptionModal({
 
       {/* Discard Changes Confirmation Modal */}
       {showDiscardModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-lg">
           <div className="w-full max-w-sm mx-4 rounded-xl bg-card-background shadow-2xl">
             <div className="p-6">
               <div className="flex items-center gap-3 mb-4">
