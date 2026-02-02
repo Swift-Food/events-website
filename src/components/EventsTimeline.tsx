@@ -158,10 +158,10 @@ export default function EventsTimeline({
                           : "bg-muted-foreground"
                       }`}
                     />
-                    <span className="text-sm font-semibold text-foreground">
+                    <span className="text-sm font-medium text-muted-foreground">
                       {monthAbbrev} {dayNum}
                     </span>
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm text-muted-foreground/60">
                       {dayName}
                     </span>
                   </div>
