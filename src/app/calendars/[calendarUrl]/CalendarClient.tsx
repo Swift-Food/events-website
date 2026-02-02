@@ -572,7 +572,7 @@ export default function CalendarClient({
       )}
 
       {/* Owner Card */}
-      <div className="rounded-xl border border-white/10 bg-card-background p-4 sm:p-6">
+      <div className="rounded-xl bg-card-background p-4 sm:p-6">
        <h3 className="mb-4 text-lg font-semibold text-foreground">
         Organized by
        </h3>
