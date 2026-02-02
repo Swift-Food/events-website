@@ -47,3 +47,5 @@ package.lock.json
 # claude
 .claude/
 claude.md
+src/components/event-management/tabs
+src/components/event-management/tabs
