@@ -40,6 +40,45 @@ export default function ThemePicker({
   const scrollRef = useRef<HTMLDivElement>(null);
   const page0Ref = useRef<HTMLDivElement>(null);
   const page1Ref = useRef<HTMLDivElement>(null);
+  const trayRef = useRef<HTMLDivElement>(null);
+  const dragState = useRef<{ startY: number; dragging: boolean }>({ startY: 0, dragging: false });
+  const [dragOffset, setDragOffset] = useState(0);
+
+  const dragOffsetRef = useRef(0);
+
+  const handleDragStart = (clientY: number) => {
+    dragState.current = { startY: clientY, dragging: true };
+    if (trayRef.current) trayRef.current.style.transition = "none";
+
+    const onMove = (e: MouseEvent | TouchEvent) => {
+      if (!dragState.current.dragging) return;
+      const y = "touches" in e ? e.touches[0].clientY : e.clientY;
+      const dy = Math.max(0, y - dragState.current.startY);
+      dragOffsetRef.current = dy;
+      setDragOffset(dy);
+    };
+
+    const onEnd = () => {
+      dragState.current.dragging = false;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onEnd);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onEnd);
+      if (trayRef.current) trayRef.current.style.transition = "transform 300ms cubic-bezier(0.16, 1, 0.3, 1)";
+      if (dragOffsetRef.current > 80) {
+        setDragOffset(trayRef.current?.offsetHeight ?? 500);
+        setTimeout(() => { onToggle(); setDragOffset(0); }, 300);
+      } else {
+        setDragOffset(0);
+        dragOffsetRef.current = 0;
+      }
+    };
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onEnd);
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("touchend", onEnd);
+  };
 
   const handleTypeChange = (type: BackgroundType) => {
     const updated: EventThemeConfig = { ...theme, type };
@@ -236,9 +275,11 @@ export default function ThemePicker({
 
       {/* Customizer Tray */}
       <div
+        ref={trayRef}
         className="relative w-full max-h-[60vh] overflow-y-auto bg-black/60 backdrop-blur-md border-t border-white/10 rounded-t-[2.0rem] lg:rounded-t-[2rem] pointer-events-auto"
         style={{
-          animation: "themePickerSlideUp 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
+          animation: dragOffset === 0 ? "themePickerSlideUp 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards" : undefined,
+          transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : undefined,
         }}
       >
         <style jsx>{`
@@ -252,7 +293,16 @@ export default function ThemePicker({
           }
         `}</style>
 
-        <div className="max-w-[1800px] mx-auto p-4 lg:p-6 xl:p-8 pb-6">
+        {/* Drag handle */}
+        <div
+          className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none"
+          onMouseDown={(e) => { e.preventDefault(); handleDragStart(e.clientY); }}
+          onTouchStart={(e) => handleDragStart(e.touches[0].clientY)}
+        >
+          <div className="w-10 h-1 rounded-full bg-white/30" />
+        </div>
+
+        <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pb-6">
           {/* Header */}
           {/* <div className="flex items-center justify-between mb-4 lg:mb-6">
             <div>
