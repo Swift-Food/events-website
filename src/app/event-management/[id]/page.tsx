@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import EventForm from "@/components/EventForm";
 import { eventService } from "@/services/event.service";
@@ -9,7 +9,6 @@ import { EventResponseDto, EventStatus } from "@/types";
 import { CollaboratorRole } from "@/types/event-collaborator";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";
-import { resolveTheme } from "@/lib/theme-presets";
 import {
  Eye,
  X,
@@ -58,19 +57,8 @@ export default function EventManagementPage() {
  const [showUnpublishConfirm, setShowUnpublishConfirm] = useState(false);
  const [refreshKey, setRefreshKey] = useState(0);
 
- // Resolve event theme for modal background
- const editModalBackground = useMemo(() => {
-  const defaultGradient = "linear-gradient(to bottom, #41296e 0%, #000000 15%)";
-  if (!eventData?.eventTheme) return defaultGradient;
-  try {
-   const config = JSON.parse(eventData.eventTheme);
-   if (config.type === "solid" && config.colorPalette && config.colorPalette !== "default") {
-    const { palette } = resolveTheme(config);
-    return palette.pageBackground;
-   }
-  } catch {}
-  return defaultGradient;
- }, [eventData?.eventTheme]);
+ // Modal always uses the default purple-black gradient regardless of event theme
+ const editModalBackground = "linear-gradient(to bottom, #41296e 0%, #000000 15%)";
 
  // Lock body scroll when edit modal is open
  useEffect(() => {
