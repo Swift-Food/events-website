@@ -74,7 +74,7 @@ export default function NotificationDropdown({ isLandingPage = false }: Notifica
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-medium text-white">
+          <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-medium text-primary-foreground">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
