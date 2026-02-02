@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { X, Eye, Pencil, AlertTriangle } from "lucide-react";
 import Tiptap from "@/components/Tiptap";
 import { useEventCreation } from "@/context/EventCreationContext";
@@ -16,6 +16,8 @@ export default function EventDescriptionModal({
 }: EventDescriptionModalProps) {
   const { description, setDescription } = useEventCreation();
   const [localDescription, setLocalDescription] = useState(description);
+  const [baselineDescription, setBaselineDescription] = useState(description);
+  const isInitializing = useRef(true);
   const [isEditMode, setIsEditMode] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
@@ -25,6 +27,8 @@ export default function EventDescriptionModal({
   // Update localDescription whenever the modal opens or description changes
   useEffect(() => {
     setLocalDescription(description);
+    setBaselineDescription(description);
+    isInitializing.current = true;
     setIsEditMode(true); // Reset to edit mode when modal opens
   }, [isOpen, description]);
 
@@ -82,6 +86,18 @@ export default function EventDescriptionModal({
     }
   }, [isOpen, updateViewport]);
 
+  // Wrap onChange to capture the editor-normalized baseline on first update
+  const handleDescriptionChange = useCallback(
+    (newContent: string) => {
+      if (isInitializing.current) {
+        setBaselineDescription(newContent);
+        isInitializing.current = false;
+      }
+      setLocalDescription(newContent);
+    },
+    [],
+  );
+
   if (!isOpen) return null;
 
   const handleSave = () => {
@@ -89,7 +105,7 @@ export default function EventDescriptionModal({
     onClose();
   };
 
-  const hasUnsavedChanges = localDescription !== description;
+  const hasUnsavedChanges = localDescription !== baselineDescription;
 
   const handleCancel = () => {
     if (hasUnsavedChanges) {
@@ -164,7 +180,7 @@ export default function EventDescriptionModal({
         <div className="flex-1 overflow-hidden">
           <Tiptap
             content={localDescription}
-            onChange={setLocalDescription}
+            onChange={handleDescriptionChange}
             editable={isEditMode}
           />
         </div>
