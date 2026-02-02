@@ -1657,7 +1657,7 @@ export default function EventClient({
                                   : isDisabled
                                   ? "bg-card-secondary-background opacity-50 cursor-not-allowed"
                                   : isSelected
-                                  ? "bg-primary/10 cursor-pointer"
+                                  ? "bg-card-secondary-background border-2 border-white/50 ring-4 ring-white/20 cursor-pointer"
                                   : "bg-card-secondary-background cursor-pointer"
                               }`}
                             >
