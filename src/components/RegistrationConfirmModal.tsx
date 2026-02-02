@@ -96,7 +96,7 @@ export default function RegistrationConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="w-full max-w-md max-h-[80vh] rounded-2xl border border-neutral-700 bg-card-background shadow-2xl overflow-hidden flex flex-col">
         {step === 'summary' ? (
           /* Summary Panel */
@@ -111,11 +111,8 @@ export default function RegistrationConfirmModal({
                     className="object-cover"
                   />
                 ) : (
-                  <div
-                    className="flex h-full items-center justify-center"
-                    style={{ backgroundColor: event.eventColor || "#3b82f6" }}
-                  >
-                    <Calendar className="h-8 w-8 text-white/30" />
+                  <div className="flex h-full items-center justify-center bg-card-background">
+                    <Calendar className="h-8 w-8 text-muted-foreground/30" />
                   </div>
                 )}
               </div>
@@ -287,7 +284,7 @@ export default function RegistrationConfirmModal({
                 <button
                   onClick={handleConfirm}
                   disabled={!acceptedTicketTerms || isRegistering}
-                  className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isRegistering ? (
                     <>
@@ -456,7 +453,7 @@ export default function RegistrationConfirmModal({
                   <button
                     onClick={() => onConfirm(questionAnswers)}
                     disabled={isRegistering}
-                    className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isRegistering ? (
                       <>
