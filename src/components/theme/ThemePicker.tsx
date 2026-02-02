@@ -872,7 +872,7 @@ export default function ThemePicker({
                 {/* Pattern options */}
                 {theme.type === "pattern" && (<>
                   {/* sm+: all patterns in a single grid */}
-                  <div className="hidden sm:grid grid-cols-5 gap-3">
+                  <div className="hidden sm:grid sm:grid-cols-5 lg:grid-cols-3 gap-3">
                     {PATTERN_OPTIONS.map((opt) => {
                       const isActive = theme.pattern === opt.id;
                       const patternStyle = getPatternPreviewBg(opt.id);
