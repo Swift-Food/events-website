@@ -106,7 +106,7 @@ export default function Navbar() {
   const hoverBg = isLandingPage ? "hover:bg-zinc-900/10" : "hover:bg-foreground/10";
   const logoStyle = isLandingPage
     ? {}
-    : { WebkitMaskImage: "url(/logo.svg)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", maskImage: "url(/logo.svg)", maskSize: "contain", maskRepeat: "no-repeat" } as React.CSSProperties;
+    : { WebkitMaskImage: "url(/logo.svg)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "center", maskImage: "url(/logo.svg)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "center" } as React.CSSProperties;
   const buttonBg = isLandingPage ? "bg-zinc-900 text-white" : "bg-primary text-primary-foreground";
   const borderColor = isLandingPage ? "border-zinc-900/20 hover:border-zinc-900/40" : "border-foreground/20 hover:border-foreground/40";
 
@@ -125,10 +125,11 @@ export default function Navbar() {
                   alt="Prismo logo"
                   width={24}
                   height={24}
+                  className="shrink-0"
                 />
               ) : (
                 <div
-                  className="w-6 h-6 bg-foreground"
+                  className="w-6 h-6 shrink-0 self-center bg-foreground"
                   style={logoStyle}
                   role="img"
                   aria-label="Prismo logo"
