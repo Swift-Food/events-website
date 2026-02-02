@@ -1018,7 +1018,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
       )}
 
       <div className="relative z-10 flex w-full max-w-5xl flex-col gap-6 text-foreground lg:flex-row">
-        <section className="flex flex-col gap-5 rounded-3xl lg:p-7 lg:w-96 lg:shrink-0 lg:sticky lg:top-20 lg:self-start sm:flex-row lg:flex-col">
+        <section className="flex flex-col gap-5 rounded-3xl lg:p-7 lg:w-96 lg:shrink-0 sm:flex-row lg:flex-col">
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background backdrop-blur-sm  sm:flex-1 sm:basis-0 lg:w-full lg:flex-none">
             {coverPreview ? (
               <img
