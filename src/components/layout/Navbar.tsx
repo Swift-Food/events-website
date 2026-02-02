@@ -36,7 +36,7 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const isLandingPage = pathname === "/";
-  const hasSolidBackground = pathname?.startsWith("/event-management") || pathname?.startsWith("/event-creation");
+  const hasSolidBackground = false;
 
   // Close user menu when clicking outside
   useEffect(() => {

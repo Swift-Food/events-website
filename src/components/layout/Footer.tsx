@@ -32,9 +32,7 @@ const IconYouTube = ({ className }: { className?: string }) => (
 export default function Footer() {
   const pathname = usePathname();
   const isLanding = pathname === "/";
-  const hasSolidBg =
-    pathname?.startsWith("/event-management") ||
-    pathname?.startsWith("/event-creation");
+  const hasSolidBg = false;
   const hasBlurBg =
     !hasSolidBg &&
     (isLanding ||
