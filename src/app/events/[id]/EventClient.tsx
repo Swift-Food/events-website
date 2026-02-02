@@ -700,7 +700,7 @@ export default function EventClient({
         {userRole && (
           <div className="sm:hidden sticky top-4 z-[100] w-full px-4 animate-in slide-in-from-top-4 duration-700 ease-out">
             <div className="relative group">
-              <div className="relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-[24px] border border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.15)] flex items-center justify-between px-4 py-3">
+              <div className="relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-[24px] border border-foreground/10 shadow-[0_4px_16px_rgba(0,0,0,0.15)] flex items-center justify-between px-4 py-3">
                 {/* Subtle Noise Overlay */}
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
 
@@ -749,7 +749,7 @@ export default function EventClient({
           {/* Management/Scanner Banner - Desktop */}
           {userRole && (
             <div className="hidden sm:block mb-6 relative group">
-              <div className="relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-[24px] border border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.15)] flex items-center justify-between px-4 py-3 lg:px-8">
+              <div className="relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-[24px] border border-foreground/10 shadow-[0_4px_16px_rgba(0,0,0,0.15)] flex items-center justify-between px-4 py-3 lg:px-8">
                 {/* Subtle Noise Overlay */}
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
 
@@ -888,7 +888,7 @@ export default function EventClient({
                   )}
 
                   {/* Organizer - Mobile/Tablet */}
-                  <div className="mt-6 h-px bg-white/10" />
+                  <div className="mt-6 h-px bg-foreground/10" />
                   <div className="py-4 flex items-center gap-3 sm:justify-center">
                     {event.owner?.user ? (
                       <Link
@@ -910,7 +910,7 @@ export default function EventClient({
                             className="rounded-full"
                           />
                         ) : (
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground/10">
                             <User className="h-6 w-6 text-muted-foreground" />
                           </div>
                         )}
@@ -929,7 +929,7 @@ export default function EventClient({
                       </Link>
                     ) : (
                       <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground/10">
                           <User className="h-6 w-6 text-muted-foreground" />
                         </div>
                         <div>
@@ -943,7 +943,7 @@ export default function EventClient({
                       </div>
                     )}
                   </div>
-                  <div className="h-px bg-white/10" />
+                  <div className="h-px bg-foreground/10" />
                 </div>
 
                 {/* Date & Time Card - Bottom left on tablet, normal on mobile/desktop */}
@@ -1104,7 +1104,7 @@ export default function EventClient({
                         </button>
                         {isAuthenticated && (
                           <>
-                            <div className="h-px bg-white/10" />
+                            <div className="h-px bg-foreground/10" />
                             <button
                               onClick={() => {
                                 setShowCalendarDropdown(false);
@@ -1351,7 +1351,7 @@ export default function EventClient({
                 )}
 
                 {/* Organizer - Desktop */}
-                <div className="mt-8 h-px bg-white/10" />
+                <div className="mt-8 h-px bg-foreground/10" />
                 <div className="py-6 flex items-center gap-3">
                   {event.owner?.user ? (
                     <Link
@@ -1373,7 +1373,7 @@ export default function EventClient({
                           className="rounded-full"
                         />
                       ) : (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground/10">
                           <User className="h-6 w-6 text-muted-foreground" />
                         </div>
                       )}
@@ -1392,7 +1392,7 @@ export default function EventClient({
                     </Link>
                   ) : (
                     <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground/10">
                         <User className="h-6 w-6 text-muted-foreground" />
                       </div>
                       <div>
@@ -1406,7 +1406,7 @@ export default function EventClient({
                     </div>
                   )}
                 </div>
-                <div className="h-px bg-white/10" />
+                <div className="h-px bg-foreground/10" />
               </div>
 
               {/* Invitation Banner */}
@@ -1554,7 +1554,7 @@ export default function EventClient({
                                   </p>
                                 </div>
                               </div>
-                              <div className="mt-3 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
+                              <div className="mt-3 pt-3 border-t border-foreground/10 flex flex-wrap items-center justify-between gap-2">
                                 <div className="flex flex-wrap items-center gap-2">
                                   <span
                                     className={getTicketStatusBadgeClasses(
@@ -2021,7 +2021,7 @@ export default function EventClient({
                     setShowReportModal(false);
                     setReportDescription("");
                   }}
-                  className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+                  className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground"
                 >
                   <X className="h-5 w-5" />
                 </button>
