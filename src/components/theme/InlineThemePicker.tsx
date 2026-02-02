@@ -11,7 +11,6 @@ import {
   LANDSCAPE_OPTIONS,
   PATTERN_OPTIONS,
   getPatternCSS,
-  parseColor,
 } from "@/lib/theme-presets";
 
 interface InlineThemePickerProps {
@@ -98,6 +97,48 @@ export default function InlineThemePicker({
     setStyleOpen(false);
   };
 
+  const renderStyleCircle = () => {
+    switch (theme.type) {
+      case "landscape": {
+        const img = LANDSCAPE_OPTIONS.find((o) => o.id === theme.image) ?? LANDSCAPE_OPTIONS[4];
+        return (
+          <Image
+            src={`/Landscape theme/${img.filename}`}
+            alt={img.name}
+            width={28}
+            height={28}
+            className="w-full h-full object-cover"
+          />
+        );
+      }
+      case "shader": {
+        const shader = SHADER_PRESETS.find((s) => s.id === theme.shaderPreset) ?? SHADER_PRESETS[0];
+        return (
+          <div
+            className="w-full h-full"
+            style={{ background: `linear-gradient(135deg, ${shader.color1}, ${shader.color2}, ${shader.color3})` }}
+          />
+        );
+      }
+      case "pattern": {
+        const patternCss = getPatternCSS(theme.pattern ?? "dots", currentPalette.palette);
+        return (
+          <div
+            className="w-full h-full"
+            style={{
+              backgroundColor: currentPalette.palette.pageBackground,
+              backgroundImage: patternCss,
+              backgroundRepeat: "repeat",
+              backgroundSize: "20px 20px",
+            }}
+          />
+        );
+      }
+      default:
+        return <div className="w-full h-full bg-foreground/10" />;
+    }
+  };
+
   const styleOptions = getStyleOptions();
   const hasStyleOptions = styleOptions.length > 0;
 
@@ -144,11 +185,7 @@ export default function InlineThemePicker({
         );
       }
       case "pattern": {
-        const { r, g, b } = parseColor(palette.palette.mainTextColor);
-        const patternCss = getPatternCSS(theme.pattern ?? "dots", {
-          ...palette.palette,
-          mainTextColor: `rgba(${r}, ${g}, ${b}, 1)`,
-        });
+        const patternCss = getPatternCSS(theme.pattern ?? "dots", palette.palette);
         return (
           <div
             className="w-full h-full rounded-lg"
@@ -276,7 +313,9 @@ export default function InlineThemePicker({
                 : "opacity-50 cursor-default"
             }`}
           >
-            <div className="h-7 w-7 rounded-full bg-foreground/10 shrink-0" />
+            <div className="h-7 w-7 rounded-full shrink-0 overflow-hidden">
+              {renderStyleCircle()}
+            </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground">Style</p>
               <p className="text-sm font-medium text-foreground truncate">

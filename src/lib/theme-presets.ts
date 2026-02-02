@@ -300,7 +300,7 @@ function darkenColor(r: number, g: number, b: number, amount: number, alpha: num
 /** Returns the CSS `background-image` value for a pattern */
 export function getPatternCSS(patternId: string, palette: ColorPalette): string {
   const { r, g, b } = parseColor(palette.pageBackground);
-  const patternColor = darkenColor(r, g, b, 0.45, 0.15);
+  const patternColor = darkenColor(r, g, b, 0.45, 0.25);
 
   let svg: string;
   switch (patternId) {
@@ -314,7 +314,7 @@ export function getPatternCSS(patternId: string, palette: ColorPalette): string 
       svg = generateStripes(patternColor);
       break;
     case "checkers": {
-      const bgColor = darkenColor(r, g, b, 0.88, 0.15);
+      const bgColor = darkenColor(r, g, b, 0.88, 0.25);
       svg = generateCheckers(patternColor, bgColor);
       break;
     }
