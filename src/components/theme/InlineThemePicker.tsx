@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { ChevronDown, Maximize2 } from "lucide-react";
+import { ChevronDown, Maximize2, Shuffle } from "lucide-react";
 import type { EventThemeConfig, BackgroundType } from "@/types/event/theme";
 import {
   ALL_PALETTES,
@@ -153,6 +153,29 @@ export default function InlineThemePicker({
     }
   };
 
+  const randomizeTheme = useCallback(() => {
+    const types: BackgroundType[] = ["solid", "landscape", "shader", "pattern"];
+    const type = types[Math.floor(Math.random() * types.length)];
+    const palette = ALL_PALETTES[Math.floor(Math.random() * ALL_PALETTES.length)];
+
+    const config: EventThemeConfig = { type, colorPalette: palette.id };
+
+    switch (type) {
+      case "landscape":
+        config.image = LANDSCAPE_OPTIONS[Math.floor(Math.random() * LANDSCAPE_OPTIONS.length)].id;
+        config.imageOpacity = 0.4;
+        break;
+      case "shader":
+        config.shaderPreset = SHADER_PRESETS[Math.floor(Math.random() * SHADER_PRESETS.length)].id;
+        break;
+      case "pattern":
+        config.pattern = PATTERN_OPTIONS[Math.floor(Math.random() * PATTERN_OPTIONS.length)].id;
+        break;
+    }
+
+    onChange(config);
+  }, [onChange]);
+
   const styleOptions = getStyleOptions();
   const hasStyleOptions = styleOptions.length > 0;
 
@@ -218,14 +241,24 @@ export default function InlineThemePicker({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-foreground">Appearance</h3>
-        <button
-          type="button"
-          onClick={onPreview}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <Maximize2 className="h-3.5 w-3.5" />
-          Preview
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={randomizeTheme}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Shuffle className="h-3.5 w-3.5" />
+            Randomize
+          </button>
+          <button
+            type="button"
+            onClick={onPreview}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Maximize2 className="h-3.5 w-3.5" />
+            Preview
+          </button>
+        </div>
       </div>
 
       {/* Type preview thumbnails */}
