@@ -32,6 +32,11 @@ const IconYouTube = ({ className }: { className?: string }) => (
 export default function Footer() {
   const pathname = usePathname();
   const isLanding = pathname === "/";
+  const hasBlurBg =
+    isLanding ||
+    pathname === "/event-creation" ||
+    /^\/event-management\/[^/]+\/edit$/.test(pathname) ||
+    /^\/events\/[^/]+$/.test(pathname);
 
   const textColor = isLanding ? "text-zinc-900" : "text-foreground";
   const mutedTextColor = isLanding ? "text-zinc-900/60" : "text-foreground/60";
@@ -42,7 +47,9 @@ export default function Footer() {
       className={
         isLanding
           ? "bg-white/10"
-          : "relative z-10 bg-white/10 backdrop-blur-xl"
+          : hasBlurBg
+            ? "relative z-10 bg-white/10 backdrop-blur-xl"
+            : "relative z-10 border-t border-white/10"
       }
     >
       <div className="mx-auto max-w-6xl px-6 py-8">
