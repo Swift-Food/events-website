@@ -574,7 +574,7 @@ export default function ThemePicker({
                 >
                   {/* Page 1: Monotone */}
                   <div ref={page0Ref} className="min-w-full snap-start px-4 lg:px-6">
-                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-4 lg:py-3 lg:gap-y-3 lg:gap-x-3">
+                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-4 sm:flex sm:flex-wrap sm:justify-center sm:gap-4 sm:py-3 lg:grid lg:grid-cols-4 lg:grid-rows-2 lg:py-3 lg:gap-y-3 lg:gap-x-3">
                       {SINGLE_COLOR_PALETTES.map((preset) => (
                         <button
                           key={preset.id}
@@ -613,7 +613,7 @@ export default function ThemePicker({
 
                   {/* Page 2: Themes */}
                   <div ref={page1Ref} className="min-w-full snap-start px-4 lg:px-6">
-                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-4 lg:py-3 lg:gap-y-3 lg:gap-x-3">
+                    <div className="grid grid-cols-4 grid-rows-2 gap-y-4 gap-x-4 py-4 sm:flex sm:flex-wrap sm:justify-center sm:gap-4 sm:py-3 lg:grid lg:grid-cols-4 lg:grid-rows-2 lg:py-3 lg:gap-y-3 lg:gap-x-3">
                       {MULTI_COLOR_PALETTES.map((preset) => (
                         <button
                           key={preset.id}
