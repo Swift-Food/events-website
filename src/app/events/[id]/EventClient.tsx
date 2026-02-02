@@ -705,7 +705,7 @@ export default function EventClient({
     <div className="relative z-10">
     {/* Management/Scanner Banner - Mobile */}
     {userRole && (
-     <div className="sm:hidden sticky top-4 z-[100] w-full px-4 animate-in slide-in-from-top-4 duration-700 ease-out">
+     <div className="sm:hidden sticky top-1 z-[100] w-full px-4 animate-in slide-in-from-top-4 duration-700 ease-out">
       <div className="relative group">
        <div className="relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-[24px] border border-foreground/10 shadow-[0_4px_16px_rgba(0,0,0,0.15)] flex items-center justify-between px-4 py-3">
         {/* Subtle Noise Overlay */}
@@ -752,7 +752,7 @@ export default function EventClient({
      </div>
     )}
 
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="mx-auto max-w-6xl px-6 py-4">
      {/* Management/Scanner Banner - Desktop */}
      {userRole && (
       <div className="hidden sm:block mb-6 relative group">
