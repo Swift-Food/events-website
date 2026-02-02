@@ -35,7 +35,8 @@ export default function ThemePicker({
   isOpen,
   onToggle,
 }: ThemePickerProps) {
-  const [palettePage, setPalettePage] = useState<0 | 1>(0);
+  const isMultiPage = MULTI_COLOR_PALETTES.some((p) => p.id === theme.colorPalette);
+  const [palettePage, setPalettePage] = useState<0 | 1>(isMultiPage ? 1 : 0);
   const [activeMobileTab, setActiveMobileTab] = useState<MobileTab>("base");
   const scrollRef = useRef<HTMLDivElement>(null);
   const page0Ref = useRef<HTMLDivElement>(null);
@@ -111,6 +112,17 @@ export default function ThemePicker({
   };
 
   const isPaletteDisabled = theme.type === "shader";
+
+  // Scroll to the correct palette page when the picker opens
+  useEffect(() => {
+    if (!isOpen) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const targetPage = MULTI_COLOR_PALETTES.some((p) => p.id === theme.colorPalette) ? 1 : 0;
+    // Instant scroll (no animation) so it appears already on the right page
+    el.scrollTo({ left: targetPage * el.clientWidth, behavior: "instant" });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   // Track which page is visible using IntersectionObserver
   useEffect(() => {
