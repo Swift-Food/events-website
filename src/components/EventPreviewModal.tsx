@@ -480,7 +480,7 @@ export default function EventPreviewModal({
               )}
 
               {/* Event Image */}
-              <div className="relative aspect-square w-3/5 mx-auto overflow-hidden rounded-2xl border border-neutral-700 bg-card-secondary-background mb-6">
+              <div className="relative aspect-square w-3/5 mx-auto overflow-hidden rounded-2xl bg-card-secondary-background mb-6">
                 {event.eventImage ? (
                   <Image
                     src={event.eventImage}
@@ -541,7 +541,7 @@ export default function EventPreviewModal({
               )}
 
               {/* Date & Time */}
-              <div className="rounded-xl border border-neutral-700 bg-card-background p-4 mb-4">
+              <div className="rounded-xl bg-card-background p-4 mb-4">
                 <div className="flex gap-4">
                   {isSameDay(event.startDateTime, event.endDateTime) ? (
                     <>
@@ -689,7 +689,7 @@ export default function EventPreviewModal({
               </div>
 
               {/* Location */}
-              <div className="rounded-xl border border-neutral-700 bg-card-background overflow-hidden mb-4">
+              <div className="rounded-xl bg-card-background overflow-hidden mb-4">
                 {isVirtualEvent(event.format) ? (
                   <div className="p-4">
                     <div className="h-32 w-full bg-primary/10 rounded-lg flex flex-col items-center justify-center gap-2 mb-4">
@@ -859,7 +859,7 @@ export default function EventPreviewModal({
                   const showClosedMessage = isEventEnded && !hasUserTicket;
 
                   return (
-                    <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 border border-neutral-700 mb-4">
+                    <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 mb-4">
                       <div className="flex items-center justify-between mb-3">
                         <h2 className="text-lg font-semibold text-foreground">
                           Tickets
@@ -1033,7 +1033,7 @@ export default function EventPreviewModal({
               {/* Organizer & Stats Row */}
               <div className="grid grid-cols-2 gap-4 mb-4">
                 {/* Organizer */}
-                <div className="rounded-xl border border-white/10 bg-card-background p-4">
+                <div className="rounded-xl bg-card-background p-4">
                   <p className="text-xs text-muted-foreground mb-2">Organized by</p>
                   {event.owner?.user ? (
                     <Link
@@ -1073,7 +1073,7 @@ export default function EventPreviewModal({
                 </div>
 
                 {/* Stats */}
-                <div className="rounded-xl border border-neutral-700 bg-card-background p-4">
+                <div className="rounded-xl bg-card-background p-4">
                   <p className="text-xs text-muted-foreground mb-2">Stats</p>
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-sm">
