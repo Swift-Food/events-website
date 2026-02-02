@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
@@ -30,7 +30,6 @@ import Link from "next/link";
 import Image from "next/image";
 import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
-import { resolveTheme } from "@/lib/theme-presets";
 import PaymentModal, { PaymentSuccessModal } from "@/components/payments/PaymentModal";
 import ExternalLinkConfirmModal from "@/components/ExternalLinkConfirmModal";
 import RegistrationConfirmModal from "@/components/RegistrationConfirmModal";
@@ -107,19 +106,8 @@ export default function EventPreviewModal({
   // Animation state
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // Resolve event theme for modal background
-  const modalBackground = useMemo(() => {
-    const defaultGradient = "linear-gradient(to bottom, #41296e 0%, #000000 15%)";
-    if (!event?.eventTheme) return defaultGradient;
-    try {
-      const config = JSON.parse(event.eventTheme);
-      if (config.type === "solid" && config.colorPalette && config.colorPalette !== "default") {
-        const { palette } = resolveTheme(config);
-        return palette.pageBackground;
-      }
-    } catch {}
-    return defaultGradient;
-  }, [event?.eventTheme]);
+  // Modal always uses the default purple-black gradient regardless of event theme
+  const modalBackground = "linear-gradient(to bottom, #41296e 0%, #000000 15%)";
 
   // Registration confirmation modal state
   const [showConfirmModal, setShowConfirmModal] = useState(false);

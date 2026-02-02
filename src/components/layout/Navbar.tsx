@@ -15,6 +15,7 @@ import {
   CalendarPlus,
   ChartNoAxesGantt,
   Search,
+  Compass,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth/authContext";
 import { useSearchModal } from "@/components/search/SearchModalContext";
@@ -143,6 +144,13 @@ export default function Navbar() {
 
             {/* Mobile Icon Navigation */}
             <nav className="flex gap-1 sm:hidden">
+              <Link
+                href="/discover"
+                className={`flex h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg}`}
+                aria-label="Discover"
+              >
+                <Compass className="h-5 w-5" />
+              </Link>
               <Link
                 href="/my-tickets"
                 onClick={(e) => handleProtectedNavClick(e, "/my-tickets", true)}
