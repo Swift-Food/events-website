@@ -25,6 +25,7 @@ export interface CreateEventDto {
   description: string;
   eventImage?: string;
   eventColor?: string;
+  eventTheme?: string; // JSON-stringified EventThemeConfig
   ownerEventUserId: string;
   startDateTime: Date | string;
   endDateTime: Date | string;
@@ -53,6 +54,7 @@ export interface UpdateEventDto {
   description?: string;
   eventImage?: string;
   eventColor?: string;
+  eventTheme?: string; // JSON-stringified EventThemeConfig
   ownerEventUserId?: string;
   startDateTime?: Date | string;
   endDateTime?: Date | string;

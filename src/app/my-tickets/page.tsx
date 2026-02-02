@@ -7,19 +7,19 @@ import { useAuth } from "@/lib/auth/authContext";
 import { guestTicketService } from "@/services/guest-ticket.service";
 import { paymentService } from "@/services/payment.service";
 import {
-  GuestTicketWithEventResponseDto,
-  GuestTicketStatus,
+ GuestTicketWithEventResponseDto,
+ GuestTicketStatus,
 } from "@/types/guest-ticket";
 import type { PaymentFlowState } from "@/types/payment";
 import { TicketCard } from "@/components/tickets";
 import PaymentModal, {
-  PaymentSuccessModal,
+ PaymentSuccessModal,
 } from "@/components/payments/PaymentModal";
 import {
-  Ticket,
-  CheckCircle2,
-  Clock,
-  Loader2,
+ Ticket,
+ CheckCircle2,
+ Clock,
+ Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -27,416 +27,416 @@ import Link from "next/link";
 type FilterType = "all" | "upcoming" | "checked_in" | "active" | "pending" | "cancelled";
 
 function MyTicketsContent() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const highlightTicketId = searchParams.get("ticketId");
+ const { isAuthenticated, isLoading: authLoading } = useAuth();
+ const router = useRouter();
+ const searchParams = useSearchParams();
+ const highlightTicketId = searchParams.get("ticketId");
 
-  const [tickets, setTickets] = useState<GuestTicketWithEventResponseDto[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterType>("active");
-  const [refundingTicketId, setRefundingTicketId] = useState<string | null>(
-    null
-  );
-  const [cancellingTicketId, setCancellingTicketId] = useState<string | null>(
-    null
-  );
-  const [leavingWaitlistTicketId, setLeavingWaitlistTicketId] = useState<string | null>(
-    null
-  );
+ const [tickets, setTickets] = useState<GuestTicketWithEventResponseDto[]>([]);
+ const [isLoading, setIsLoading] = useState(true);
+ const [filter, setFilter] = useState<FilterType>("active");
+ const [refundingTicketId, setRefundingTicketId] = useState<string | null>(
+  null
+ );
+ const [cancellingTicketId, setCancellingTicketId] = useState<string | null>(
+  null
+ );
+ const [leavingWaitlistTicketId, setLeavingWaitlistTicketId] = useState<string | null>(
+  null
+ );
 
-  // Payment state
-  const [processingPaymentTicketId, setProcessingPaymentTicketId] = useState<
-    string | null
-  >(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [paymentData, setPaymentData] = useState<PaymentFlowState | null>(null);
-  const [successTicketDetails, setSuccessTicketDetails] = useState<{
-    ticketName: string;
-    eventName: string;
-  } | null>(null);
+ // Payment state
+ const [processingPaymentTicketId, setProcessingPaymentTicketId] = useState<
+  string | null
+ >(null);
+ const [showPaymentModal, setShowPaymentModal] = useState(false);
+ const [showSuccessModal, setShowSuccessModal] = useState(false);
+ const [paymentData, setPaymentData] = useState<PaymentFlowState | null>(null);
+ const [successTicketDetails, setSuccessTicketDetails] = useState<{
+  ticketName: string;
+  eventName: string;
+ } | null>(null);
 
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push("/auth");
-    }
-  }, [authLoading, isAuthenticated, router]);
+ useEffect(() => {
+  if (!authLoading && !isAuthenticated) {
+   router.push("/auth");
+  }
+ }, [authLoading, isAuthenticated, router]);
 
-  useEffect(() => {
-    const fetchTickets = async () => {
-      if (!isAuthenticated) return;
+ useEffect(() => {
+  const fetchTickets = async () => {
+   if (!isAuthenticated) return;
 
-      try {
-        setIsLoading(true);
-        const response = await guestTicketService.getMyTickets();
-        setTickets(response.tickets);
-      } catch (error) {
-        console.error("Failed to fetch tickets:", error);
-        toast.error("Failed to load your tickets");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTickets();
-  }, [isAuthenticated]);
-
-  const handleRefund = async (ticketId: string) => {
-    try {
-      setRefundingTicketId(ticketId);
-
-      // Check eligibility
-      const eligibility = await guestTicketService.checkRefundEligibility(
-        ticketId
-      );
-
-      if (!eligibility.eligible) {
-        toast.error(
-          eligibility.reason || "This ticket is not eligible for refund"
-        );
-        return;
-      }
-
-      // Process refund
-      const result = await guestTicketService.refundTicket(ticketId, {
-        reason: "User requested refund",
-      });
-
-      if (result.success) {
-        toast.success(
-          result.message ||
-            `Refund of £${eligibility.refundAmount?.toFixed(2) || "0.00"} processed successfully`
-        );
-        // Update ticket status locally
-        setTickets((prev) =>
-          prev.map((t) =>
-            t.id === ticketId ? { ...t, status: GuestTicketStatus.REFUNDED } : t
-          )
-        );
-      } else {
-        toast.error(result.message || "Failed to process refund");
-      }
-    } catch (error: any) {
-      console.error("Refund failed:", error);
-      toast.error(error.response?.data?.message || "Failed to process refund");
-    } finally {
-      setRefundingTicketId(null);
-    }
+   try {
+    setIsLoading(true);
+    const response = await guestTicketService.getMyTickets();
+    setTickets(response.tickets);
+   } catch (error) {
+    console.error("Failed to fetch tickets:", error);
+    toast.error("Failed to load your tickets");
+   } finally {
+    setIsLoading(false);
+   }
   };
 
-  const handleCancel = async (ticketId: string) => {
-    try {
-      setCancellingTicketId(ticketId);
-      const result = await guestTicketService.cancelTicket(ticketId);
+  fetchTickets();
+ }, [isAuthenticated]);
 
-      if (result.success) {
-        toast.success(result.message || "Ticket cancelled successfully");
-        // Update ticket status locally
-        setTickets((prev) =>
-          prev.map((t) =>
-            t.id === ticketId ? { ...t, status: GuestTicketStatus.CANCELLED } : t
-          )
-        );
-      } else {
-        toast.error(result.message || "Failed to cancel ticket");
-      }
-    } catch (error: any) {
-      console.error("Cancel failed:", error);
-      toast.error(error.response?.data?.message || "Failed to cancel ticket");
-    } finally {
-      setCancellingTicketId(null);
-    }
-  };
+ const handleRefund = async (ticketId: string) => {
+  try {
+   setRefundingTicketId(ticketId);
 
-  const handleLeaveWaitlist = async (ticketId: string) => {
-    try {
-      setLeavingWaitlistTicketId(ticketId);
-      const result = await guestTicketService.leaveWaitlist(ticketId);
+   // Check eligibility
+   const eligibility = await guestTicketService.checkRefundEligibility(
+    ticketId
+   );
 
-      if (result.success) {
-        toast.success(result.message || "You have left the waitlist");
-        // Remove ticket from list
-        setTickets((prev) => prev.filter((t) => t.id !== ticketId));
-      } else {
-        toast.error(result.message || "Failed to leave waitlist");
-      }
-    } catch (error: any) {
-      console.error("Leave waitlist failed:", error);
-      toast.error(error.response?.data?.message || "Failed to leave waitlist");
-    } finally {
-      setLeavingWaitlistTicketId(null);
-    }
-  };
-
-  const handleCompletePayment = async (ticketId: string) => {
-    const ticket = tickets.find((t) => t.id === ticketId);
-    if (!ticket) {
-      toast.error("Ticket not found");
-      return;
-    }
-
-    try {
-      setProcessingPaymentTicketId(ticketId);
-      const paymentResponse = await paymentService.createTicketPaymentIntent(
-        ticketId
-      );
-
-      if (paymentResponse.success && paymentResponse.clientSecret) {
-        setPaymentData({
-          clientSecret: paymentResponse.clientSecret,
-          amount: paymentResponse.amount || 0,
-          currency: paymentResponse.currency || "gbp",
-          ticketDetails: paymentResponse.ticketDetails || {
-            ticketName: ticket.ticketName,
-            eventName: ticket.eventName,
-            price: 0,
-          },
-          guestTicketId: ticketId,
-        });
-        setShowPaymentModal(true);
-      } else {
-        throw new Error(paymentResponse.error || "Failed to create payment");
-      }
-    } catch (error: any) {
-      console.error("Payment setup failed:", error);
-      toast.error(
-        error.response?.data?.message ||
-          "Failed to setup payment. Please try again."
-      );
-    } finally {
-      setProcessingPaymentTicketId(null);
-    }
-  };
-
-  const handlePaymentSuccess = async () => {
-    setShowPaymentModal(false);
-
-    // Confirm payment with backend (backup to webhooks)
-    // This ensures the ticket is activated even if webhook is slow/fails
-    if (paymentData?.guestTicketId) {
-      try {
-        await paymentService.confirmTicketPayment(paymentData.guestTicketId);
-      } catch (error) {
-        // Log but don't fail - webhook should handle it
-        console.error("Failed to confirm payment with backend:", error);
-      }
-
-      // Update ticket status locally
-      setTickets((prev) =>
-        prev.map((t) =>
-          t.id === paymentData.guestTicketId
-            ? { ...t, status: GuestTicketStatus.ACTIVE }
-            : t
-        )
-      );
-    }
-
-    if (paymentData) {
-      setSuccessTicketDetails({
-        ticketName: paymentData.ticketDetails.ticketName,
-        eventName: paymentData.ticketDetails.eventName,
-      });
-    }
-    setShowSuccessModal(true);
-    setPaymentData(null);
-  };
-
-  const handlePaymentClose = () => {
-    setShowPaymentModal(false);
-    setPaymentData(null);
-    toast.info("Payment cancelled. You can try again later.");
-  };
-
-  const handleSuccessClose = () => {
-    setShowSuccessModal(false);
-    setSuccessTicketDetails(null);
-  };
-
-  const now = new Date();
-
-  const filteredTickets = tickets
-    .filter((ticket) => {
-      const eventDate = new Date(ticket.eventStartDateTime);
-      const isUpcoming = eventDate > now;
-
-      switch (filter) {
-        case "upcoming":
-          return (
-            isUpcoming &&
-            ticket.status !== GuestTicketStatus.CANCELLED &&
-            ticket.status !== GuestTicketStatus.REFUNDED
-          );
-        case "checked_in":
-          return ticket.status === GuestTicketStatus.CHECKED_IN;
-        case "active":
-          const eventEndDate = new Date(ticket.eventEndDateTime);
-          const hasEnded = eventEndDate < now;
-          return ticket.status === GuestTicketStatus.ACTIVE && !hasEnded;
-        case "pending":
-          return (
-            ticket.status === GuestTicketStatus.PENDING_APPROVAL ||
-            ticket.status === GuestTicketStatus.PENDING_PAYMENT ||
-            ticket.status === GuestTicketStatus.WAITLISTED
-          );
-        case "cancelled":
-          return (
-            ticket.status === GuestTicketStatus.CANCELLED ||
-            ticket.status === GuestTicketStatus.REFUNDED
-          );
-        default:
-          return true;
-      }
-    })
-    .sort((a, b) => {
-      const dateA = new Date(a.eventStartDateTime).getTime();
-      const dateB = new Date(b.eventStartDateTime).getTime();
-      // Ascending for active/pending/upcoming, descending for past/all
-      if (filter === "active" || filter === "pending" || filter === "upcoming") {
-        return dateA - dateB;
-      }
-      return dateB - dateA;
-    });
-
-  const filters: { id: FilterType; label: string; icon: React.ReactNode }[] = [
-    {
-      id: "active",
-      label: "Active",
-      icon: <CheckCircle2 className="h-4 w-4" />,
-    },
-    { id: "pending", label: "Pending", icon: <Clock className="h-4 w-4" /> },
-    { id: "cancelled", label: "Cancelled", icon: <Ticket className="h-4 w-4" /> },
-    { id: "checked_in", label: "Checked In", icon: <CheckCircle2 className="h-4 w-4" /> },
-    { id: "all", label: "All", icon: <Ticket className="h-4 w-4" /> },
-  ];
-
-  if (authLoading) {
-    return (
-      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+   if (!eligibility.eligible) {
+    toast.error(
+     eligibility.reason || "This ticket is not eligible for refund"
     );
+    return;
+   }
+
+   // Process refund
+   const result = await guestTicketService.refundTicket(ticketId, {
+    reason: "User requested refund",
+   });
+
+   if (result.success) {
+    toast.success(
+     result.message ||
+      `Refund of £${eligibility.refundAmount?.toFixed(2) || "0.00"} processed successfully`
+    );
+    // Update ticket status locally
+    setTickets((prev) =>
+     prev.map((t) =>
+      t.id === ticketId ? { ...t, status: GuestTicketStatus.REFUNDED } : t
+     )
+    );
+   } else {
+    toast.error(result.message || "Failed to process refund");
+   }
+  } catch (error: any) {
+   console.error("Refund failed:", error);
+   toast.error(error.response?.data?.message || "Failed to process refund");
+  } finally {
+   setRefundingTicketId(null);
+  }
+ };
+
+ const handleCancel = async (ticketId: string) => {
+  try {
+   setCancellingTicketId(ticketId);
+   const result = await guestTicketService.cancelTicket(ticketId);
+
+   if (result.success) {
+    toast.success(result.message || "Ticket cancelled successfully");
+    // Update ticket status locally
+    setTickets((prev) =>
+     prev.map((t) =>
+      t.id === ticketId ? { ...t, status: GuestTicketStatus.CANCELLED } : t
+     )
+    );
+   } else {
+    toast.error(result.message || "Failed to cancel ticket");
+   }
+  } catch (error: any) {
+   console.error("Cancel failed:", error);
+   toast.error(error.response?.data?.message || "Failed to cancel ticket");
+  } finally {
+   setCancellingTicketId(null);
+  }
+ };
+
+ const handleLeaveWaitlist = async (ticketId: string) => {
+  try {
+   setLeavingWaitlistTicketId(ticketId);
+   const result = await guestTicketService.leaveWaitlist(ticketId);
+
+   if (result.success) {
+    toast.success(result.message || "You have left the waitlist");
+    // Remove ticket from list
+    setTickets((prev) => prev.filter((t) => t.id !== ticketId));
+   } else {
+    toast.error(result.message || "Failed to leave waitlist");
+   }
+  } catch (error: any) {
+   console.error("Leave waitlist failed:", error);
+   toast.error(error.response?.data?.message || "Failed to leave waitlist");
+  } finally {
+   setLeavingWaitlistTicketId(null);
+  }
+ };
+
+ const handleCompletePayment = async (ticketId: string) => {
+  const ticket = tickets.find((t) => t.id === ticketId);
+  if (!ticket) {
+   toast.error("Ticket not found");
+   return;
   }
 
-  if (!isAuthenticated) {
-    return null;
+  try {
+   setProcessingPaymentTicketId(ticketId);
+   const paymentResponse = await paymentService.createTicketPaymentIntent(
+    ticketId
+   );
+
+   if (paymentResponse.success && paymentResponse.clientSecret) {
+    setPaymentData({
+     clientSecret: paymentResponse.clientSecret,
+     amount: paymentResponse.amount || 0,
+     currency: paymentResponse.currency || "gbp",
+     ticketDetails: paymentResponse.ticketDetails || {
+      ticketName: ticket.ticketName,
+      eventName: ticket.eventName,
+      price: 0,
+     },
+     guestTicketId: ticketId,
+    });
+    setShowPaymentModal(true);
+   } else {
+    throw new Error(paymentResponse.error || "Failed to create payment");
+   }
+  } catch (error: any) {
+   console.error("Payment setup failed:", error);
+   toast.error(
+    error.response?.data?.message ||
+     "Failed to setup payment. Please try again."
+   );
+  } finally {
+   setProcessingPaymentTicketId(null);
+  }
+ };
+
+ const handlePaymentSuccess = async () => {
+  setShowPaymentModal(false);
+
+  // Confirm payment with backend (backup to webhooks)
+  // This ensures the ticket is activated even if webhook is slow/fails
+  if (paymentData?.guestTicketId) {
+   try {
+    await paymentService.confirmTicketPayment(paymentData.guestTicketId);
+   } catch (error) {
+    // Log but don't fail - webhook should handle it
+    console.error("Failed to confirm payment with backend:", error);
+   }
+
+   // Update ticket status locally
+   setTickets((prev) =>
+    prev.map((t) =>
+     t.id === paymentData.guestTicketId
+      ? { ...t, status: GuestTicketStatus.ACTIVE }
+      : t
+    )
+   );
   }
 
+  if (paymentData) {
+   setSuccessTicketDetails({
+    ticketName: paymentData.ticketDetails.ticketName,
+    eventName: paymentData.ticketDetails.eventName,
+   });
+  }
+  setShowSuccessModal(true);
+  setPaymentData(null);
+ };
+
+ const handlePaymentClose = () => {
+  setShowPaymentModal(false);
+  setPaymentData(null);
+  toast.info("Payment cancelled. You can try again later.");
+ };
+
+ const handleSuccessClose = () => {
+  setShowSuccessModal(false);
+  setSuccessTicketDetails(null);
+ };
+
+ const now = new Date();
+
+ const filteredTickets = tickets
+  .filter((ticket) => {
+   const eventDate = new Date(ticket.eventStartDateTime);
+   const isUpcoming = eventDate > now;
+
+   switch (filter) {
+    case "upcoming":
+     return (
+      isUpcoming &&
+      ticket.status !== GuestTicketStatus.CANCELLED &&
+      ticket.status !== GuestTicketStatus.REFUNDED
+     );
+    case "checked_in":
+     return ticket.status === GuestTicketStatus.CHECKED_IN;
+    case "active":
+     const eventEndDate = new Date(ticket.eventEndDateTime);
+     const hasEnded = eventEndDate < now;
+     return ticket.status === GuestTicketStatus.ACTIVE && !hasEnded;
+    case "pending":
+     return (
+      ticket.status === GuestTicketStatus.PENDING_APPROVAL ||
+      ticket.status === GuestTicketStatus.PENDING_PAYMENT ||
+      ticket.status === GuestTicketStatus.WAITLISTED
+     );
+    case "cancelled":
+     return (
+      ticket.status === GuestTicketStatus.CANCELLED ||
+      ticket.status === GuestTicketStatus.REFUNDED
+     );
+    default:
+     return true;
+   }
+  })
+  .sort((a, b) => {
+   const dateA = new Date(a.eventStartDateTime).getTime();
+   const dateB = new Date(b.eventStartDateTime).getTime();
+   // Ascending for active/pending/upcoming, descending for past/all
+   if (filter === "active" || filter === "pending" || filter === "upcoming") {
+    return dateA - dateB;
+   }
+   return dateB - dateA;
+  });
+
+ const filters: { id: FilterType; label: string; icon: React.ReactNode }[] = [
+  {
+   id: "active",
+   label: "Active",
+   icon: <CheckCircle2 className="h-4 w-4" />,
+  },
+  { id: "pending", label: "Pending", icon: <Clock className="h-4 w-4" /> },
+  { id: "cancelled", label: "Cancelled", icon: <Ticket className="h-4 w-4" /> },
+  { id: "checked_in", label: "Checked In", icon: <CheckCircle2 className="h-4 w-4" /> },
+  { id: "all", label: "All", icon: <Ticket className="h-4 w-4" /> },
+ ];
+
+ if (authLoading) {
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-background">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          {/* <Link
-            href="/profile"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Profile
-          </Link> */}
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">My Tickets</h1>
-          <p className="text-muted-foreground text-md mt-2">
-            View and manage your event tickets
-          </p>
-        </div>
-
-        {/* Filters */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {filters.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setFilter(f.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                filter === f.id
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-card-background text-muted-foreground hover:text-foreground hover:bg-card-secondary-background"
-              }`}
-            >
-              {f.icon}
-              {f.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Tickets Grid */}
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : filteredTickets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="rounded-full bg-card-secondary-background p-4 text-muted-foreground mb-4">
-              <Ticket className="h-12 w-12"/>
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              No tickets found
-            </h3>
-            <p className="text-muted-foreground mb-6 max-w-sm">
-              {filter === "upcoming"
-                ? "You don't have any upcoming tickets. Browse events to find something exciting!"
-                : "No tickets match this filter."}
-            </p>
-            <Link
-              href="/events"
-              className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90"
-            >
-              Browse Events
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTickets.map((ticket) => (
-              <TicketCard
-                key={ticket.id}
-                ticket={ticket}
-                onRefund={handleRefund}
-                isRefunding={refundingTicketId === ticket.id}
-                onCompletePayment={handleCompletePayment}
-                isProcessingPayment={processingPaymentTicketId === ticket.id}
-                onCancel={handleCancel}
-                isCancelling={cancellingTicketId === ticket.id}
-                onLeaveWaitlist={handleLeaveWaitlist}
-                isLeavingWaitlist={leavingWaitlistTicketId === ticket.id}
-                autoShowQR={ticket.id === highlightTicketId}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Payment Modal */}
-      {showPaymentModal && paymentData && (
-        <PaymentModal
-          isOpen={showPaymentModal}
-          onClose={handlePaymentClose}
-          onSuccess={handlePaymentSuccess}
-          clientSecret={paymentData.clientSecret}
-          ticketDetails={paymentData.ticketDetails}
-          amount={paymentData.amount}
-          currency={paymentData.currency}
-        />
-      )}
-
-      {/* Payment Success Modal */}
-      {showSuccessModal && successTicketDetails && (
-        <PaymentSuccessModal
-          isOpen={showSuccessModal}
-          onClose={handleSuccessClose}
-          ticketDetails={successTicketDetails}
-        />
-      )}
-    </div>
+   <div className="flex min-h-[calc(100vh-64px)] items-center justify-center ">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+   </div>
   );
+ }
+
+ if (!isAuthenticated) {
+  return null;
+ }
+
+ return (
+  <div className="min-h-[calc(100vh-64px)] ">
+   <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    {/* Header */}
+    <div className="mb-8">
+     {/* <Link
+      href="/profile"
+      className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors"
+     >
+      <ArrowLeft className="h-4 w-4" />
+      Back to Profile
+     </Link> */}
+     <h1 className="text-xl sm:text-2xl font-bold text-foreground">My Tickets</h1>
+     <p className="text-muted-foreground text-md mt-2">
+      View and manage your event tickets
+     </p>
+    </div>
+
+    {/* Filters */}
+    <div className="flex flex-wrap gap-2 mb-6">
+     {filters.map((f) => (
+      <button
+       key={f.id}
+       onClick={() => setFilter(f.id)}
+       className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+        filter === f.id
+         ? "bg-primary text-primary-foreground"
+         : "bg-card-background text-muted-foreground hover:text-foreground hover:bg-card-secondary-background"
+       }`}
+      >
+       {f.icon}
+       {f.label}
+      </button>
+     ))}
+    </div>
+
+    {/* Tickets Grid */}
+    {isLoading ? (
+     <div className="flex items-center justify-center py-20">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+     </div>
+    ) : filteredTickets.length === 0 ? (
+     <div className="flex flex-col items-center justify-center py-20 text-center">
+      <div className="rounded-full bg-card-secondary-background p-4 text-muted-foreground mb-4">
+       <Ticket className="h-12 w-12"/>
+      </div>
+      <h3 className="text-lg font-semibold text-foreground mb-2">
+       No tickets found
+      </h3>
+      <p className="text-muted-foreground mb-6 max-w-sm">
+       {filter === "upcoming"
+        ? "You don't have any upcoming tickets. Browse events to find something exciting!"
+        : "No tickets match this filter."}
+      </p>
+      <Link
+       href="/events"
+       className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90"
+      >
+       Browse Events
+      </Link>
+     </div>
+    ) : (
+     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {filteredTickets.map((ticket) => (
+       <TicketCard
+        key={ticket.id}
+        ticket={ticket}
+        onRefund={handleRefund}
+        isRefunding={refundingTicketId === ticket.id}
+        onCompletePayment={handleCompletePayment}
+        isProcessingPayment={processingPaymentTicketId === ticket.id}
+        onCancel={handleCancel}
+        isCancelling={cancellingTicketId === ticket.id}
+        onLeaveWaitlist={handleLeaveWaitlist}
+        isLeavingWaitlist={leavingWaitlistTicketId === ticket.id}
+        autoShowQR={ticket.id === highlightTicketId}
+       />
+      ))}
+     </div>
+    )}
+   </div>
+
+   {/* Payment Modal */}
+   {showPaymentModal && paymentData && (
+    <PaymentModal
+     isOpen={showPaymentModal}
+     onClose={handlePaymentClose}
+     onSuccess={handlePaymentSuccess}
+     clientSecret={paymentData.clientSecret}
+     ticketDetails={paymentData.ticketDetails}
+     amount={paymentData.amount}
+     currency={paymentData.currency}
+    />
+   )}
+
+   {/* Payment Success Modal */}
+   {showSuccessModal && successTicketDetails && (
+    <PaymentSuccessModal
+     isOpen={showSuccessModal}
+     onClose={handleSuccessClose}
+     ticketDetails={successTicketDetails}
+    />
+   )}
+  </div>
+ );
 }
 
 export default function MyTicketsPage() {
-  return (
-    <Suspense fallback={
-      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    }>
-      <MyTicketsContent />
-    </Suspense>
-  );
+ return (
+  <Suspense fallback={
+   <div className="flex min-h-[calc(100vh-64px)] items-center justify-center ">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+   </div>
+  }>
+   <MyTicketsContent />
+  </Suspense>
+ );
 }

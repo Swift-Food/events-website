@@ -1,9 +1,20 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import type { authApi as AuthApiType } from "./authApi";
 
+// Use proxy in browser to avoid CORS when accessing via local network IP
+const getBaseURL = () => {
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (host !== "localhost" && host !== "127.0.0.1") {
+      return "/api/proxy";
+    }
+  }
+  return process.env.NEXT_PUBLIC_API_URL;
+};
+
 // Create axios instance
 export const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: getBaseURL(),
   headers: {
     "Content-Type": "application/json",
   },

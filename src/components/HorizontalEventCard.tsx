@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Calendar, Clock, MapPin, Ticket, Video, Lock } from "lucide-react";
 import { EventResponseDto } from "@/types/event";
 import {
@@ -8,6 +8,8 @@ import {
   isHybridEvent,
   hasOnlineComponent,
 } from "@/types/event/status";
+import { resolveTheme } from "@/lib/theme-presets";
+import type { EventThemeConfig } from "@/types/event/theme";
 
 interface HorizontalEventCardProps {
   event: EventResponseDto;
@@ -24,6 +26,16 @@ export default function HorizontalEventCard({
   showCategories = true,
   onClick,
 }: HorizontalEventCardProps) {
+  const themePalette = useMemo(() => {
+    if (!event.eventTheme) return null;
+    try {
+      const config: EventThemeConfig = JSON.parse(event.eventTheme);
+      return resolveTheme(config).palette;
+    } catch {
+      return null;
+    }
+  }, [event.eventTheme]);
+
   const formatTime = (date: string | Date) => {
     return new Date(date).toLocaleTimeString("en-US", {
       hour: "numeric",
@@ -212,9 +224,9 @@ export default function HorizontalEventCard({
         ) : (
           <div
             className="flex h-full items-center justify-center"
-            style={{ backgroundColor: event.eventColor }}
+            style={{ backgroundColor: themePalette?.pageBackground ?? event.eventColor }}
           >
-            <Calendar className="h-8 w-8 text-white/50" />
+            <Calendar className="h-8 w-8" style={{ color: themePalette?.subTextColor ?? "rgba(255,255,255,0.5)" }} />
           </div>
         )}
       </div>

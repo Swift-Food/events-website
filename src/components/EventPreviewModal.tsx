@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
@@ -30,6 +30,8 @@ import Link from "next/link";
 import Image from "next/image";
 import GoogleMap from "@/components/GoogleMap";
 import { toast } from "sonner";
+import { resolveTheme } from "@/lib/theme-presets";
+import type { EventThemeConfig } from "@/types/event/theme";
 import PaymentModal, { PaymentSuccessModal } from "@/components/payments/PaymentModal";
 import ExternalLinkConfirmModal from "@/components/ExternalLinkConfirmModal";
 import RegistrationConfirmModal from "@/components/RegistrationConfirmModal";
@@ -105,6 +107,20 @@ export default function EventPreviewModal({
 
   // Animation state
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Modal always uses the default purple-black gradient regardless of event theme
+  const modalBackground = "linear-gradient(to bottom, #41296e 0%, #000000 15%)";
+
+  // Resolve event theme palette for placeholder image background
+  const themePalette = useMemo(() => {
+    if (!event?.eventTheme) return null;
+    try {
+      const config: EventThemeConfig = JSON.parse(event.eventTheme);
+      return resolveTheme(config).palette;
+    } catch {
+      return null;
+    }
+  }, [event?.eventTheme]);
 
   // Registration confirmation modal state
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -370,19 +386,11 @@ export default function EventPreviewModal({
 
   if (!isOpen) return null;
 
-  const statusColors = {
-    [EventStatus.PUBLISHED]: "bg-green-500/20 text-green-400 border-green-500/30",
-    [EventStatus.DRAFT]: "bg-gray-500/20 text-gray-400 border-gray-500/30",
-    [EventStatus.ONGOING]: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-    [EventStatus.CANCELLED]: "bg-red-500/20 text-red-400 border-red-500/30",
-    [EventStatus.COMPLETED]: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  };
-
   return (
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`fixed inset-0 z-50 bg-white/5 backdrop-blur-sm transition-opacity duration-300 ${
           isAnimating ? "opacity-100" : "opacity-0"
         }`}
         onClick={handleClose}
@@ -390,7 +398,8 @@ export default function EventPreviewModal({
 
       {/* Modal - Desktop: slide from right, Mobile: slide from bottom */}
       <div
-        className={`fixed z-50 bg-background shadow-2xl overflow-hidden transition-transform duration-300 ease-out
+        style={{ background: modalBackground }}
+        className={`fixed z-50 shadow-2xl overflow-hidden transition-transform duration-300 ease-out
           /* Mobile: bottom sheet */
           inset-x-0 bottom-0 top-16 rounded-t-3xl
           /* Desktop: right slide-out */
@@ -401,7 +410,7 @@ export default function EventPreviewModal({
           }`}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-background px-4 py-3 sm:px-6 sm:py-4">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-6 sm:py-4 backdrop-blur-md">
           <button
             onClick={handleViewFullPage}
             className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
@@ -483,23 +492,9 @@ export default function EventPreviewModal({
                 ) : (
                   <div
                     className="flex h-full items-center justify-center"
-                    style={{ backgroundColor: event.eventColor || "#3b82f6" }}
+                    style={{ backgroundColor: themePalette?.pageBackground ?? event.eventColor }}
                   >
-                    <Calendar className="h-16 w-16 text-white/30" />
-                  </div>
-                )}
-
-                {/* Status Badge - only for collaborators */}
-                {userRole && (
-                  <div className="absolute right-4 top-4">
-                    <span
-                      className={`rounded-full border px-3 py-1.5 text-xs font-semibold backdrop-blur-md ${
-                        statusColors[event.status] ||
-                        "bg-gray-500/20 text-gray-400 border-gray-500/30"
-                      }`}
-                    >
-                      {event.status || "Unknown"}
-                    </span>
+                    <Calendar className="h-16 w-16" style={{ color: themePalette?.subTextColor ?? "rgba(255,255,255,0.3)" }} />
                   </div>
                 )}
               </div>

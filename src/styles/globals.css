@@ -39,7 +39,7 @@
 @theme {
   --color-background: #222222;
   --color-foreground: #ededed;
-  --color-card-background: #2a2a2a;
+  --color-card-background: #111111;
   --color-input-background: #333333;
   --color-card-secondary-background: #333333;
   --color-primary: #3b82f6;
@@ -55,6 +55,12 @@
   --font-sans: var(--font-inter), sans-serif;
   --font-heading: var(--font-satoshi), sans-serif;
   --font-mono: var(--font-geist-mono);
+}
+
+html, body {
+  overscroll-behavior: none;
+  overflow: hidden;
+  height: 100%;
 }
 
 body {
@@ -467,4 +473,26 @@ input[type="datetime-local"] {
 
 .landing-feature-card:hover::after {
   width: 100%;
+}
+
+/* Dark scrollbar for dark panels/modals */
+.scrollbar-dark {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.05);
+}
+.scrollbar-dark::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-dark::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+.scrollbar-dark::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+.scrollbar-dark::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.45);
 }

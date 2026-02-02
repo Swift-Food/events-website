@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { EventResponseDto, EventStatus } from "@/types";
+import { resolveTheme } from "@/lib/theme-presets";
+import type { EventThemeConfig } from "@/types/event/theme";
 import { MapPin, Edit, Users, ImageIcon, ScanLine, Trash2, Calendar, Eye, EyeOff, AlertTriangle, Loader2, CreditCard, Video, UserPlus, Link2, Copy, Check, Pencil, X } from "lucide-react";
 import { isVirtualEvent, isHybridEvent } from "@/types/event/status";
 import { GuestTicketResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
@@ -40,6 +42,15 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
   const canViewStats = userRole === "owner" || userRole === "admin";
   const canPublish = userRole === "owner" || userRole === "admin";
   const isPublished = eventData.status === EventStatus.PUBLISHED;
+  const themePalette = useMemo(() => {
+    if (!eventData.eventTheme) return null;
+    try {
+      const config: EventThemeConfig = JSON.parse(eventData.eventTheme);
+      return resolveTheme(config).palette;
+    } catch {
+      return null;
+    }
+  }, [eventData.eventTheme]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [refundableInfo, setRefundableInfo] = useState<{ count: number; totalAmount: number } | null>(null);
   const [isLoadingRefundInfo, setIsLoadingRefundInfo] = useState(false);
@@ -271,9 +282,9 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
               ) : (
                 <div
                   className="flex h-full w-full items-center justify-center"
-                  style={{ backgroundColor: eventData.eventColor || "#3b82f6" }}
+                  style={{ backgroundColor: themePalette?.pageBackground ?? (eventData.eventColor || "#3b82f6") }}
                 >
-                  <ImageIcon className="h-8 w-8 sm:h-10 sm:w-10 text-white/30" />
+                  <ImageIcon className="h-8 w-8 sm:h-10 sm:w-10" style={{ color: themePalette?.subTextColor ?? "rgba(255,255,255,0.3)" }} />
                 </div>
               )}
             </div>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import {
   User,
   LogOut,
@@ -30,16 +31,22 @@ export default function Navbar() {
   const { isAuthenticated, logout, user, eventUser, refreshProfile } = useAuth();
   const { openSearchModal } = useSearchModal();
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
   const router = useRouter();
   const pathname = usePathname();
   const isLandingPage = pathname === "/";
+  const hasSolidBackground = false;
 
   // Close user menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
       if (
         userMenuRef.current &&
-        !userMenuRef.current.contains(event.target as Node)
+        !userMenuRef.current.contains(target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target)
       ) {
         setIsUserMenuOpen(false);
       }
@@ -60,7 +67,14 @@ export default function Navbar() {
   };
 
   const handleUserIconClick = async () => {
-    // Fetch profile when opening the menu
+    // Calculate dropdown position from the trigger button
+    if (!isUserMenuOpen && userMenuRef.current) {
+      const rect = userMenuRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
     setIsUserMenuOpen(!isUserMenuOpen);
     if (!isUserMenuOpen) {
       try {
@@ -89,26 +103,51 @@ export default function Navbar() {
   // Dynamic classes based on landing page
   const textColor = isLandingPage ? "text-zinc-900" : "text-foreground";
   const hoverBg = isLandingPage ? "hover:bg-zinc-900/10" : "hover:bg-foreground/10";
-  const logoFilter = isLandingPage ? "" : "invert";
-  const buttonBg = isLandingPage ? "bg-zinc-900 text-white" : "bg-foreground text-background";
+  const logoStyle = isLandingPage
+    ? {}
+    : { WebkitMaskImage: "url(/logo.svg)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "center", maskImage: "url(/logo.svg)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "center" } as React.CSSProperties;
+  const buttonBg = isLandingPage ? "bg-zinc-900 text-white" : "bg-primary text-primary-foreground";
   const borderColor = isLandingPage ? "border-zinc-900/20 hover:border-zinc-900/40" : "border-foreground/20 hover:border-foreground/40";
 
   return (
     <>
-      <header className={`sticky top-0 z-50 backdrop-blur-sm ${isLandingPage ? "" : "border-b border-zinc-700"}`}>
+      <header className="sticky top-0 z-50">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
+            {/* Mobile logo links to /discover, desktop logo links to / */}
+            {!isLandingPage && (
+              <Link
+                href="/discover"
+                className={`flex sm:hidden items-center gap-1 text-lg font-semibold tracking-tight hover:scale-105 hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-transform duration-200`}
+              >
+                <div
+                  className="w-6 h-6 shrink-0 self-center bg-foreground"
+                  style={logoStyle}
+                  role="img"
+                  aria-label="Prismo logo"
+                />
+              </Link>
+            )}
             <Link
               href="/"
-              className={`flex items-center gap-1 text-lg font-semibold tracking-tight hover:scale-105 ${isLandingPage ? "hover:drop-shadow-[0_0_8px_rgba(0,0,0,0.3)]" : "hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"} transition-transform duration-200`}
+              className={`flex items-center gap-1 text-lg font-semibold tracking-tight hover:scale-105 ${isLandingPage ? "hover:drop-shadow-[0_0_8px_rgba(0,0,0,0.3)]" : "hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"} transition-transform duration-200 ${!isLandingPage ? "hidden sm:flex" : ""}`}
             >
-              <Image
-                src="/logo.svg"
-                alt="Prismo logo"
-                width={24}
-                height={24}
-                className={logoFilter}
-              />
+              {isLandingPage ? (
+                <Image
+                  src="/logo.svg"
+                  alt="Prismo logo"
+                  width={24}
+                  height={24}
+                  className="shrink-0"
+                />
+              ) : (
+                <div
+                  className="w-6 h-6 shrink-0 self-center bg-foreground"
+                  style={logoStyle}
+                  role="img"
+                  aria-label="Prismo logo"
+                />
+              )}
               <span
                 className={`hidden sm:inline font-normal ${textColor}`}
                 style={{ fontFamily: "var(--font-satoshi), sans-serif" }}
@@ -157,6 +196,15 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            {!isAuthenticated && (
+              <button
+                onClick={handleSearchIconClick}
+                className={`flex h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg} cursor-pointer`}
+                aria-label="Search"
+              >
+                <Search className="h-5 w-5" />
+              </button>
+            )}
             <Link
               href="/event-creation"
               className={`flex lg:hidden h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg}`}
@@ -170,16 +218,18 @@ export default function Navbar() {
             >
               Create Event
             </Link>
+            {isAuthenticated && (
+              <button
+                onClick={handleSearchIconClick}
+                className={`flex h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg} cursor-pointer`}
+                aria-label="Search"
+              >
+                <Search className="h-5 w-5" />
+              </button>
+            )}
             {isAuthenticated ? (
               <div className="relative" ref={userMenuRef}>
                 <div className="flex flex-row space-x-2">
-                  <button
-                    onClick={handleSearchIconClick}
-                    className={`flex h-9 w-9 items-center justify-center rounded-full ${textColor} transition-colors ${hoverBg} cursor-pointer`}
-                    aria-label="User profile"
-                  >
-                    <Search className="h-5 w-5" />
-                  </button>
                   <NotificationDropdown isLandingPage={isLandingPage} />
                   <button
                     onClick={handleUserIconClick}
@@ -190,63 +240,7 @@ export default function Navbar() {
                   </button>
                 </div>
 
-                {/* User Dropdown Menu */}
-                {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-xl border border-foreground/10 bg-card-background shadow-2xl backdrop-blur-xl">
-                    {/* User Info Section */}
-                    <div className="border-b border-foreground/10 px-4 py-3">
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {user?.email}
-                      </p>
-                      <p className="text-xs text-foreground/60 mt-0.5">
-                        Signed in
-                      </p>
-                    </div>
-
-                    {/* Menu Items */}
-                    <div className="py-2">
-                      <button
-                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
-                        onClick={() => {
-                          if (eventUser?.id) {
-                            router.push(`/user/${eventUser.id}`);
-                          }
-                          setIsUserMenuOpen(false);
-                        }}
-                      >
-                        <UserCircle className="h-4 w-4" />
-                        Profile
-                      </button>
-                      <button
-                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
-                        onClick={() => {
-                          router.push("/friends");
-                          setIsUserMenuOpen(false);
-                        }}
-                      >
-                        <Users className="h-4 w-4" />
-                        Friends
-                      </button>
-                      <button
-                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
-                        onClick={() => {
-                          router.push("/profile/edit");
-                          setIsUserMenuOpen(false);
-                        }}
-                      >
-                        <Settings className="h-4 w-4" />
-                        Settings
-                      </button>
-                      <button
-                        className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5 hover:text-red-400"
-                        onClick={handleLogout}
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Logout
-                      </button>
-                    </div>
-                  </div>
-                )}
+                {/* User Dropdown Menu - rendered via portal to escape header's backdrop-filter */}
               </div>
             ) : (
               <Link
@@ -260,6 +254,69 @@ export default function Navbar() {
           </div>
         </div>
       </header>
+
+      {/* User Dropdown Menu - portaled outside header to allow backdrop-blur */}
+      {isUserMenuOpen && createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed z-[60] w-56 rounded-xl border border-foreground/10 bg-card-background shadow-2xl backdrop-blur-sm"
+          style={{ top: dropdownPos.top, right: dropdownPos.right }}
+        >
+          {/* User Info Section */}
+          <div className="border-b border-foreground/10 px-4 py-3">
+            <p className="text-sm font-medium text-foreground truncate">
+              {user?.email}
+            </p>
+            <p className="text-xs text-foreground/60 mt-0.5">
+              Signed in
+            </p>
+          </div>
+
+          {/* Menu Items */}
+          <div className="py-2">
+            <button
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
+              onClick={() => {
+                if (eventUser?.id) {
+                  router.push(`/user/${eventUser.id}`);
+                }
+                setIsUserMenuOpen(false);
+              }}
+            >
+              <UserCircle className="h-4 w-4" />
+              Profile
+            </button>
+            <button
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
+              onClick={() => {
+                router.push("/friends");
+                setIsUserMenuOpen(false);
+              }}
+            >
+              <Users className="h-4 w-4" />
+              Friends
+            </button>
+            <button
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
+              onClick={() => {
+                router.push("/profile/edit");
+                setIsUserMenuOpen(false);
+              }}
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </button>
+            <button
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5 hover:text-red-400"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
     </>
   );
 }

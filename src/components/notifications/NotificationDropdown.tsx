@@ -74,7 +74,7 @@ export default function NotificationDropdown({ isLandingPage = false }: Notifica
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-medium text-white">
+          <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-medium text-primary-foreground">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
@@ -82,7 +82,7 @@ export default function NotificationDropdown({ isLandingPage = false }: Notifica
 
       {/* Dropdown panel */}
       {isDropdownOpen && (
-        <div className="absolute right-0 top-full mt-2 w-96 max-w-[calc(100vw-2rem)] rounded-lg border border-foreground/10 bg-background shadow-xl z-50">
+        <div className="fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 rounded-lg border border-foreground/10 bg-background shadow-xl z-50">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-foreground/10 px-4 py-3">
             <h3 className="text-sm font-medium text-foreground">

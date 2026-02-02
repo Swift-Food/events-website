@@ -18,6 +18,10 @@ import {
   EventCreationProvider,
   useEventCreation,
 } from "@/context/EventCreationContext";
+import { resolveTheme, getThemeCSSVariables, PALETTE_MAP, SHADER_MAP, LANDSCAPE_MAP, getPatternPreviewCSS } from "@/lib/theme-presets";
+import ThemePicker from "@/components/theme/ThemePicker";
+import InlineThemePicker from "@/components/theme/InlineThemePicker";
+import EventThemeBackground from "@/components/theme/EventThemeBackground";
 import { TicketType, UpdateEventDto, EventStatus } from "@/types";
 import { FormField } from "@/types";
 import { EventCategoryResponseDto } from "@/types/category";
@@ -66,9 +70,11 @@ interface EventFormProps {
   onPublishToggle?: () => void;
   isPublishLoading?: boolean;
   onSaveSuccess?: () => void;
+  /** When true, edit mode renders identically to the create page (full theme preview + bottom-sheet picker). */
+  fullPage?: boolean;
 }
 
-function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishToggle, isPublishLoading, onSaveSuccess }: EventFormProps) {
+function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishToggle, isPublishLoading, onSaveSuccess, fullPage }: EventFormProps) {
   const {
     eventName,
     setEventName,
@@ -125,8 +131,31 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     acceptedOrganizerTerms,
     setAcceptedOrganizerTerms,
     externalEventUrl,
+    eventTheme,
+    setEventTheme,
     clearForm,
   } = useEventCreation();
+
+  // Theme
+  const isCreateMode = mode === "create";
+  const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
+  const showLiveTheme = isCreateMode || !!fullPage;
+  const resolvedTheme = useMemo(() => resolveTheme(eventTheme), [eventTheme]);
+  const themeCSSVars = useMemo(
+    () => (showLiveTheme ? getThemeCSSVariables(resolvedTheme.palette) : {}),
+    [resolvedTheme.palette, showLiveTheme]
+  );
+
+  // Apply theme CSS variables to document root so navbar inherits them
+  useEffect(() => {
+    if (!showLiveTheme) return;
+    const root = document.documentElement;
+    const entries = Object.entries(themeCSSVars);
+    entries.forEach(([key, value]) => root.style.setProperty(key, value));
+    return () => {
+      entries.forEach(([key]) => root.style.removeProperty(key));
+    };
+  }, [themeCSSVars, showLiveTheme]);
 
   // Local state for UI only
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
@@ -282,6 +311,16 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
         if (initialData.address.location) {
           setLatitude(initialData.address.location.latitude);
           setLongitude(initialData.address.location.longitude);
+        }
+      }
+
+      // Theme
+      if (initialData.eventTheme) {
+        try {
+          const parsed = JSON.parse(initialData.eventTheme);
+          setEventTheme(parsed);
+        } catch {
+          // Keep default theme if parsing fails
         }
       }
 
@@ -601,7 +640,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
         name: eventName,
         description: description || "",
         eventImage: coverPreview || undefined,
-        eventColor: "#6366f1",
+        eventColor: resolvedTheme.palette.primaryColor,
+        eventTheme: JSON.stringify(eventTheme),
         ownerEventUserId: eventUser.id,
         startDateTime: start,
         endDateTime: end,
@@ -994,10 +1034,25 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] justify-center bg-background px-3 md:px-6 pb-4">
-      <div className="flex w-full max-w-5xl flex-col gap-6 text-foreground lg:flex-row">
-        <section className="flex flex-col gap-5 rounded-3xl lg:p-7 lg:w-96 lg:shrink-0 lg:sticky lg:top-20 lg:self-start sm:flex-row lg:flex-col">
-          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background backdrop-blur-sm  sm:flex-1 sm:basis-0 lg:w-full lg:flex-none">
+    <div
+      className={`relative flex min-h-[calc(100vh-64px)] justify-center px-3 md:px-6 pb-4 transition-colors duration-300 ${
+        ""
+      }`}
+      style={showLiveTheme ? (themeCSSVars as React.CSSProperties) : undefined}
+    >
+      {/* Theme background layer for landscape/shader/pattern */}
+      {showLiveTheme && (
+        <EventThemeBackground
+          config={eventTheme}
+          palette={resolvedTheme.palette}
+          shader={resolvedTheme.shader}
+          landscape={resolvedTheme.landscape}
+        />
+      )}
+
+      <div className="relative z-10 flex w-full max-w-5xl flex-col gap-6 text-foreground md:flex-row">
+        <section className="flex flex-col gap-5 rounded-3xl md:p-7 md:w-80 lg:w-96 md:shrink-0">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background backdrop-blur-sm">
             {coverPreview ? (
               <img
                 src={coverPreview}
@@ -1005,7 +1060,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-muted">
+              <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-card-background">
                 <span className="text-3xl font-serif text-foreground">
                   You Are Invited
                 </span>
@@ -1033,7 +1088,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               onChange={handleImageChange}
             />
           </div>
-          <div className="rounded-2xl bg-card-background backdrop-blur-xl text-sm sm:flex-1 lg:flex-none lg:aspect-auto">
+          {/* <div className="rounded-2xl bg-card-background backdrop-blur-xl text-sm sm:flex-1 lg:flex-none lg:aspect-auto">
             <div className="p-5">
               <div className="flex items-center justify-between text-muted-foreground">
                 <div>
@@ -1053,9 +1108,87 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   </p>
                 </div>
               </div>
-
+              <div className="mt-5 pt-4 border-t border-foreground/10 text-xs text-muted-foreground">
+                <span className="font-medium">Cover:</span>{" "}
+                <span className="text-foreground font-medium">{coverName}</span>
+              </div>
             </div>
-          </div>
+          </div> */}
+          {/* Theme Row */}
+          {showLiveTheme ? (
+            <button
+              type="button"
+              onClick={() => setIsThemePickerOpen(!isThemePickerOpen)}
+              className="flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer"
+            >
+              <div className="flex h-8 w-8 rounded-lg overflow-hidden shrink-0">
+                {eventTheme.type === "shader" ? (
+                  (() => {
+                    const shader = SHADER_MAP[eventTheme.shaderPreset ?? ""];
+                    return shader ? (
+                      <div className="flex items-center justify-center w-full h-full" style={{ background: resolvedTheme.palette.pageBackground }}>
+                        <div className="flex -space-x-1.5">
+                          {[shader.color1, shader.color2, shader.color3].map((c, i) => (
+                            <div key={i} className="w-3 h-3 rounded-full" style={{ backgroundColor: c, zIndex: 3 - i }} />
+                          ))}
+                        </div>
+                      </div>
+                    ) : null;
+                  })()
+                ) : eventTheme.type === "pattern" ? (
+                  (() => {
+                    const patternStyle = getPatternPreviewCSS(eventTheme.pattern ?? "dots", resolvedTheme.palette);
+                    return (
+                      <div
+                        className="w-full h-full"
+                        style={{
+                          backgroundColor: resolvedTheme.palette.pageBackground,
+                          backgroundImage: patternStyle.backgroundImage,
+                          backgroundSize: patternStyle.backgroundSize,
+                          backgroundRepeat: "repeat",
+                        }}
+                      />
+                    );
+                  })()
+                ) : eventTheme.type === "landscape" ? (
+                  (() => {
+                    const landscape = LANDSCAPE_MAP[eventTheme.image ?? ""];
+                    return landscape ? (
+                      <img
+                        src={`/Landscape theme/${landscape.filename}`}
+                        alt={landscape.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : null;
+                  })()
+                ) : (
+                  (PALETTE_MAP[eventTheme.colorPalette]?.colors ?? ["#222", "#2a2a2a"]).map(
+                    (color, i) => (
+                      <div key={i} className="flex-1" style={{ backgroundColor: color }} />
+                    )
+                  )
+                )}
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-base font-semibold text-foreground">Theme</p>
+                <p className="text-sm text-muted-foreground">
+                  {PALETTE_MAP[eventTheme.colorPalette]?.name ?? "Default"} &middot;{" "}
+                  {eventTheme.type.charAt(0).toUpperCase() + eventTheme.type.slice(1)}
+                </p>
+              </div>
+              {isThemePickerOpen ? (
+                <ChevronUp className="h-5 w-5 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="h-5 w-5 text-muted-foreground" />
+              )}
+            </button>
+          ) : (
+            <InlineThemePicker
+              theme={eventTheme}
+              onChange={setEventTheme}
+              onPreview={() => router.push(`/event-management/${eventId}/edit`)}
+            />
+          )}
         </section>
 
         <section className="flex-1 space-y-6">
@@ -1171,7 +1304,6 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             <span>Edit Description</span>
           </button>
 
-
           {/* Event Categories */}
           <div className="space-y-4">
             <div className="relative">
@@ -1260,7 +1392,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           <div ref={locationRef} className="space-y-3">
             {/* Location validation errors indicator */}
             {(validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode) && (
-              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <div className="p-3 bg-red-950 border border-red-500/30 rounded-lg">
                 <p className="text-sm text-red-400 font-medium">Please complete the location details:</p>
                 <ul className="text-xs text-red-400/80 mt-1 list-disc list-inside">
                   {validationErrors.eventFormat && <li>{validationErrors.eventFormat}</li>}
@@ -1428,7 +1560,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
             {/* Stripe Connect Warning for Paid Tickets */}
             {hasPaidTickets && stripeConnectStatus && !stripeConnectStatus.onboardingComplete && (
-              <div ref={stripeConnectRef} className={`rounded-2xl p-4 ${validationErrors.stripeConnect ? "bg-red-500/10 border border-red-500/30" : "bg-amber-500/10 border border-amber-500/30"}`}>
+              <div ref={stripeConnectRef} className={`rounded-2xl p-4 ${validationErrors.stripeConnect ? "bg-red-950 border border-red-500/30" : "bg-amber-950 border border-amber-500/30"}`}>
                 <div className="flex items-start gap-3">
                   <AlertTriangle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${validationErrors.stripeConnect ? "text-red-400" : "text-amber-400"}`} />
                   <div className="flex-1">
@@ -1706,7 +1838,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               <button
                 type="button"
                 onClick={() => setIsPrivate((prev) => !prev)}
-                className={`h-7 w-14 rounded-full transition-all ${
+                className={`h-7 w-14 rounded-full transition-all ring-4 ring-white/10 ${
                   isPrivate
                     ? "bg-primary"
                     : "bg-card-secondary-background"
@@ -1735,7 +1867,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               <button
                 type="button"
                 onClick={() => setRequireApproval((prev) => !prev)}
-                className={`h-7 w-14 rounded-full transition-all ${
+                className={`h-7 w-14 rounded-full transition-all ring-4 ring-white/10 ${
                   requireApproval
                     ? "bg-primary"
                     : "bg-card-secondary-background"
@@ -1800,7 +1932,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
           {/* Organiser Terms Checkbox - Only shown in create mode */}
           {mode === "create" && (
-            <div ref={organizerTermsRef} className={`rounded-xl backdrop-blur-xl p-4 md:p-5 ${validationErrors.organizerTerms ? "bg-red-500/10 border border-red-500/30" : "bg-card-background"}`}>
+            <div ref={organizerTermsRef} className={`rounded-xl backdrop-blur-xl p-4 md:p-5 ${validationErrors.organizerTerms ? "bg-red-950 border border-red-500/30" : "bg-card-background"}`}>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -1835,7 +1967,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="w-full rounded-lg bg-foreground py-2 text-center text-lg font-semibold text-black transition-all hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-primary py-2 text-center text-lg font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting
               ? `${mode === "create" ? "Creating" : "Updating"} Event...`
@@ -1928,6 +2060,15 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
       />
+
+      {showLiveTheme && (
+        <ThemePicker
+          theme={eventTheme}
+          onChange={setEventTheme}
+          isOpen={isThemePickerOpen}
+          onToggle={() => setIsThemePickerOpen(!isThemePickerOpen)}
+        />
+      )}
 
       <EventCoverPicker
         isOpen={isCoverPickerOpen}
