@@ -382,7 +382,7 @@ export default function EventPreviewModal({
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`fixed inset-0 z-50 bg-white/5 backdrop-blur-sm transition-opacity duration-300 ${
           isAnimating ? "opacity-100" : "opacity-0"
         }`}
         onClick={handleClose}
@@ -390,7 +390,8 @@ export default function EventPreviewModal({
 
       {/* Modal - Desktop: slide from right, Mobile: slide from bottom */}
       <div
-        className={`fixed z-50 bg-background shadow-2xl overflow-hidden transition-transform duration-300 ease-out
+        style={{ background: "linear-gradient(to bottom, #41296e 0%, #000000 15%)" }}
+        className={`fixed z-50 shadow-2xl overflow-hidden transition-transform duration-300 ease-out
           /* Mobile: bottom sheet */
           inset-x-0 bottom-0 top-16 rounded-t-3xl
           /* Desktop: right slide-out */
@@ -401,7 +402,7 @@ export default function EventPreviewModal({
           }`}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-background px-4 py-3 sm:px-6 sm:py-4">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-6 sm:py-4 backdrop-blur-md">
           <button
             onClick={handleViewFullPage}
             className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"

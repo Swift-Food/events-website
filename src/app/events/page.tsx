@@ -290,7 +290,7 @@ function EventsPageContent() {
     </div>
 
     {/* Sticky Search Bar */}
-    <div className="sticky top-20 z-40 -mx-4 px-4 sm:-mx-6 sm:px-6 pb-4 bg-gradient-to-b from-background via-background to-transparent">
+    <div className="sticky top-0 z-40 -mx-4 px-4 sm:-mx-6 sm:px-6 backdrop-blur-md">
      {/* Search Bar with Filter Button */}
      <div ref={filterDropdownRef} className="relative flex items-center gap-2">
       <div className="relative flex-1">
@@ -442,7 +442,7 @@ function EventsPageContent() {
 
     {/* Subcategory Filter Chips - only show when a category is selected and has subcategories */}
     {filteredSubcategories.length > 0 && (
-     <div className="sticky top-[136px] z-30 -mx-4 px-4 sm:-mx-6 sm:px-6 pb-3 bg-gradient-to-b from-background via-background to-transparent">
+     <div className="sticky top-[60px] z-30 -mx-4 px-4 sm:-mx-6 sm:px-6 pb-3 backdrop-blur-md">
       <div className="flex flex-wrap gap-2">
        {selectedSubcategoryId && (
         <button
@@ -523,8 +523,8 @@ function EventsPageContent() {
     {!loading && !error && events.length > 0 && (
      <EventsTimeline
       events={events}
-      stickyTopClass={filteredSubcategories.length > 0 ? "top-[180px]" : "top-[136px]"}
-      observerRootMargin={filteredSubcategories.length > 0 ? "-188px 0px 0px 0px" : "-144px 0px 0px 0px"}
+      stickyTopClass={filteredSubcategories.length > 0 ? "top-[100px]" : "top-[60px]"}
+      observerRootMargin={filteredSubcategories.length > 0 ? "-108px 0px 0px 0px" : "-68px 0px 0px 0px"}
      />
     )}
 
