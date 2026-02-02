@@ -1003,7 +1003,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   return (
     <div
       className={`relative flex min-h-[calc(100vh-64px)] justify-center px-3 md:px-6 pb-4 transition-colors duration-300 ${
-        showLiveTheme && eventTheme.type === "solid" ? "bg-background" : ""
+        ""
       }`}
       style={showLiveTheme ? (themeCSSVars as React.CSSProperties) : undefined}
     >

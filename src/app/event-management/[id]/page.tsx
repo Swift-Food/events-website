@@ -448,9 +448,9 @@ export default function EventManagementPage() {
      />
 
      {/* Slide-out Panel */}
-     <div className="fixed right-0 top-0 z-50 h-full w-full max-w-4xl overflow-y-auto overscroll-contain bg-background shadow-2xl animate-in slide-in-from-right duration-300">
+     <div className="fixed right-0 top-0 z-50 h-full w-full max-w-4xl overflow-y-auto overscroll-contain shadow-2xl animate-in slide-in-from-right duration-300" style={{ background: "linear-gradient(to bottom, #41296e 0%, #000000 15%)" }}>
       {/* Modal Header */}
-      <div className="sticky top-0 z-10 flex items-center justify-end bg-background px-6 py-4">
+      <div className="sticky top-0 z-10 flex items-center justify-end px-6 py-4">
        {/* <h2 className="text-lg font-semibold text-foreground">Edit Event</h2> */}
        <button
         onClick={() => setShowEditModal(false)}
