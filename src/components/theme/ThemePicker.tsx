@@ -435,7 +435,7 @@ export default function ThemePicker({
       {/* Customizer Tray */}
       <div
         ref={trayRef}
-        className="relative w-full max-h-[60vh] flex flex-col bg-black/60 backdrop-blur-sm border-t border-white/10 rounded-t-[2.0rem] lg:rounded-t-[2rem] pointer-events-auto"
+        className="relative w-full max-h-[50vh] flex flex-col bg-black/60 backdrop-blur-sm border-t border-white/10 rounded-t-[2.0rem] lg:rounded-t-[2rem] pointer-events-auto"
         style={{
           animation: dragOffset === 0 ? "themePickerSlideUp 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards" : undefined,
           transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : undefined,
@@ -488,22 +488,20 @@ export default function ThemePicker({
             ))}
           </div>
 
-          {/* Mobile section label */}
-          <div className="px-4 pb-3 lg:hidden">
-            <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] block text-center">
-              {activeMobileTab === "base"
-                ? "Base Style"
-                : activeMobileTab === "palette"
-                ? (palettePage === 0 ? "Monotone" : "Themes") + " Palette"
-                : theme.type === "solid"
-                ? "Solid Detail"
-                : `${theme.type.charAt(0).toUpperCase() + theme.type.slice(1)} Styles`}
-            </label>
-          </div>
+          {/* Mobile section label (hidden for style tab — the tab name is sufficient) */}
+          {activeMobileTab !== "details" && (
+            <div className="px-4 pb-3 lg:hidden">
+              <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] block text-center">
+                {activeMobileTab === "base"
+                  ? "Base Style"
+                  : (palettePage === 0 ? "Monotone" : "Themes") + " Palette"}
+              </label>
+            </div>
+          )}
         </div>
 
         <div className="overflow-y-auto min-h-0 w-full">
-        <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pt-3 pb-6">
+        <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pt-3 pb-3 md:pb-8">
           {/* Content: 3-column grid on desktop, tabbed on mobile */}
           <div className={`lg:grid ${isPaletteDisabled ? "lg:grid-cols-[180px_1fr]" : "lg:grid-cols-[180px_1fr_1.5fr]"} gap-8 xl:gap-12 items-start`}>
             {/* Column 1: Base Style Selection */}
@@ -526,7 +524,7 @@ export default function ThemePicker({
                       className="flex flex-col items-center gap-1.5 lg:gap-2 group w-full"
                     >
                       <div
-                        className={`relative w-full aspect-[4/3] rounded-xl lg:rounded-xl overflow-hidden border-2 transition-all duration-300 ${
+                        className={`relative w-full aspect-[4/3] sm:aspect-[3/2] rounded-xl lg:rounded-xl overflow-hidden border-2 transition-all duration-300 ${
                           isActive
                             ? "border-white ring-2 lg:ring-6 ring-white/5 scale-105 z-10"
                             : "border-white/5 hover:border-white/10"
@@ -705,7 +703,7 @@ export default function ThemePicker({
                           ref={(el) => { landscapePageRefs.current[pageIdx] = el; }}
                           className="min-w-full snap-start px-4"
                         >
-                          <div className="grid grid-cols-3 gap-3 py-4">
+                          <div className="grid grid-cols-3 gap-3 py-2 sm:py-3">
                             {pageItems.map((opt) => (
                               <button
                                 key={opt.id}
@@ -720,7 +718,7 @@ export default function ThemePicker({
                                 className="flex flex-col items-center gap-1.5 group"
                               >
                                 <div
-                                  className={`relative w-full aspect-[4/3] rounded-xl overflow-hidden border-2 transition-all ${
+                                  className={`relative w-full aspect-[4/3] sm:aspect-[3/2] rounded-xl overflow-hidden border-2 transition-all ${
                                     theme.image === opt.id
                                       ? "border-white scale-105 z-10 ring-4 ring-white/10"
                                       : "border-white/5 opacity-50 group-hover:opacity-100"
@@ -818,7 +816,7 @@ export default function ThemePicker({
                           ref={(el) => { shaderPageRefs.current[pageIdx] = el; }}
                           className="min-w-full snap-start px-4"
                         >
-                          <div className="grid grid-cols-2 gap-3 py-4">
+                          <div className="grid grid-cols-2 gap-3 py-2 sm:py-3">
                             {pageItems.map((preset) => (
                               <button
                                 key={preset.id}
@@ -892,7 +890,7 @@ export default function ThemePicker({
                           ref={(el) => { patternPageRefs.current[pageIdx] = el; }}
                           className="min-w-full snap-start px-4"
                         >
-                          <div className="grid grid-cols-3 gap-3 py-4">
+                          <div className="grid grid-cols-3 gap-3 py-2 sm:py-3">
                             {pageItems.map((opt) => {
                               const isActive = theme.pattern === opt.id;
                               const patternStyle = getPatternPreviewBg(opt.id);
@@ -904,7 +902,7 @@ export default function ThemePicker({
                                   className="flex flex-col items-center gap-1.5 group"
                                 >
                                   <div
-                                    className={`relative w-full aspect-[3/2] rounded-xl overflow-hidden border-2 transition-all ${
+                                    className={`relative w-full aspect-[3/2] sm:aspect-[2/1] rounded-xl overflow-hidden border-2 transition-all ${
                                       isActive
                                         ? "border-white scale-105 z-10 ring-4 ring-white/10"
                                         : "border-white/10 opacity-60 group-hover:opacity-100"
