@@ -505,7 +505,7 @@ export default function ThemePicker({
         <div className="overflow-y-auto min-h-0 w-full">
         <div className="max-w-[1800px] mx-auto px-4 lg:px-6 xl:px-8 pb-6">
           {/* Content: 3-column grid on desktop, tabbed on mobile */}
-          <div className={`lg:grid ${isPaletteDisabled ? "lg:grid-cols-[220px_1fr]" : "lg:grid-cols-[220px_1fr_1.5fr]"} gap-8 xl:gap-12 items-start`}>
+          <div className={`lg:grid ${isPaletteDisabled ? "lg:grid-cols-[180px_1fr]" : "lg:grid-cols-[180px_1fr_1.5fr]"} gap-8 xl:gap-12 items-start`}>
             {/* Column 1: Base Style Selection */}
             <div
               className={`${
@@ -515,7 +515,7 @@ export default function ThemePicker({
               <label className="hidden lg:block text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em] mb-3 text-center">
                 Base Style
               </label>
-              <div className="grid grid-cols-4 lg:grid-cols-2 gap-3">
+              <div className="grid grid-cols-4 lg:grid-cols-2 gap-3 lg:gap-2.5">
                 {BG_TYPES.map(({ type, label }) => {
                   const isActive = theme.type === type;
                   return (
@@ -523,19 +523,19 @@ export default function ThemePicker({
                       key={type}
                       type="button"
                       onClick={() => handleTypeChange(type)}
-                      className="flex flex-col items-center gap-1.5 lg:gap-2.5 group w-full"
+                      className="flex flex-col items-center gap-1.5 lg:gap-2 group w-full"
                     >
                       <div
-                        className={`relative w-full aspect-[4/3] rounded-xl lg:rounded-[1.5rem] overflow-hidden border-2 transition-all duration-300 ${
+                        className={`relative w-full aspect-[4/3] rounded-xl lg:rounded-xl overflow-hidden border-2 transition-all duration-300 ${
                           isActive
-                            ? "border-white ring-2 lg:ring-8 ring-white/5 shadow-2xl scale-105 z-10"
+                            ? "border-white ring-2 lg:ring-6 ring-white/5 scale-105 z-10"
                             : "border-white/5 hover:border-white/10"
                         }`}
                       >
                         {getBgPreview(type)}
                       </div>
                       <span
-                        className={`text-[10px] font-bold uppercase tracking-widest ${
+                        className={`text-[10px] lg:text-[9px] font-bold uppercase tracking-widest ${
                           isActive
                             ? "text-white"
                             : "text-zinc-400 group-hover:text-zinc-200"
@@ -765,8 +765,43 @@ export default function ThemePicker({
                 )}
 
                 {/* Shader options */}
-                {theme.type === "shader" && (
-                  <div className="flex flex-col">
+                {theme.type === "shader" && (<>
+                  {/* Desktop: all shaders in a grid */}
+                  <div className="hidden md:grid grid-cols-4 gap-2 xl:gap-3">
+                    {SHADER_PRESETS.map((preset) => (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() =>
+                          onChange({ ...theme, shaderPreset: preset.id })
+                        }
+                        className={`px-3 py-2 xl:px-6 xl:py-4 rounded-xl xl:rounded-[1.5rem] border text-[10px] xl:text-[12px] font-bold uppercase tracking-[0.15em] xl:tracking-[0.2em] transition-all flex items-center justify-between group h-12 xl:h-18 ${
+                          theme.shaderPreset === preset.id
+                            ? "bg-white text-zinc-950 border-white ring-4 xl:ring-8 ring-white/5"
+                            : "bg-white/5 border-white/5 text-zinc-300 hover:text-white hover:bg-white/10"
+                        }`}
+                      >
+                        {preset.name}
+                        <div className="flex -space-x-1.5 xl:-space-x-3">
+                          {[preset.color1, preset.color2, preset.color3].map(
+                            (c, i) => (
+                              <div
+                                key={i}
+                                className="w-5 h-5 xl:w-8 xl:h-8 rounded-full shadow-lg"
+                                style={{
+                                  backgroundColor: c,
+                                  zIndex: 3 - i,
+                                }}
+                              />
+                            )
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Mobile: paginated 2x2 scroll */}
+                  <div className="flex flex-col md:hidden">
                     <div
                       ref={shaderScrollRef}
                       className="flex overflow-x-auto snap-x snap-mandatory"
@@ -791,19 +826,19 @@ export default function ThemePicker({
                                 onClick={() =>
                                   onChange({ ...theme, shaderPreset: preset.id })
                                 }
-                                className={`px-4 lg:px-6 py-3 lg:py-4 rounded-[1.25rem] lg:rounded-[1.5rem] border text-[11px] lg:text-[12px] font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-between group h-16 lg:h-18 ${
+                                className={`px-4 py-3 rounded-[1.25rem] border text-[11px] font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-between group h-16 ${
                                   theme.shaderPreset === preset.id
-                                    ? "bg-white text-zinc-950 border-white ring-4 lg:ring-8 ring-white/5"
+                                    ? "bg-white text-zinc-950 border-white ring-4 ring-white/5"
                                     : "bg-white/5 border-white/5 text-zinc-300 hover:text-white hover:bg-white/10"
                                 }`}
                               >
                                 {preset.name}
-                                <div className="flex -space-x-2 lg:-space-x-3">
+                                <div className="flex -space-x-2">
                                   {[preset.color1, preset.color2, preset.color3].map(
                                     (c, i) => (
                                       <div
                                         key={i}
-                                        className="w-6 h-6 lg:w-8 lg:h-8 rounded-full shadow-lg"
+                                        className="w-6 h-6 rounded-full shadow-lg"
                                         style={{
                                           backgroundColor: c,
                                           zIndex: 3 - i,
@@ -836,7 +871,7 @@ export default function ThemePicker({
                       </div>
                     )}
                   </div>
-                )}
+                </>)}
 
                 {/* Pattern options */}
                 {theme.type === "pattern" && (
