@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Inter } from "next/font/google";
 // import { Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
@@ -44,6 +44,12 @@ const satoshi = localFont({
  ],
  variable: "--font-satoshi",
 });
+
+export const viewport: Viewport = {
+ width: "device-width",
+ initialScale: 1,
+ viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
  title: "Prismo",
@@ -156,10 +162,10 @@ export default function RootLayout({
      <CategoriesProvider>
       <NotificationProvider>
        <SearchModalProvider>
-        <div className="relative h-screen overflow-hidden">
+        <div className="relative h-dvh overflow-hidden">
          <div className="fixed inset-0 -z-10" style={{ background: "linear-gradient(to bottom, #41296e 0%, #000000 15%)" }} />
          <Navbar />
-         <main className="h-screen overflow-y-auto overscroll-none pt-[72px]">
+         <main className="h-dvh overflow-y-auto overscroll-none pt-[72px]">
           {children}
           <Footer />
          </main>

@@ -52,7 +52,7 @@ export default function Footer() {
               : "relative z-10 border-t border-white/10"
       }
     >
-      <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="mx-auto max-w-6xl px-6 py-8 pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Logo and Links */}
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
