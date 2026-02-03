@@ -63,7 +63,7 @@ export default function TimePicker({ selectedTime, onSelect }: TimePickerProps) 
                 data-time={`${hour}-${minute}`}
                 onClick={() => handleTimeClick(hour, minute)}
                 className={`
-                  w-full py-2 px-3 text-center text-sm font-medium transition-all rounded-lg mb-0.5
+                  w-full py-2 px-2 text-center text-sm font-medium transition-all rounded-md mb-0.5
                   ${selected
                     ? "bg-amber-600 text-white"
                     : "text-white hover:bg-white/10"

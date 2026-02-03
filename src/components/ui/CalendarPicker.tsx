@@ -129,7 +129,7 @@ export default function CalendarPicker({ selectedDate, onSelect, minDate }: Cale
         <span className="text-base font-semibold text-white">
           {MONTHS[month]}
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={prevMonth}
@@ -137,11 +137,6 @@ export default function CalendarPicker({ selectedDate, onSelect, minDate }: Cale
           >
             <ChevronLeft className="h-4 w-4 text-white/60" />
           </button>
-          <div className="flex items-center gap-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
-            <div className="w-1.5 h-1.5 rounded-full bg-white" />
-            <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
-          </div>
           <button
             type="button"
             onClick={nextMonth}

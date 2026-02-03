@@ -132,7 +132,7 @@ export default function DateTimePicker({
         position: "absolute",
         top: dropdownPosition.top,
         left: dropdownPosition.left,
-        minWidth: activeView === "time" ? 160 : 280,
+        width: activeView === "time" ? 100 : 280,
         zIndex: 99999,
       }}
       className="rounded-2xl bg-[#1a1a1a]/90 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden"
