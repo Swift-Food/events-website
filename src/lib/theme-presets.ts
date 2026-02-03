@@ -3,6 +3,7 @@ import type {
   ColorPalette,
   PalettePreset,
   ShaderPreset,
+  ShaderSettings,
   LandscapeOption,
   PatternOption,
 } from "@/types/event/theme";
@@ -166,6 +167,47 @@ export const PALETTE_MAP: Record<string, PalettePreset> = Object.fromEntries(
 // Shader gradient presets
 // ---------------------------------------------------------------------------
 
+/** Default shader settings - presets can override any of these */
+export const DEFAULT_SHADER_SETTINGS: Required<ShaderSettings> = {
+  brightness: 1.2,
+  cAzimuthAngle: 180,
+  cDistance: 2.9,
+  cPolarAngle: 120,
+  cameraZoom: 1,
+  envPreset: "city",
+  positionX: 0,
+  positionY: 1.8,
+  positionZ: 0,
+  reflection: 0.1,
+  rotationX: 0,
+  rotationY: 0,
+  rotationZ: -90,
+  type: "waterPlane",
+  uAmplitude: 0,
+  uDensity: 1,
+  uFrequency: 5.5,
+  uSpeed: 0.1,
+  uStrength: 3,
+  uTime: 0.2,
+};
+
+/** Custom settings for sphere-based presets (Dusk, Midnight) */
+const SPHERE_SHADER_SETTINGS: ShaderSettings = {
+  brightness: 1.5,
+  cAzimuthAngle: 60,
+  cDistance: 7.1,
+  cPolarAngle: 90,
+  cameraZoom: 15.3,
+  envPreset: "dawn",
+  positionY: -0.15,
+  rotationZ: 0,
+  type: "sphere",
+  uAmplitude: 1.4,
+  uDensity: 1.1,
+  uStrength: 0.4,
+  uTime: 0,
+};
+
 const SHADER_PALETTE_LIGHT: Omit<ColorPalette, "primaryColor"> = {
   pageBackground: "transparent",
   cardBackground: "rgba(255, 255, 255, 0.22)",
@@ -195,10 +237,11 @@ function shaderPreset(
   color2: string,
   color3: string,
   dark: boolean,
-  primaryColor: string
+  primaryColor: string,
+  settings?: ShaderSettings
 ): ShaderPreset {
   const base = dark ? SHADER_PALETTE_DARK : SHADER_PALETTE_LIGHT;
-  return { id, name, color1, color2, color3, palette: { ...base, primaryColor } };
+  return { id, name, color1, color2, color3, palette: { ...base, primaryColor }, settings };
 }
 
 export const SHADER_PRESETS: ShaderPreset[] = [
@@ -206,9 +249,9 @@ export const SHADER_PRESETS: ShaderPreset[] = [
   shaderPreset("peach", "Peach", "#f9c8db", "#cee29a", "#ddf2eb", false, "#5a7a2e"),
   shaderPreset("desert", "Desert", "#ff6d2a", "#afcff6", "#f8e6a9", false, "#d4440f"),
   shaderPreset("arctic", "Arctic", "#1c4074", "#c6dcda", "#f8f5e6", false, "#1c4074"),
-  shaderPreset("dusk", "Dusk", "#402c61", "#92475c", "#f3a39c", false, "#402c61"),
+  shaderPreset("dusk", "Dusk", "#402c61", "#92475c", "#f3a39c", true, "#c090b0", SPHERE_SHADER_SETTINGS),
   shaderPreset("sky", "Sky", "#2e80e4", "#afcff6", "#f8e6a9", false, "#1a5fb4"),
-  shaderPreset("midnight", "Midnight", "#1c275f", "#596394", "#ececec", true, "#8090c0"),
+  shaderPreset("midnight", "Midnight", "#1c275f", "#596394", "#ececec", true, "#8090c0", SPHERE_SHADER_SETTINGS),
   shaderPreset("aquarium", "Aquarium", "#a3d6b4", "#cddbf9", "#99b0ed", false, "#3a6b8c"),
 ];
 

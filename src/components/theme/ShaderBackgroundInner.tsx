@@ -2,41 +2,44 @@
 
 import { ShaderGradient, ShaderGradientCanvas } from "@shadergradient/react";
 import type { ShaderPreset } from "@/types/event/theme";
+import { DEFAULT_SHADER_SETTINGS } from "@/lib/theme-presets";
 
 export default function ShaderBackgroundInner({
   preset,
 }: {
   preset: ShaderPreset;
 }) {
+  const s = { ...DEFAULT_SHADER_SETTINGS, ...preset.settings };
+
   return (
     <ShaderGradientCanvas>
       <ShaderGradient
         animate="on"
-        brightness={1.2}
-        cAzimuthAngle={180}
-        cDistance={2.9}
-        cPolarAngle={120}
-        cameraZoom={1}
+        brightness={s.brightness}
+        cAzimuthAngle={s.cAzimuthAngle}
+        cDistance={s.cDistance}
+        cPolarAngle={s.cPolarAngle}
+        cameraZoom={s.cameraZoom}
         color1={preset.color1}
         color2={preset.color2}
         color3={preset.color3}
-        envPreset="city"
+        envPreset={s.envPreset}
         grain="off"
         lightType="3d"
-        positionX={0}
-        positionY={1.8}
-        positionZ={0}
-        reflection={0.1}
-        rotationX={0}
-        rotationY={0}
-        rotationZ={-90}
-        type="waterPlane"
-        uAmplitude={0}
-        uDensity={1}
-        uFrequency={5.5}
-        uSpeed={0.1}
-        uStrength={3}
-        uTime={0.2}
+        positionX={s.positionX}
+        positionY={s.positionY}
+        positionZ={s.positionZ}
+        reflection={s.reflection}
+        rotationX={s.rotationX}
+        rotationY={s.rotationY}
+        rotationZ={s.rotationZ}
+        type={s.type}
+        uAmplitude={s.uAmplitude}
+        uDensity={s.uDensity}
+        uFrequency={s.uFrequency}
+        uSpeed={s.uSpeed}
+        uStrength={s.uStrength}
+        uTime={s.uTime}
         wireframe={false}
       />
     </ShaderGradientCanvas>

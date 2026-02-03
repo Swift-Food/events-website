@@ -43,6 +43,30 @@ export interface PalettePreset {
   palette: ColorPalette;
 }
 
+/** Configurable shader gradient settings (all optional, defaults applied at render) */
+export interface ShaderSettings {
+  brightness?: number;
+  cAzimuthAngle?: number;
+  cDistance?: number;
+  cPolarAngle?: number;
+  cameraZoom?: number;
+  envPreset?: "city" | "dawn" | "lobby";
+  positionX?: number;
+  positionY?: number;
+  positionZ?: number;
+  reflection?: number;
+  rotationX?: number;
+  rotationY?: number;
+  rotationZ?: number;
+  type?: "waterPlane" | "sphere" | "plane";
+  uAmplitude?: number;
+  uDensity?: number;
+  uFrequency?: number;
+  uSpeed?: number;
+  uStrength?: number;
+  uTime?: number;
+}
+
 /** Shader gradient preset (includes its own fixed palette) */
 export interface ShaderPreset {
   id: string;
@@ -51,6 +75,8 @@ export interface ShaderPreset {
   color2: string;
   color3: string;
   palette: ColorPalette;
+  /** Optional shader settings overrides */
+  settings?: ShaderSettings;
 }
 
 /** Landscape background option */
