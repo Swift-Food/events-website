@@ -1982,7 +1982,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                       setValidationErrors(prev => ({ ...prev, organizerTerms: undefined }));
                     }
                   }}
-                  className={`h-5 w-5 rounded bg-card-secondary-background text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer flex-shrink-0 ${validationErrors.organizerTerms ? "border-red-400" : "border-foreground/20"}`}
+                  className={`h-3 w-3 rounded bg-card-secondary-background text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer flex-shrink-0 ${validationErrors.organizerTerms ? "border-red-400" : "border-foreground/20"}`}
                 />
                 <span className={`text-sm ${validationErrors.organizerTerms ? "text-red-400" : "text-muted-foreground"}`}>
                   I agree to the{" "}
