@@ -1352,7 +1352,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           <button
             type="button"
             onClick={handleDescriptionClick}
-            className="flex w-full items-center justify-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-6 py-3 text-foreground text-base transition-all font-semibold cursor-pointer"
+            className="flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground text-sm transition-all font-medium cursor-pointer"
           >
             <Edit className="h-5 w-5" />
             <span>Edit Description</span>
@@ -1371,21 +1371,21 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 <div className="flex-1 text-left">
                   {loadingCategories ? (
                     <>
-                      <p className="text-base font-semibold text-foreground">
+                      <p className="text-sm font-medium text-foreground">
                         Event Categories
                       </p>
                       <div className="flex items-center gap-2">
                         <div className="h-3 w-3 animate-spin rounded-full border-b-2 border-primary"></div>
-                        <span className="text-sm text-muted-foreground">Loading...</span>
+                        <span className="text-xs text-muted-foreground">Loading...</span>
                       </div>
                     </>
                   ) : selectedCategoryIds.length > 0 || selectedSubcategoryIds.length > 0 ? (
                     <>
-                      <p className="text-base font-semibold text-foreground">
+                      <p className="text-sm font-medium text-foreground">
                         {selectedCategoryIds.length} {selectedCategoryIds.length === 1 ? 'Category' : 'Categories'}
                         {selectedSubcategoryIds.length > 0 && `, ${selectedSubcategoryIds.length} ${selectedSubcategoryIds.length === 1 ? 'Subcategory' : 'Subcategories'}`}
                       </p>
-                      <p className="text-sm text-muted-foreground line-clamp-1">
+                      <p className="text-xs text-muted-foreground line-clamp-1">
                         {categoriesWithSubs
                           .filter((cat) => selectedCategoryIds.includes(cat.id))
                           .map((cat) => {
@@ -1403,10 +1403,10 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                     </>
                   ) : (
                     <>
-                      <p className="text-base font-semibold text-foreground">
+                      <p className="text-sm font-medium text-foreground">
                         Event Categories
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         Select categories to help people discover your event
                       </p>
                     </>
@@ -1486,10 +1486,10 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   >
                     <MapPin className={`h-5 w-5 ${hasError ? "text-red-400" : "text-muted-foreground"}`} />
                     <div className="flex-1 text-left">
-                      <p className={`text-base font-semibold ${hasError ? "text-red-400" : "text-foreground"}`}>
+                      <p className={`text-sm font-medium ${hasError ? "text-red-400" : "text-foreground"}`}>
                         Add Event Location
                       </p>
-                      <p className={`text-sm ${hasError ? "text-red-400/80" : "text-muted-foreground"}`}>
+                      <p className={`text-xs ${hasError ? "text-red-400/80" : "text-muted-foreground"}`}>
                         Physical location or virtual link
                       </p>
                     </div>
