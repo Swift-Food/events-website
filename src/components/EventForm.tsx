@@ -1563,7 +1563,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             )}
           </div>
 
-          <div className="rounded-xl bg-card-background backdrop-blur-xl px-4 py-3">
+          <div className="rounded-xl bg-card-background backdrop-blur-xl px-4 py-2">
             {/* Ticket Section */}
             {isCreateMode ? (
               <div className="flex items-start gap-2.5 pb-2">
@@ -1869,7 +1869,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             )}
 
             {/* Private Event Toggle */}
-            <div className="flex items-center gap-2.5 py-2 mt-2 border-t border-foreground/10">
+            <div className="flex items-center gap-2.5 py-2 border-t border-foreground/10">
               <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               <p className="text-sm font-medium text-foreground flex-1">Private Event</p>
               <button
@@ -1882,7 +1882,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             </div>
 
             {/* Require Approval Toggle */}
-            <div className="flex items-center gap-2.5 py-2 border-t border-foreground/10">
+            <div className="flex items-center gap-2.5 pt-2 border-t border-foreground/10">
               <UserCheck className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               <p className="text-sm font-medium text-foreground flex-1">Require Approval</p>
               <button
