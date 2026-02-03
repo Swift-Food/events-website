@@ -448,7 +448,7 @@ export default function UserProfileClient({
 
       {/* Events Timeline */}
       {!loading && !error && filteredEvents.length > 0 && (
-       <EventsTimeline events={filteredEvents} stickyTopClass="top-20" />
+       <EventsTimeline events={filteredEvents} stickyTopClass="top-2" />
       )}
 
       {/* Infinite scroll sentinel */}
