@@ -36,9 +36,11 @@ export default function DateTimePicker({
     setMounted(true);
   }, []);
 
-  // Calculate dropdown position
+  // Calculate dropdown position and update on scroll
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) return;
+
+    const updatePosition = () => {
       // For date picker, align with the card (triggerRef). For time picker, align with time button.
       const ref = activeView === "date"
         ? triggerRef.current
@@ -48,16 +50,27 @@ export default function DateTimePicker({
         const rect = ref.getBoundingClientRect();
 
         setDropdownPosition({
-          top: rect.bottom + window.scrollY + 8,
-          left: rect.left + window.scrollX,
+          top: rect.bottom + 8,
+          left: rect.left,
         });
-
-        // Scroll dropdown into view if needed
-        setTimeout(() => {
-          dropdownRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }, 10);
       }
-    }
+    };
+
+    updatePosition();
+
+    // Scroll dropdown into view if needed
+    setTimeout(() => {
+      dropdownRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, 10);
+
+    // Update position on scroll
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
+
+    return () => {
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+    };
   }, [isOpen, activeView]);
 
   // Close on outside click
@@ -133,7 +146,7 @@ export default function DateTimePicker({
     <div
       ref={dropdownRef}
       style={{
-        position: "absolute",
+        position: "fixed",
         top: dropdownPosition.top,
         left: dropdownPosition.left,
         width: activeView === "time" ? 100 : 280,
