@@ -1971,7 +1971,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
           {/* Organiser Terms Checkbox - Only shown in create mode */}
           {mode === "create" && (
-            <div ref={organizerTermsRef} className={`rounded-xl backdrop-blur-xl p-4 md:p-5 ${validationErrors.organizerTerms ? "bg-red-950 border border-red-500/30" : "bg-card-background"}`}>
+            <div ref={organizerTermsRef} className={`rounded-xl backdrop-blur-xl px-4 py-3 ${validationErrors.organizerTerms ? "bg-red-950 border border-red-500/30" : "bg-card-background"}`}>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
