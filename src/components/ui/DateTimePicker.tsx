@@ -152,7 +152,7 @@ export default function DateTimePicker({
         width: activeView === "time" ? 100 : 280,
         zIndex: 99999,
       }}
-      className="rounded-2xl bg-[#1a1a1a]/90 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden"
+      className="rounded-2xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl overflow-hidden"
     >
       {activeView === "date" ? (
         <CalendarPicker
