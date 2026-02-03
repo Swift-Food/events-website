@@ -1873,23 +1873,20 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 <p className="text-base font-semibold text-foreground">
                   Private Event
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Only people with invite link can get tickets
-                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsPrivate((prev) => !prev)}
-                className={`h-7 w-14 rounded-full transition-all ring-4 ring-white/10 ${
+                className={`h-5 w-10 rounded-full transition-all ${
                   isPrivate
                     ? "bg-primary"
                     : "bg-card-secondary-background"
                 }`}
               >
                 <span
-                  className={`block h-6 w-6 rounded-full transition-all ${
+                  className={`block h-4 w-4 rounded-full transition-all ${
                     isPrivate
-                      ? "translate-x-7 bg-primary-foreground"
+                      ? "translate-x-5.5 bg-primary-foreground"
                       : "translate-x-0.5 bg-foreground"
                   }`}
                 />
@@ -1902,23 +1899,20 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 <p className="text-base font-semibold text-foreground">
                   Require Approval
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Manually approve each ticket request
-                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setRequireApproval((prev) => !prev)}
-                className={`h-7 w-14 rounded-full transition-all ring-4 ring-white/10 ${
+                className={`h-5 w-10 rounded-full transition-all ${
                   requireApproval
                     ? "bg-primary"
                     : "bg-card-secondary-background"
                 }`}
               >
                 <span
-                  className={`block h-6 w-6 rounded-full transition-all ${
+                  className={`block h-4 w-4 rounded-full transition-all ${
                     requireApproval
-                      ? "translate-x-7 bg-primary-foreground"
+                      ? "translate-x-5.5 bg-primary-foreground"
                       : "translate-x-0.5 bg-foreground"
                   }`}
                 />
