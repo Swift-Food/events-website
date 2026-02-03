@@ -132,12 +132,12 @@ export default function EventDescriptionModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center bg-black/40 backdrop-blur-lg sm:p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center bg-black/40 backdrop-blur-sm sm:p-4"
       style={hasKeyboard ? { height: `${viewportHeight}px`, top: `${viewportOffset}px` } : {}}
     >
       <div
         style={hasKeyboard ? { maxHeight: `${viewportHeight}px` } : {}}
-        className={`flex h-full sm:h-[90vh] w-full sm:max-w-4xl flex-col rounded-t-2xl sm:rounded-2xl bg-card-background/80 shadow-2xl p-4 sm:p-6 text-foreground transition-transform duration-300 ease-out ${
+        className={`flex h-full sm:h-[90vh] w-full sm:max-w-4xl flex-col rounded-t-2xl sm:rounded-2xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl p-4 sm:p-6 text-white transition-transform duration-300 ease-out ${
           isVisible ? "translate-y-0" : "translate-y-full sm:translate-y-0"
         }`}
       >
@@ -149,7 +149,7 @@ export default function EventDescriptionModal({
             <button
               type="button"
               onClick={() => setIsEditMode(!isEditMode)}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors"
               aria-label={
                 isEditMode ? "Switch to preview mode" : "Switch to edit mode"
               }
@@ -169,7 +169,7 @@ export default function EventDescriptionModal({
             <button
               type="button"
               onClick={handleCancel}
-              className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+              className="p-1 text-white/60 hover:text-white transition-colors"
               aria-label="Close modal"
             >
               <X className="h-5 w-5" />
@@ -185,18 +185,18 @@ export default function EventDescriptionModal({
           />
         </div>
 
-        <div className="mt-4 flex flex-shrink-0 justify-end gap-3 pt-4 border-t border-foreground/10">
+        <div className="mt-4 flex flex-shrink-0 justify-end gap-3 pt-4 border-t border-white/10">
           <button
             type="button"
             onClick={handleCancel}
-            className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            className="px-6 py-2.5 text-sm font-medium text-white/60 hover:text-white transition-colors"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="rounded-lg bg-amber-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-amber-500 transition-colors"
           >
             Save
           </button>
@@ -205,23 +205,23 @@ export default function EventDescriptionModal({
 
       {/* Discard Changes Confirmation Modal */}
       {showDiscardModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/10 backdrop-blur-lg">
-          <div className="w-full max-w-sm mx-4 rounded-xl bg-card-background shadow-2xl">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-sm mx-4 rounded-xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl">
             <div className="p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-amber-500/10">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-amber-500/20">
                   <AlertTriangle className="h-5 w-5 text-amber-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Discard Changes?</h3>
+                <h3 className="text-lg font-semibold text-white">Discard Changes?</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-6">
+              <p className="text-sm text-white/60 mb-6">
                 You have unsaved changes. Are you sure you want to close without saving? Your changes will be lost.
               </p>
               <div className="flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={handleDiscardCancel}
-                  className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-white/60 hover:text-white transition-colors"
                 >
                   Keep Editing
                 </button>
