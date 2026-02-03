@@ -25,7 +25,6 @@ export default function DateTimePicker({
   const [activeView, setActiveView] = useState<"date" | "time">("date");
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
-  const dateButtonRef = useRef<HTMLButtonElement>(null);
   const timeButtonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
@@ -40,10 +39,10 @@ export default function DateTimePicker({
   // Calculate dropdown position
   useEffect(() => {
     if (isOpen) {
-      // Use the appropriate button ref based on active view
-      const buttonRef = activeView === "date" ? dateButtonRef.current : timeButtonRef.current;
-      const fallbackRef = triggerRef.current;
-      const ref = buttonRef || fallbackRef;
+      // For date picker, align with the card (triggerRef). For time picker, align with time button.
+      const ref = activeView === "date"
+        ? triggerRef.current
+        : (timeButtonRef.current || triggerRef.current);
 
       if (ref) {
         const rect = ref.getBoundingClientRect();
@@ -178,7 +177,6 @@ export default function DateTimePicker({
             {selectedDate ? (
               <>
                 <button
-                  ref={dateButtonRef}
                   type="button"
                   onClick={handleDateClick}
                   className="text-foreground hover:text-primary transition-colors font-medium"
@@ -197,7 +195,6 @@ export default function DateTimePicker({
               </>
             ) : (
               <button
-                ref={dateButtonRef}
                 type="button"
                 onClick={handleDateClick}
                 className="text-muted-foreground hover:text-foreground transition-colors"
