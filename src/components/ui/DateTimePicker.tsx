@@ -23,8 +23,10 @@ export default function DateTimePicker({
 }: DateTimePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeView, setActiveView] = useState<"date" | "time">("date");
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
+  const dateButtonRef = useRef<HTMLButtonElement>(null);
+  const timeButtonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -37,22 +39,28 @@ export default function DateTimePicker({
 
   // Calculate dropdown position
   useEffect(() => {
-    if (isOpen && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const dropdownHeight = activeView === "date" ? 360 : 300;
+    if (isOpen) {
+      // Use the appropriate button ref based on active view
+      const buttonRef = activeView === "date" ? dateButtonRef.current : timeButtonRef.current;
+      const fallbackRef = triggerRef.current;
+      const ref = buttonRef || fallbackRef;
 
-      // Check if dropdown would go off screen bottom
-      const spaceBelow = viewportHeight - rect.bottom;
-      const showAbove = spaceBelow < dropdownHeight && rect.top > dropdownHeight;
+      if (ref) {
+        const rect = ref.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const dropdownHeight = activeView === "date" ? 360 : 300;
 
-      setDropdownPosition({
-        top: showAbove
-          ? rect.top + window.scrollY - dropdownHeight - 8
-          : rect.bottom + window.scrollY + 8,
-        left: rect.left + window.scrollX,
-        width: rect.width,
-      });
+        // Check if dropdown would go off screen bottom
+        const spaceBelow = viewportHeight - rect.bottom;
+        const showAbove = spaceBelow < dropdownHeight && rect.top > dropdownHeight;
+
+        setDropdownPosition({
+          top: showAbove
+            ? rect.top + window.scrollY - dropdownHeight - 8
+            : rect.bottom + window.scrollY + 8,
+          left: rect.left + window.scrollX,
+        });
+      }
     }
   }, [isOpen, activeView]);
 
@@ -170,6 +178,7 @@ export default function DateTimePicker({
             {selectedDate ? (
               <>
                 <button
+                  ref={dateButtonRef}
                   type="button"
                   onClick={handleDateClick}
                   className="text-foreground hover:text-primary transition-colors font-medium"
@@ -178,6 +187,7 @@ export default function DateTimePicker({
                 </button>
                 <span className="text-muted-foreground">,</span>
                 <button
+                  ref={timeButtonRef}
                   type="button"
                   onClick={handleTimeClick}
                   className="text-foreground hover:text-primary transition-colors font-medium"
@@ -187,6 +197,7 @@ export default function DateTimePicker({
               </>
             ) : (
               <button
+                ref={dateButtonRef}
                 type="button"
                 onClick={handleDateClick}
                 className="text-muted-foreground hover:text-foreground transition-colors"
