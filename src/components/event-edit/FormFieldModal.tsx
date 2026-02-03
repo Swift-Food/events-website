@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, FileText, Plus, Trash2 } from "lucide-react";
 import { FormField, FormFieldType } from "@/types";
 
@@ -30,6 +31,12 @@ export default function FormFieldModal({
   const [localOptions, setLocalOptions] = useState<string[]>([]);
   const [newOption, setNewOption] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Mount state for portal (SSR safety)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Handle open/close animations
   useEffect(() => {
@@ -61,7 +68,7 @@ export default function FormFieldModal({
     }
   }, [isOpen, fieldToEdit]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const isSelectType =
     localType === "single-select" || localType === "multi-select";
@@ -105,7 +112,7 @@ export default function FormFieldModal({
     onClose();
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
       <div
@@ -289,6 +296,7 @@ export default function FormFieldModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
