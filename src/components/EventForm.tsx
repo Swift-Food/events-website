@@ -1589,7 +1589,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           </div>
 
           {/* Event Settings Card */}
-          <div className="rounded-xl bg-card-background backdrop-blur-xl px-4 py-2">
+          <div className="rounded-xl bg-card-background backdrop-blur-xl px-4 py-1">
             {/* Tickets info - Create mode only */}
             {isCreateMode && (
               <div className="flex items-start gap-2.5">
