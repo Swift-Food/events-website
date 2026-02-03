@@ -790,6 +790,7 @@ export default function EventPreviewModal({
                         title={event.address.name}
                         className="h-32 w-full !rounded-none"
                         placeId={event.address.placeId}
+                        disableInteraction
                       />
                     ) : (
                       <div className="h-32 w-full bg-card-secondary-background flex flex-col items-center justify-center gap-2">

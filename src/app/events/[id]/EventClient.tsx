@@ -766,7 +766,7 @@ export default function EventClient({
            ? "border-blue-500/40 bg-blue-500/25 text-blue-800 dark:text-blue-200 shadow-[0_0_12px_rgba(59,130,246,0.15)]"
            : userRole === "admin"
            ? "border-purple-500/40 bg-purple-500/25 text-purple-800 dark:text-purple-200 shadow-[0_0_12px_rgba(168,85,247,0.15)]"
-           : "border-amber-500/40 bg-amber-500/25 text-amber-800 dark:text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.15)]"
+           : "border-amber-500/40 bg-amber-500/45 text-amber-800 dark:text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.15)]"
          }`}>
           {userRole === "owner" && <Crown className="w-3.5 h-3.5" />}
           {userRole === "admin" && <Shield className="w-3.5 h-3.5" />}
@@ -1623,16 +1623,16 @@ export default function EventClient({
             !hasValidInvitation &&
             !hasUserTicket &&
             canRegister && (
-             <div className="mb-4 rounded-xl bg-purple-500/10 p-4">
+             <div className="mb-4 rounded-xl bg-card-secondary-background border border-primary/40 p-4">
               <div className="flex items-start gap-3">
-               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-500/20">
-                <Lock className="h-5 w-5 text-purple-400" />
+               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/20">
+                <Lock className="h-5 w-5 text-primary" />
                </div>
                <div>
-                <h3 className="font-semibold text-purple-400">
+                <h3 className="font-semibold text-foreground">
                  Private Event
                 </h3>
-                <p className="mt-1 text-sm text-purple-300/80">
+                <p className="mt-1 text-sm text-muted-foreground">
                  This is a private event. You&apos;ll need an
                  invite link from the organizer to register for
                  tickets.

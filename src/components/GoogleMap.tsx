@@ -9,6 +9,7 @@ interface GoogleMapProps {
   title?: string;
   className?: string;
   placeId?: string | null;
+  disableInteraction?: boolean;
 }
 
 export default function GoogleMap({
@@ -17,6 +18,7 @@ export default function GoogleMap({
   title = "Event Location",
   className = "",
   placeId,
+  disableInteraction = false,
 }: GoogleMapProps) {
   const handleMapClick = () => {
     if (placeId) {
@@ -105,8 +107,10 @@ export default function GoogleMap({
         zoom: 15,
         mapTypeControl: false,
         streetViewControl: false,
-        fullscreenControl: true,
-        zoomControl: true,
+        fullscreenControl: !disableInteraction,
+        zoomControl: !disableInteraction,
+        gestureHandling: disableInteraction ? "none" : "auto",
+        scrollwheel: !disableInteraction,
         styles: [
           {
             featureType: "all",
@@ -191,7 +195,7 @@ export default function GoogleMap({
         markerRef.current.setMap(null);
       }
     };
-  }, [latitude, longitude, title]);
+  }, [latitude, longitude, title, disableInteraction]);
 
   // Don't render if no valid coordinates
   if (!hasValidCoordinates) {
