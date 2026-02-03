@@ -1235,7 +1235,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 }}
                 placeholder="Event Name"
                 maxLength={80}
-                className={`w-full bg-transparent text-3xl md:text-5xl font-bold text-foreground outline-none placeholder:text-muted-foreground/40 ${validationErrors.eventName ? "text-red-400 placeholder:text-red-400/40" : ""}`}
+                className={`w-full bg-transparent text-3xl md:text-5xl font-bold text-foreground outline-none placeholder:text-muted-foreground/90 ${validationErrors.eventName ? "text-red-400 placeholder:text-red-400/40" : ""}`}
               />
               <div className={`text-xs ${validationErrors.eventName ? "text-red-400" : eventName.length >= 80 ? "text-amber-400" : "text-muted-foreground"}`}>
                 {validationErrors.eventName || `${eventName.length}/80 characters`}
@@ -1567,8 +1567,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             {/* Ticket Section */}
             {isCreateMode ? (
               <div className="flex items-start gap-2.5">
-                <Ticket className="h-4 w-4 text-muted-foreground mt-2.5 flex-shrink-0" />
-                <div className="flex-1 py-2 border-b border-foreground/10">
+                <Ticket className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <div className="flex-1 py-2">
                   <p className="text-sm font-medium text-foreground">Tickets</p>
                   <p className="text-xs text-muted-foreground">
                     Default &quot;General Admission&quot; ticket · Edit after creating
@@ -1867,7 +1867,10 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 )}
               </button>
             )}
+          </div>
 
+          {/* Event Settings Card */}
+          <div className="rounded-xl bg-card-background backdrop-blur-xl px-4 py-2">
             {/* Private Event Toggle */}
             <div className="flex items-center gap-2.5">
               <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -1897,7 +1900,6 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 </button>
               </div>
             </div>
-
           </div>
 
           {/* Visibility Toggle - Only shown in edit mode */}
