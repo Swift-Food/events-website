@@ -144,7 +144,7 @@ export default function EventCoverPicker({
         ))}
       </div>
     ) : currentImages.length === 0 ? (
-      <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+      <div className="flex items-center justify-center h-full text-white/60 text-sm">
         No images available
       </div>
     ) : (
@@ -156,7 +156,7 @@ export default function EventCoverPicker({
             onClick={() => handleImageClick(imageUrl)}
             className={`relative aspect-[4/3] rounded-xl overflow-hidden group transition-all cursor-pointer ${
               selectedImage === imageUrl
-                ? "ring-3 ring-primary ring-offset-2 ring-offset-card-background"
+                ? "ring-3 ring-amber-500 ring-offset-2 ring-offset-[#1a1a1a]"
                 : "hover:ring-2 hover:ring-white/20"
             }`}
           >
@@ -167,9 +167,9 @@ export default function EventCoverPicker({
               loading="lazy"
             />
             {selectedImage === imageUrl && (
-              <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                <div className="rounded-full bg-primary p-1.5">
-                  <Check className="h-4 w-4 text-primary-foreground" />
+              <div className="absolute inset-0 bg-amber-600/20 flex items-center justify-center">
+                <div className="rounded-full bg-amber-600 p-1.5">
+                  <Check className="h-4 w-4 text-white" />
                 </div>
               </div>
             )}
@@ -180,20 +180,20 @@ export default function EventCoverPicker({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 transition-opacity duration-200 ${
+      className={`fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4 transition-opacity duration-200 ${
         isAnimating ? "opacity-0" : "opacity-100"
       }`}
       onClick={handleBackdropClick}
     >
       <div
         ref={modalRef}
-        className={`w-full max-w-4xl h-[80vh] max-h-[700px] rounded-3xl bg-card-background backdrop-blur-2xl text-foreground flex flex-col overflow-hidden transition-transform duration-200 ${
-          isAnimating ? "scale-95" : "scale-100"
+        className={`w-full sm:max-w-4xl h-[85vh] sm:h-[80vh] sm:max-h-[700px] rounded-t-2xl sm:rounded-2xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 text-white flex flex-col overflow-hidden transition-transform duration-200 ${
+          isAnimating ? "translate-y-full sm:translate-y-0 sm:scale-95" : "translate-y-0 sm:scale-100"
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-foreground/10 shrink-0">
-          <h2 className="text-xl font-bold">Choose Cover</h2>
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/10 shrink-0">
+          <h2 className="text-lg sm:text-xl font-bold">Choose Cover</h2>
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -201,7 +201,7 @@ export default function EventCoverPicker({
                 onClose();
                 onUploadClick();
               }}
-              className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-foreground transition-all hover:bg-white/15"
+              className="hidden sm:flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-white/15"
             >
               <Upload className="h-4 w-4" />
               Upload your own
@@ -210,7 +210,7 @@ export default function EventCoverPicker({
               type="button"
               onClick={handleRandom}
               disabled={loading}
-              className="flex items-center gap-2 rounded-full bg-primary/20 px-4 py-2 text-sm font-medium text-primary transition-all hover:bg-primary/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 rounded-full bg-amber-600/20 px-4 py-2 text-sm font-medium text-amber-400 transition-all hover:bg-amber-600/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -224,15 +224,15 @@ export default function EventCoverPicker({
               onClick={onClose}
               className="rounded-full p-2 transition-colors hover:bg-white/10"
             >
-              <X className="h-5 w-5 text-muted-foreground" />
+              <X className="h-5 w-5 text-white/60" />
             </button>
           </div>
         </div>
 
         {/* Body: sidebar + grid */}
-        <div className="flex flex-1 min-h-0">
+        <div className="flex flex-1 min-h-0 overflow-hidden">
           {/* Category sidebar — desktop */}
-          <div className="hidden md:flex flex-col w-48 shrink-0 border-r border-foreground/10 overflow-y-auto py-2">
+          <div className="hidden md:flex flex-col w-48 shrink-0 border-r border-white/10 overflow-y-auto py-2">
             {loading ? (
               <div className="space-y-2 p-3">
                 {Array.from({ length: 8 }).map((_, i) => (
@@ -250,8 +250,8 @@ export default function EventCoverPicker({
                   onClick={() => setActiveCategory(category)}
                   className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-all ${
                     activeCategory === category
-                      ? "bg-primary/15 text-primary border-r-2 border-primary"
-                      : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                      ? "bg-amber-600/20 text-amber-400 border-r-2 border-amber-500"
+                      : "text-white/60 hover:bg-white/5 hover:text-white"
                   }`}
                 >
                   {formatCategoryName(category)}
@@ -261,8 +261,8 @@ export default function EventCoverPicker({
           </div>
 
           {/* Mobile layout */}
-          <div className="md:hidden flex flex-col min-h-0 flex-1">
-            <div className="flex gap-2 px-4 py-3 overflow-x-auto shrink-0 border-b border-foreground/10">
+          <div className="md:hidden flex flex-col min-h-0 flex-1 overflow-hidden">
+            <div className="flex gap-2 px-4 py-3 overflow-x-auto shrink-0 border-b border-white/10">
               {loading
                 ? Array.from({ length: 6 }).map((_, i) => (
                     <div
@@ -277,13 +277,27 @@ export default function EventCoverPicker({
                       onClick={() => setActiveCategory(category)}
                       className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                         activeCategory === category
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-white/5 text-muted-foreground hover:bg-white/10"
+                          ? "bg-amber-600 text-white"
+                          : "bg-white/10 text-white/60 hover:bg-white/15"
                       }`}
                     >
                       {formatCategoryName(category)}
                     </button>
                   ))}
+            </div>
+            {/* Mobile upload button */}
+            <div className="px-4 py-3 border-b border-white/10 sm:hidden">
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onUploadClick();
+                }}
+                className="flex items-center justify-center gap-2 w-full rounded-lg bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-white/15"
+              >
+                <Upload className="h-4 w-4" />
+                Upload your own
+              </button>
             </div>
             <div ref={imageGridRef} className="flex-1 overflow-y-auto p-4">
               {imageGrid("grid-cols-2")}
