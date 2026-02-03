@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Eye, EyeOff, Tags, Download, Shuffle } from "lucide-react";
+import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Eye, EyeOff, Tags, Download, Shuffle, Ticket, Lock, UserCheck } from "lucide-react";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import FormFieldModal from "@/components/event-edit/FormFieldModal";
@@ -1563,16 +1563,17 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             )}
           </div>
 
-          <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 md:p-5 space-y-5">
-            {/* Create Mode: Simplified ticket info */}
+          <div className="rounded-xl bg-card-background backdrop-blur-xl px-4 py-3">
+            {/* Ticket Section */}
             {isCreateMode ? (
-              <div>
-                <p className="text-base font-semibold text-foreground">
-                  Tickets
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  A free &quot;General Admission&quot; ticket will be created by default. You can customize ticket types after creating the event.
-                </p>
+              <div className="flex items-start gap-2.5 pb-2">
+                <Ticket className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Tickets</p>
+                  <p className="text-xs text-muted-foreground">
+                    Default &quot;General Admission&quot; ticket · Edit after creating
+                  </p>
+                </div>
               </div>
             ) : (
               /* Edit Mode: Full ticket management */
@@ -1602,7 +1603,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
             {/* Stripe Connect Warning for Paid Tickets - Edit mode only */}
             {!isCreateMode && hasPaidTickets && stripeConnectStatus && !stripeConnectStatus.onboardingComplete && (
-              <div ref={stripeConnectRef} className={`rounded-2xl p-4 ${validationErrors.stripeConnect ? "bg-red-950 border border-red-500/30" : "bg-amber-950 border border-amber-500/30"}`}>
+              <div ref={stripeConnectRef} className={`mt-5 rounded-2xl p-4 ${validationErrors.stripeConnect ? "bg-red-950 border border-red-500/30" : "bg-amber-950 border border-amber-500/30"}`}>
                 <div className="flex items-start gap-3">
                   <AlertTriangle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${validationErrors.stripeConnect ? "text-red-400" : "text-amber-400"}`} />
                   <div className="flex-1">
@@ -1644,7 +1645,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
             {/* List of Ticket Types - Edit mode only */}
             {!isCreateMode && ticketTypes.length > 0 && isTicketListExpanded && (
-              <div className="space-y-3">
+              <div className="mt-5 space-y-3">
                 {ticketTypes.map((ticket) => (
                   <div
                     key={ticket.id}
@@ -1868,54 +1869,28 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             )}
 
             {/* Private Event Toggle */}
-            <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
-              <div>
-                <p className="text-base font-semibold text-foreground">
-                  Private Event
-                </p>
-              </div>
+            <div className="flex items-center gap-2.5 py-2 mt-2 border-t border-foreground/10">
+              <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <p className="text-sm font-medium text-foreground flex-1">Private Event</p>
               <button
                 type="button"
                 onClick={() => setIsPrivate((prev) => !prev)}
-                className={`h-5 w-10 rounded-full transition-all ${
-                  isPrivate
-                    ? "bg-primary"
-                    : "bg-card-secondary-background"
-                }`}
+                className={`h-5 w-10 rounded-full transition-all ${isPrivate ? "bg-primary" : "bg-card-secondary-background"}`}
               >
-                <span
-                  className={`block h-4 w-4 rounded-full transition-all ${
-                    isPrivate
-                      ? "translate-x-5.5 bg-primary-foreground"
-                      : "translate-x-0.5 bg-foreground"
-                  }`}
-                />
+                <span className={`block h-4 w-4 rounded-full transition-all ${isPrivate ? "translate-x-5.5 bg-primary-foreground" : "translate-x-0.5 bg-foreground"}`} />
               </button>
             </div>
 
             {/* Require Approval Toggle */}
-            <div className="flex items-center justify-between pt-5 border-t border-foreground/10">
-              <div>
-                <p className="text-base font-semibold text-foreground">
-                  Require Approval
-                </p>
-              </div>
+            <div className="flex items-center gap-2.5 py-2 border-t border-foreground/10">
+              <UserCheck className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <p className="text-sm font-medium text-foreground flex-1">Require Approval</p>
               <button
                 type="button"
                 onClick={() => setRequireApproval((prev) => !prev)}
-                className={`h-5 w-10 rounded-full transition-all ${
-                  requireApproval
-                    ? "bg-primary"
-                    : "bg-card-secondary-background"
-                }`}
+                className={`h-5 w-10 rounded-full transition-all ${requireApproval ? "bg-primary" : "bg-card-secondary-background"}`}
               >
-                <span
-                  className={`block h-4 w-4 rounded-full transition-all ${
-                    requireApproval
-                      ? "translate-x-5.5 bg-primary-foreground"
-                      : "translate-x-0.5 bg-foreground"
-                  }`}
-                />
+                <span className={`block h-4 w-4 rounded-full transition-all ${requireApproval ? "translate-x-5.5 bg-primary-foreground" : "translate-x-0.5 bg-foreground"}`} />
               </button>
             </div>
 
