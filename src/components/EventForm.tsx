@@ -1564,31 +1564,44 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           </div>
 
           <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 md:p-5 space-y-5">
-            <div className="flex items-center justify-between">
+            {/* Create Mode: Simplified ticket info */}
+            {isCreateMode ? (
               <div>
                 <p className="text-base font-semibold text-foreground">
-                  Ticket Types
+                  Tickets
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {ticketTypes.length === 0
-                    ? "No tickets added"
-                    : `${ticketTypes.length} ticket type${
-                        ticketTypes.length > 1 ? "s" : ""
-                      }`}
+                  A free &quot;General Admission&quot; ticket will be created by default. You can customize ticket types after creating the event.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={handleAddTicketClick}
-                className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/80"
-              >
-                <Plus className="h-4 w-4" />
-                Add Ticket
-              </button>
-            </div>
+            ) : (
+              /* Edit Mode: Full ticket management */
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-base font-semibold text-foreground">
+                    Ticket Types
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {ticketTypes.length === 0
+                      ? "No tickets added"
+                      : `${ticketTypes.length} ticket type${
+                          ticketTypes.length > 1 ? "s" : ""
+                        }`}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddTicketClick}
+                  className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/80"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Ticket
+                </button>
+              </div>
+            )}
 
-            {/* Stripe Connect Warning for Paid Tickets */}
-            {hasPaidTickets && stripeConnectStatus && !stripeConnectStatus.onboardingComplete && (
+            {/* Stripe Connect Warning for Paid Tickets - Edit mode only */}
+            {!isCreateMode && hasPaidTickets && stripeConnectStatus && !stripeConnectStatus.onboardingComplete && (
               <div ref={stripeConnectRef} className={`rounded-2xl p-4 ${validationErrors.stripeConnect ? "bg-red-950 border border-red-500/30" : "bg-amber-950 border border-amber-500/30"}`}>
                 <div className="flex items-start gap-3">
                   <AlertTriangle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${validationErrors.stripeConnect ? "text-red-400" : "text-amber-400"}`} />
@@ -1629,8 +1642,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               </div>
             )}
 
-            {/* List of Ticket Types */}
-            {ticketTypes.length > 0 && isTicketListExpanded && (
+            {/* List of Ticket Types - Edit mode only */}
+            {!isCreateMode && ticketTypes.length > 0 && isTicketListExpanded && (
               <div className="space-y-3">
                 {ticketTypes.map((ticket) => (
                   <div
@@ -1831,8 +1844,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               </div>
             )}
 
-            {/* Expand/Collapse Button */}
-            {ticketTypes.length > 0 && (
+            {/* Expand/Collapse Button - Edit mode only */}
+            {!isCreateMode && ticketTypes.length > 0 && (
               <button
                 type="button"
                 onClick={() => setIsTicketListExpanded(!isTicketListExpanded)}
