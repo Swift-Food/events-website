@@ -1563,20 +1563,55 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             )}
           </div>
 
+          {/* Event Settings Card */}
           <div className="rounded-xl bg-card-background backdrop-blur-xl px-4 py-2">
-            {/* Ticket Section */}
-            {isCreateMode ? (
+            {/* Tickets info - Create mode only */}
+            {isCreateMode && (
               <div className="flex items-start gap-2.5">
-                <Ticket className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                <div className="flex-1 py-2">
+                <Ticket className="h-4 w-4 text-muted-foreground mt-2.5 flex-shrink-0" />
+                <div className="flex-1 py-2 border-b border-foreground/10">
                   <p className="text-sm font-medium text-foreground">Tickets</p>
                   <p className="text-xs text-muted-foreground">
                     Default &quot;General Admission&quot; ticket · Edit after creating
                   </p>
                 </div>
               </div>
-            ) : (
-              /* Edit Mode: Full ticket management */
+            )}
+
+            {/* Private Event Toggle */}
+            <div className="flex items-center gap-2.5">
+              <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <div className="flex-1 flex items-center justify-between py-2 border-b border-foreground/10">
+                <p className="text-sm font-medium text-foreground">Private Event</p>
+                <button
+                  type="button"
+                  onClick={() => setIsPrivate((prev) => !prev)}
+                  className={`h-5 w-10 rounded-full transition-all ${isPrivate ? "bg-primary" : "bg-card-secondary-background"}`}
+                >
+                  <span className={`block h-4 w-4 rounded-full transition-all ${isPrivate ? "translate-x-5.5 bg-primary-foreground" : "translate-x-0.5 bg-foreground"}`} />
+                </button>
+              </div>
+            </div>
+
+            {/* Require Approval Toggle */}
+            <div className="flex items-center gap-2.5">
+              <UserCheck className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <div className="flex-1 flex items-center justify-between py-2">
+                <p className="text-sm font-medium text-foreground">Require Approval</p>
+                <button
+                  type="button"
+                  onClick={() => setRequireApproval((prev) => !prev)}
+                  className={`h-5 w-10 rounded-full transition-all ${requireApproval ? "bg-primary" : "bg-card-secondary-background"}`}
+                >
+                  <span className={`block h-4 w-4 rounded-full transition-all ${requireApproval ? "translate-x-5.5 bg-primary-foreground" : "translate-x-0.5 bg-foreground"}`} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Ticket Types Card - Edit mode only */}
+          {!isCreateMode && (
+            <div className="rounded-xl bg-card-background backdrop-blur-xl px-4 py-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-base font-semibold text-foreground">
@@ -1599,10 +1634,9 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   Add Ticket
                 </button>
               </div>
-            )}
 
-            {/* Stripe Connect Warning for Paid Tickets - Edit mode only */}
-            {!isCreateMode && hasPaidTickets && stripeConnectStatus && !stripeConnectStatus.onboardingComplete && (
+              {/* Stripe Connect Warning for Paid Tickets */}
+              {hasPaidTickets && stripeConnectStatus && !stripeConnectStatus.onboardingComplete && (
               <div ref={stripeConnectRef} className={`mt-5 rounded-2xl p-4 ${validationErrors.stripeConnect ? "bg-red-950 border border-red-500/30" : "bg-amber-950 border border-amber-500/30"}`}>
                 <div className="flex items-start gap-3">
                   <AlertTriangle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${validationErrors.stripeConnect ? "text-red-400" : "text-amber-400"}`} />
@@ -1643,9 +1677,9 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               </div>
             )}
 
-            {/* List of Ticket Types - Edit mode only */}
-            {!isCreateMode && ticketTypes.length > 0 && isTicketListExpanded && (
-              <div className="mt-5 space-y-3">
+              {/* List of Ticket Types */}
+              {ticketTypes.length > 0 && isTicketListExpanded && (
+                <div className="mt-5 space-y-3">
                 {ticketTypes.map((ticket) => (
                   <div
                     key={ticket.id}
@@ -1845,62 +1879,30 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               </div>
             )}
 
-            {/* Expand/Collapse Button - Edit mode only */}
-            {!isCreateMode && ticketTypes.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setIsTicketListExpanded(!isTicketListExpanded)}
-                className="w-full flex items-center justify-center gap-2 py-2 transition-all hover:bg-white/5 rounded-xl cursor-pointer"
-              >
-                {isTicketListExpanded ? (
-                  <>
-                    <span className="text-sm text-muted-foreground">Hide tickets</span>
-                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                  </>
-                ) : (
-                  <>
-                    <span className="text-sm text-muted-foreground">
-                      Show {ticketTypes.length} ticket{ticketTypes.length > 1 ? "s" : ""}
-                    </span>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-
-          {/* Event Settings Card */}
-          <div className="rounded-xl bg-card-background backdrop-blur-xl px-4 py-2">
-            {/* Private Event Toggle */}
-            <div className="flex items-center gap-2.5">
-              <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <div className="flex-1 flex items-center justify-between py-2 border-b border-foreground/10">
-                <p className="text-sm font-medium text-foreground">Private Event</p>
+              {/* Expand/Collapse Button */}
+              {ticketTypes.length > 0 && (
                 <button
                   type="button"
-                  onClick={() => setIsPrivate((prev) => !prev)}
-                  className={`h-5 w-10 rounded-full transition-all ${isPrivate ? "bg-primary" : "bg-card-secondary-background"}`}
+                  onClick={() => setIsTicketListExpanded(!isTicketListExpanded)}
+                  className="w-full flex items-center justify-center gap-2 py-2 transition-all hover:bg-white/5 rounded-xl cursor-pointer"
                 >
-                  <span className={`block h-4 w-4 rounded-full transition-all ${isPrivate ? "translate-x-5.5 bg-primary-foreground" : "translate-x-0.5 bg-foreground"}`} />
+                  {isTicketListExpanded ? (
+                    <>
+                      <span className="text-sm text-muted-foreground">Hide tickets</span>
+                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-sm text-muted-foreground">
+                        Show {ticketTypes.length} ticket{ticketTypes.length > 1 ? "s" : ""}
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </>
+                  )}
                 </button>
-              </div>
+              )}
             </div>
-
-            {/* Require Approval Toggle */}
-            <div className="flex items-center gap-2.5">
-              <UserCheck className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <div className="flex-1 flex items-center justify-between py-2">
-                <p className="text-sm font-medium text-foreground">Require Approval</p>
-                <button
-                  type="button"
-                  onClick={() => setRequireApproval((prev) => !prev)}
-                  className={`h-5 w-10 rounded-full transition-all ${requireApproval ? "bg-primary" : "bg-card-secondary-background"}`}
-                >
-                  <span className={`block h-4 w-4 rounded-full transition-all ${requireApproval ? "translate-x-5.5 bg-primary-foreground" : "translate-x-0.5 bg-foreground"}`} />
-                </button>
-              </div>
-            </div>
-          </div>
+          )}
 
           {/* Visibility Toggle - Only shown in edit mode */}
           {mode === "edit" && onPublishToggle && (
