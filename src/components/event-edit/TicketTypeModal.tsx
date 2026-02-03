@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, Ticket, Plus, Edit, Trash2, ChevronUp, ChevronDown, ChevronRight, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Infinity, Users, Settings } from "lucide-react";
 import { TicketType, FormField } from "@/types";
 import FormFieldModal from "./FormFieldModal";
@@ -76,6 +77,12 @@ export default function TicketTypeModal({
   const [localMaxGroupSize, setLocalMaxGroupSize] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Mount state for portal (SSR safety)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Collapsible section state
   const [settingsExpanded, setSettingsExpanded] = useState(false);
@@ -135,7 +142,7 @@ export default function TicketTypeModal({
     }
   }, [isOpen, ticketToEdit]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const handleSave = async () => {
     // Validate
@@ -284,7 +291,7 @@ export default function TicketTypeModal({
     });
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
       <div
@@ -730,6 +737,7 @@ export default function TicketTypeModal({
         onSave={handleSaveQuestion}
         fieldToEdit={questionToEdit}
       />
-    </div>
+    </div>,
+    document.body
   );
 }
