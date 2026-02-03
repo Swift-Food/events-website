@@ -148,7 +148,7 @@ export default function CategoryModal({
       ref={dropdownRef}
       className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
     >
-      <div className="p-4 space-y-3 max-h-[60vh] overflow-hidden flex flex-col">
+      <div className="p-3 space-y-2 max-h-[60vh] overflow-hidden flex flex-col">
         {/* Search Input */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
@@ -158,7 +158,7 @@ export default function CategoryModal({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search categories..."
-            className="w-full rounded-lg bg-white/10 pl-10 pr-4 py-2.5 text-sm text-white outline-none placeholder:text-white/40 border border-white/10 focus:border-amber-500/50 transition-all"
+            className="w-full rounded-lg bg-white/10 pl-9 pr-3 py-2 text-sm text-white outline-none placeholder:text-white/40 border border-white/10 focus:border-amber-500/50 transition-all"
           />
         </div>
 
@@ -200,27 +200,27 @@ export default function CategoryModal({
                       <button
                         type="button"
                         onClick={() => toggleCategory(category.id)}
-                        className={`flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
+                        className={`flex-1 flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-left transition-all ${
                           isSelected
                             ? "bg-amber-600/20 border border-amber-500/30"
                             : "hover:bg-white/5 border border-transparent"
                         }`}
                       >
                         <div
-                          className={`h-5 w-5 rounded flex items-center justify-center border transition-all ${
+                          className={`h-4 w-4 rounded flex items-center justify-center border transition-all shrink-0 ${
                             isSelected
                               ? "bg-amber-600 border-amber-600"
                               : "border-white/20 bg-transparent"
                           }`}
                         >
-                          {isSelected && <Check className="h-3 w-3 text-white" />}
+                          {isSelected && <Check className="h-2.5 w-2.5 text-white" />}
                         </div>
                         <div className="flex-1">
                           <span className={`text-sm font-medium ${isSelected ? "text-white" : "text-white/80"}`}>
                             {getCategoryLabel(category.name)}
                           </span>
                           {category.description && (
-                            <p className="text-xs text-white/50 mt-0.5 line-clamp-1">
+                            <p className="text-xs text-white/50 line-clamp-1">
                               {category.description}
                             </p>
                           )}
@@ -256,7 +256,7 @@ export default function CategoryModal({
                               key={subcategory.id}
                               type="button"
                               onClick={() => toggleSubcategory(subcategory.id, category.id)}
-                              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all hover:bg-white/5"
+                              className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-left transition-all hover:bg-white/5"
                             >
                               <div
                                 className={`h-4 w-4 rounded flex items-center justify-center border transition-all ${
@@ -287,7 +287,7 @@ export default function CategoryModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-full rounded-lg bg-amber-600 py-2.5 text-sm font-semibold text-white transition-all hover:bg-amber-500"
+            className="w-full rounded-lg bg-amber-600 py-2 text-sm font-semibold text-white transition-all hover:bg-amber-500"
           >
             Done
           </button>
