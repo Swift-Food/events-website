@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
 import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Eye, EyeOff, Tags, Download, Shuffle, Ticket, Lock, UserCheck } from "lucide-react";
+import DateTimePicker from "@/components/ui/DateTimePicker";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import FormFieldModal from "@/components/event-edit/FormFieldModal";
@@ -1281,17 +1282,17 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                     Start
                   </label>
                   <div className="flex-1">
-                    <input
-                      type="datetime-local"
+                    <DateTimePicker
                       value={start}
-                      min={externalEventUrl ? undefined : new Date().toISOString().slice(0, 16)}
-                      onChange={(e) => {
-                        setStart(e.target.value);
+                      onChange={(value) => {
+                        setStart(value);
                         if (validationErrors.startTime) {
                           setValidationErrors(prev => ({ ...prev, startTime: undefined }));
                         }
                       }}
-                      className={`w-full rounded-xl bg-card-background px-4 py-3.5 text-foreground outline-none ${validationErrors.startTime ? "ring-2 ring-red-400/50" : ""}`}
+                      minDate={externalEventUrl ? undefined : new Date()}
+                      error={!!validationErrors.startTime}
+                      placeholder="Select start date & time"
                     />
                     {validationErrors.startTime && (
                       <p className="text-xs text-red-400 mt-1">{validationErrors.startTime}</p>
@@ -1304,16 +1305,16 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                     End
                   </label>
                   <div className="flex-1">
-                    <input
-                      type="datetime-local"
+                    <DateTimePicker
                       value={end}
-                      onChange={(e) => {
-                        setEnd(e.target.value);
+                      onChange={(value) => {
+                        setEnd(value);
                         if (validationErrors.endTime) {
                           setValidationErrors(prev => ({ ...prev, endTime: undefined }));
                         }
                       }}
-                      className={`w-full rounded-xl bg-card-background px-4 py-3.5 text-foreground outline-none ${validationErrors.endTime ? "ring-2 ring-red-400/50" : ""}`}
+                      error={!!validationErrors.endTime}
+                      placeholder="Select end date & time"
                     />
                     {validationErrors.endTime && (
                       <p className="text-xs text-red-400 mt-1">{validationErrors.endTime}</p>
