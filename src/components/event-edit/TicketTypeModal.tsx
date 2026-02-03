@@ -355,7 +355,7 @@ export default function TicketTypeModal({
             <label className="text-sm font-medium text-white block mb-1.5">
               Price
             </label>
-            <div className="flex items-center gap-3">
+            <div className="flex items-start gap-3">
               <div className="flex-1">
                 {localIsFree ? (
                   <div className="h-11 flex items-center rounded-xl bg-white/10 px-4">
