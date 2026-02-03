@@ -1245,7 +1245,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           )}
         </section>
 
-        <section className="flex-1 space-y-6">
+        <section className="flex-1 space-y-3">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-1">
               <input
@@ -1402,14 +1402,9 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                       </p>
                     </>
                   ) : (
-                    <>
-                      <p className="text-sm font-medium text-foreground">
-                        Event Categories
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Select categories to help people discover your event
-                      </p>
-                    </>
+                    <p className="text-sm font-medium text-foreground">
+                      Event Categories
+                    </p>
                   )}
                 </div>
                 {selectedCategoryIds.length > 0 || selectedSubcategoryIds.length > 0 ? (
