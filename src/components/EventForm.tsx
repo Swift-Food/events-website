@@ -4,13 +4,39 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import { Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, X, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Eye, EyeOff, Tags, Download, Shuffle, Ticket, Lock, UserCheck } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  Plus,
+  ChevronDown,
+  ChevronUp,
+  MapPin,
+  X,
+  HelpCircle,
+  MessageSquare,
+  AlignLeft,
+  CircleDot,
+  CheckSquare,
+  Eye,
+  EyeOff,
+  Tags,
+  Download,
+  Shuffle,
+  Ticket,
+  Lock,
+  UserCheck,
+} from "lucide-react";
 import DateTimePicker from "@/components/ui/DateTimePicker";
 import EventDescriptionModal from "@/components/event-edit/EventDescriptionModal";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import FormFieldModal from "@/components/event-edit/FormFieldModal";
-import LocationModal, { LocationEditMode } from "@/components/event-edit/LocationModal";
-import { VenueCard, VirtualLinkCard } from "@/components/event-edit/LocationCards";
+import LocationModal, {
+  LocationEditMode,
+} from "@/components/event-edit/LocationModal";
+import {
+  VenueCard,
+  VirtualLinkCard,
+} from "@/components/event-edit/LocationCards";
 import CategoryModal from "@/components/event-edit/CategoryModal";
 import ImportEventModal from "@/components/event-edit/ImportEventModal";
 import EventCoverPicker from "@/components/event-edit/EventCoverPicker";
@@ -19,7 +45,18 @@ import {
   EventCreationProvider,
   useEventCreation,
 } from "@/context/EventCreationContext";
-import { resolveTheme, getThemeCSSVariables, PALETTE_MAP, SHADER_MAP, LANDSCAPE_MAP, ALL_PALETTES, SHADER_PRESETS, LANDSCAPE_OPTIONS, PATTERN_OPTIONS, getPatternPreviewCSS } from "@/lib/theme-presets";
+import {
+  resolveTheme,
+  getThemeCSSVariables,
+  PALETTE_MAP,
+  SHADER_MAP,
+  LANDSCAPE_MAP,
+  ALL_PALETTES,
+  SHADER_PRESETS,
+  LANDSCAPE_OPTIONS,
+  PATTERN_OPTIONS,
+  getPatternPreviewCSS,
+} from "@/lib/theme-presets";
 import type { EventThemeConfig, BackgroundType } from "@/types/event/theme";
 import ThemePicker from "@/components/theme/ThemePicker";
 import InlineThemePicker from "@/components/theme/InlineThemePicker";
@@ -35,7 +72,10 @@ import { categoriesApi } from "@/services/categories";
 import { eventCoverService } from "@/services/event-cover.service";
 import { useCategoriesContext } from "@/lib/categories-context";
 import { CreateEventDto, QuestionType, CreateEventTicketDto } from "@/types";
-import type { EventTicketResponseDto, QuestionBlock } from "@/types/event-ticket/response/ticket.dto";
+import type {
+  EventTicketResponseDto,
+  QuestionBlock,
+} from "@/types/event-ticket/response/ticket.dto";
 import type { StripeConnectStatus } from "@/types/payment";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -76,7 +116,16 @@ interface EventFormProps {
   fullPage?: boolean;
 }
 
-function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishToggle, isPublishLoading, onSaveSuccess, fullPage }: EventFormProps) {
+function EventFormInner({
+  mode,
+  eventId,
+  initialData,
+  eventStatus,
+  onPublishToggle,
+  isPublishLoading,
+  onSaveSuccess,
+  fullPage,
+}: EventFormProps) {
   const {
     eventName,
     setEventName,
@@ -145,7 +194,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   const resolvedTheme = useMemo(() => resolveTheme(eventTheme), [eventTheme]);
   const themeCSSVars = useMemo(
     () => (showLiveTheme ? getThemeCSSVariables(resolvedTheme.palette) : {}),
-    [resolvedTheme.palette, showLiveTheme]
+    [resolvedTheme.palette, showLiveTheme],
   );
 
   // Apply theme CSS variables to document root so navbar inherits them
@@ -164,13 +213,20 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   const [isTicketTypeModalOpen, setIsTicketTypeModalOpen] = useState(false);
   const [ticketToEdit, setTicketToEdit] = useState<TicketType | null>(null);
   const [isTicketListExpanded, setIsTicketListExpanded] = useState(true);
-  const [collapsedTickets, setCollapsedTickets] = useState<Set<string>>(new Set());
+  const [collapsedTickets, setCollapsedTickets] = useState<Set<string>>(
+    new Set(),
+  );
   const [isFormFieldModalOpen, setIsFormFieldModalOpen] = useState(false);
   const [fieldToEdit, setFieldToEdit] = useState<FormField | null>(null);
-  const [activeTicketIdForQuestions, setActiveTicketIdForQuestions] = useState<string | null>(null);
-  const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
+  const [activeTicketIdForQuestions, setActiveTicketIdForQuestions] = useState<
+    string | null
+  >(null);
+  const [editingQuestionIndex, setEditingQuestionIndex] = useState<
+    number | null
+  >(null);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
-  const [locationEditMode, setLocationEditMode] = useState<LocationEditMode>(null);
+  const [locationEditMode, setLocationEditMode] =
+    useState<LocationEditMode>(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
@@ -195,16 +251,21 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [originalTickets, setOriginalTickets] = useState<TicketType[]>([]);
-  const [stripeConnectStatus, setStripeConnectStatus] = useState<StripeConnectStatus | null>(null);
+  const [stripeConnectStatus, setStripeConnectStatus] =
+    useState<StripeConnectStatus | null>(null);
   const [isLoadingStripeStatus, setIsLoadingStripeStatus] = useState(false);
   const [isStartingOnboarding, setIsStartingOnboarding] = useState(false);
 
   // Categories state
-  const [availableCategories, setAvailableCategories] = useState<EventCategoryResponseDto[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<
+    EventCategoryResponseDto[]
+  >([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
   // Validation errors state
-  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
+    {},
+  );
 
   console.log("Ticket Types: ", ticketTypes);
 
@@ -334,52 +395,65 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
       // Load categories (store category IDs)
       if (initialData.categories && initialData.categories.length > 0) {
-        const categoryIds = initialData.categories.map((cat: any) => cat.id as string);
+        const categoryIds = initialData.categories.map(
+          (cat: any) => cat.id as string,
+        );
         setSelectedCategoryIds(categoryIds);
       }
 
       // Load subcategories (store subcategory IDs)
       if (initialData.subcategories && initialData.subcategories.length > 0) {
-        const subcategoryIds = initialData.subcategories.map((sub: any) => sub.id as string);
+        const subcategoryIds = initialData.subcategories.map(
+          (sub: any) => sub.id as string,
+        );
         setSelectedSubcategoryIds(subcategoryIds);
       }
 
       // Load tickets with their questions
       if (initialData.eventTickets && initialData.eventTickets.length > 0) {
-        const ticketsToLoad = initialData.eventTickets.map((ticket: EventTicketResponseDto, index: number) => {
-          const price = parseFloat(ticket.price) || 0;
+        const ticketsToLoad = initialData.eventTickets.map(
+          (ticket: EventTicketResponseDto, index: number) => {
+            const price = parseFloat(ticket.price) || 0;
 
-          // Map question form for this ticket
-          const questionForm = (ticket.questionForm || []).map(
-            (question: QuestionBlock, qIndex: number) => {
-              let fieldType: "short-text" | "long-text" | "single-select" | "multi-select" = "short-text";
-              if (question.type === "longText") fieldType = "long-text";
-              else if (question.type === "singleSelect") fieldType = "single-select";
-              else if (question.type === "multiSelect") fieldType = "multi-select";
-              else if (question.type === "shortText") fieldType = "short-text";
+            // Map question form for this ticket
+            const questionForm = (ticket.questionForm || []).map(
+              (question: QuestionBlock, qIndex: number) => {
+                let fieldType:
+                  | "short-text"
+                  | "long-text"
+                  | "single-select"
+                  | "multi-select" = "short-text";
+                if (question.type === "longText") fieldType = "long-text";
+                else if (question.type === "singleSelect")
+                  fieldType = "single-select";
+                else if (question.type === "multiSelect")
+                  fieldType = "multi-select";
+                else if (question.type === "shortText")
+                  fieldType = "short-text";
 
-              return {
-                id: `field-${qIndex}`,
-                question: question.question,
-                type: fieldType,
-                options: question.options || [],
-                required: question.required,
-              };
-            }
-          );
+                return {
+                  id: `field-${qIndex}`,
+                  question: question.question,
+                  type: fieldType,
+                  options: question.options || [],
+                  required: question.required,
+                };
+              },
+            );
 
-          return {
-            id: ticket.id || `ticket-${index}`,
-            name: ticket.name,
-            description: ticket.description || "",
-            isFree: price === 0,
-            price: price,
-            isSingleUse: ticket.isSingleUse ?? true,
-            quantity: ticket.quantityTotal || 100,
-            questionForm: questionForm,
-            maxGroupSize: ticket.maxGroupSize ?? 1,
-          };
-        });
+            return {
+              id: ticket.id || `ticket-${index}`,
+              name: ticket.name,
+              description: ticket.description || "",
+              isFree: price === 0,
+              price: price,
+              isSingleUse: ticket.isSingleUse ?? true,
+              quantity: ticket.quantityTotal || 100,
+              questionForm: questionForm,
+              maxGroupSize: ticket.maxGroupSize ?? 1,
+            };
+          },
+        );
 
         // Set tickets directly (replaces existing tickets)
         setTicketTypes(ticketsToLoad);
@@ -464,7 +538,9 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
       }
     } catch (error: any) {
       console.error("Error starting Stripe onboarding:", error);
-      toast.error(error.response?.data?.message || "Failed to start payment setup");
+      toast.error(
+        error.response?.data?.message || "Failed to start payment setup",
+      );
     } finally {
       setIsStartingOnboarding(false);
     }
@@ -477,7 +553,9 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
       const status = await paymentService.getStripeConnectStatus();
       setStripeConnectStatus(status);
       if (status.onboardingComplete) {
-        toast.success("Payment setup complete! You can now create paid tickets.");
+        toast.success(
+          "Payment setup complete! You can now create paid tickets.",
+        );
       }
     } catch (error) {
       console.error("Error refreshing Stripe status:", error);
@@ -535,14 +613,18 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
     // Validate virtual meeting URL for virtual/hybrid events
     if (
-      (eventFormat === EventFormat.VIRTUAL || eventFormat === EventFormat.BOTH) &&
+      (eventFormat === EventFormat.VIRTUAL ||
+        eventFormat === EventFormat.BOTH) &&
       !virtualMeetingUrl.trim()
     ) {
       errors.virtualMeetingUrl = "Virtual meeting URL is required";
     }
 
     // Validate location for in-person/hybrid events
-    if (eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH) {
+    if (
+      eventFormat === EventFormat.IN_PERSON ||
+      eventFormat === EventFormat.BOTH
+    ) {
       if (!addressLine1) {
         errors.addressLine1 = "Address is required";
       }
@@ -557,7 +639,10 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     }
 
     // Check Stripe Connect for paid tickets
-    if (hasPaidTickets && (!stripeConnectStatus || !stripeConnectStatus.onboardingComplete)) {
+    if (
+      hasPaidTickets &&
+      (!stripeConnectStatus || !stripeConnectStatus.onboardingComplete)
+    ) {
       errors.stripeConnect = "Payment setup required for paid tickets";
     }
 
@@ -588,17 +673,42 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
       // Scroll to the first field with an error
       const scrollToFirstError = () => {
         if (errors.eventName && eventNameRef.current) {
-          eventNameRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+          eventNameRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
         } else if (errors.startTime && startTimeRef.current) {
-          startTimeRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+          startTimeRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
         } else if (errors.endTime && endTimeRef.current) {
-          endTimeRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-        } else if ((errors.eventFormat || errors.virtualMeetingUrl || errors.addressLine1 || errors.city || errors.postcode) && locationRef.current) {
-          locationRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+          endTimeRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        } else if (
+          (errors.eventFormat ||
+            errors.virtualMeetingUrl ||
+            errors.addressLine1 ||
+            errors.city ||
+            errors.postcode) &&
+          locationRef.current
+        ) {
+          locationRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
         } else if (errors.stripeConnect && stripeConnectRef.current) {
-          stripeConnectRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+          stripeConnectRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
         } else if (errors.organizerTerms && organizerTermsRef.current) {
-          organizerTermsRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+          organizerTermsRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
         }
       };
 
@@ -619,7 +729,10 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     try {
       // Map tickets to API format
       const ticketsPayload = ticketTypes.map((ticket) => ({
-        id: mode === "edit" && originalTickets.some(t => t.id === ticket.id) ? ticket.id : undefined,
+        id:
+          mode === "edit" && originalTickets.some((t) => t.id === ticket.id)
+            ? ticket.id
+            : undefined,
         name: ticket.name,
         description: ticket.description || "",
         price: ticket.isFree ? 0 : ticket.price,
@@ -650,28 +763,34 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
         isPrivate: isPrivate,
         requiresApproval: requireApproval,
         // Only include hideFullAddress for in-person/hybrid events
-        hideFullAddress: (eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH)
-          ? hideFullAddress
-          : undefined,
+        hideFullAddress:
+          eventFormat === EventFormat.IN_PERSON ||
+          eventFormat === EventFormat.BOTH
+            ? hideFullAddress
+            : undefined,
         format: eventFormat ?? undefined,
         // Only include virtualMeetingUrl for virtual/hybrid events
-        virtualMeetingUrl: (eventFormat === EventFormat.VIRTUAL || eventFormat === EventFormat.BOTH)
-          ? (virtualMeetingUrl || undefined)
-          : undefined,
+        virtualMeetingUrl:
+          eventFormat === EventFormat.VIRTUAL ||
+          eventFormat === EventFormat.BOTH
+            ? virtualMeetingUrl || undefined
+            : undefined,
         // Only include addressData for in-person/hybrid events
-        addressData: (eventFormat === EventFormat.IN_PERSON || eventFormat === EventFormat.BOTH)
-          ? {
-              name: venueName || undefined,
-              addressLine1: addressLine1,
-              addressLine2: addressLine2 || undefined,
-              city: city,
-              zipcode: postcode,
-              location:
-                latitude !== null && longitude !== null
-                  ? { latitude, longitude }
-                  : undefined,
-            }
-          : undefined,
+        addressData:
+          eventFormat === EventFormat.IN_PERSON ||
+          eventFormat === EventFormat.BOTH
+            ? {
+                name: venueName || undefined,
+                addressLine1: addressLine1,
+                addressLine2: addressLine2 || undefined,
+                city: city,
+                zipcode: postcode,
+                location:
+                  latitude !== null && longitude !== null
+                    ? { latitude, longitude }
+                    : undefined,
+              }
+            : undefined,
         categoryIds: selectedCategoryIds,
         subcategoryIds: selectedSubcategoryIds,
         eventUrl: undefined,
@@ -683,7 +802,9 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
       if (mode === "create") {
         // Create event with tickets
-        const response = await eventService.createEvent(eventData as CreateEventDto);
+        const response = await eventService.createEvent(
+          eventData as CreateEventDto,
+        );
         if (response.success) {
           createdOrUpdatedEventId = response.event.id;
           toast.success("Event created successfully!");
@@ -709,7 +830,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     } catch (error: any) {
       console.error(
         `Error ${mode === "create" ? "creating" : "updating"} event:`,
-        error
+        error,
       );
 
       if (error.response?.status === 401) {
@@ -721,7 +842,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
         toast.error(
           `Failed to ${
             mode === "create" ? "create" : "update"
-          } event. Please try again.`
+          } event. Please try again.`,
         );
       }
     } finally {
@@ -742,7 +863,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     (_croppedArea: Area, croppedAreaPixels: Area) => {
       setCroppedAreaPixels(croppedAreaPixels);
     },
-    []
+    [],
   );
 
   const createImage = (url: string): Promise<HTMLImageElement> =>
@@ -755,7 +876,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
   const getCroppedImg = async (
     imageSrc: string,
-    pixelCrop: Area
+    pixelCrop: Area,
   ): Promise<string> => {
     const image = await createImage(imageSrc);
     const canvas = document.createElement("canvas");
@@ -777,7 +898,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
       0,
       0,
       pixelCrop.width,
-      pixelCrop.height
+      pixelCrop.height,
     );
 
     return new Promise((resolve) => {
@@ -798,12 +919,15 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
       setIsUploadingImage(true);
 
       // First, crop the image locally
-      const croppedImageBlob = await getCroppedImg(imageToCrop, croppedAreaPixels);
+      const croppedImageBlob = await getCroppedImg(
+        imageToCrop,
+        croppedAreaPixels,
+      );
 
       // Upload the cropped image to the server
       const uploadedImageUrl = await imageService.uploadImageFromBlob(
         croppedImageBlob,
-        coverName
+        coverName,
       );
 
       // Store the server URL instead of the blob URL
@@ -842,7 +966,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
       const allCovers = await eventCoverService.getAll();
       const categories = Object.keys(allCovers);
       if (categories.length === 0) return;
-      const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+      const randomCategory =
+        categories[Math.floor(Math.random() * categories.length)];
       const images = allCovers[randomCategory];
       if (!images || images.length === 0) return;
       const randomImage = images[Math.floor(Math.random() * images.length)];
@@ -886,7 +1011,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   };
 
   const handleDeleteTicket = (ticketId: string) => {
-    const ticketToDelete = ticketTypes.find(t => t.id === ticketId);
+    const ticketToDelete = ticketTypes.find((t) => t.id === ticketId);
     if (!ticketToDelete) return;
 
     const ticketName = ticketToDelete.name;
@@ -897,7 +1022,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   };
 
   const toggleTicketCollapse = (ticketId: string) => {
-    setCollapsedTickets(prev => {
+    setCollapsedTickets((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(ticketId)) {
         newSet.delete(ticketId);
@@ -949,7 +1074,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
   const handleEditQuestion = (ticketId: string, questionIndex: number) => {
     const ticket = ticketTypes.find((t) => t.id === ticketId);
-    if (!ticket || !ticket.questionForm || !ticket.questionForm[questionIndex]) return;
+    if (!ticket || !ticket.questionForm || !ticket.questionForm[questionIndex])
+      return;
 
     const question = ticket.questionForm[questionIndex];
     setActiveTicketIdForQuestions(ticketId);
@@ -985,7 +1111,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     if (editingQuestionIndex !== null) {
       // Editing existing question
       updatedQuestions = currentQuestions.map((q, idx) =>
-        idx === editingQuestionIndex ? field : q
+        idx === editingQuestionIndex ? field : q,
       );
     } else {
       // Adding new question
@@ -1010,18 +1136,24 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
     const question = ticket.questionForm[questionIndex];
     const confirmed = confirm(
-      `Are you sure you want to delete the question "${question.question}"?`
+      `Are you sure you want to delete the question "${question.question}"?`,
     );
     if (!confirmed) return;
 
-    const updatedQuestions = ticket.questionForm.filter((_, idx) => idx !== questionIndex);
+    const updatedQuestions = ticket.questionForm.filter(
+      (_, idx) => idx !== questionIndex,
+    );
     updateTicketType({
       ...ticket,
       questionForm: updatedQuestions,
     });
   };
 
-  const handleMoveQuestion = (ticketId: string, fromIndex: number, direction: "up" | "down") => {
+  const handleMoveQuestion = (
+    ticketId: string,
+    fromIndex: number,
+    direction: "up" | "down",
+  ) => {
     const ticket = ticketTypes.find((t) => t.id === ticketId);
     if (!ticket || !ticket.questionForm) return;
 
@@ -1029,8 +1161,10 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     if (toIndex < 0 || toIndex >= ticket.questionForm.length) return;
 
     const reorderedQuestions = [...ticket.questionForm];
-    [reorderedQuestions[fromIndex], reorderedQuestions[toIndex]] =
-      [reorderedQuestions[toIndex], reorderedQuestions[fromIndex]];
+    [reorderedQuestions[fromIndex], reorderedQuestions[toIndex]] = [
+      reorderedQuestions[toIndex],
+      reorderedQuestions[fromIndex],
+    ];
 
     updateTicketType({
       ...ticket,
@@ -1041,7 +1175,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
   const handleClearForm = () => {
     if (
       confirm(
-        "Are you sure you want to clear the entire form? This action cannot be undone."
+        "Are you sure you want to clear the entire form? This action cannot be undone.",
       )
     ) {
       clearForm();
@@ -1054,9 +1188,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
   return (
     <div
-      className={`relative flex min-h-[calc(100vh-64px)] justify-center px-3 md:px-6 pb-4 transition-colors duration-300 ${
-        ""
-      }`}
+      className={`relative flex min-h-[calc(100vh-64px)] justify-center px-3 md:px-6 pb-4 transition-colors duration-300 ${""}`}
       style={showLiveTheme ? (themeCSSVars as React.CSSProperties) : undefined}
     >
       {/* Theme background layer for landscape/shader/pattern */}
@@ -1091,18 +1223,18 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             <div className="absolute bottom-4 right-4 flex flex-wrap gap-2">
               <button
                 type="button"
+                onClick={() => setIsCoverPickerOpen(true)}
+                className="rounded-full bg-primary/90 backdrop-blur-md px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary hover:scale-105 cursor-pointer"
+              >
+                Change cover
+              </button>
+              <button
+                type="button"
                 onClick={handleRandomizeCover}
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/90 backdrop-blur-md text-primary-foreground transition-all hover:bg-primary hover:scale-105 cursor-pointer"
                 aria-label="Randomize cover"
               >
                 <Shuffle className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsCoverPickerOpen(true)}
-                className="rounded-full bg-primary/90 backdrop-blur-md px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary hover:scale-105 cursor-pointer"
-              >
-                Change cover
               </button>
             </div>
             <input
@@ -1149,58 +1281,86 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 className="flex flex-1 items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer"
               >
                 <div className="flex h-8 w-8 rounded-lg overflow-hidden shrink-0">
-                  {eventTheme.type === "shader" ? (
-                    (() => {
-                      const shader = SHADER_MAP[eventTheme.shaderPreset ?? ""];
-                      return shader ? (
-                        <div className="flex items-center justify-center w-full h-full" style={{ background: resolvedTheme.palette.pageBackground }}>
-                          <div className="flex -space-x-1.5">
-                            {[shader.color1, shader.color2, shader.color3].map((c, i) => (
-                              <div key={i} className="w-3 h-3 rounded-full" style={{ backgroundColor: c, zIndex: 3 - i }} />
-                            ))}
+                  {eventTheme.type === "shader"
+                    ? (() => {
+                        const shader =
+                          SHADER_MAP[eventTheme.shaderPreset ?? ""];
+                        return shader ? (
+                          <div
+                            className="flex items-center justify-center w-full h-full"
+                            style={{
+                              background: resolvedTheme.palette.pageBackground,
+                            }}
+                          >
+                            <div className="flex -space-x-1.5">
+                              {[
+                                shader.color1,
+                                shader.color2,
+                                shader.color3,
+                              ].map((c, i) => (
+                                <div
+                                  key={i}
+                                  className="w-3 h-3 rounded-full"
+                                  style={{ backgroundColor: c, zIndex: 3 - i }}
+                                />
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      ) : null;
-                    })()
-                  ) : eventTheme.type === "pattern" ? (
-                    (() => {
-                      const patternStyle = getPatternPreviewCSS(eventTheme.pattern ?? "dots", resolvedTheme.palette);
-                      return (
-                        <div
-                          className="w-full h-full"
-                          style={{
-                            backgroundColor: resolvedTheme.palette.pageBackground,
-                            backgroundImage: patternStyle.backgroundImage,
-                            backgroundSize: patternStyle.backgroundSize,
-                            backgroundRepeat: "repeat",
-                          }}
-                        />
-                      );
-                    })()
-                  ) : eventTheme.type === "landscape" ? (
-                    (() => {
-                      const landscape = LANDSCAPE_MAP[eventTheme.image ?? ""];
-                      return landscape ? (
-                        <img
-                          src={`/Landscape theme/${landscape.filename}`}
-                          alt={landscape.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : null;
-                    })()
-                  ) : (
-                    (PALETTE_MAP[eventTheme.colorPalette]?.colors ?? ["#222", "#2a2a2a"]).map(
-                      (color, i) => (
-                        <div key={i} className="flex-1" style={{ backgroundColor: color }} />
-                      )
-                    )
-                  )}
+                        ) : null;
+                      })()
+                    : eventTheme.type === "pattern"
+                      ? (() => {
+                          const patternStyle = getPatternPreviewCSS(
+                            eventTheme.pattern ?? "dots",
+                            resolvedTheme.palette,
+                          );
+                          return (
+                            <div
+                              className="w-full h-full"
+                              style={{
+                                backgroundColor:
+                                  resolvedTheme.palette.pageBackground,
+                                backgroundImage: patternStyle.backgroundImage,
+                                backgroundSize: patternStyle.backgroundSize,
+                                backgroundRepeat: "repeat",
+                              }}
+                            />
+                          );
+                        })()
+                      : eventTheme.type === "landscape"
+                        ? (() => {
+                            const landscape =
+                              LANDSCAPE_MAP[eventTheme.image ?? ""];
+                            return landscape ? (
+                              <img
+                                src={`/Landscape theme/${landscape.filename}`}
+                                alt={landscape.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : null;
+                          })()
+                        : (
+                            PALETTE_MAP[eventTheme.colorPalette]?.colors ?? [
+                              "#222",
+                              "#2a2a2a",
+                            ]
+                          ).map((color, i) => (
+                            <div
+                              key={i}
+                              className="flex-1"
+                              style={{ backgroundColor: color }}
+                            />
+                          ))}
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="text-base font-semibold text-foreground">Theme</p>
+                  <p className="text-base font-semibold text-foreground">
+                    Theme
+                  </p>
                   <p className="text-sm text-muted-foreground">
-                    {PALETTE_MAP[eventTheme.colorPalette]?.name ?? "Default"} &middot;{" "}
-                    {eventTheme.type.charAt(0).toUpperCase() + eventTheme.type.slice(1)}
+                    {PALETTE_MAP[eventTheme.colorPalette]?.name ?? "Default"}{" "}
+                    &middot;{" "}
+                    {eventTheme.type.charAt(0).toUpperCase() +
+                      eventTheme.type.slice(1)}
                   </p>
                 </div>
                 {isThemePickerOpen ? (
@@ -1212,20 +1372,40 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               <button
                 type="button"
                 onClick={() => {
-                  const types: BackgroundType[] = ["solid", "landscape", "shader", "pattern"];
+                  const types: BackgroundType[] = [
+                    "solid",
+                    "landscape",
+                    "shader",
+                    "pattern",
+                  ];
                   const type = types[Math.floor(Math.random() * types.length)];
-                  const palette = ALL_PALETTES[Math.floor(Math.random() * ALL_PALETTES.length)];
-                  const config: EventThemeConfig = { type, colorPalette: palette.id };
+                  const palette =
+                    ALL_PALETTES[
+                      Math.floor(Math.random() * ALL_PALETTES.length)
+                    ];
+                  const config: EventThemeConfig = {
+                    type,
+                    colorPalette: palette.id,
+                  };
                   switch (type) {
                     case "landscape":
-                      config.image = LANDSCAPE_OPTIONS[Math.floor(Math.random() * LANDSCAPE_OPTIONS.length)].id;
+                      config.image =
+                        LANDSCAPE_OPTIONS[
+                          Math.floor(Math.random() * LANDSCAPE_OPTIONS.length)
+                        ].id;
                       config.imageOpacity = 0.4;
                       break;
                     case "shader":
-                      config.shaderPreset = SHADER_PRESETS[Math.floor(Math.random() * SHADER_PRESETS.length)].id;
+                      config.shaderPreset =
+                        SHADER_PRESETS[
+                          Math.floor(Math.random() * SHADER_PRESETS.length)
+                        ].id;
                       break;
                     case "pattern":
-                      config.pattern = PATTERN_OPTIONS[Math.floor(Math.random() * PATTERN_OPTIONS.length)].id;
+                      config.pattern =
+                        PATTERN_OPTIONS[
+                          Math.floor(Math.random() * PATTERN_OPTIONS.length)
+                        ].id;
                       break;
                   }
                   setEventTheme(config);
@@ -1255,15 +1435,21 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 onChange={(e) => {
                   setEventName(e.target.value.slice(0, 80));
                   if (validationErrors.eventName) {
-                    setValidationErrors(prev => ({ ...prev, eventName: undefined }));
+                    setValidationErrors((prev) => ({
+                      ...prev,
+                      eventName: undefined,
+                    }));
                   }
                 }}
                 placeholder="Event Name"
                 maxLength={80}
                 className={`w-full bg-transparent text-3xl md:text-5xl font-bold text-foreground outline-none placeholder:text-muted-foreground/90 ${validationErrors.eventName ? "text-red-400 placeholder:text-red-400/40" : ""}`}
               />
-              <div className={`text-xs ${validationErrors.eventName ? "text-red-400" : eventName.length >= 80 ? "text-amber-400" : "text-muted-foreground"}`}>
-                {validationErrors.eventName || `${eventName.length}/80 characters`}
+              <div
+                className={`text-xs ${validationErrors.eventName ? "text-red-400" : eventName.length >= 80 ? "text-amber-400" : "text-muted-foreground"}`}
+              >
+                {validationErrors.eventName ||
+                  `${eventName.length}/80 characters`}
               </div>
             </div>
             {mode === "create" && (
@@ -1287,7 +1473,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             >
               <Download className="h-5 w-5 text-primary flex-shrink-0" />
               <span className="text-sm text-muted-foreground">
-                Have an event on Eventbrite, Meetup, Luma, or elsewhere? <span className="text-primary font-medium">Import it</span>
+                Have an event on Eventbrite, Meetup, Luma, or elsewhere?{" "}
+                <span className="text-primary font-medium">Import it</span>
               </span>
             </button>
           )}
@@ -1301,8 +1488,13 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               </div>
 
               <div className="flex flex-1 flex-col gap-4">
-                <div ref={startTimeRef} className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <label className={`text-sm font-medium sm:w-14 ${validationErrors.startTime ? "text-red-400" : "text-muted-foreground"}`}>
+                <div
+                  ref={startTimeRef}
+                  className="flex flex-col gap-3 sm:flex-row sm:items-center"
+                >
+                  <label
+                    className={`text-sm font-medium sm:w-14 ${validationErrors.startTime ? "text-red-400" : "text-muted-foreground"}`}
+                  >
                     Start
                   </label>
                   <div className="flex-1">
@@ -1311,7 +1503,10 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                       onChange={(value) => {
                         setStart(value);
                         if (validationErrors.startTime) {
-                          setValidationErrors(prev => ({ ...prev, startTime: undefined }));
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            startTime: undefined,
+                          }));
                         }
                       }}
                       minDate={externalEventUrl ? undefined : new Date()}
@@ -1319,13 +1514,20 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                       placeholder="Select start date & time"
                     />
                     {validationErrors.startTime && (
-                      <p className="text-xs text-red-400 mt-1">{validationErrors.startTime}</p>
+                      <p className="text-xs text-red-400 mt-1">
+                        {validationErrors.startTime}
+                      </p>
                     )}
                   </div>
                 </div>
 
-                <div ref={endTimeRef} className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <label className={`text-sm font-medium sm:w-14 ${validationErrors.endTime ? "text-red-400" : "text-muted-foreground"}`}>
+                <div
+                  ref={endTimeRef}
+                  className="flex flex-col gap-3 sm:flex-row sm:items-center"
+                >
+                  <label
+                    className={`text-sm font-medium sm:w-14 ${validationErrors.endTime ? "text-red-400" : "text-muted-foreground"}`}
+                  >
                     End
                   </label>
                   <div className="flex-1">
@@ -1334,14 +1536,19 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                       onChange={(value) => {
                         setEnd(value);
                         if (validationErrors.endTime) {
-                          setValidationErrors(prev => ({ ...prev, endTime: undefined }));
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            endTime: undefined,
+                          }));
                         }
                       }}
                       error={!!validationErrors.endTime}
                       placeholder="Select end date & time"
                     />
                     {validationErrors.endTime && (
-                      <p className="text-xs text-red-400 mt-1">{validationErrors.endTime}</p>
+                      <p className="text-xs text-red-400 mt-1">
+                        {validationErrors.endTime}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -1376,29 +1583,44 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                       </p>
                       <div className="flex items-center gap-2">
                         <div className="h-3 w-3 animate-spin rounded-full border-b-2 border-primary"></div>
-                        <span className="text-xs text-muted-foreground">Loading...</span>
+                        <span className="text-xs text-muted-foreground">
+                          Loading...
+                        </span>
                       </div>
                     </>
-                  ) : selectedCategoryIds.length > 0 || selectedSubcategoryIds.length > 0 ? (
+                  ) : selectedCategoryIds.length > 0 ||
+                    selectedSubcategoryIds.length > 0 ? (
                     <>
                       <p className="text-sm font-medium text-foreground">
-                        {selectedCategoryIds.length} {selectedCategoryIds.length === 1 ? 'Category' : 'Categories'}
-                        {selectedSubcategoryIds.length > 0 && `, ${selectedSubcategoryIds.length} ${selectedSubcategoryIds.length === 1 ? 'Subcategory' : 'Subcategories'}`}
+                        {selectedCategoryIds.length}{" "}
+                        {selectedCategoryIds.length === 1
+                          ? "Category"
+                          : "Categories"}
+                        {selectedSubcategoryIds.length > 0 &&
+                          `, ${selectedSubcategoryIds.length} ${selectedSubcategoryIds.length === 1 ? "Subcategory" : "Subcategories"}`}
                       </p>
                       <p className="text-xs text-muted-foreground line-clamp-1">
                         {categoriesWithSubs
                           .filter((cat) => selectedCategoryIds.includes(cat.id))
                           .map((cat) => {
-                            const categoryName = cat.name.charAt(0).toUpperCase() + cat.name.slice(1).toLowerCase();
+                            const categoryName =
+                              cat.name.charAt(0).toUpperCase() +
+                              cat.name.slice(1).toLowerCase();
                             const selectedSubs = (cat.subcategories || [])
-                              .filter((sub) => selectedSubcategoryIds.includes(sub.id))
-                              .map((sub) => sub.name.charAt(0).toUpperCase() + sub.name.slice(1).toLowerCase());
+                              .filter((sub) =>
+                                selectedSubcategoryIds.includes(sub.id),
+                              )
+                              .map(
+                                (sub) =>
+                                  sub.name.charAt(0).toUpperCase() +
+                                  sub.name.slice(1).toLowerCase(),
+                              );
                             if (selectedSubs.length > 0) {
-                              return `${categoryName} (${selectedSubs.join(', ')})`;
+                              return `${categoryName} (${selectedSubs.join(", ")})`;
                             }
                             return categoryName;
                           })
-                          .join(', ')}
+                          .join(", ")}
                       </p>
                     </>
                   ) : (
@@ -1407,7 +1629,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                     </p>
                   )}
                 </div>
-                {selectedCategoryIds.length > 0 || selectedSubcategoryIds.length > 0 ? (
+                {selectedCategoryIds.length > 0 ||
+                selectedSubcategoryIds.length > 0 ? (
                   <div
                     role="button"
                     onClick={(e) => {
@@ -1420,7 +1643,9 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                     <X className="h-5 w-5 text-muted-foreground hover:text-foreground" />
                   </div>
                 ) : (
-                  <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isCategoryModalOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    className={`h-5 w-5 text-muted-foreground transition-transform ${isCategoryModalOpen ? "rotate-180" : ""}`}
+                  />
                 )}
               </button>
 
@@ -1440,22 +1665,41 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
           {/* Event Location & Format */}
           <div ref={locationRef} className="space-y-3">
             {/* Location validation errors indicator */}
-            {(validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode) && (
+            {(validationErrors.eventFormat ||
+              validationErrors.virtualMeetingUrl ||
+              validationErrors.addressLine1 ||
+              validationErrors.city ||
+              validationErrors.postcode) && (
               <div className="p-3 bg-red-950 border border-red-500/30 rounded-lg">
-                <p className="text-sm text-red-400 font-medium">Please complete the location details:</p>
+                <p className="text-sm text-red-400 font-medium">
+                  Please complete the location details:
+                </p>
                 <ul className="text-xs text-red-400/80 mt-1 list-disc list-inside">
-                  {validationErrors.eventFormat && <li>{validationErrors.eventFormat}</li>}
-                  {validationErrors.virtualMeetingUrl && <li>{validationErrors.virtualMeetingUrl}</li>}
-                  {validationErrors.addressLine1 && <li>{validationErrors.addressLine1}</li>}
+                  {validationErrors.eventFormat && (
+                    <li>{validationErrors.eventFormat}</li>
+                  )}
+                  {validationErrors.virtualMeetingUrl && (
+                    <li>{validationErrors.virtualMeetingUrl}</li>
+                  )}
+                  {validationErrors.addressLine1 && (
+                    <li>{validationErrors.addressLine1}</li>
+                  )}
                   {validationErrors.city && <li>{validationErrors.city}</li>}
-                  {validationErrors.postcode && <li>{validationErrors.postcode}</li>}
+                  {validationErrors.postcode && (
+                    <li>{validationErrors.postcode}</li>
+                  )}
                 </ul>
               </div>
             )}
 
             {/* Main Location Button - always visible at top */}
             {(() => {
-              const hasError = validationErrors.eventFormat || validationErrors.virtualMeetingUrl || validationErrors.addressLine1 || validationErrors.city || validationErrors.postcode;
+              const hasError =
+                validationErrors.eventFormat ||
+                validationErrors.virtualMeetingUrl ||
+                validationErrors.addressLine1 ||
+                validationErrors.city ||
+                validationErrors.postcode;
 
               return (
                 <div className="relative">
@@ -1467,7 +1711,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                         setIsLocationModalOpen(!isLocationModalOpen);
                       }
                       if (hasError) {
-                        setValidationErrors(prev => ({
+                        setValidationErrors((prev) => ({
                           ...prev,
                           eventFormat: undefined,
                           virtualMeetingUrl: undefined,
@@ -1479,16 +1723,24 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                     }}
                     className={`flex w-full items-center gap-3 rounded-xl bg-card-background hover:bg-card-background/85 backdrop-blur-xl px-4 py-3 text-foreground transition-all cursor-pointer ${hasError ? "ring-2 ring-red-400/50" : ""}`}
                   >
-                    <MapPin className={`h-5 w-5 ${hasError ? "text-red-400" : "text-muted-foreground"}`} />
+                    <MapPin
+                      className={`h-5 w-5 ${hasError ? "text-red-400" : "text-muted-foreground"}`}
+                    />
                     <div className="flex-1 text-left">
-                      <p className={`text-sm font-medium ${hasError ? "text-red-400" : "text-foreground"}`}>
+                      <p
+                        className={`text-sm font-medium ${hasError ? "text-red-400" : "text-foreground"}`}
+                      >
                         Add Event Location
                       </p>
-                      <p className={`text-xs ${hasError ? "text-red-400/80" : "text-muted-foreground"}`}>
+                      <p
+                        className={`text-xs ${hasError ? "text-red-400/80" : "text-muted-foreground"}`}
+                      >
                         Physical location or virtual link
                       </p>
                     </div>
-                    <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isLocationModalOpen && !locationEditMode ? 'rotate-180' : ''}`} />
+                    <ChevronDown
+                      className={`h-5 w-5 text-muted-foreground transition-transform ${isLocationModalOpen && !locationEditMode ? "rotate-180" : ""}`}
+                    />
                   </button>
 
                   {/* Location Modal - for adding new */}
@@ -1509,7 +1761,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 <VirtualLinkCard
                   virtualMeetingUrl={virtualMeetingUrl}
                   onEdit={() => {
-                    setLocationEditMode({ type: 'virtual' });
+                    setLocationEditMode({ type: "virtual" });
                     setIsLocationModalOpen(true);
                   }}
                   onDelete={() => {
@@ -1517,21 +1769,24 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   }}
                 />
                 {/* Edit Modal for Virtual Link */}
-                {isLocationModalOpen && locationEditMode?.type === 'virtual' && (
-                  <LocationModal
-                    isOpen={isLocationModalOpen}
-                    onClose={() => {
-                      setIsLocationModalOpen(false);
-                      setLocationEditMode(null);
-                    }}
-                    editMode={locationEditMode}
-                  />
-                )}
+                {isLocationModalOpen &&
+                  locationEditMode?.type === "virtual" && (
+                    <LocationModal
+                      isOpen={isLocationModalOpen}
+                      onClose={() => {
+                        setIsLocationModalOpen(false);
+                        setLocationEditMode(null);
+                      }}
+                      editMode={locationEditMode}
+                    />
+                  )}
               </div>
             )}
 
             {/* Venue Card - show if we have addressLine1 OR (venueName/city with coordinates) */}
-            {(addressLine1 || (venueName && latitude !== null) || (city && latitude !== null)) && (
+            {(addressLine1 ||
+              (venueName && latitude !== null) ||
+              (city && latitude !== null)) && (
               <div className="relative">
                 <VenueCard
                   venueName={venueName}
@@ -1542,9 +1797,11 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   latitude={latitude}
                   longitude={longitude}
                   hideFullAddress={hideFullAddress}
-                  onToggleHideAddress={() => setHideFullAddress(!hideFullAddress)}
+                  onToggleHideAddress={() =>
+                    setHideFullAddress(!hideFullAddress)
+                  }
                   onEdit={() => {
-                    setLocationEditMode({ type: 'venue' });
+                    setLocationEditMode({ type: "venue" });
                     setIsLocationModalOpen(true);
                   }}
                   onDelete={() => {
@@ -1559,7 +1816,7 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   }}
                 />
                 {/* Edit Modal for Venue */}
-                {isLocationModalOpen && locationEditMode?.type === 'venue' && (
+                {isLocationModalOpen && locationEditMode?.type === "venue" && (
                   <LocationModal
                     isOpen={isLocationModalOpen}
                     onClose={() => {
@@ -1573,14 +1830,16 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             )}
 
             {/* Google Map - shown when we have coordinates */}
-            {latitude !== null && longitude !== null && !isLocationModalOpen && (
-              <GoogleMap
-                latitude={latitude}
-                longitude={longitude}
-                title={venueName || addressLine1 || city || "Event Location"}
-                className="h-48 w-full rounded-xl"
-              />
-            )}
+            {latitude !== null &&
+              longitude !== null &&
+              !isLocationModalOpen && (
+                <GoogleMap
+                  latitude={latitude}
+                  longitude={longitude}
+                  title={venueName || addressLine1 || city || "Event Location"}
+                  className="h-48 w-full rounded-xl"
+                />
+              )}
           </div>
 
           {/* Event Settings Card */}
@@ -1592,7 +1851,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 <div className="flex-1 py-2 border-b border-foreground/10">
                   <p className="text-sm font-medium text-foreground">Tickets</p>
                   <p className="text-xs text-muted-foreground">
-                    Default &quot;General Admission&quot; ticket · Edit after creating
+                    Default &quot;General Admission&quot; ticket · Edit after
+                    creating
                   </p>
                 </div>
               </div>
@@ -1602,13 +1862,17 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             <div className="flex items-center gap-2.5">
               <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               <div className="flex-1 flex items-center justify-between py-2 border-b border-foreground/10">
-                <p className="text-sm font-medium text-foreground">Private Event</p>
+                <p className="text-sm font-medium text-foreground">
+                  Private Event
+                </p>
                 <button
                   type="button"
                   onClick={() => setIsPrivate((prev) => !prev)}
                   className={`h-5 w-10 rounded-full transition-all ${isPrivate ? "bg-primary" : "bg-card-secondary-background"}`}
                 >
-                  <span className={`block h-4 w-4 rounded-full transition-all ${isPrivate ? "translate-x-5.5 bg-primary-foreground" : "translate-x-0.5 bg-foreground"}`} />
+                  <span
+                    className={`block h-4 w-4 rounded-full transition-all ${isPrivate ? "translate-x-5.5 bg-primary-foreground" : "translate-x-0.5 bg-foreground"}`}
+                  />
                 </button>
               </div>
             </div>
@@ -1617,13 +1881,17 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             <div className="flex items-center gap-2.5">
               <UserCheck className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               <div className="flex-1 flex items-center justify-between py-2">
-                <p className="text-sm font-medium text-foreground">Require Approval</p>
+                <p className="text-sm font-medium text-foreground">
+                  Require Approval
+                </p>
                 <button
                   type="button"
                   onClick={() => setRequireApproval((prev) => !prev)}
                   className={`h-5 w-10 rounded-full transition-all ${requireApproval ? "bg-primary" : "bg-card-secondary-background"}`}
                 >
-                  <span className={`block h-4 w-4 rounded-full transition-all ${requireApproval ? "translate-x-5.5 bg-primary-foreground" : "translate-x-0.5 bg-foreground"}`} />
+                  <span
+                    className={`block h-4 w-4 rounded-full transition-all ${requireApproval ? "translate-x-5.5 bg-primary-foreground" : "translate-x-0.5 bg-foreground"}`}
+                  />
                 </button>
               </div>
             </div>
@@ -1656,248 +1924,316 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
               </div>
 
               {/* Stripe Connect Warning for Paid Tickets */}
-              {hasPaidTickets && stripeConnectStatus && !stripeConnectStatus.onboardingComplete && (
-              <div ref={stripeConnectRef} className={`mt-5 rounded-2xl p-4 ${validationErrors.stripeConnect ? "bg-red-950 border border-red-500/30" : "bg-amber-950 border border-amber-500/30"}`}>
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${validationErrors.stripeConnect ? "text-red-400" : "text-amber-400"}`} />
-                  <div className="flex-1">
-                    <p className={`text-sm font-medium ${validationErrors.stripeConnect ? "text-red-400" : "text-amber-400"}`}>
-                      Payment Setup Required
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      To create events with paid tickets, you need to complete Stripe payment setup first.
-                    </p>
-                    <div className="flex items-center gap-3 mt-3">
-                      <button
-                        type="button"
-                        onClick={handleStartStripeOnboarding}
-                        disabled={isStartingOnboarding}
-                        className="flex items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-sm font-medium text-black transition-all hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isStartingOnboarding ? (
-                          "Opening..."
-                        ) : (
-                          <>
-                            Set Up Payments
-                            <ExternalLink className="h-4 w-4" />
-                          </>
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleRefreshStripeStatus}
-                        disabled={isLoadingStripeStatus}
-                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {isLoadingStripeStatus ? "Checking..." : "I've completed setup"}
-                      </button>
+              {hasPaidTickets &&
+                stripeConnectStatus &&
+                !stripeConnectStatus.onboardingComplete && (
+                  <div
+                    ref={stripeConnectRef}
+                    className={`mt-5 rounded-2xl p-4 ${validationErrors.stripeConnect ? "bg-red-950 border border-red-500/30" : "bg-amber-950 border border-amber-500/30"}`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle
+                        className={`h-5 w-5 flex-shrink-0 mt-0.5 ${validationErrors.stripeConnect ? "text-red-400" : "text-amber-400"}`}
+                      />
+                      <div className="flex-1">
+                        <p
+                          className={`text-sm font-medium ${validationErrors.stripeConnect ? "text-red-400" : "text-amber-400"}`}
+                        >
+                          Payment Setup Required
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          To create events with paid tickets, you need to
+                          complete Stripe payment setup first.
+                        </p>
+                        <div className="flex items-center gap-3 mt-3">
+                          <button
+                            type="button"
+                            onClick={handleStartStripeOnboarding}
+                            disabled={isStartingOnboarding}
+                            className="flex items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-sm font-medium text-black transition-all hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {isStartingOnboarding ? (
+                              "Opening..."
+                            ) : (
+                              <>
+                                Set Up Payments
+                                <ExternalLink className="h-4 w-4" />
+                              </>
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleRefreshStripeStatus}
+                            disabled={isLoadingStripeStatus}
+                            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            {isLoadingStripeStatus
+                              ? "Checking..."
+                              : "I've completed setup"}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            )}
+                )}
 
               {/* List of Ticket Types */}
               {ticketTypes.length > 0 && isTicketListExpanded && (
                 <div className="mt-5 space-y-3">
-                {ticketTypes.map((ticket) => (
-                  <div
-                    key={ticket.id}
-                    className="rounded-xl bg-card-secondary-background backdrop-blur-xl overflow-hidden"
-                  >
-                    {/* Ticket Header */}
-                    <div className="flex items-start justify-between gap-3 p-4">
-                      <button
-                        type="button"
-                        onClick={() => toggleTicketCollapse(ticket.id)}
-                        className="p-1 rounded-md hover:bg-white/10 transition-colors mt-0.5"
-                        aria-label={collapsedTickets.has(ticket.id) ? "Expand ticket" : "Collapse ticket"}
-                      >
-                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${collapsedTickets.has(ticket.id) ? "-rotate-90" : ""}`} />
-                      </button>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="text-base font-semibold text-foreground">
-                            {ticket.name}
-                          </p>
-                          {ticket.isSingleUse && (
-                            <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
-                              Single-use
+                  {ticketTypes.map((ticket) => (
+                    <div
+                      key={ticket.id}
+                      className="rounded-xl bg-card-secondary-background backdrop-blur-xl overflow-hidden"
+                    >
+                      {/* Ticket Header */}
+                      <div className="flex items-start justify-between gap-3 p-4">
+                        <button
+                          type="button"
+                          onClick={() => toggleTicketCollapse(ticket.id)}
+                          className="p-1 rounded-md hover:bg-white/10 transition-colors mt-0.5"
+                          aria-label={
+                            collapsedTickets.has(ticket.id)
+                              ? "Expand ticket"
+                              : "Collapse ticket"
+                          }
+                        >
+                          <ChevronDown
+                            className={`h-4 w-4 text-muted-foreground transition-transform ${collapsedTickets.has(ticket.id) ? "-rotate-90" : ""}`}
+                          />
+                        </button>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="text-base font-semibold text-foreground">
+                              {ticket.name}
+                            </p>
+                            {ticket.isSingleUse && (
+                              <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
+                                Single-use
+                              </span>
+                            )}
+                          </div>
+                          {(ticket.maxGroupSize || 1) > 1 && (
+                            <span className="inline-block rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-400 mt-1">
+                              Groups
                             </span>
                           )}
+                          {ticket.description && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {ticket.description}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-3 mt-2">
+                            <p className="text-sm font-medium text-foreground">
+                              {ticket.isFree
+                                ? "Free"
+                                : `£${ticket.price.toFixed(2)}`}
+                            </p>
+                            <span className="text-muted-foreground">•</span>
+                            <p className="text-sm text-muted-foreground">
+                              {ticket.quantity >= 100000
+                                ? "Unlimited"
+                                : `${ticket.quantity.toLocaleString()} available`}
+                            </p>
+                            {collapsedTickets.has(ticket.id) &&
+                              ticket.questionForm &&
+                              ticket.questionForm.length > 0 && (
+                                <>
+                                  <span className="text-muted-foreground">
+                                    •
+                                  </span>
+                                  <p className="text-sm text-muted-foreground">
+                                    {ticket.questionForm.length} question
+                                    {ticket.questionForm.length > 1 ? "s" : ""}
+                                  </p>
+                                </>
+                              )}
+                          </div>
                         </div>
-                        {(ticket.maxGroupSize || 1) > 1 && (
-                          <span className="inline-block rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-400 mt-1">
-                            Groups
-                          </span>
-                        )}
-                        {ticket.description && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {ticket.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-3 mt-2">
-                          <p className="text-sm font-medium text-foreground">
-                            {ticket.isFree
-                              ? "Free"
-                              : `£${ticket.price.toFixed(2)}`}
-                          </p>
-                          <span className="text-muted-foreground">•</span>
-                          <p className="text-sm text-muted-foreground">
-                            {ticket.quantity >= 100000 ? "Unlimited" : `${ticket.quantity.toLocaleString()} available`}
-                          </p>
-                          {collapsedTickets.has(ticket.id) && ticket.questionForm && ticket.questionForm.length > 0 && (
-                            <>
-                              <span className="text-muted-foreground">•</span>
-                              <p className="text-sm text-muted-foreground">
-                                {ticket.questionForm.length} question{ticket.questionForm.length > 1 ? "s" : ""}
-                              </p>
-                            </>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEditTicketClick(ticket)}
+                            className="rounded-full p-2 transition-all hover:bg-white/10"
+                            aria-label="Edit ticket"
+                          >
+                            <Edit className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteTicket(ticket.id)}
+                            className="rounded-full p-2 transition-all hover:bg-red-500/20"
+                            aria-label="Delete ticket"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-400" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Registration Questions - hidden when collapsed */}
+                      {!collapsedTickets.has(ticket.id) && (
+                        <div className="border-t border-foreground/10 bg-card-background/50 px-2 py-2 md:px-4 md:py-3">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm font-medium text-muted-foreground">
+                                Registration Questions (
+                                {ticket.questionForm?.length || 0})
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleAddQuestion(ticket.id)}
+                              className="flex items-center gap-1.5 rounded-md bg-primary/20 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/30"
+                            >
+                              <Plus className="h-3.5 w-3.5" />
+                              Add Question
+                            </button>
+                          </div>
+                          {ticket.questionForm &&
+                          ticket.questionForm.length > 0 ? (
+                            <div className="space-y-2">
+                              {ticket.questionForm.map((question, index) => (
+                                <div
+                                  key={index}
+                                  className="flex items-start gap-2 sm:gap-3 rounded-md bg-card-background p-3 group"
+                                >
+                                  {/* Mobile ordering buttons - left side, vertically stacked */}
+                                  <div className="flex flex-col gap-0.5 sm:hidden">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleMoveQuestion(
+                                          ticket.id,
+                                          index,
+                                          "up",
+                                        )
+                                      }
+                                      disabled={index === 0}
+                                      className="rounded p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                                      title="Move up"
+                                    >
+                                      <ChevronUp className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleMoveQuestion(
+                                          ticket.id,
+                                          index,
+                                          "down",
+                                        )
+                                      }
+                                      disabled={
+                                        index ===
+                                        (ticket.questionForm?.length || 0) - 1
+                                      }
+                                      className="rounded p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                                      title="Move down"
+                                    >
+                                      <ChevronDown className="h-4 w-4" />
+                                    </button>
+                                  </div>
+
+                                  <div className="flex items-center justify-center rounded bg-primary/10 p-1.5 text-primary">
+                                    {getQuestionTypeIcon(question.type)}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <p className="text-sm text-foreground">
+                                        {question.question}
+                                      </p>
+                                      {question.required && (
+                                        <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-xs text-red-400">
+                                          Required
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                        {getQuestionTypeLabel(question.type)}
+                                        {question.options &&
+                                          question.options.length > 0 && (
+                                            <>
+                                              {" "}
+                                              • {question.options.length}{" "}
+                                              options
+                                            </>
+                                          )}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* Action buttons - edit/delete always, ordering on desktop only */}
+                                  <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                    {/* Desktop ordering buttons */}
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleMoveQuestion(
+                                          ticket.id,
+                                          index,
+                                          "up",
+                                        )
+                                      }
+                                      disabled={index === 0}
+                                      className="hidden sm:block rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                      title="Move up"
+                                    >
+                                      <ChevronUp className="h-3.5 w-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleMoveQuestion(
+                                          ticket.id,
+                                          index,
+                                          "down",
+                                        )
+                                      }
+                                      disabled={
+                                        index ===
+                                        (ticket.questionForm?.length || 0) - 1
+                                      }
+                                      className="hidden sm:block rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                      title="Move down"
+                                    >
+                                      <ChevronDown className="h-3.5 w-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleEditQuestion(ticket.id, index)
+                                      }
+                                      className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+                                      title="Edit question"
+                                    >
+                                      <Edit className="h-3.5 w-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleDeleteQuestion(ticket.id, index)
+                                      }
+                                      className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-red-500/20 hover:text-red-400"
+                                      title="Delete question"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground text-center py-2">
+                              No questions added yet
+                            </p>
                           )}
                         </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleEditTicketClick(ticket)}
-                          className="rounded-full p-2 transition-all hover:bg-white/10"
-                          aria-label="Edit ticket"
-                        >
-                          <Edit className="h-4 w-4 text-muted-foreground" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteTicket(ticket.id)}
-                          className="rounded-full p-2 transition-all hover:bg-red-500/20"
-                          aria-label="Delete ticket"
-                        >
-                          <Trash2 className="h-4 w-4 text-red-400" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Registration Questions - hidden when collapsed */}
-                    {!collapsedTickets.has(ticket.id) && (
-                    <div className="border-t border-foreground/10 bg-card-background/50 px-2 py-2 md:px-4 md:py-3">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm font-medium text-muted-foreground">
-                            Registration Questions ({ticket.questionForm?.length || 0})
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleAddQuestion(ticket.id)}
-                          className="flex items-center gap-1.5 rounded-md bg-primary/20 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/30"
-                        >
-                          <Plus className="h-3.5 w-3.5" />
-                          Add Question
-                        </button>
-                      </div>
-                      {ticket.questionForm && ticket.questionForm.length > 0 ? (
-                        <div className="space-y-2">
-                          {ticket.questionForm.map((question, index) => (
-                            <div
-                              key={index}
-                              className="flex items-start gap-2 sm:gap-3 rounded-md bg-card-background p-3 group"
-                            >
-                              {/* Mobile ordering buttons - left side, vertically stacked */}
-                              <div className="flex flex-col gap-0.5 sm:hidden">
-                                <button
-                                  type="button"
-                                  onClick={() => handleMoveQuestion(ticket.id, index, "up")}
-                                  disabled={index === 0}
-                                  className="rounded p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
-                                  title="Move up"
-                                >
-                                  <ChevronUp className="h-4 w-4" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleMoveQuestion(ticket.id, index, "down")}
-                                  disabled={index === (ticket.questionForm?.length || 0) - 1}
-                                  className="rounded p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
-                                  title="Move down"
-                                >
-                                  <ChevronDown className="h-4 w-4" />
-                                </button>
-                              </div>
-
-                              <div className="flex items-center justify-center rounded bg-primary/10 p-1.5 text-primary">
-                                {getQuestionTypeIcon(question.type)}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <p className="text-sm text-foreground">{question.question}</p>
-                                  {question.required && (
-                                    <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-xs text-red-400">
-                                      Required
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                    {getQuestionTypeLabel(question.type)}
-                                    {question.options && question.options.length > 0 && (
-                                      <> • {question.options.length} options</>
-                                    )}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Action buttons - edit/delete always, ordering on desktop only */}
-                              <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                                {/* Desktop ordering buttons */}
-                                <button
-                                  type="button"
-                                  onClick={() => handleMoveQuestion(ticket.id, index, "up")}
-                                  disabled={index === 0}
-                                  className="hidden sm:block rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                                  title="Move up"
-                                >
-                                  <ChevronUp className="h-3.5 w-3.5" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleMoveQuestion(ticket.id, index, "down")}
-                                  disabled={index === (ticket.questionForm?.length || 0) - 1}
-                                  className="hidden sm:block rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                                  title="Move down"
-                                >
-                                  <ChevronDown className="h-3.5 w-3.5" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleEditQuestion(ticket.id, index)}
-                                  className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
-                                  title="Edit question"
-                                >
-                                  <Edit className="h-3.5 w-3.5" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteQuestion(ticket.id, index)}
-                                  className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-red-500/20 hover:text-red-400"
-                                  title="Delete question"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground text-center py-2">
-                          No questions added yet
-                        </p>
                       )}
                     </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
 
               {/* Expand/Collapse Button */}
               {ticketTypes.length > 0 && (
@@ -1908,13 +2244,16 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                 >
                   {isTicketListExpanded ? (
                     <>
-                      <span className="text-sm text-muted-foreground">Hide tickets</span>
+                      <span className="text-sm text-muted-foreground">
+                        Hide tickets
+                      </span>
                       <ChevronUp className="h-4 w-4 text-muted-foreground" />
                     </>
                   ) : (
                     <>
                       <span className="text-sm text-muted-foreground">
-                        Show {ticketTypes.length} ticket{ticketTypes.length > 1 ? "s" : ""}
+                        Show {ticketTypes.length} ticket
+                        {ticketTypes.length > 1 ? "s" : ""}
                       </span>
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </>
@@ -1940,7 +2279,9 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   )}
                   <div>
                     <p className="text-base font-semibold text-foreground">
-                      {eventStatus === EventStatus.PUBLISHED ? "Published" : "Draft"}
+                      {eventStatus === EventStatus.PUBLISHED
+                        ? "Published"
+                        : "Draft"}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {eventStatus === EventStatus.PUBLISHED
@@ -1962,8 +2303,8 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   {isPublishLoading
                     ? "..."
                     : eventStatus === EventStatus.PUBLISHED
-                    ? "Unpublish"
-                    : "Publish"}
+                      ? "Unpublish"
+                      : "Publish"}
                 </button>
               </div>
             </div>
@@ -1971,7 +2312,10 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
 
           {/* Organiser Terms Checkbox - Only shown in create mode */}
           {mode === "create" && (
-            <div ref={organizerTermsRef} className={`rounded-xl backdrop-blur-xl px-4 py-3 ${validationErrors.organizerTerms ? "bg-red-950 border border-red-500/30" : "bg-card-background"}`}>
+            <div
+              ref={organizerTermsRef}
+              className={`rounded-xl backdrop-blur-xl px-4 py-3 ${validationErrors.organizerTerms ? "bg-red-950 border border-red-500/30" : "bg-card-background"}`}
+            >
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -1979,12 +2323,17 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                   onChange={(e) => {
                     setAcceptedOrganizerTerms(e.target.checked);
                     if (validationErrors.organizerTerms) {
-                      setValidationErrors(prev => ({ ...prev, organizerTerms: undefined }));
+                      setValidationErrors((prev) => ({
+                        ...prev,
+                        organizerTerms: undefined,
+                      }));
                     }
                   }}
                   className={`h-3 w-3 rounded bg-card-secondary-background text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer flex-shrink-0 ${validationErrors.organizerTerms ? "border-red-400" : "border-foreground/20"}`}
                 />
-                <span className={`text-sm ${validationErrors.organizerTerms ? "text-red-400" : "text-muted-foreground"}`}>
+                <span
+                  className={`text-sm ${validationErrors.organizerTerms ? "text-red-400" : "text-muted-foreground"}`}
+                >
                   I agree to the{" "}
                   <a
                     href="/terms/organizer"
@@ -1995,7 +2344,9 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
                     Organiser Terms and Conditions
                   </a>
                   {validationErrors.organizerTerms && (
-                    <span className="block mt-1 text-red-400 text-xs">{validationErrors.organizerTerms}</span>
+                    <span className="block mt-1 text-red-400 text-xs">
+                      {validationErrors.organizerTerms}
+                    </span>
                   )}
                 </span>
               </label>
