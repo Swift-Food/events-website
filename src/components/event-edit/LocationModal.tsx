@@ -56,6 +56,9 @@ interface LocationModalProps {
   editMode?: LocationEditMode;
 }
 
+// Dark theme input class
+const inputClass = "w-full rounded-lg bg-white/10 px-3 py-2 text-sm text-white outline-none placeholder:text-white/40 border border-white/10 focus:border-amber-500/50 transition-all";
+
 export default function LocationModal({ isOpen, onClose, editMode = null }: LocationModalProps) {
   const {
     venueName,
@@ -438,7 +441,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
     return (
       <div
         ref={dropdownRef}
-        className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-card-background/95 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
+        className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
       >
         <div className="p-3">
           {/* URL Input */}
@@ -449,7 +452,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Enter virtual meeting link..."
-            className="w-full bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground/50 border-b border-white/10 pb-3"
+            className="w-full bg-transparent text-base text-white outline-none placeholder:text-white/40 border-b border-white/10 pb-3"
             autoFocus
           />
 
@@ -466,10 +469,10 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
               onClick={handleSaveVirtualLink}
               className="w-full mt-3 flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-left"
             >
-              <Video className="h-5 w-5 text-muted-foreground" />
+              <Video className="h-5 w-5 text-white/60" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground">Virtual</p>
-                <p className="text-xs text-muted-foreground truncate">
+                <p className="text-sm font-medium text-white">Virtual</p>
+                <p className="text-xs text-white/60 truncate">
                   {normalizeUrl(inputValue)}
                 </p>
               </div>
@@ -485,7 +488,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
     return (
       <div
         ref={dropdownRef}
-        className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-card-background/95 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
+        className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
       >
         <div className="p-3 max-h-[70vh] overflow-y-auto">
           {/* Search Input */}
@@ -496,7 +499,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search for a new location..."
-            className="w-full bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground/50"
+            className="w-full bg-transparent text-base text-white outline-none placeholder:text-white/40"
             autoFocus
           />
 
@@ -519,12 +522,12 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
                     highlightedIndex === idx ? 'bg-white/10' : 'hover:bg-white/5'
                   }`}
                 >
-                  <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  <MapPin className="h-5 w-5 text-white/60 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
+                    <p className="text-sm font-medium text-white truncate">
                       {prediction.structured_formatting.main_text}
                     </p>
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p className="text-xs text-white/60 truncate">
                       {prediction.structured_formatting.secondary_text}
                     </p>
                   </div>
@@ -539,7 +542,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
           {/* Manual Address Form */}
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+              <label className="block text-xs font-medium text-white/60 mb-1.5">
                 Venue Name (Optional)
               </label>
               <input
@@ -547,12 +550,12 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
                 value={localVenueName}
                 onChange={(e) => setLocalVenueName(e.target.value)}
                 placeholder="e.g., UCL Student Centre"
-                className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+              <label className="block text-xs font-medium text-white/60 mb-1.5">
                 Address Line 1 <span className="text-red-400">*</span>
               </label>
               <input
@@ -564,12 +567,12 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
                   setLocalLongitude(null);
                 }}
                 placeholder="Street address"
-                className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+              <label className="block text-xs font-medium text-white/60 mb-1.5">
                 Address Line 2 (Optional)
               </label>
               <input
@@ -577,13 +580,13 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
                 value={localAddressLine2}
                 onChange={(e) => setLocalAddressLine2(e.target.value)}
                 placeholder="Apartment, suite, building, etc."
-                className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+                className={inputClass}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                <label className="block text-xs font-medium text-white/60 mb-1.5">
                   City <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -595,11 +598,11 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
                     setLocalLongitude(null);
                   }}
                   placeholder="City"
-                  className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+                  className={inputClass}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                <label className="block text-xs font-medium text-white/60 mb-1.5">
                   Postcode <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -611,7 +614,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
                     setLocalLongitude(null);
                   }}
                   placeholder="e.g., SW1A 1AA"
-                  className="w-full rounded-lg bg-card-secondary-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+                  className={inputClass}
                 />
               </div>
             </div>
@@ -629,7 +632,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
             <button
               type="button"
               onClick={handleSaveVenue}
-              className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90"
+              className="w-full rounded-lg bg-amber-600 py-2.5 text-sm font-semibold text-white transition-all hover:bg-amber-500"
             >
               Save Changes
             </button>
@@ -643,7 +646,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
   return (
     <div
       ref={dropdownRef}
-      className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-card-background/95 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
+      className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
     >
       <div className="p-3">
         {/* Search Input */}
@@ -654,7 +657,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Enter location or virtual link"
-          className="w-full bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground/50"
+          className="w-full bg-transparent text-base text-white outline-none placeholder:text-white/40"
           autoFocus
         />
       </div>
@@ -676,10 +679,10 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
               highlightedIndex === 0 ? 'bg-white/10' : 'hover:bg-white/5'
             }`}
           >
-            <Video className="h-5 w-5 text-muted-foreground" />
+            <Video className="h-5 w-5 text-white/60" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">Virtual</p>
-              <p className="text-xs text-muted-foreground truncate">{normalizeUrl(inputValue)}</p>
+              <p className="text-sm font-medium text-white">Virtual</p>
+              <p className="text-xs text-white/60 truncate">{normalizeUrl(inputValue)}</p>
             </div>
           </button>
         </div>
@@ -700,12 +703,12 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
                   highlightedIndex === currentIndex ? 'bg-white/10' : 'hover:bg-white/5'
                 }`}
               >
-                <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                <MapPin className="h-5 w-5 text-white/60 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">
+                  <p className="text-sm font-medium text-white truncate">
                     {prediction.structured_formatting.main_text}
                   </p>
-                  <p className="text-xs text-muted-foreground truncate">
+                  <p className="text-xs text-white/60 truncate">
                     {prediction.structured_formatting.secondary_text}
                   </p>
                 </div>
@@ -725,8 +728,8 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
                   highlightedIndex === currentIndex ? 'bg-white/10' : 'hover:bg-white/5'
                 }`}
               >
-                <MapPin className="h-5 w-5 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
+                <MapPin className="h-5 w-5 text-white/60" />
+                <p className="text-sm text-white/60">
                   Use &quot;{inputValue}&quot;
                 </p>
               </button>
@@ -739,7 +742,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
       {showVirtualOptions && (
         <div className="border-t border-white/10">
           <div className="px-4 py-2">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <p className="text-xs font-medium text-white/40 uppercase tracking-wider">
               Virtual Options
             </p>
           </div>
@@ -752,12 +755,12 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
                 highlightedIndex === 0 ? 'bg-white/10' : 'hover:bg-white/5'
               }`}
             >
-              <Link className="h-5 w-5 text-muted-foreground" />
-              <p className="text-sm font-medium text-foreground">Add Virtual Link</p>
+              <Link className="h-5 w-5 text-white/60" />
+              <p className="text-sm font-medium text-white">Add Virtual Link</p>
             </button>
           </div>
           <div className="px-4 pb-3">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-white/60">
               If you have a virtual event link, you can enter or paste it above.
             </p>
           </div>
@@ -767,7 +770,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
       {/* Loading state */}
       {isLoadingPredictions && inputValue.trim() && !isUrlInput && (
         <div className="px-4 pb-3">
-          <p className="text-xs text-muted-foreground">Searching...</p>
+          <p className="text-xs text-white/60">Searching...</p>
         </div>
       )}
 
@@ -782,8 +785,8 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
               highlightedIndex === 0 ? 'bg-white/10' : 'hover:bg-white/5'
             }`}
           >
-            <MapPin className="h-5 w-5 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
+            <MapPin className="h-5 w-5 text-white/60" />
+            <p className="text-sm text-white/60">
               Use &quot;{inputValue}&quot;
             </p>
           </button>

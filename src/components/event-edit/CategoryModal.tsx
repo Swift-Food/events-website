@@ -146,32 +146,32 @@ export default function CategoryModal({
   return (
     <div
       ref={dropdownRef}
-      className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-card-background/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
+      className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
     >
       <div className="p-4 space-y-3 max-h-[60vh] overflow-hidden flex flex-col">
         {/* Search Input */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
           <input
             ref={searchInputRef}
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search categories..."
-            className="w-full rounded-lg bg-card-secondary-background pl-10 pr-4 py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all"
+            className="w-full rounded-lg bg-white/10 pl-10 pr-4 py-2.5 text-sm text-white outline-none placeholder:text-white/40 border border-white/10 focus:border-amber-500/50 transition-all"
           />
         </div>
 
         {/* Selected count and clear */}
         {totalSelected > 0 && (
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-white/60">
               {totalSelected} selected
             </span>
             <button
               type="button"
               onClick={clearAll}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="text-xs text-white/60 hover:text-white transition-colors"
             >
               Clear all
             </button>
@@ -182,7 +182,7 @@ export default function CategoryModal({
         <div className="overflow-y-auto flex-1 -mx-1 px-1">
           <div className="space-y-1">
             {filteredCategories.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
+              <p className="text-sm text-white/60 text-center py-4">
                 No categories found
               </p>
             ) : (
@@ -202,31 +202,31 @@ export default function CategoryModal({
                         onClick={() => toggleCategory(category.id)}
                         className={`flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
                           isSelected
-                            ? "bg-primary/20 border border-primary/30"
+                            ? "bg-amber-600/20 border border-amber-500/30"
                             : "hover:bg-white/5 border border-transparent"
                         }`}
                       >
                         <div
                           className={`h-5 w-5 rounded flex items-center justify-center border transition-all ${
                             isSelected
-                              ? "bg-primary border-primary"
+                              ? "bg-amber-600 border-amber-600"
                               : "border-white/20 bg-transparent"
                           }`}
                         >
                           {isSelected && <Check className="h-3 w-3 text-white" />}
                         </div>
                         <div className="flex-1">
-                          <span className={`text-sm font-medium ${isSelected ? "text-foreground" : "text-foreground/80"}`}>
+                          <span className={`text-sm font-medium ${isSelected ? "text-white" : "text-white/80"}`}>
                             {getCategoryLabel(category.name)}
                           </span>
                           {category.description && (
-                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                            <p className="text-xs text-white/50 mt-0.5 line-clamp-1">
                               {category.description}
                             </p>
                           )}
                         </div>
                         {selectedSubcategoriesInCategory > 0 && (
-                          <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                          <span className="text-xs bg-amber-600/20 text-amber-400 px-2 py-0.5 rounded-full">
                             +{selectedSubcategoriesInCategory}
                           </span>
                         )}
@@ -238,9 +238,9 @@ export default function CategoryModal({
                           className="p-2 rounded-lg hover:bg-white/5 transition-colors"
                         >
                           {isExpanded ? (
-                            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                            <ChevronUp className="h-4 w-4 text-white/60" />
                           ) : (
-                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                            <ChevronDown className="h-4 w-4 text-white/60" />
                           )}
                         </button>
                       )}
@@ -261,13 +261,13 @@ export default function CategoryModal({
                               <div
                                 className={`h-4 w-4 rounded flex items-center justify-center border transition-all ${
                                   isSubSelected
-                                    ? "bg-primary border-primary"
+                                    ? "bg-amber-600 border-amber-600"
                                     : "border-white/20 bg-transparent"
                                 }`}
                               >
                                 {isSubSelected && <Check className="h-2.5 w-2.5 text-white" />}
                               </div>
-                              <span className="text-sm text-muted-foreground">
+                              <span className="text-sm text-white/60">
                                 {getCategoryLabel(subcategory.name)}
                               </span>
                             </button>
@@ -287,7 +287,7 @@ export default function CategoryModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90"
+            className="w-full rounded-lg bg-amber-600 py-2.5 text-sm font-semibold text-white transition-all hover:bg-amber-500"
           >
             Done
           </button>
