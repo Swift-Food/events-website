@@ -46,19 +46,16 @@ export default function DateTimePicker({
 
       if (ref) {
         const rect = ref.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const dropdownHeight = activeView === "date" ? 360 : 300;
-
-        // Check if dropdown would go off screen bottom
-        const spaceBelow = viewportHeight - rect.bottom;
-        const showAbove = spaceBelow < dropdownHeight && rect.top > dropdownHeight;
 
         setDropdownPosition({
-          top: showAbove
-            ? rect.top + window.scrollY - dropdownHeight - 8
-            : rect.bottom + window.scrollY + 8,
+          top: rect.bottom + window.scrollY + 8,
           left: rect.left + window.scrollX,
         });
+
+        // Scroll dropdown into view if needed
+        setTimeout(() => {
+          dropdownRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 10);
       }
     }
   }, [isOpen, activeView]);
