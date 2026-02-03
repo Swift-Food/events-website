@@ -866,7 +866,7 @@ export default function EventClient({
             <Link
              key={category.id}
              href={`/events?category=${category.name}`}
-             className="rounded-full bg-white/5 px-4 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-primary/10"
+             className="rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-foreground"
             >
              {category.name}
             </Link>
@@ -885,7 +885,7 @@ export default function EventClient({
              <Link
               key={subcategory.id}
               href={href}
-              className="rounded-full bg-purple-500/10 px-4 py-1.5 text-sm font-medium text-purple-400 transition-colors hover:bg-purple-500/20"
+              className="rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-foreground"
              >
               {subcategory.name}
              </Link>
@@ -1343,7 +1343,7 @@ export default function EventClient({
            <Link
             key={category.id}
             href={`/events?category=${category.name}`}
-            className="rounded-full bg-white/5 px-4 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-primary/10"
+            className="rounded-full bg-primary/10 px-4 py-1.5 text-xs font-medium text-foreground"
            >
             {category.name}
            </Link>
@@ -1362,7 +1362,7 @@ export default function EventClient({
             <Link
              key={subcategory.id}
              href={href}
-             className="rounded-full bg-purple-500/10 px-4 py-1.5 text-sm font-medium text-purple-400 transition-colors hover:bg-purple-500/20"
+             className="rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-foreground"
             >
              {subcategory.name}
             </Link>
