@@ -837,6 +837,23 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
     setCoverName("gallery-cover.png");
   };
 
+  const handleRandomizeCover = async () => {
+    try {
+      const allCovers = await eventCoverService.getAll();
+      const categories = Object.keys(allCovers);
+      if (categories.length === 0) return;
+      const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+      const images = allCovers[randomCategory];
+      if (!images || images.length === 0) return;
+      const randomImage = images[Math.floor(Math.random() * images.length)];
+      setCoverPreview(randomImage);
+      setCoverName("gallery-cover.png");
+    } catch (error) {
+      console.error("Failed to randomize cover:", error);
+      toast.error("Failed to randomize cover");
+    }
+  };
+
   // const handleImageRemove = () => {
   //   setCoverPreview(null);
   //   setCoverName("invite-cover.png");
@@ -1074,12 +1091,19 @@ function EventFormInner({ mode, eventId, initialData, eventStatus, onPublishTogg
             <div className="absolute bottom-4 right-4 flex flex-wrap gap-2">
               <button
                 type="button"
+                onClick={handleRandomizeCover}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/90 backdrop-blur-md text-primary-foreground transition-all hover:bg-primary hover:scale-105 cursor-pointer"
+                aria-label="Randomize cover"
+              >
+                <Shuffle className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
                 onClick={() => setIsCoverPickerOpen(true)}
                 className="rounded-full bg-primary/90 backdrop-blur-md px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary hover:scale-105 cursor-pointer"
               >
                 Change cover
               </button>
-        
             </div>
             <input
               id="cover-upload"
