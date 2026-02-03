@@ -1353,10 +1353,10 @@ function EventFormInner({
                           ))}
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="text-base font-semibold text-foreground">
+                  <p className="text-sm font-medium text-foreground">
                     Theme
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {PALETTE_MAP[eventTheme.colorPalette]?.name ?? "Default"}{" "}
                     &middot;{" "}
                     {eventTheme.type.charAt(0).toUpperCase() +
