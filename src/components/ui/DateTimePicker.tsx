@@ -189,16 +189,16 @@ export default function DateTimePicker({
                 <button
                   type="button"
                   onClick={handleDateClick}
-                  className="text-foreground hover:text-primary transition-colors font-medium"
+                  className="text-sm text-foreground hover:text-primary transition-colors font-medium"
                 >
                   {formatDate(selectedDate)}
                 </button>
-                <span className="text-muted-foreground">,</span>
+                <span className="text-sm text-muted-foreground">,</span>
                 <button
                   ref={timeButtonRef}
                   type="button"
                   onClick={handleTimeClick}
-                  className="text-foreground hover:text-primary transition-colors font-medium"
+                  className="text-sm text-foreground hover:text-primary transition-colors font-medium"
                 >
                   {formatTime(selectedDate)}
                 </button>
@@ -207,7 +207,7 @@ export default function DateTimePicker({
               <button
                 type="button"
                 onClick={handleDateClick}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 {placeholder}
               </button>
