@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { eventsApi } from "@/services/events";
 import { guestTicketService } from "@/services/guest-ticket.service";
@@ -384,7 +385,10 @@ export default function EventPreviewModal({
 
   if (!isOpen) return null;
 
-  return (
+  // Use portal to render at document body, escaping parent transforms
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
@@ -1142,6 +1146,7 @@ export default function EventPreviewModal({
         />
       )}
 
-    </>
+    </>,
+    document.body
   );
 }

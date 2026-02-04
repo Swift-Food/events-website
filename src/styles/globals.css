@@ -500,3 +500,149 @@ input[type="datetime-local"] {
 .scrollbar-dark::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.45);
 }
+
+/* ========================================
+   DISCOVER PAGE - SLEEK & PREMIUM
+   ======================================== */
+
+/* Refined fade-up animation */
+@keyframes discover-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Subtle shimmer for loading states */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Slow ambient drift */
+@keyframes ambient-drift {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(20px, 10px); }
+}
+
+/* Staggered entrance classes */
+.discover-stagger-1 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0ms forwards; opacity: 0; }
+.discover-stagger-2 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 100ms forwards; opacity: 0; }
+.discover-stagger-3 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 200ms forwards; opacity: 0; }
+.discover-stagger-4 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 300ms forwards; opacity: 0; }
+
+/* Ambient background glow - subtle purple that matches gradient */
+.discover-ambient {
+  position: fixed;
+  top: 20%;
+  right: -20%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(65, 41, 110, 0.3) 0%, transparent 70%);
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 0;
+  animation: ambient-drift 30s ease-in-out infinite;
+}
+
+/* Noise texture overlay for depth */
+.discover-noise {
+  position: fixed;
+  inset: 0;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Premium glass card effect */
+.discover-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.discover-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.discover-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 20px 40px -15px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.discover-card:hover::before {
+  opacity: 1;
+}
+
+/* Category icon - subtle hover */
+.category-icon-wrapper {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.category-icon-wrapper:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* Section headers */
+.discover-section-header {
+  position: relative;
+  display: inline-block;
+}
+
+/* View all link */
+.view-all-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+}
+
+.view-all-link:hover {
+  gap: 8px;
+}
+
+/* Loading skeleton */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* Event card image hover zoom */
+.discover-card-image {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.discover-card:hover .discover-card-image {
+  transform: scale(1.03);
+}

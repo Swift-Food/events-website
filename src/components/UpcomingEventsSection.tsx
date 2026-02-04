@@ -39,7 +39,6 @@ export default function UpcomingEventsSection({
           sortOrder: "asc",
           take: maxEvents,
         });
-        console.log("Upcoming section events: ", result.events)
         setEvents(result.events ?? []);
       } catch (err) {
         console.error("Failed to fetch upcoming events:", err);
@@ -66,12 +65,14 @@ export default function UpcomingEventsSection({
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-            <p className="text-sm text-muted-foreground">{subtitle}</p>
+            <div className="h-6 w-40 skeleton-shimmer mb-2" />
+            <div className="h-4 w-60 skeleton-shimmer" />
           </div>
         </div>
-        <div className="flex min-h-[200px] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-24 skeleton-shimmer rounded-xl" />
+          ))}
         </div>
       </div>
     );
@@ -86,12 +87,12 @@ export default function UpcomingEventsSection({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+          <h2 className="text-lg font-semibold text-foreground discover-section-header">{title}</h2>
           <p className="text-sm text-muted-foreground">{subtitle}</p>
         </div>
         <Link
           href="/events"
-          className="flex items-center gap-1 text-sm text-primary hover:underline"
+          className="view-all-link text-sm text-primary hover:text-primary/80"
         >
           View All
           <ChevronRight className="h-4 w-4" />
@@ -101,13 +102,14 @@ export default function UpcomingEventsSection({
       {/* Events Grid - 1 column on mobile, 2 columns on desktop */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {events.map((event) => (
-          <HorizontalEventCard
-            key={event.id}
-            event={event}
-            showDate
-            showCategories={false}
-            onClick={handleEventClick}
-          />
+          <div key={event.id} className="discover-card">
+            <HorizontalEventCard
+              event={event}
+              showDate
+              showCategories={false}
+              onClick={handleEventClick}
+            />
+          </div>
         ))}
       </div>
 
