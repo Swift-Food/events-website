@@ -31,7 +31,7 @@ export default function HorizontalEventCard({
   // Text color classes based on variant (dark variant forces white text for use in dark modals)
   const textPrimary = variant === "dark" ? "text-white" : "text-foreground";
   const textMuted = variant === "dark" ? "text-white/60" : "text-muted-foreground";
-  const hoverPrimary = variant === "dark" ? "group-hover:text-amber-500" : "group-hover:text-primary";
+  const hoverPrimary = variant === "dark" ? "group-hover:text-accent" : "group-hover:text-primary";
   const themePalette = useMemo(() => {
     if (!event.eventTheme) return null;
     try {

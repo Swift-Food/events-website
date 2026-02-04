@@ -191,7 +191,7 @@ export default function CalendarPicker({ selectedDate, onSelect, minDate }: Cale
                 h-9 w-9 rounded-lg text-sm font-medium transition-all
                 flex items-center justify-center
                 ${disabled ? "text-white/20 cursor-not-allowed" : "cursor-pointer"}
-                ${selected ? "bg-amber-600 text-white" : ""}
+                ${selected ? "bg-accent-dark text-white" : ""}
                 ${!selected && isOtherMonth ? "text-white/30 hover:bg-white/5" : ""}
                 ${!selected && !isOtherMonth && !disabled ? (isWeekend ? "text-white/50 hover:bg-white/10" : "text-white hover:bg-white/10") : ""}
                 ${todayDate && !selected ? "ring-1 ring-white/30" : ""}

@@ -65,7 +65,7 @@ export default function TimePicker({ selectedTime, onSelect }: TimePickerProps) 
                 className={`
                   w-full py-2 px-2 text-center text-sm font-medium transition-all rounded-md mb-0.5
                   ${selected
-                    ? "bg-amber-600 text-white"
+                    ? "bg-accent-dark text-white"
                     : "text-white hover:bg-white/10"
                   }
                 `}

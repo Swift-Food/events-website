@@ -53,6 +53,7 @@
   --color-button-inactive: #3a3a3a;
   --color-warning: #f59e0b;
   --color-accent: #d9ccff;
+  --color-accent-dark: #41296e;
   --font-sans: var(--font-inter), sans-serif;
   --font-heading: var(--font-satoshi), sans-serif;
   --font-mono: var(--font-geist-mono);
