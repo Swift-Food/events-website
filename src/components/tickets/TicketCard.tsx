@@ -208,9 +208,9 @@ export default function TicketCard({
 
   return (
     <>
-      <div className="rounded-2xl bg-card-background border border-white/5 overflow-hidden shadow-lg hover:shadow-xl transition-all hover:border-white/10">
-        {/* Event Image */}
-        <div className="relative h-36 bg-gradient-to-br from-primary/20 to-primary/5">
+      <div className="rounded-xl bg-card-background border border-white/5 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-200 hover:border-white/10 hover:scale-[1.01]">
+        {/* Event Image - Aspect ratio 4:1 = 25% height relative to width */}
+        <div className="relative aspect-[4/1] bg-gradient-to-br from-primary/20 to-primary/5">
           {ticket.eventImage ? (
             <img
               src={ticket.eventImage}
@@ -219,50 +219,50 @@ export default function TicketCard({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Ticket className="h-12 w-12 text-primary/30" />
+              <Ticket className="h-8 w-8 text-primary/30" />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-card-background/80 to-transparent" />
-          <div className="absolute top-3 right-3">
-            <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm ${status.color}`}>
+          <div className="absolute inset-0 bg-gradient-to-t from-card-background/90 to-transparent" />
+          <div className="absolute top-2 right-2">
+            <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium backdrop-blur-sm ${status.color}`}>
               {status.icon}
               {status.label}
             </span>
           </div>
         </div>
 
-        {/* Ticket Info */}
-        <div className="p-5">
-          <h3 className="text-lg font-semibold text-foreground mb-1 line-clamp-1">
+        {/* Ticket Info - Compact */}
+        <div className="p-3.5">
+          <h3 className="text-base font-semibold text-foreground mb-0.5 line-clamp-1">
             {ticket.eventName}
           </h3>
 
-          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-3">
-            <Ticket className="h-4 w-4 text-primary/60" />
-            <span>{ticket.ticketName}</span>
+          <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-2">
+            <Ticket className="h-3.5 w-3.5 text-primary/60" />
+            <span className="truncate">{ticket.ticketName}</span>
           </div>
 
-          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-5">
-            <Calendar className="h-4 w-4 shrink-0 text-primary/60" />
-            <span>{format(eventDate, "EEE, MMM d, yyyy 'at' h:mm a")}</span>
+          <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-3">
+            <Calendar className="h-3.5 w-3.5 shrink-0 text-primary/60" />
+            <span>{format(eventDate, "EEE, MMM d 'at' h:mm a")}</span>
           </div>
 
           {/* Actions */}
-          <div className="pt-4 border-t border-white/5">
+          <div className="pt-3 border-t border-white/5">
             {/* Active ticket layout */}
             {isActive && (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {canShowQR && (
                   <button
                     onClick={() => setShowQRModal(true)}
-                    className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
                     aria-label="View QR Code"
                   >
-                    <QrCode className="h-5 w-5" />
+                    <QrCode className="h-4 w-4" />
                     Show Ticket
                   </button>
                 )}
-                <div className="flex items-center justify-between pt-1">
+                <div className="flex items-center justify-between">
                   <Link
                     href={`/events/${ticket.eventId}`}
                     className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -304,18 +304,18 @@ export default function TicketCard({
 
             {/* Pending payment layout */}
             {isPendingPayment && (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {/* Claim deadline warning for promoted waitlist tickets */}
                 {hasClaimDeadline && claimDeadline && (
-                  <div className={`flex items-center gap-2 p-3 rounded-lg text-sm ${
+                  <div className={`flex items-center gap-1.5 p-2 rounded-lg text-xs ${
                     isClaimExpiringSoon
                       ? "bg-red-500/20 text-red-400"
                       : "bg-amber-500/20 text-amber-400"
                   }`}>
-                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                     <span>
                       {isClaimExpiringSoon ? "Expires soon! " : ""}
-                      Complete payment by {format(claimDeadline, "MMM d 'at' h:mm a")}
+                      Pay by {format(claimDeadline, "MMM d, h:mm a")}
                     </span>
                   </div>
                 )}
@@ -323,11 +323,11 @@ export default function TicketCard({
                   <button
                     onClick={() => onCompletePayment(ticket.id)}
                     disabled={isProcessingPayment}
-                    className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-warning text-white rounded-xl text-sm font-semibold hover:bg-warning/90 transition-all disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-warning text-white rounded-lg text-sm font-semibold hover:bg-warning/90 transition-all disabled:opacity-50"
                   >
                     {isProcessingPayment ? (
                       <>
-                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin" />
                         Processing...
                       </>
                     ) : (
@@ -335,7 +335,7 @@ export default function TicketCard({
                     )}
                   </button>
                 )}
-                <div className="flex items-center justify-between pt-1">
+                <div className="flex items-center justify-between">
                   <Link
                     href={`/events/${ticket.eventId}`}
                     className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -363,18 +363,18 @@ export default function TicketCard({
 
             {/* Waitlisted layout */}
             {isWaitlisted && (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {/* Waitlist position info */}
                 {waitlistPosition !== undefined && waitlistPosition > 0 && (
-                  <div className="flex items-center gap-2 p-3 rounded-lg bg-purple-500/20 text-purple-400 text-sm">
-                    <Clock className="h-4 w-4 shrink-0" />
+                  <div className="flex items-center gap-1.5 p-2 rounded-lg bg-purple-500/20 text-purple-400 text-xs">
+                    <Clock className="h-3.5 w-3.5 shrink-0" />
                     <span>
-                      Position #{waitlistPosition}
+                      #{waitlistPosition}
                       {waitlistTotal ? ` of ${waitlistTotal}` : ""} on waitlist
                     </span>
                   </div>
                 )}
-                <div className="flex items-center justify-between pt-1">
+                <div className="flex items-center justify-between">
                   <Link
                     href={`/events/${ticket.eventId}`}
                     className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -402,12 +402,12 @@ export default function TicketCard({
 
             {/* Other status layout (not active, not pending payment, not waitlisted) */}
             {!isActive && !isPendingPayment && !isWaitlisted && (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Link
                   href={`/events/${ticket.eventId}`}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/5 text-foreground rounded-xl text-sm font-medium hover:bg-white/10 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-white/5 text-foreground rounded-lg text-sm font-medium hover:bg-white/10 transition-colors"
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <ExternalLink className="h-3.5 w-3.5" />
                   View Event
                 </Link>
                 {canCancel && (

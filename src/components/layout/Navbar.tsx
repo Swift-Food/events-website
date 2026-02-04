@@ -180,18 +180,26 @@ export default function Navbar() {
 
             {/* Desktop Navigation */}
             <nav className={`ml-8 hidden gap-6 text-sm font-medium ${textColor} sm:flex`}>
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={(e) =>
-                    handleProtectedNavClick(e, link.href, link.requiresAuth)
-                  }
-                  className="transition-colors hover:opacity-80"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href || pathname?.startsWith(link.href + "/");
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={(e) =>
+                      handleProtectedNavClick(e, link.href, link.requiresAuth)
+                    }
+                    className={`relative py-1 transition-colors hover:opacity-100 ${isActive ? "opacity-100" : "opacity-70"} group`}
+                  >
+                    {link.label}
+                    <span
+                      className={`absolute -bottom-1 left-0 h-0.5 bg-current transition-all duration-300 ease-out ${
+                        isActive ? "w-full" : "w-0 group-hover:w-full"
+                      }`}
+                    />
+                  </Link>
+                );
+              })}
             </nav>
           </div>
 

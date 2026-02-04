@@ -535,6 +535,39 @@ input[type="datetime-local"] {
 .discover-stagger-3 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 200ms forwards; opacity: 0; }
 .discover-stagger-4 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 300ms forwards; opacity: 0; }
 
+/* Management page staggered entrance - reuses discover-fade-up keyframe */
+.manage-stagger-1 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0ms forwards; opacity: 0; }
+.manage-stagger-2 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 80ms forwards; opacity: 0; }
+.manage-stagger-3 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 160ms forwards; opacity: 0; }
+
+/* Tickets page staggered entrance - reuses discover-fade-up keyframe */
+.tickets-stagger-1 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0ms forwards; opacity: 0; }
+.tickets-stagger-2 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 80ms forwards; opacity: 0; }
+.tickets-stagger-3 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 160ms forwards; opacity: 0; }
+
+/* Individual ticket card animation */
+.ticket-card-animate {
+  animation: discover-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+/* Tickets filter content animation */
+@keyframes tickets-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tickets-content-animate {
+  animation: tickets-content-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+
 /* Ambient background glow - subtle purple that matches gradient */
 .discover-ambient {
   position: fixed;
