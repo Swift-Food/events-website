@@ -513,6 +513,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                           showDate
                           showCategories={false}
                           onClick={handleEventClick}
+                          variant="dark"
                         />
                       </div>
                     );

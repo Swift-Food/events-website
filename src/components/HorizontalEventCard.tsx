@@ -17,6 +17,7 @@ interface HorizontalEventCardProps {
   showDate?: boolean;
   showCategories?: boolean;
   onClick?: (e: React.MouseEvent, event: EventResponseDto) => void;
+  variant?: "default" | "dark";
 }
 
 export default function HorizontalEventCard({
@@ -25,7 +26,12 @@ export default function HorizontalEventCard({
   showDate = false,
   showCategories = true,
   onClick,
+  variant = "default",
 }: HorizontalEventCardProps) {
+  // Text color classes based on variant (dark variant forces white text for use in dark modals)
+  const textPrimary = variant === "dark" ? "text-white" : "text-foreground";
+  const textMuted = variant === "dark" ? "text-white/60" : "text-muted-foreground";
+  const hoverPrimary = variant === "dark" ? "group-hover:text-amber-500" : "group-hover:text-primary";
   const themePalette = useMemo(() => {
     if (!event.eventTheme) return null;
     try {
@@ -234,20 +240,20 @@ export default function HorizontalEventCard({
       {/* Event Details */}
       <div className="flex min-w-0 flex-1 flex-col justify-center">
         {/* Date/Time */}
-        <span className="mb-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+        <span className={`mb-1 flex items-center gap-1.5 text-sm ${textMuted}`}>
           <Clock className="h-3.5 w-3.5 flex-shrink-0" />
           {showDate && <>{formatDate(event.startDateTime)} &middot; </>}
           {formatTime(event.startDateTime)}
         </span>
 
         {/* Event Name */}
-        <h3 className="mb-1 truncate text-base font-semibold text-foreground group-hover:text-primary">
+        <h3 className={`mb-1 truncate text-base font-semibold ${textPrimary} ${hoverPrimary}`}>
           {event.name}
         </h3>
 
         {/* Row 1: Address */}
         {isVirtualEvent(event.format) ? (
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <div className={`flex items-center gap-1.5 text-sm ${textMuted}`}>
             <Video className="h-3.5 w-3.5 flex-shrink-0 text-blue-400" />
             <span className="truncate text-blue-400">Online Event</span>
           </div>
@@ -256,7 +262,7 @@ export default function HorizontalEventCard({
             {event.address &&
               event.address.city &&
               event.address.city !== "TBD" && (
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <div className={`flex items-center gap-1.5 text-sm ${textMuted}`}>
                   <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
                   <span className="truncate">
                     {event.address.city}
@@ -265,7 +271,7 @@ export default function HorizontalEventCard({
                 </div>
               )}
             {isHybridEvent(event.format) && (
-              <span className="flex items-center gap-1 rounded-md border border-white/20 bg-white/5 px-2 py-0.5 text-xs text-muted-foreground flex-shrink-0">
+              <span className={`flex items-center gap-1 rounded-md border border-white/20 bg-white/5 px-2 py-0.5 text-xs ${textMuted} flex-shrink-0`}>
                 <span>+</span>
                 <Video className="h-3 w-3 flex-shrink-0" />
                 <span>Online</span>
@@ -304,7 +310,7 @@ export default function HorizontalEventCard({
                 className={`rounded-md border px-2 py-0.5 text-xs ${
                   tag.type === 'subcategory'
                     ? "border-purple-400/30 bg-purple-500/10 text-purple-400"
-                    : "border-white/20 bg-transparent text-muted-foreground"
+                    : `border-white/20 bg-transparent ${textMuted}`
                 } ${index >= visibleCount ? "hidden" : ""}`}
               >
                 {tag.name}
@@ -313,7 +319,7 @@ export default function HorizontalEventCard({
             {allTags.length > visibleCount && (
               <span
                 data-overflow="true"
-                className="group/tooltip relative rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs text-muted-foreground cursor-default"
+                className={`group/tooltip relative rounded-md border border-white/20 bg-transparent px-2 py-0.5 text-xs ${textMuted} cursor-default`}
               >
                 +{allTags.length - visibleCount}
                 <span className="pointer-events-none absolute top-full left-1/2 z-50 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover/tooltip:opacity-100">
