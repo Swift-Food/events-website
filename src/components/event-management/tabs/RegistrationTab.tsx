@@ -360,9 +360,8 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
 
   return (
     <div className="space-y-6">
-      {/* Ticket Types Card */}
-      <div className="rounded-xl border border-neutral-700 bg-card-background p-3 sm:p-6">
-        <div className="flex items-center justify-between mb-6">
+      {/* Ticket Types Header */}
+      <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-primary/20 p-2">
               <Ticket className="h-5 w-5 text-primary" />
@@ -372,7 +371,7 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
           <div className="flex items-center gap-2">
             <button
               onClick={onScanClick}
-              className="flex items-center gap-2 rounded-lg border border-neutral-700 bg-card-secondary-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
+              className="flex items-center gap-2 rounded-lg border border-white/10 bg-card-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-background/80"
             >
               <ScanLine className="h-4 w-4" />
               <span className="hidden sm:inline">Scan</span>
@@ -389,7 +388,7 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
 
         {tickets.length === 0 ? (
           <div className="text-center py-12">
-            <div className="mx-auto mb-4 rounded-full bg-card-secondary-background p-4 w-fit">
+            <div className="mx-auto mb-4 rounded-full bg-card-background p-4 w-fit">
               <Ticket className="h-8 w-8 text-muted-foreground" />
             </div>
             <h3 className="text-foreground font-medium mb-2">No ticket types yet</h3>
@@ -409,7 +408,7 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
             {tickets.map((ticket) => (
               <div
                 key={ticket.id}
-                className="rounded-lg border border-neutral-700 bg-card-secondary-background overflow-hidden transition-colors hover:border-neutral-600"
+                className="rounded-2xl border border-white/10 bg-card-background overflow-hidden"
               >
                 {/* Ticket Header */}
                 <div className="flex items-center justify-between gap-4 p-4">
@@ -454,7 +453,7 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleEditTicket(ticket.id)}
-                      className="flex items-center gap-2 rounded-md border border-neutral-700 bg-card-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-background/80"
+                      className="flex items-center gap-2 rounded-md border border-white/10 bg-card-secondary-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
                     >
                       <Edit className="h-4 w-4" />
                       <span className="hidden sm:inline">Edit</span>
@@ -473,7 +472,7 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                 </div>
 
                 {/* Registration Questions */}
-                <div className="border-t border-neutral-700 bg-card-background/50 px-4 py-3">
+                <div className="border-t border-white/10 bg-card-secondary-background/50 px-4 py-3">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <HelpCircle className="h-4 w-4 text-muted-foreground" />
@@ -494,7 +493,7 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                       {ticket.questionForm.map((question, index) => (
                         <div
                           key={index}
-                          className="flex items-start gap-2 sm:gap-3 rounded-md bg-card-background p-3 group"
+                          className="flex items-start gap-2 sm:gap-3 rounded-md bg-card-secondary-background p-3 group"
                         >
                           {/* Mobile ordering buttons - left side, vertically stacked */}
                           <div className="flex flex-col gap-0.5 sm:hidden">
@@ -585,7 +584,6 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
             ))}
           </div>
         )}
-      </div>
 
       <TicketTypeModal
         isOpen={isModalOpen}
