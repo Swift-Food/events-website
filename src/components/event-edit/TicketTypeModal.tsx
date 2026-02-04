@@ -47,7 +47,7 @@ function GroupSizeInput({ value, onChange }: { value: number; onChange: (v: numb
             }
           }}
           className={`w-20 h-9 rounded-lg bg-white/10 px-3 text-white text-sm outline-none focus:ring-2 transition-all ${
-            showWarning ? "ring-2 ring-red-500/50 focus:ring-red-500/50" : "focus:ring-amber-500/50"
+            showWarning ? "ring-2 ring-red-500/50 focus:ring-red-500/50" : "focus:ring-accent/50"
           }`}
         />
       </div>
@@ -311,8 +311,8 @@ export default function TicketTypeModal({
       >
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-amber-600/20 p-2.5">
-              <Ticket className="h-5 w-5 text-amber-400" />
+            <div className="rounded-full bg-accent/20 p-2.5">
+              <Ticket className="h-5 w-5 text-accent" />
             </div>
             <h2 className="text-xl md:text-2xl font-bold">
               {ticketToEdit ? "Edit Ticket" : "Add Ticket Type"}
@@ -338,7 +338,7 @@ export default function TicketTypeModal({
               type="text"
               value={localName}
               onChange={(e) => setLocalName(e.target.value)}
-              className="w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-amber-500/50 border border-white/10 transition-all placeholder:text-white/40"
+              className="w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all placeholder:text-white/40"
               placeholder="e.g., General Admission, VIP, Early Bird"
             />
           </div>
@@ -352,7 +352,7 @@ export default function TicketTypeModal({
               value={localDescription}
               onChange={(e) => setLocalDescription(e.target.value)}
               rows={3}
-              className="w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-amber-500/50 border border-white/10 transition-all resize-none placeholder:text-white/40"
+              className="w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all resize-none placeholder:text-white/40"
               placeholder="Optional description of this ticket type..."
             />
           </div>
@@ -382,7 +382,7 @@ export default function TicketTypeModal({
                         step="0.01"
                         value={localPrice}
                         onChange={(e) => setLocalPrice(e.target.value)}
-                        className="w-full h-11 rounded-xl bg-white/10 pl-8 pr-4 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-amber-500/50 border border-white/10 transition-all"
+                        className="w-full h-11 rounded-xl bg-white/10 pl-8 pr-4 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all"
                         placeholder="0.30"
                       />
                     </div>
@@ -398,7 +398,7 @@ export default function TicketTypeModal({
                   onClick={() => setLocalIsFree(true)}
                   className={`h-11 rounded-xl px-4 text-sm font-medium transition-all ${
                     localIsFree
-                      ? "bg-amber-600 text-white"
+                      ? "bg-accent-dark text-white"
                       : "bg-white/10 text-white/60 hover:bg-white/15"
                   }`}
                 >
@@ -409,7 +409,7 @@ export default function TicketTypeModal({
                   onClick={() => setLocalIsFree(false)}
                   className={`h-11 rounded-xl px-4 text-sm font-medium transition-all ${
                     !localIsFree
-                      ? "bg-amber-600 text-white"
+                      ? "bg-accent-dark text-white"
                       : "bg-white/10 text-white/60 hover:bg-white/15"
                   }`}
                 >
@@ -432,7 +432,7 @@ export default function TicketTypeModal({
                   onClick={() => setLocalIsUnlimited(!localIsUnlimited)}
                   className={`h-6 w-11 rounded-full transition-all flex-shrink-0 ${
                     localIsUnlimited
-                      ? "bg-amber-600"
+                      ? "bg-accent-dark"
                       : "bg-white/10"
                   }`}
                 >
@@ -448,7 +448,7 @@ export default function TicketTypeModal({
             </div>
             {localIsUnlimited ? (
               <div className="h-11 flex items-center gap-2 rounded-xl bg-white/10 px-4">
-                <Infinity className="h-4 w-4 text-amber-400" />
+                <Infinity className="h-4 w-4 text-accent" />
                 <p className="text-base md:text-sm text-white/60">
                   Unlimited tickets available
                 </p>
@@ -461,7 +461,7 @@ export default function TicketTypeModal({
                   max="100000"
                   value={localQuantity}
                   onChange={(e) => setLocalQuantity(e.target.value)}
-                  className="w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-amber-500/50 border border-white/10 transition-all"
+                  className="w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all"
                   placeholder="100"
                 />
                 <p className="text-xs text-white/60 mt-1.5">
@@ -486,7 +486,7 @@ export default function TicketTypeModal({
                 <Settings className="h-4 w-4 text-white/60" />
                 <span className="text-sm font-medium text-white">Additional Settings</span>
                 {(localIsSingleUse || localMaxGroupSize > 1) && (
-                  <span className="text-xs text-amber-400 bg-amber-600/10 px-2 py-0.5 rounded-full">
+                  <span className="text-xs text-accent bg-accent/10 px-2 py-0.5 rounded-full">
                     {[localIsSingleUse && "Single-use", localMaxGroupSize > 1 && "Group"].filter(Boolean).join(", ")}
                   </span>
                 )}
@@ -511,7 +511,7 @@ export default function TicketTypeModal({
                     onClick={() => setLocalIsSingleUse(!localIsSingleUse)}
                     className={`h-6 w-11 rounded-full transition-all ${
                       localIsSingleUse
-                        ? "bg-amber-600"
+                        ? "bg-accent-dark"
                         : "bg-white/10"
                     }`}
                   >
@@ -546,7 +546,7 @@ export default function TicketTypeModal({
                       onClick={() => setLocalMaxGroupSize(localMaxGroupSize > 1 ? 1 : 5)}
                       className={`h-6 w-11 rounded-full transition-all flex-shrink-0 ${
                         localMaxGroupSize > 1
-                          ? "bg-amber-600"
+                          ? "bg-accent-dark"
                           : "bg-white/10"
                       }`}
                     >
@@ -583,7 +583,7 @@ export default function TicketTypeModal({
                 <HelpCircle className="h-4 w-4 text-white/60" />
                 <span className="text-sm font-medium text-white">Registration Questions</span>
                 {localQuestions.length > 0 && (
-                  <span className="text-xs text-amber-400 bg-amber-600/10 px-2 py-0.5 rounded-full">
+                  <span className="text-xs text-accent bg-accent/10 px-2 py-0.5 rounded-full">
                     {localQuestions.length}
                   </span>
                 )}
@@ -597,7 +597,7 @@ export default function TicketTypeModal({
                   <button
                     type="button"
                     onClick={handleAddQuestion}
-                    className="flex items-center gap-1.5 rounded-lg bg-amber-600/20 px-2.5 py-1.5 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-600/30"
+                    className="flex items-center gap-1.5 rounded-lg bg-accent/20 px-2.5 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent-dark/30"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     Add Question
@@ -633,7 +633,7 @@ export default function TicketTypeModal({
                       </button>
                     </div>
 
-                    <div className="flex items-center justify-center rounded bg-amber-600/10 p-1.5 text-amber-400 flex-shrink-0">
+                    <div className="flex items-center justify-center rounded bg-accent/10 p-1.5 text-accent flex-shrink-0">
                       {getQuestionTypeIcon(question.type)}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -719,7 +719,7 @@ export default function TicketTypeModal({
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="flex-1 rounded-xl bg-amber-600 py-2.5 text-center text-sm font-semibold text-white transition-all hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 rounded-xl bg-accent-dark py-2.5 text-center text-sm font-semibold text-white transition-all hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSaving ? "Saving..." : ticketToEdit ? "Update Ticket" : "Add Ticket"}
           </button>
