@@ -259,15 +259,15 @@ export default function Navbar() {
       {isUserMenuOpen && createPortal(
         <div
           ref={dropdownRef}
-          className="fixed z-[60] w-56 rounded-xl border border-foreground/10 bg-card-background shadow-2xl backdrop-blur-sm"
+          className="fixed z-[60] w-56 rounded-xl border border-white/10 bg-[#1a1a1a]/70 backdrop-blur-sm shadow-2xl shadow-black/50"
           style={{ top: dropdownPos.top, right: dropdownPos.right }}
         >
           {/* User Info Section */}
-          <div className="border-b border-foreground/10 px-4 py-3">
-            <p className="text-sm font-medium text-foreground truncate">
+          <div className="border-b border-white/10 px-4 py-3">
+            <p className="text-sm font-medium text-white truncate">
               {user?.email}
             </p>
-            <p className="text-xs text-foreground/60 mt-0.5">
+            <p className="text-xs text-white/60 mt-0.5">
               Signed in
             </p>
           </div>
@@ -275,7 +275,7 @@ export default function Navbar() {
           {/* Menu Items */}
           <div className="py-2">
             <button
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-white/5"
               onClick={() => {
                 if (eventUser?.id) {
                   router.push(`/user/${eventUser.id}`);
@@ -287,7 +287,7 @@ export default function Navbar() {
               Profile
             </button>
             <button
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-white/5"
               onClick={() => {
                 router.push("/friends");
                 setIsUserMenuOpen(false);
@@ -297,7 +297,7 @@ export default function Navbar() {
               Friends
             </button>
             <button
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5"
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-white/5"
               onClick={() => {
                 router.push("/profile/edit");
                 setIsUserMenuOpen(false);
@@ -307,7 +307,7 @@ export default function Navbar() {
               Settings
             </button>
             <button
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5 hover:text-red-400"
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-white/5 hover:text-red-400"
               onClick={handleLogout}
             >
               <LogOut className="h-4 w-4" />

@@ -82,16 +82,16 @@ export default function NotificationDropdown({ isLandingPage = false }: Notifica
 
       {/* Dropdown panel */}
       {isDropdownOpen && (
-        <div className="fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 rounded-lg border border-foreground/10 bg-background shadow-xl z-50">
+        <div className="fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 rounded-xl border border-white/10 bg-[#1a1a1a]/70 backdrop-blur-sm shadow-2xl shadow-black/50 z-50">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-foreground/10 px-4 py-3">
-            <h3 className="text-sm font-medium text-foreground">
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+            <h3 className="text-sm font-medium text-white">
               Notifications
             </h3>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
+                className="flex items-center gap-1.5 text-xs text-amber-500 hover:text-amber-400 transition-colors"
               >
                 <CheckCheck className="h-4 w-4" />
                 Mark all as read
@@ -107,19 +107,19 @@ export default function NotificationDropdown({ isLandingPage = false }: Notifica
           >
             {isLoading && notifications.length === 0 ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-foreground/40" />
+                <Loader2 className="h-6 w-6 animate-spin text-white/40" />
               </div>
             ) : notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                <Bell className="h-10 w-10 text-foreground/20 mb-3" />
-                <p className="text-sm text-foreground/60">No notifications</p>
-                <p className="text-xs text-foreground/40 mt-1">
+                <Bell className="h-10 w-10 text-white/20 mb-3" />
+                <p className="text-sm text-white/60">No notifications</p>
+                <p className="text-xs text-white/40 mt-1">
                   You&apos;re all caught up!
                 </p>
               </div>
             ) : (
               <>
-                <div className="divide-y divide-foreground/5">
+                <div className="divide-y divide-white/5">
                   {notifications.map((notification) => (
                     <NotificationItem
                       key={notification.id}
@@ -129,11 +129,11 @@ export default function NotificationDropdown({ isLandingPage = false }: Notifica
                 </div>
                 {isLoading && (
                   <div className="flex items-center justify-center py-4">
-                    <Loader2 className="h-5 w-5 animate-spin text-foreground/40" />
+                    <Loader2 className="h-5 w-5 animate-spin text-white/40" />
                   </div>
                 )}
                 {!hasMore && notifications.length > 0 && (
-                  <div className="text-center py-4 text-xs text-foreground/40">
+                  <div className="text-center py-4 text-xs text-white/40">
                     No more notifications
                   </div>
                 )}

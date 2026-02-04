@@ -60,7 +60,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     {
       icon: <Compass className="h-4 w-4" />,
       label: "Open Discover",
-      href: "/",
+      href: "/discover",
       keywords: ["discover", "explore", "find", "browse", "home"],
     },
     {
@@ -368,12 +368,12 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
         <div
           ref={modalRef}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-xl rounded-xl border border-foreground/10 bg-card-background shadow-2xl animate-in fade-in duration-200 flex flex-col max-h-[85dvh] sm:max-h-[70vh] touch-auto"
+          className="relative w-full max-w-xl rounded-xl border border-white/10 bg-[#1a1a1a]/70 backdrop-blur-sm shadow-2xl shadow-black/50 animate-in fade-in duration-200 flex flex-col max-h-[85dvh] sm:max-h-[70vh] touch-auto"
         >
           {/* Search Input */}
-          <div className="border-b border-foreground/10">
+          <div className="border-b border-white/10">
             <div className="flex items-center gap-3 px-4 py-3">
-              <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              <Search className="h-5 w-5 text-white/60 flex-shrink-0" />
               <input
                 ref={inputRef}
                 type="text"
@@ -381,20 +381,20 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search for events, calendars and more..."
-                className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-base sm:text-sm"
+                className="flex-1 bg-transparent text-white placeholder:text-white/40 outline-none text-base sm:text-sm"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="p-1 rounded-md hover:bg-foreground/10 transition-colors"
+                  className="p-1 rounded-md hover:bg-white/10 transition-colors"
                 >
-                  <X className="h-4 w-4 text-muted-foreground" />
+                  <X className="h-4 w-4 text-white/60" />
                 </button>
               )}
             </div>
             <div className="px-4 pb-2">
-              <span className="text-xs text-muted-foreground">
-                <kbd className="px-1.5 py-0.5 rounded bg-foreground/10 text-foreground/70 font-mono text-xs">@</kbd>
+              <span className="text-xs text-white/60">
+                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white/70 font-mono text-xs">@</kbd>
                 <span className="ml-1.5">to search for users</span>
               </span>
             </div>
@@ -406,7 +406,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             {filteredShortcuts.length > 0 && (
               <div className="p-2">
                 <div className="px-2 py-2">
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <span className="text-xs font-medium text-white/40 uppercase tracking-wider">
                     Shortcuts
                   </span>
                 </div>
@@ -418,14 +418,14 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       key={index}
                       data-index={index}
                       onClick={() => handleShortcutClick(item)}
-                      className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-foreground transition-colors group ${isSelected ? "bg-foreground/10" : "hover:bg-foreground/5"}`}
+                      className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-white transition-colors group ${isSelected ? "bg-white/10" : "hover:bg-white/5"}`}
                     >
-                      <span className="text-muted-foreground group-hover:text-foreground transition-colors">
+                      <span className="text-white/60 group-hover:text-white transition-colors">
                         {item.icon}
                       </span>
                       <span className="text-sm flex-1 text-left">{item.label}</span>
                       {item.external && (
-                        <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                        <ExternalLink className="h-3 w-3 text-white/60" />
                       )}
                     </button>
                     );
@@ -437,22 +437,22 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             {/* Loading State for API results */}
             {isLoading && (
               <div className="flex items-center justify-center py-8">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-white" />
               </div>
             )}
 
             {/* No Results */}
             {!isLoading && searchQuery.length >= 2 && !hasResults && filteredShortcuts.length === 0 && (
-              <div className="px-4 py-8 text-center text-muted-foreground text-sm">
+              <div className="px-4 py-8 text-center text-white/60 text-sm">
                 No results found for &quot;{searchQuery}&quot;
               </div>
             )}
 
             {/* Calendars Section */}
             {!isLoading && searchResults?.calendars?.items && searchResults.calendars.items.length > 0 && (
-              <div className="p-2 border-t border-foreground/10">
+              <div className="p-2 border-t border-white/10">
                 <div className="px-2 py-2">
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <span className="text-xs font-medium text-white/40 uppercase tracking-wider">
                     Calendars
                   </span>
                 </div>
@@ -491,9 +491,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
             {/* Events Section */}
             {!isLoading && searchResults?.events?.items && searchResults.events.items.length > 0 && (
-              <div className="p-2 border-t border-foreground/10">
+              <div className="p-2 border-t border-white/10">
                 <div className="px-2 py-2">
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <span className="text-xs font-medium text-white/40 uppercase tracking-wider">
                     Events
                   </span>
                 </div>
@@ -506,7 +506,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       <div
                         key={event.id}
                         data-index={globalIndex}
-                        className={`rounded-lg ${isSelected ? "bg-foreground/10" : ""}`}
+                        className={`rounded-lg ${isSelected ? "bg-white/10" : ""}`}
                       >
                         <HorizontalEventCard
                           event={event}
@@ -523,9 +523,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
             {/* Users Section */}
             {!isLoading && searchResults?.users?.items && searchResults.users.items.length > 0 && (
-              <div className="p-2 border-t border-foreground/10">
+              <div className="p-2 border-t border-white/10">
                 <div className="px-2 py-2">
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <span className="text-xs font-medium text-white/40 uppercase tracking-wider">
                     Users
                   </span>
                 </div>
@@ -541,9 +541,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       key={user.id}
                       data-index={globalIndex}
                       onClick={() => handleUserClick(user)}
-                      className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-foreground transition-colors group ${isSelected ? "bg-foreground/10" : "hover:bg-foreground/5"}`}
+                      className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-white transition-colors group ${isSelected ? "bg-white/10" : "hover:bg-white/5"}`}
                     >
-                      <div className="h-10 w-10 rounded-full overflow-hidden bg-card-secondary-background flex-shrink-0">
+                      <div className="h-10 w-10 rounded-full overflow-hidden bg-white/10 flex-shrink-0">
                         {user.profilePicture ? (
                           <img
                             src={user.profilePicture}
@@ -555,8 +555,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                             }}
                           />
                         ) : null}
-                        <div className={`h-full w-full flex items-center justify-center bg-primary/20 ${user.profilePicture ? 'hidden' : ''}`}>
-                          <User className="h-5 w-5 text-primary" />
+                        <div className={`h-full w-full flex items-center justify-center bg-white/20 ${user.profilePicture ? 'hidden' : ''}`}>
+                          <User className="h-5 w-5 text-white" />
                         </div>
                       </div>
                       <div className="flex-1 text-left min-w-0">
@@ -566,7 +566,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                               ? `${user.firstName} ${user.lastName}`
                               : user.username)}
                         </p>
-                        <p className="text-xs text-muted-foreground truncate">
+                        <p className="text-xs text-white/60 truncate">
                           @{user.username}
                           {user.followerCount > 0 && (
                             <span className="ml-2">
@@ -585,9 +585,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
           </div>
 
           {/* Keyboard Shortcut Hint - hidden on mobile */}
-          <div className="hidden sm:flex px-4 py-3 border-t border-foreground/10 items-center justify-between">
-            <span className="text-xs text-muted-foreground">
-              Press <kbd className="px-1.5 py-0.5 rounded bg-foreground/10 text-foreground/70 font-mono text-xs">ESC</kbd> to close
+          <div className="hidden sm:flex px-4 py-3 border-t border-white/10 items-center justify-between">
+            <span className="text-xs text-white/60">
+              Press <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white/70 font-mono text-xs">ESC</kbd> to close
             </span>
           </div>
         </div>

@@ -101,7 +101,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} bg-primary text-white hover:bg-primary/90`}
+            className={`${baseClasses} bg-amber-600 text-white hover:bg-amber-500`}
           >
             Accept
           </button>
@@ -111,7 +111,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} bg-foreground/10 text-foreground hover:bg-foreground/20`}
+            className={`${baseClasses} bg-white/10 text-white hover:bg-white/20`}
           >
             Reject
           </button>
@@ -120,7 +120,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} text-primary hover:bg-primary/10`}
+            className={`${baseClasses} text-amber-500 hover:bg-amber-500/10`}
           >
             View Profile
           </button>
@@ -129,7 +129,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} text-primary hover:bg-primary/10`}
+            className={`${baseClasses} text-amber-500 hover:bg-amber-500/10`}
           >
             View Event
           </button>
@@ -138,7 +138,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} text-primary hover:bg-primary/10`}
+            className={`${baseClasses} text-amber-500 hover:bg-amber-500/10`}
           >
             View Ticket
           </button>
@@ -147,7 +147,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} text-primary hover:bg-primary/10`}
+            className={`${baseClasses} text-amber-500 hover:bg-amber-500/10`}
           >
             View Dashboard
           </button>
@@ -156,7 +156,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} text-primary hover:bg-primary/10`}
+            className={`${baseClasses} text-amber-500 hover:bg-amber-500/10`}
           >
             View Attendee
           </button>
@@ -165,7 +165,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} text-primary hover:bg-primary/10`}
+            className={`${baseClasses} text-amber-500 hover:bg-amber-500/10`}
           >
             View Team
           </button>
@@ -174,7 +174,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} bg-primary text-white hover:bg-primary/90`}
+            className={`${baseClasses} bg-amber-600 text-white hover:bg-amber-500`}
           >
             Complete Payment
           </button>
@@ -222,23 +222,23 @@ export default function NotificationItem({
 
   return (
     <div
-      className={`relative flex gap-3 p-4 transition-colors hover:bg-foreground/5 ${
-        isUnread ? "bg-primary/5" : ""
+      className={`relative flex gap-3 p-4 transition-colors hover:bg-white/5 ${
+        isUnread ? "bg-amber-500/5" : ""
       }`}
     >
       {/* Unread indicator */}
       {isUnread && (
-        <div className="absolute left-1.5 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-primary" />
+        <div className="absolute left-1.5 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-amber-500" />
       )}
 
       {/* Avatar */}
       <div
-        className="relative flex-shrink-0 h-10 w-10 rounded-full overflow-hidden bg-foreground/10 cursor-pointer"
+        className="relative flex-shrink-0 h-10 w-10 rounded-full overflow-hidden bg-white/10 cursor-pointer"
         onClick={() => primaryAction && handleAction(notification, primaryAction)}
       >
         {avatarContent}
         <div
-          className={`absolute inset-0 flex items-center justify-center text-foreground/60 ${
+          className={`absolute inset-0 flex items-center justify-center text-white/60 ${
             avatarContent ? "hidden" : ""
           }`}
         >
@@ -251,8 +251,8 @@ export default function NotificationItem({
         {/* Title and time */}
         <div className="flex items-start justify-between gap-2">
           <p
-            className={`text-sm cursor-pointer hover:text-primary ${
-              isUnread ? "font-medium text-foreground" : "text-foreground/80"
+            className={`text-sm cursor-pointer hover:text-amber-500 ${
+              isUnread ? "font-medium text-white" : "text-white/80"
             }`}
             onClick={() =>
               primaryAction && handleAction(notification, primaryAction)
@@ -261,10 +261,10 @@ export default function NotificationItem({
             {notification.title}
           </p>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-xs text-foreground/50">{relativeTime}</span>
+            <span className="text-xs text-white/50">{relativeTime}</span>
             <button
               onClick={() => deleteNotification(notification.id)}
-              className="p-1 text-foreground/40 hover:text-foreground/60 transition-colors"
+              className="p-1 text-white/40 hover:text-white/60 transition-colors"
               title="Dismiss"
             >
               <X className="h-3.5 w-3.5" />
@@ -274,7 +274,7 @@ export default function NotificationItem({
 
         {/* Body */}
         {notification.body && (
-          <p className="text-sm text-foreground/60 mt-0.5 line-clamp-2">
+          <p className="text-sm text-white/60 mt-0.5 line-clamp-2">
             {notification.body}
           </p>
         )}
