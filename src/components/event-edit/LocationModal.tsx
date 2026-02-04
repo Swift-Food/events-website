@@ -419,10 +419,12 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
           }
         } else if (editMode?.type === 'virtual') {
           handleSaveVirtualLink();
+        } else if (isLikelyUrl(inputValue) && !editMode) {
+          handleSelectVirtualLink();
         }
         break;
     }
-  }, [getSelectableOptions, highlightedIndex, onClose, handleSelectVirtualLink, handleSelectPlace, handleUseAsManualEntry, handleAddVirtualLinkClick, editMode, handleSaveVirtualLink]);
+  }, [getSelectableOptions, highlightedIndex, onClose, handleSelectVirtualLink, handleSelectPlace, handleUseAsManualEntry, handleAddVirtualLinkClick, editMode, handleSaveVirtualLink, inputValue]);
 
   if (!isOpen) return null;
 
