@@ -7,6 +7,7 @@ import { calendarService } from "@/services/calendar.service";
 import { EventResponseDto } from "@/types/event";
 import { toast } from "sonner";
 import Image from "next/image";
+import { useAuth } from "@/lib/auth/authContext";
 
 interface AddEventsToCalendarModalProps {
   calendarId: string;
@@ -23,6 +24,10 @@ export default function AddEventsToCalendarModal({
   onClose,
   onEventsAdded,
 }: AddEventsToCalendarModalProps) {
+  const { user: currentUser} = useAuth();
+  if (!currentUser){
+    return null
+  }
   const [events, setEvents] = useState<EventResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -47,7 +52,9 @@ export default function AddEventsToCalendarModal({
     }
 
     try {
-      const result = await eventsApi.findAll({
+      const result = await eventsApi.findByOwnerId(
+        currentUser.id,
+        {
         search: searchQuery || undefined,
         skip: reset ? 0 : skipRef.current,
         take: eventsPerPage,

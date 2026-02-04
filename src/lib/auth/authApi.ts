@@ -118,15 +118,15 @@ export const authApi = {
   },
 
   /**
-   * Google Sign-In for Event Users
+   * Google Sign-In for Event Users (authorization code flow)
    */
   googleLogin: async (
-    idToken: string,
+    code: string,
     inviteToken?: string,
     inviteType?: 'collaborator' | 'ticket'
   ): Promise<{ access_token: string; refresh_token: string }> => {
     const payload = {
-      idToken,
+      code,
       inviteToken,
       inviteType,
     };
@@ -138,15 +138,15 @@ export const authApi = {
   },
 
   /**
-   * Google Register for Event Users
+   * Google Register for Event Users (authorization code flow)
    */
   googleRegister: async (
-    idToken: string,
+    code: string,
     inviteToken?: string,
     inviteType?: 'collaborator' | 'ticket'
   ): Promise<{ access_token: string; refresh_token: string }> => {
     const payload = {
-      idToken,
+      code,
       inviteToken,
       inviteType,
     };

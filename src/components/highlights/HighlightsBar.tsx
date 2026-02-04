@@ -71,6 +71,7 @@ export default function HighlightsBar({
 
           {/* Highlight items */}
           {highlights.map((highlight, index) => {
+            console.log("highlight sdate", JSON.stringify(highlight))
             const timeRemaining = getTimeRemaining(highlight.expiresAt);
             const firstMedia = highlight.mediaItems[0];
             const thumbnailUrl =
@@ -119,7 +120,7 @@ export default function HighlightsBar({
                       )}
                     </div>
                   </div>
-
+                
                   {/* Media count badge */}
                   {highlight.mediaItems.length > 1 && (
                     <div className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-white">
@@ -127,7 +128,11 @@ export default function HighlightsBar({
                     </div>
                   )}
                 </div>
-
+                {highlight.caption && (
+                    <span className="text-xs text-muted-foreground">
+                      {highlight.caption}
+                    </span>
+                  )}
                 {/* Time remaining label */}
                 <span className="text-xs text-muted-foreground">
                   {timeRemaining || ""}
