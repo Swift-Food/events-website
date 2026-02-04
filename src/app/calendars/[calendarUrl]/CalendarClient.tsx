@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { calendarService } from "@/services/calendar.service";
 import { highlightService } from "@/services/highlight.service";
@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import EventsTimeline from "@/components/EventsTimeline";
 import AddEventsToCalendarModal from "@/components/AddEventsToCalendarModal";
 import { HighlightsBar, AddHighlightModal } from "@/components/highlights";
+import EventCalendarWidget from "@/components/EventCalendarWidget";
 
 interface CalendarClientProps {
  initialCalendar: Calendar;
@@ -59,6 +60,10 @@ export default function CalendarClient({
  const [highlights, setHighlights] = useState<HighlightResponseDto[]>([]);
  const [loadingHighlights, setLoadingHighlights] = useState(true);
  const [showAddHighlightModal, setShowAddHighlightModal] = useState(false);
+
+ // Calendar widget state
+ const [allEvents, setAllEvents] = useState<EventResponseDto[]>([]);
+ const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
  // Re-fetch calendar data when user is authenticated
  useEffect(() => {
@@ -95,6 +100,20 @@ export default function CalendarClient({
 
   fetchEvents();
  }, [calendar.id, activeTab]);
+
+ // Fetch all events for calendar widget date highlighting
+ useEffect(() => {
+  const fetchAllEvents = async () => {
+   try {
+    const response = await calendarService.getCalendarEvents(calendar.id, { filter: "all" });
+    setAllEvents(response.events);
+   } catch (err) {
+    console.error("Failed to fetch all events for calendar widget:", err);
+   }
+  };
+
+  fetchAllEvents();
+ }, [calendar.id]);
 
  // Check if user is subscribed
  useEffect(() => {
@@ -257,10 +276,14 @@ export default function CalendarClient({
 
  const refreshEvents = async () => {
   try {
-   const response = await calendarService.getCalendarEvents(calendar.id, { filter: activeTab });
-   setEvents(response.events);
-   setUpcomingCount(response.upcomingCount);
-   setPastCount(response.pastCount);
+   const [tabResponse, allResponse] = await Promise.all([
+    calendarService.getCalendarEvents(calendar.id, { filter: activeTab }),
+    calendarService.getCalendarEvents(calendar.id, { filter: "all" }),
+   ]);
+   setEvents(tabResponse.events);
+   setUpcomingCount(tabResponse.upcomingCount);
+   setPastCount(tabResponse.pastCount);
+   setAllEvents(allResponse.events);
   } catch (err) {
    console.error("Failed to refresh calendar events:", err);
   }
@@ -268,6 +291,28 @@ export default function CalendarClient({
 
  const canManage = userRole === "owner" || userRole === "admin";
  const isOwner = userRole === "owner";
+
+ // Compute event dates for the calendar widget
+ const eventDates = useMemo(() => {
+  return allEvents.map((e) => new Date(e.startDateTime));
+ }, [allEvents]);
+
+ // Filter displayed events when a date is selected
+ const displayedEvents = useMemo(() => {
+  if (!selectedDate) return events;
+  return allEvents.filter((e) => {
+   const eventDate = new Date(e.startDateTime);
+   return (
+    eventDate.getFullYear() === selectedDate.getFullYear() &&
+    eventDate.getMonth() === selectedDate.getMonth() &&
+    eventDate.getDate() === selectedDate.getDate()
+   );
+  });
+ }, [events, allEvents, selectedDate]);
+
+ const handleDateSelect = (date: Date | null) => {
+  setSelectedDate(date);
+ };
 
  return (
   <div className="min-h-screen ">
@@ -473,9 +518,9 @@ export default function CalendarClient({
         </h2>
         <div className="flex gap-2">
          <button
-          onClick={() => setActiveTab("upcoming")}
+          onClick={() => { setActiveTab("upcoming"); setSelectedDate(null); }}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-           activeTab === "upcoming"
+           activeTab === "upcoming" && !selectedDate
             ? "bg-primary text-white"
             : "bg-card-background border border-white/10 text-muted-foreground hover:text-foreground"
           }`}
@@ -483,9 +528,9 @@ export default function CalendarClient({
           Upcoming ({upcomingCount})
          </button>
          <button
-          onClick={() => setActiveTab("past")}
+          onClick={() => { setActiveTab("past"); setSelectedDate(null); }}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-           activeTab === "past"
+           activeTab === "past" && !selectedDate
             ? "bg-primary text-white"
             : "bg-card-background border border-white/10 text-muted-foreground hover:text-foreground"
           }`}
@@ -499,28 +544,39 @@ export default function CalendarClient({
         <div className="flex min-h-[200px] items-center justify-center">
          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
         </div>
-       ) : events.length === 0 ? (
+       ) : displayedEvents.length === 0 ? (
         <div className="rounded-xl border border-white/10 bg-card-background p-12 text-center">
          <CalendarIcon className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
          <h3 className="mb-2 text-xl font-semibold text-foreground">
-          {activeTab === "upcoming" ? "No upcoming events" : "No past events"}
+          {selectedDate
+           ? "No events on this date"
+           : activeTab === "upcoming" ? "No upcoming events" : "No past events"}
          </h3>
          <p className="text-muted-foreground">
-          {activeTab === "upcoming"
-           ? canManage
-            ? "Add events to this calendar to get started"
-            : "Check back later for new events"
-           : "Past events will appear here after they end"}
+          {selectedDate
+           ? "Try selecting a different date or clear the filter"
+           : activeTab === "upcoming"
+            ? canManage
+             ? "Add events to this calendar to get started"
+             : "Check back later for new events"
+            : "Past events will appear here after they end"}
          </p>
         </div>
        ) : (
-        <EventsTimeline events={events}   stickyTopClass = "top-2"/>
+        <EventsTimeline events={displayedEvents} stickyTopClass="top-2"/>
        )}
       </div>
      </section>
 
      {/* Sidebar */}
      <aside className="flex flex-col gap-6 lg:w-80 lg:shrink-0">
+      {/* Calendar Date Picker */}
+      <EventCalendarWidget
+       eventDates={eventDates}
+       selectedDate={selectedDate}
+       onDateSelect={handleDateSelect}
+      />
+
       {/* Location Card */}
       {calendar.address && (
        <div className="rounded-xl border border-neutral-700 bg-card-background overflow-hidden">
