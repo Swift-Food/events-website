@@ -132,8 +132,8 @@ export default function FormFieldModal({
       >
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-amber-600/20 p-2.5">
-              <FileText className="h-5 w-5 text-amber-400" />
+            <div className="rounded-full bg-accent/20 p-2.5">
+              <FileText className="h-5 w-5 text-accent" />
             </div>
             <h2 className="text-xl md:text-2xl font-bold">
               {fieldToEdit ? "Edit Question" : "Add Question"}
@@ -159,7 +159,7 @@ export default function FormFieldModal({
               value={localQuestion}
               onChange={(e) => setLocalQuestion(e.target.value)}
               rows={2}
-              className="w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-amber-500/50 border border-white/10 transition-all resize-none placeholder:text-white/40"
+              className="w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all resize-none placeholder:text-white/40"
               placeholder="e.g., What is your dietary preference?"
             />
           </div>
@@ -186,7 +186,7 @@ export default function FormFieldModal({
                   }}
                   className={`rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
                     localType === type.value
-                      ? "bg-amber-600 text-white"
+                      ? "bg-accent-dark text-white"
                       : "bg-white/10 text-white/60 hover:bg-white/15"
                   }`}
                 >
@@ -233,13 +233,13 @@ export default function FormFieldModal({
                         handleAddOption();
                       }
                     }}
-                    className="flex-1 rounded-xl bg-white/10 px-4 py-2.5 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-amber-500/50 border border-white/10 transition-all placeholder:text-white/40"
+                    className="flex-1 rounded-xl bg-white/10 px-4 py-2.5 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all placeholder:text-white/40"
                     placeholder="Add an option..."
                   />
                   <button
                     type="button"
                     onClick={handleAddOption}
-                    className="rounded-xl bg-amber-600 px-3 py-2.5 text-white transition-all hover:bg-amber-500"
+                    className="rounded-xl bg-accent-dark px-3 py-2.5 text-white transition-all hover:bg-accent"
                     aria-label="Add option"
                   >
                     <Plus className="h-4 w-4" />
@@ -264,7 +264,7 @@ export default function FormFieldModal({
               onClick={() => setLocalRequired(!localRequired)}
               className={`h-6 w-11 rounded-full transition-all ${
                 localRequired
-                  ? "bg-amber-600"
+                  ? "bg-accent-dark"
                   : "bg-white/10"
               }`}
             >
@@ -290,7 +290,7 @@ export default function FormFieldModal({
           <button
             type="button"
             onClick={handleSave}
-            className="flex-1 rounded-xl bg-amber-600 py-2.5 text-center text-sm font-semibold text-white transition-all hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 rounded-xl bg-accent-dark py-2.5 text-center text-sm font-semibold text-white transition-all hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {fieldToEdit ? "Update" : "Add"} Question
           </button>
