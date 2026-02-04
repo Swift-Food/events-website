@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
+import { createPortal } from "react-dom";
 import { Bell, CheckCheck, Loader2 } from "lucide-react";
 import { useNotifications } from "@/context/NotificationContext";
 import NotificationItem from "./NotificationItem";
@@ -22,15 +23,20 @@ export default function NotificationDropdown({ isLandingPage = false }: Notifica
     markAllAsRead,
   } = useNotifications();
 
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; right: number | undefined; left: number | undefined }>({ top: 0, right: 0, left: undefined });
 
   // Handle click outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        !dropdownRef.current.contains(target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(target)
       ) {
         setIsDropdownOpen(false);
       }
@@ -58,6 +64,16 @@ export default function NotificationDropdown({ isLandingPage = false }: Notifica
 
   const toggleDropdown = () => {
     const newState = !isDropdownOpen;
+    // Calculate dropdown position from the trigger button
+    if (newState && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const isMobile = window.innerWidth < 640;
+      setDropdownPos({
+        top: isMobile ? 64 : rect.bottom + 8, // 64px = navbar height on mobile
+        right: isMobile ? undefined : window.innerWidth - rect.right,
+        left: isMobile ? 16 : undefined,
+      });
+    }
     setIsDropdownOpen(newState);
     if (newState && notifications.length === 0) {
       fetchNotifications(true);
@@ -65,24 +81,31 @@ export default function NotificationDropdown({ isLandingPage = false }: Notifica
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      {/* Bell button */}
-      <button
-        onClick={toggleDropdown}
-        className={`relative flex h-9 w-9 items-center justify-center rounded-full ${isLandingPage ? "text-zinc-900 hover:bg-zinc-900/10" : "text-foreground hover:bg-foreground/10"} transition-colors cursor-pointer`}
-        aria-label="Notifications"
-      >
-        <Bell className="h-5 w-5" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-medium text-primary-foreground">
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        )}
-      </button>
+    <>
+      <div className="relative">
+        {/* Bell button */}
+        <button
+          ref={buttonRef}
+          onClick={toggleDropdown}
+          className={`relative flex h-9 w-9 items-center justify-center rounded-full ${isLandingPage ? "text-zinc-900 hover:bg-zinc-900/10" : "text-foreground hover:bg-foreground/10"} transition-colors cursor-pointer`}
+          aria-label="Notifications"
+        >
+          <Bell className="h-5 w-5" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-medium text-primary-foreground">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
+        </button>
+      </div>
 
-      {/* Dropdown panel */}
-      {isDropdownOpen && (
-        <div className="fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 rounded-xl border border-white/10 bg-[#1a1a1a]/70 backdrop-blur-sm shadow-2xl shadow-black/50 z-50">
+      {/* Dropdown panel - portaled outside header to allow backdrop-blur */}
+      {isDropdownOpen && createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed z-[60] w-[calc(100%-2rem)] sm:w-96 rounded-xl border border-white/10 bg-[#1a1a1a]/70 backdrop-blur-sm shadow-2xl shadow-black/50"
+          style={{ top: dropdownPos.top, right: dropdownPos.right, left: dropdownPos.left }}
+        >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
             <h3 className="text-sm font-medium text-white">
@@ -140,8 +163,9 @@ export default function NotificationDropdown({ isLandingPage = false }: Notifica
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   );
 }
