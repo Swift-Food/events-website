@@ -196,7 +196,7 @@ export default function EventDescriptionModal({
           <button
             type="button"
             onClick={handleSave}
-            className="rounded-lg bg-amber-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-amber-500 transition-colors"
+            className="rounded-lg bg-accent-dark px-6 py-2.5 text-sm font-medium text-white hover:bg-accent-dark/70 transition-colors"
           >
             Save
           </button>
@@ -209,8 +209,8 @@ export default function EventDescriptionModal({
           <div className="w-full max-w-sm mx-4 rounded-xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl">
             <div className="p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-amber-500/20">
-                  <AlertTriangle className="h-5 w-5 text-amber-400" />
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-accent">
+                  <AlertTriangle className="h-5 w-5 text-accent-dark" />
                 </div>
                 <h3 className="text-lg font-semibold text-white">Discard Changes?</h3>
               </div>
