@@ -46,10 +46,10 @@ export default function Footer() {
         isLanding
           ? "bg-white/10"
           : hasSolidBg
-            ? "relative z-10 bg-background border-t border-white/10"
+            ? "relative bg-background border-t border-white/10"
             : hasBlurBg
-              ? "relative z-10 bg-white/10 backdrop-blur-xl"
-              : "relative z-10 border-t border-white/10"
+              ? "relative bg-white/10 backdrop-blur-xl"
+              : "relative border-t border-white/10"
       }
     >
       <div className="mx-auto max-w-6xl px-6 py-8 pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">

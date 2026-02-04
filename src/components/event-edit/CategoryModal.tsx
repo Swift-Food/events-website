@@ -158,7 +158,7 @@ export default function CategoryModal({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search categories..."
-            className="w-full rounded-lg bg-white/10 pl-9 pr-3 py-2 text-sm text-white outline-none placeholder:text-white/40 border border-white/10 focus:border-amber-500/50 transition-all"
+            className="w-full rounded-lg bg-white/10 pl-9 pr-3 py-2 text-sm text-white outline-none placeholder:text-white/40 border border-white/10 focus:border-accent transition-all"
           />
         </div>
 
@@ -202,14 +202,14 @@ export default function CategoryModal({
                         onClick={() => toggleCategory(category.id)}
                         className={`flex-1 flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-left transition-all ${
                           isSelected
-                            ? "bg-amber-600/20 border border-amber-500/30"
+                            ? "bg-accent/20 border border-accent/30"
                             : "hover:bg-white/5 border border-transparent"
                         }`}
                       >
                         <div
                           className={`h-4 w-4 rounded flex items-center justify-center border transition-all shrink-0 ${
                             isSelected
-                              ? "bg-amber-600 border-amber-600"
+                              ? "bg-accent-dark border-accent-dark"
                               : "border-white/20 bg-transparent"
                           }`}
                         >
@@ -226,7 +226,7 @@ export default function CategoryModal({
                           )}
                         </div>
                         {selectedSubcategoriesInCategory > 0 && (
-                          <span className="text-xs bg-amber-600/20 text-amber-400 px-2 py-0.5 rounded-full">
+                          <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full">
                             +{selectedSubcategoriesInCategory}
                           </span>
                         )}
@@ -261,7 +261,7 @@ export default function CategoryModal({
                               <div
                                 className={`h-4 w-4 rounded flex items-center justify-center border transition-all ${
                                   isSubSelected
-                                    ? "bg-amber-600 border-amber-600"
+                                    ? "bg-accent-dark border-accent-dark"
                                     : "border-white/20 bg-transparent"
                                 }`}
                               >
@@ -287,7 +287,7 @@ export default function CategoryModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-full rounded-lg bg-amber-600 py-2 text-sm font-semibold text-white transition-all hover:bg-amber-500"
+            className="w-full rounded-lg bg-accent-dark py-2 text-sm font-semibold text-white transition-all hover:bg-accent"
           >
             Done
           </button>
