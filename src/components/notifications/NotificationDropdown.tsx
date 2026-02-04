@@ -114,7 +114,7 @@ export default function NotificationDropdown({ isLandingPage = false }: Notifica
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="flex items-center gap-1.5 text-xs text-amber-500 hover:text-amber-400 transition-colors"
+                className="flex items-center gap-1.5 text-xs text-[#d9ccff] transition-colors"
               >
                 <CheckCheck className="h-4 w-4" />
                 Mark all as read

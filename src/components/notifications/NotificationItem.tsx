@@ -101,7 +101,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} bg-amber-600 text-white hover:bg-amber-500`}
+            className={`${baseClasses} bg-[#d9ccff] text-white hover:bg-[#d9ccff]/80`}
           >
             Accept
           </button>
@@ -120,7 +120,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} text-amber-500 hover:bg-amber-500/10`}
+            className={`${baseClasses} text-[#d9ccff] hover:bg-[#d9ccff]/10`}
           >
             View Profile
           </button>
@@ -129,7 +129,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} text-amber-500 hover:bg-amber-500/10`}
+            className={`${baseClasses} text-[#d9ccff] hover:bg-[#d9ccff]/10`}
           >
             View Event
           </button>
@@ -138,7 +138,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} text-amber-500 hover:bg-amber-500/10`}
+            className={`${baseClasses} text-[#d9ccff] hover:bg-[#d9ccff]/10`}
           >
             View Ticket
           </button>
@@ -147,7 +147,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} text-amber-500 hover:bg-amber-500/10`}
+            className={`${baseClasses} text-[#d9ccff] hover:bg-[#d9ccff]/10`}
           >
             View Dashboard
           </button>
@@ -156,7 +156,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} text-amber-500 hover:bg-amber-500/10`}
+            className={`${baseClasses} text-[#d9ccff] hover:bg-[#d9ccff]/10`}
           >
             View Attendee
           </button>
@@ -165,7 +165,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} text-amber-500 hover:bg-amber-500/10`}
+            className={`${baseClasses} text-[#d9ccff] hover:bg-[#d9ccff]/10`}
           >
             View Team
           </button>
@@ -174,7 +174,7 @@ export default function NotificationItem({
         return (
           <button
             onClick={() => handleAction(notification, action)}
-            className={`${baseClasses} bg-amber-600 text-white hover:bg-amber-500`}
+            className={`${baseClasses} bg-[#d9ccff] text-white hover:bg-[#d9ccff]/80`}
           >
             Complete Payment
           </button>
@@ -223,12 +223,12 @@ export default function NotificationItem({
   return (
     <div
       className={`relative flex gap-3 p-4 transition-colors hover:bg-white/5 ${
-        isUnread ? "bg-amber-500/5" : ""
+        isUnread ? "bg-[#d9ccff]/20" : ""
       }`}
     >
       {/* Unread indicator */}
       {isUnread && (
-        <div className="absolute left-1.5 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-amber-500" />
+        <div className="absolute left-1.5 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-[#d9ccff]" />
       )}
 
       {/* Avatar */}
@@ -251,7 +251,7 @@ export default function NotificationItem({
         {/* Title and time */}
         <div className="flex items-start justify-between gap-2">
           <p
-            className={`text-sm cursor-pointer hover:text-amber-500 ${
+            className={`text-sm cursor-pointer hover:text-[#d9ccff] ${
               isUnread ? "font-medium text-white" : "text-white/80"
             }`}
             onClick={() =>
