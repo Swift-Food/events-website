@@ -19,7 +19,7 @@ export default function EventSettingsCard({
       {isCreateMode && (
         <div className="flex items-start gap-2.5">
           <Ticket className="h-4 w-4 text-muted-foreground mt-2.5 flex-shrink-0" />
-          <div className="flex-1 py-2 border-b border-foreground/10">
+          <div className="flex-1 py-2 border-b border-foreground/10 -mr-4 pr-4">
             <p className="text-sm font-medium text-foreground">Tickets</p>
             <p className="text-xs text-muted-foreground">
               Default &quot;General Admission&quot; ticket · Edit after creating
@@ -31,7 +31,7 @@ export default function EventSettingsCard({
       {/* Private Event Toggle */}
       <div className="flex items-center gap-2.5">
         <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-        <div className="flex-1 flex items-center justify-between py-2 border-b border-foreground/10">
+        <div className="flex-1 flex items-center justify-between py-2 border-b border-foreground/10 -mr-4 pr-4">
           <p className="text-sm font-medium text-foreground">Private Event</p>
           <button
             type="button"
