@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authApi } from "./authApi";
 import { toast } from "sonner";
@@ -16,6 +16,11 @@ declare global {
           prompt: () => void;
           renderButton: (element: HTMLElement, config: any) => void;
           disableAutoSelect: () => void;
+        };
+        oauth2: {
+          initCodeClient: (config: any) => {
+            requestCode: () => void;
+          };
         };
       };
     };
@@ -49,6 +54,7 @@ export function useOAuth({
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   const [isAppleLoaded, setIsAppleLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const codeClientRef = useRef<{ requestCode: () => void } | null>(null);
 
   // Initialize Google Sign-In
 
@@ -56,13 +62,13 @@ export function useOAuth({
 
     setIsLoading(true);
     try {
-      const idToken = response.credential;
-  
+      const code = response.code;
+
       let result;
       if (isRegister) {
-        result = await authApi.googleRegister(idToken, inviteToken, inviteType);
+        result = await authApi.googleRegister(code, inviteToken, inviteType);
       } else {
-        result = await authApi.googleLogin(idToken, inviteToken, inviteType);
+        result = await authApi.googleLogin(code, inviteToken, inviteType);
       }
   
       localStorage.setItem("auth_token", result.access_token);
@@ -100,26 +106,27 @@ export function useOAuth({
   
   useEffect(() => {
     const initializeGoogle = () => {
-      if (window.google?.accounts?.id && process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+      if (window.google?.accounts?.oauth2 && process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
         try {
-          window.google.accounts.id.initialize({
+          const client = window.google.accounts.oauth2.initCodeClient({
             client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-            callback: handleGoogleCallback, // Fresh reference each time
-            auto_select: false,
+            scope: "openid email profile",
+            ux_mode: "popup",
+            callback: handleGoogleCallback,
           });
+          codeClientRef.current = client;
           setIsGoogleLoaded(true);
-          console.log("Google initialized with fresh callback");
         } catch (error) {
           console.error("Failed to initialize Google Sign-In:", error);
         }
       }
     };
 
-    if (window.google?.accounts?.id) {
+    if (window.google?.accounts?.oauth2) {
       initializeGoogle();
     } else {
       const checkGoogle = setInterval(() => {
-        if (window.google?.accounts?.id) {
+        if (window.google?.accounts?.oauth2) {
           initializeGoogle();
           clearInterval(checkGoogle);
         }
@@ -127,7 +134,7 @@ export function useOAuth({
 
       return () => clearInterval(checkGoogle);
     }
-  }, [isRegister, inviteToken, inviteType, redirectTo, handleGoogleCallback, onSuccess, onError]); // Add all dependencies
+  }, [handleGoogleCallback]);
 
   // Initialize Apple Sign-In
   useEffect(() => {
@@ -168,7 +175,7 @@ export function useOAuth({
 
   // Trigger Google Sign-In
   const signInWithGoogle = () => {
-    if (!isGoogleLoaded) {
+    if (!isGoogleLoaded || !codeClientRef.current) {
       toast.error("Google Sign-In is not ready yet. Please try again.");
       return;
     }
@@ -178,10 +185,9 @@ export function useOAuth({
       console.error("NEXT_PUBLIC_GOOGLE_CLIENT_ID is not set");
       return;
     }
-    console.log("trying to login with google")
 
     try {
-      window.google?.accounts.id.prompt();
+      codeClientRef.current.requestCode();
     } catch (error) {
       console.error("Failed to trigger Google Sign-In:", error);
       toast.error("Failed to open Google Sign-In");
