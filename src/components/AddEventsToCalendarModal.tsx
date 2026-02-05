@@ -52,9 +52,8 @@ export default function AddEventsToCalendarModal({
     }
 
     try {
-      const result = await eventsApi.findByOwnerId(
-        currentUser.id,
-        {
+      // Use authenticated my-events endpoint to include private events
+      const result = await eventsApi.findMyEvents({
         search: searchQuery || undefined,
         skip: reset ? 0 : skipRef.current,
         take: eventsPerPage,

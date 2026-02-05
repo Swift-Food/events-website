@@ -29,7 +29,7 @@ export const eventsApi = {
   },
 
   /**
-   * Fetch events by owner ID
+   * Fetch events by owner ID (public endpoint - excludes private events)
    */
   findByOwnerId: async (
     ownerId: string,
@@ -40,6 +40,18 @@ export const eventsApi = {
         ...queryParams,
         ownerId,
       },
+    });
+    return response.data;
+  },
+
+  /**
+   * Fetch current user's events (authenticated - includes private events)
+   */
+  findMyEvents: async (
+    queryParams?: EventQueryDto
+  ): Promise<EventListResponseDto> => {
+    const response = await apiClient.get<EventListResponseDto>("/events/my-events", {
+      params: queryParams,
     });
     return response.data;
   },
