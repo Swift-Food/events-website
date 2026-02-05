@@ -4,8 +4,9 @@ import { ChevronRight } from "lucide-react";
 import { notFound } from "next/navigation";
 import OrganizerTermsContent from "./OrganizerTermsContent";
 import TicketTermsContent from "./TicketTermsContent";
+import PrivacyPolicyContent from "./PrivacyPolicyContent";
 
-type TermType = "organizer" | "ticket";
+type TermType = "organizer" | "ticket" | "privacy";
 
 interface Props {
  params: Promise<{ termType: string }>;
@@ -26,6 +27,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
    description:
     "Terms and conditions for purchasing event tickets on the Prismo platform",
   };
+ } else if (termType === "privacy") {
+  return {
+   title: "Privacy Policy | Prismo",
+   description:
+    "Privacy policy for Swift Food Services Ltd and the Prismo platform",
+  };
  }
 
  return {
@@ -34,17 +41,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export function generateStaticParams() {
- return [{ termType: "organizer" }, { termType: "ticket" }];
+ return [{ termType: "organizer" }, { termType: "ticket" }, { termType: "privacy" }];
 }
 
 export default async function TermsPage({ params }: Props) {
  const { termType } = await params;
 
- if (termType !== "organizer" && termType !== "ticket") {
+ if (termType !== "organizer" && termType !== "ticket" && termType !== "privacy") {
   notFound();
  }
-
- const isOrganizer = termType === "organizer";
 
  return (
   <div className="min-h-screen ">
@@ -53,7 +58,7 @@ export default async function TermsPage({ params }: Props) {
      {/* Side Navigation */}
      <nav className="lg:w-56 shrink-0">
       <div className="flex flex-row lg:flex-col gap-2 lg:sticky lg:top-24">
-       {!isOrganizer ? (
+       {termType === "ticket" ? (
         <span className="flex items-center justify-between rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white lg:px-4">
          Ticket Sales Terms
          <ChevronRight className="hidden lg:block h-4 w-4" />
@@ -67,7 +72,7 @@ export default async function TermsPage({ params }: Props) {
          <ChevronRight className="hidden lg:block h-4 w-4" />
         </Link>
        )}
-       {isOrganizer ? (
+       {termType === "organizer" ? (
         <span className="flex items-center justify-between rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white lg:px-4">
          Organiser Terms
          <ChevronRight className="hidden lg:block h-4 w-4" />
@@ -81,12 +86,32 @@ export default async function TermsPage({ params }: Props) {
          <ChevronRight className="hidden lg:block h-4 w-4" />
         </Link>
        )}
+       {termType === "privacy" ? (
+        <span className="flex items-center justify-between rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white lg:px-4">
+         Privacy Policy
+         <ChevronRight className="hidden lg:block h-4 w-4" />
+        </span>
+       ) : (
+        <Link
+         href="/terms/privacy"
+         className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors lg:px-4"
+        >
+         Privacy Policy
+         <ChevronRight className="hidden lg:block h-4 w-4" />
+        </Link>
+       )}
       </div>
      </nav>
 
      {/* Content */}
      <div className="flex-1 max-w-3xl">
-      {isOrganizer ? <OrganizerTermsContent /> : <TicketTermsContent />}
+      {termType === "organizer" ? (
+      <OrganizerTermsContent />
+     ) : termType === "privacy" ? (
+      <PrivacyPolicyContent />
+     ) : (
+      <TicketTermsContent />
+     )}
      </div>
     </div>
    </div>

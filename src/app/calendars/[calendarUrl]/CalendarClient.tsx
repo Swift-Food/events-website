@@ -73,6 +73,7 @@ export default function CalendarClient({
    try {
     const data = await calendarService.getCalendarByUrl(calendarUrl);
     setCalendar(data);
+    console.log("calender data", JSON.stringify(calendar))
    } catch (err) {
     console.error("Failed to fetch authenticated calendar data:", err);
    }

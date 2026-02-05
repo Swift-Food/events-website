@@ -102,6 +102,12 @@ export default function Footer() {
               >
                 Terms
               </Link>
+              <Link
+                href="/terms/privacy"
+                className="transition-colors hover:opacity-80"
+              >
+                Privacy
+              </Link>
             </nav>
           </div>
           {/* Social Media Links */}

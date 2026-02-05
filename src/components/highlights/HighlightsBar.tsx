@@ -71,7 +71,6 @@ export default function HighlightsBar({
 
           {/* Highlight items */}
           {highlights.map((highlight, index) => {
-            console.log("highlight sdate", JSON.stringify(highlight))
             const timeRemaining = getTimeRemaining(highlight.expiresAt);
             const firstMedia = highlight.mediaItems[0];
             const thumbnailUrl =
