@@ -569,69 +569,78 @@ export default function EditCalendarPage() {
       </div>
      </div>
 
-     {/* Settings Block */}
-     <div className="rounded-2xl bg-card-background overflow-hidden">
-      {/* Public Calendar */}
-      <div className="flex items-center gap-3 px-4 py-3.5">
-       <Globe className="h-5 w-5 text-muted-foreground shrink-0" />
-       <p className="flex-1 text-sm font-medium text-foreground">Public Calendar</p>
-       <button
-        type="button"
-        onClick={() => setIsPublic(!isPublic)}
-        className={`relative h-6 w-11 rounded-full transition-colors shrink-0 ${
-         isPublic ? "bg-primary" : "bg-white/10"
-        }`}
-       >
-        <div
-         className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-          isPublic ? "translate-x-5" : "translate-x-0.5"
-         }`}
-        />
-       </button>
-      </div>
-      <div className="mx-4 border-t border-white/5" />
-
-      {/* Show Subscriber Count */}
-      <div className="flex items-center gap-3 px-4 py-3.5">
-       <Eye className="h-5 w-5 text-muted-foreground shrink-0" />
-       <p className="flex-1 text-sm font-medium text-foreground">Show Subscriber Count</p>
-       <button
-        type="button"
-        onClick={() => setShowSubscriberCount(!showSubscriberCount)}
-        className={`relative h-6 w-11 rounded-full transition-colors shrink-0 ${
-         showSubscriberCount ? "bg-primary" : "bg-white/10"
-        }`}
-       >
-        <div
-         className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-          showSubscriberCount ? "translate-x-5" : "translate-x-0.5"
-         }`}
-        />
-       </button>
-      </div>
-      <div className="mx-4 border-t border-white/5" />
-
-      {/* Auto-delete past events */}
-      <div className="flex items-center gap-3 px-4 py-3.5">
-       <Trash2 className="h-5 w-5 text-muted-foreground shrink-0" />
-       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-foreground">Auto-delete Past Events</p>
-        <p className="text-xs text-muted-foreground mt-0.5">Remove events after they end</p>
+     {/* Settings */}
+     <div>
+      <label className="block text-xs font-medium text-muted-foreground mb-1">
+       Settings
+      </label>
+      <div className="rounded-xl bg-card-background backdrop-blur-xl px-4 py-1">
+       {/* Public Calendar */}
+       <div className="flex items-center gap-2.5">
+        <Globe className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        <div className="flex-1 flex items-center justify-between py-2 border-b border-foreground/10 -mr-4 pr-4">
+         <p className="text-sm font-medium text-foreground">Public Calendar</p>
+         <button
+          type="button"
+          onClick={() => setIsPublic(!isPublic)}
+          className={`h-5 w-8 rounded-full transition-all ${
+           isPublic ? "bg-primary" : "bg-card-secondary-background"
+          }`}
+         >
+          <span
+           className={`block h-4 w-4 rounded-full transition-all ${
+            isPublic ? "translate-x-3.5 bg-primary-foreground" : "translate-x-0.5 bg-foreground"
+           }`}
+          />
+         </button>
+        </div>
        </div>
-       <select
-        id="autoDelete"
-        value={autoDeletePastEventsAfterDays === null ? "never" : autoDeletePastEventsAfterDays.toString()}
-        onChange={(e) => setAutoDeletePastEventsAfterDays(
-         e.target.value === "never" ? null : parseInt(e.target.value)
-        )}
-        className="bg-transparent text-sm text-muted-foreground focus:outline-none cursor-pointer shrink-0"
-       >
-        <option value="never">Never</option>
-        <option value="0">Immediately</option>
-        <option value="1">After 1 day</option>
-        <option value="7">After 7 days</option>
-        <option value="30">After 30 days</option>
-       </select>
+
+       {/* Show Subscriber Count */}
+       <div className="flex items-center gap-2.5">
+        <Eye className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        <div className="flex-1 flex items-center justify-between py-2 border-b border-foreground/10 -mr-4 pr-4">
+         <p className="text-sm font-medium text-foreground">Show Subscriber Count</p>
+         <button
+          type="button"
+          onClick={() => setShowSubscriberCount(!showSubscriberCount)}
+          className={`h-5 w-8 rounded-full transition-all ${
+           showSubscriberCount ? "bg-primary" : "bg-card-secondary-background"
+          }`}
+         >
+          <span
+           className={`block h-4 w-4 rounded-full transition-all ${
+            showSubscriberCount ? "translate-x-3.5 bg-primary-foreground" : "translate-x-0.5 bg-foreground"
+           }`}
+          />
+         </button>
+        </div>
+       </div>
+
+       {/* Auto-delete past events */}
+       <div className="flex items-center gap-2.5">
+        <Trash2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        <div className="flex-1 flex items-center justify-between py-2">
+         <div className="min-w-0">
+          <p className="text-sm font-medium text-foreground">Auto-delete Past Events</p>
+          <p className="text-xs text-muted-foreground">Remove events after they end</p>
+         </div>
+         <select
+          id="autoDelete"
+          value={autoDeletePastEventsAfterDays === null ? "never" : autoDeletePastEventsAfterDays.toString()}
+          onChange={(e) => setAutoDeletePastEventsAfterDays(
+           e.target.value === "never" ? null : parseInt(e.target.value)
+          )}
+          className="bg-transparent text-sm text-muted-foreground focus:outline-none cursor-pointer shrink-0"
+         >
+          <option value="never">Never</option>
+          <option value="0">Immediately</option>
+          <option value="1">After 1 day</option>
+          <option value="7">After 7 days</option>
+          <option value="30">After 30 days</option>
+         </select>
+        </div>
+       </div>
       </div>
      </div>
 
