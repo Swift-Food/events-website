@@ -755,7 +755,7 @@ export default function EventClient({
     <div className="mx-auto max-w-6xl px-6 py-4">
      {/* Management/Scanner Banner - Desktop */}
      {userRole && (
-      <div className="hidden sm:block mb-6 relative group">
+      <div className="hidden sm:block mb-6 relative group event-page-stagger-1">
        <div className="relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-[24px] border border-foreground/10 shadow-[0_4px_16px_rgba(0,0,0,0.15)] flex items-center justify-between px-4 py-3 lg:px-8">
         {/* Subtle Noise Overlay */}
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
@@ -810,7 +810,7 @@ export default function EventClient({
      )}
 
      {/* Back Button and Report Button */}
-     <div className="mb-6 flex items-center justify-between gap-4">
+     <div className="mb-6 flex items-center justify-between gap-4 event-page-stagger-1">
       <button
        onClick={() => router.push("/events")}
        className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
@@ -830,7 +830,7 @@ export default function EventClient({
      {/* Main Content - Responsive Layout */}
      <div className="flex flex-col gap-6 lg:flex-row-reverse">
       {/* Left Column - Image and Sidebar */}
-      <section className="flex flex-col gap-6 lg:w-96 lg:shrink-0">
+      <section className="flex flex-col gap-6 lg:w-96 lg:shrink-0 event-page-stagger-2">
        {/* 2×2 Grid on sm-md, Flex column on lg+ */}
        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:flex lg:flex-col">
         {/* Top Left: Image with Status Badge */}
@@ -1328,7 +1328,7 @@ export default function EventClient({
       </section>
 
       {/* Right Column - Main Content */}
-      <section className="flex-1 space-y-6">
+      <section className="flex-1 space-y-6 event-page-stagger-3">
        {/* Event Title and Categories - Only show on desktop */}
        <div className="hidden lg:block">
         <h1 className="mb-4 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
