@@ -254,17 +254,12 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={onClose}>
       {/* Modal */}
       <div
         ref={modalRef}
-        className="relative w-full max-w-md rounded-2xl bg-card-background border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-md rounded-2xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl overflow-hidden"
       >
         {/* Header */}
         <div className="relative px-6 pt-6 pb-4">
