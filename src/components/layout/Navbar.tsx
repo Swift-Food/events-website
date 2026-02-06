@@ -28,11 +28,15 @@ const navLinks = [
 
 export default function Navbar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const { isAuthenticated, logout, user, eventUser, refreshProfile } = useAuth();
+  const { isAuthenticated, logout, user, eventUser, refreshProfile } =
+    useAuth();
   const { openSearchModal } = useSearchModal();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [dropdownPos, setDropdownPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
+  const [dropdownPos, setDropdownPos] = useState<{
+    top: number;
+    right: number;
+  }>({ top: 0, right: 0 });
   const router = useRouter();
   const pathname = usePathname();
   const isLandingPage = pathname === "/";
@@ -104,7 +108,7 @@ export default function Navbar() {
   const handleProtectedNavClick = (
     e: React.MouseEvent,
     href: string,
-    requiresAuth?: boolean
+    requiresAuth?: boolean,
   ) => {
     if (requiresAuth && !isAuthenticated) {
       e.preventDefault();
@@ -114,12 +118,27 @@ export default function Navbar() {
 
   // Dynamic classes based on landing page
   const textColor = isLandingPage ? "text-zinc-900" : "text-foreground";
-  const hoverBg = isLandingPage ? "hover:bg-zinc-900/10" : "hover:bg-foreground/10";
+  const hoverBg = isLandingPage
+    ? "hover:bg-zinc-900/10"
+    : "hover:bg-foreground/10";
   const logoStyle = isLandingPage
     ? {}
-    : { WebkitMaskImage: "url(/logo.svg)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "center", maskImage: "url(/logo.svg)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "center" } as React.CSSProperties;
-  const buttonBg = isLandingPage ? "bg-zinc-900 text-white" : "bg-primary text-primary-foreground";
-  const borderColor = isLandingPage ? "border-zinc-900/20 hover:border-zinc-900/40" : "border-foreground/20 hover:border-foreground/40";
+    : ({
+        WebkitMaskImage: "url(/logo.svg)",
+        WebkitMaskSize: "contain",
+        WebkitMaskRepeat: "no-repeat",
+        WebkitMaskPosition: "center",
+        maskImage: "url(/logo.svg)",
+        maskSize: "contain",
+        maskRepeat: "no-repeat",
+        maskPosition: "center",
+      } as React.CSSProperties);
+  const buttonBg = isLandingPage
+    ? "bg-zinc-900 text-white"
+    : "bg-primary text-primary-foreground";
+  const borderColor = isLandingPage
+    ? "border-zinc-900/20 hover:border-zinc-900/40"
+    : "border-foreground/20 hover:border-foreground/40";
 
   return (
     <>
@@ -128,6 +147,12 @@ export default function Navbar() {
         style={{
           backdropFilter: hasScrolled ? "blur(4px)" : "none",
           WebkitBackdropFilter: hasScrolled ? "blur(4px)" : "none",
+          maskImage: hasScrolled
+            ? "linear-gradient(to bottom, black 80%, transparent 100%)"
+            : "none",
+          WebkitMaskImage: hasScrolled
+            ? "linear-gradient(to bottom, black 80%, transparent 100%)"
+            : "none",
           transition: "backdrop-filter 0.3s, -webkit-backdrop-filter 0.3s",
         }}
       >
@@ -198,9 +223,13 @@ export default function Navbar() {
             </nav>
 
             {/* Desktop Navigation */}
-            <nav className={`ml-8 hidden gap-6 text-sm font-medium ${textColor} sm:flex`}>
+            <nav
+              className={`ml-8 hidden gap-6 text-sm font-medium ${textColor} sm:flex`}
+            >
               {navLinks.map((link) => {
-                const isActive = pathname === link.href || pathname?.startsWith(link.href + "/");
+                const isActive =
+                  pathname === link.href ||
+                  pathname?.startsWith(link.href + "/");
                 return (
                   <Link
                     key={link.href}
@@ -283,67 +312,66 @@ export default function Navbar() {
       </header>
 
       {/* User Dropdown Menu - portaled outside header to allow backdrop-blur */}
-      {isUserMenuOpen && createPortal(
-        <div
-          ref={dropdownRef}
-          className="fixed z-[60] w-56 rounded-xl border border-white/10 bg-[#1a1a1a]/70 backdrop-blur-sm shadow-2xl shadow-black/50"
-          style={{ top: dropdownPos.top, right: dropdownPos.right }}
-        >
-          {/* User Info Section */}
-          <div className="border-b border-white/10 px-4 py-3">
-            <p className="text-sm font-medium text-white truncate">
-              {user?.email}
-            </p>
-            <p className="text-xs text-white/60 mt-0.5">
-              Signed in
-            </p>
-          </div>
+      {isUserMenuOpen &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            className="fixed z-[60] w-56 rounded-xl border border-white/10 bg-[#1a1a1a]/70 backdrop-blur-sm shadow-2xl shadow-black/50"
+            style={{ top: dropdownPos.top, right: dropdownPos.right }}
+          >
+            {/* User Info Section */}
+            <div className="border-b border-white/10 px-4 py-3">
+              <p className="text-sm font-medium text-white truncate">
+                {user?.email}
+              </p>
+              <p className="text-xs text-white/60 mt-0.5">Signed in</p>
+            </div>
 
-          {/* Menu Items */}
-          <div className="py-2">
-            <button
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-white/5"
-              onClick={() => {
-                if (eventUser?.id) {
-                  router.push(`/user/${eventUser.id}`);
-                }
-                setIsUserMenuOpen(false);
-              }}
-            >
-              <UserCircle className="h-4 w-4" />
-              Profile
-            </button>
-            <button
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-white/5"
-              onClick={() => {
-                router.push("/friends");
-                setIsUserMenuOpen(false);
-              }}
-            >
-              <Users className="h-4 w-4" />
-              Friends
-            </button>
-            <button
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-white/5"
-              onClick={() => {
-                router.push("/profile/edit");
-                setIsUserMenuOpen(false);
-              }}
-            >
-              <Settings className="h-4 w-4" />
-              Settings
-            </button>
-            <button
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-white/5 hover:text-red-400"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </button>
-          </div>
-        </div>,
-        document.body
-      )}
+            {/* Menu Items */}
+            <div className="py-2">
+              <button
+                className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-white/5"
+                onClick={() => {
+                  if (eventUser?.id) {
+                    router.push(`/user/${eventUser.id}`);
+                  }
+                  setIsUserMenuOpen(false);
+                }}
+              >
+                <UserCircle className="h-4 w-4" />
+                Profile
+              </button>
+              <button
+                className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-white/5"
+                onClick={() => {
+                  router.push("/friends");
+                  setIsUserMenuOpen(false);
+                }}
+              >
+                <Users className="h-4 w-4" />
+                Friends
+              </button>
+              <button
+                className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-white/5"
+                onClick={() => {
+                  router.push("/profile/edit");
+                  setIsUserMenuOpen(false);
+                }}
+              >
+                <Settings className="h-4 w-4" />
+                Settings
+              </button>
+              <button
+                className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-white/5 hover:text-red-400"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </button>
+            </div>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }
