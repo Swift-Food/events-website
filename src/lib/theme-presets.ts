@@ -144,7 +144,7 @@ export const MULTI_COLOR_PALETTES: PalettePreset[] = [
   multiColorPalette("desert", "Desert", "#ff6d2a", "#ffc2b3", "#ffe9bd"),
   multiColorPalette("arctic", "Arctic", "#1c4074", "#c6dcda", "#f8f5e6"),
   multiColorPalette("meadow", "Meadow", "#0e8622", "#cee29a", "#ddf2eb"),
-  multiColorPalette("dusk", "Dusk", "#402c61", "#92475c", "#f3a39c"),
+  multiColorPalette("dusk", "Dusk", "#f3a39c", "#92475c", "#402c61"),
   multiColorPalette("beach", "Beach", "#2e80e4", "#afcff6", "#f8e6a8"),
   multiColorPalette("garden", "Garden", "#929124", "#f6c9dd", "#d0e3f4"),
   multiColorPalette("midnight", "Midnight", "#ececec", "#596394", "#1c275f"),
