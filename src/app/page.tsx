@@ -48,6 +48,7 @@ const AnimatedWord: React.FC<{ text: string; delayOffset: number }> = ({
 
 export default function LandingPage() {
  const [mounted, setMounted] = useState(false);
+ const [shaderReady, setShaderReady] = useState(false);
 
  useEffect(() => {
   setMounted(true);
@@ -56,20 +57,31 @@ export default function LandingPage() {
   document.documentElement.style.overscrollBehavior = "none";
   document.body.style.overscrollBehavior = "none";
 
+  // Give the shader canvas a moment to render its first frame
+  const timer = setTimeout(() => setShaderReady(true), 100);
+
   return () => {
+   clearTimeout(timer);
    document.documentElement.style.overscrollBehavior = "";
    document.body.style.overscrollBehavior = "";
   };
  }, []);
 
- if (!mounted) {
-  return null;
- }
-
  return (
   <div className="relative h-screen overflow-hidden">
-   {/* Animated gradient background */}
-   <div className="fixed inset-0 z-[-1]">
+   {/* Static gradient placeholder (matches shader colors, visible immediately) */}
+   <div
+    className="fixed inset-0 z-[-2]"
+    style={{
+     background: "linear-gradient(135deg, #b8e7f5 0%, #d9ccff 50%, #faf9f6 100%)",
+    }}
+   />
+   {/* Animated gradient background — fades in once shader is ready */}
+   {mounted && (
+   <div
+    className="fixed inset-0 z-[-1] transition-opacity duration-700"
+    style={{ opacity: shaderReady ? 1 : 0 }}
+   >
     <ShaderGradientCanvas>
      <ShaderGradient
       animate="on"
@@ -102,6 +114,7 @@ export default function LandingPage() {
      />
     </ShaderGradientCanvas>
    </div>
+   )}
    <div className="scanline" />
 
    {/* Grid overlay */}
