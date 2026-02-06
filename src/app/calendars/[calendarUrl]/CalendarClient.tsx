@@ -455,27 +455,27 @@ export default function CalendarClient({
 
      {/* Management Buttons */}
      {canManage && (
-      <div className="flex gap-1.5 sm:gap-2">
+      <div className="flex gap-1.5">
        <button
         onClick={() => setShowAddEventsModal(true)}
-        className="flex items-center gap-2 rounded-lg bg-primary px-2.5 py-2 sm:px-5 sm:py-2.5 font-semibold text-white transition-all hover:bg-primary/80 text-sm"
+        className="flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1.5 sm:px-3.5 sm:py-1.5 text-xs font-medium text-white transition-all hover:bg-primary/80"
        >
-        <Plus className="h-4 w-4" />
+        <Plus className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">Add Events</span>
        </button>
        <Link
         href={`/calendars/${calendar.calendarUrl}/edit`}
-        className="flex items-center gap-2 rounded-lg border border-white/10 bg-card-background px-2.5 py-2 sm:px-5 sm:py-2.5 font-semibold text-foreground transition-all hover:bg-white/5 text-sm"
+        className="flex items-center gap-1.5 rounded-full border border-white/10 bg-card-background px-2.5 py-1.5 sm:px-3.5 sm:py-1.5 text-xs font-medium text-foreground transition-all hover:bg-white/5"
        >
-        <Edit3 className="h-4 w-4" />
+        <Edit3 className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">Edit</span>
        </Link>
        {isOwner && (
         <button
          onClick={handleDelete}
-         className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-2 sm:px-5 sm:py-2.5 font-semibold text-red-400 transition-all hover:bg-red-500/20 text-sm"
+         className="flex items-center rounded-full border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-xs font-medium text-red-400 transition-all hover:bg-red-500/20"
         >
-         <Trash2 className="h-4 w-4" />
+         <Trash2 className="h-3.5 w-3.5" />
         </button>
        )}
       </div>
