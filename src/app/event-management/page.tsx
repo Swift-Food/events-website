@@ -465,22 +465,11 @@ function EventManagementContent() {
 
                 {/* Calendars Grid */}
                 {!loadingCalendars && !calendarsError && calendars.length > 0 && (
-                  <>
-                    {/* Mobile: Horizontal scroll */}
-                    <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                      {calendars.map((calendar) => (
-                        <div key={calendar.id} className="flex-shrink-0 w-[80vw]">
-                          <HorizontalCalendarCard calendar={calendar} />
-                        </div>
-                      ))}
-                    </div>
-                    {/* Desktop: Grid */}
-                    <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {calendars.map((calendar) => (
-                        <CalendarCard key={calendar.id} calendar={calendar} />
-                      ))}
-                    </div>
-                  </>
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    {calendars.map((calendar) => (
+                      <CalendarCard key={calendar.id} calendar={calendar} />
+                    ))}
+                  </div>
                 )}
               </div>
             )}
