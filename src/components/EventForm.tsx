@@ -60,6 +60,7 @@ interface EventFormProps {
   isPublishLoading?: boolean;
   onSaveSuccess?: () => void;
   fullPage?: boolean;
+  initialCalendarId?: string;
 }
 
 function EventFormInner({
@@ -71,6 +72,7 @@ function EventFormInner({
   isPublishLoading,
   onSaveSuccess,
   fullPage,
+  initialCalendarId,
 }: EventFormProps) {
   const {
     eventName,
@@ -323,6 +325,14 @@ function EventFormInner({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, initialData, isInitialDataLoaded]);
+
+  // Pre-select calendar from URL param
+  useEffect(() => {
+    if (initialCalendarId && mode === "create" && selectedCalendarIds.length === 0) {
+      setSelectedCalendarIds([initialCalendarId]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCalendarId]);
 
   // Auto-update end date if start date is after end date
   useEffect(() => {

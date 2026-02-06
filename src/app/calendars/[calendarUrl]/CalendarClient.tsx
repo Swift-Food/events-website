@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { calendarService } from "@/services/calendar.service";
 import { highlightService } from "@/services/highlight.service";
@@ -18,6 +18,9 @@ import {
  Shield,
  Edit3,
  Plus,
+ ChevronDown,
+ CalendarPlus,
+ ListPlus,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -31,6 +34,53 @@ import EventCalendarWidget from "@/components/EventCalendarWidget";
 interface CalendarClientProps {
  initialCalendar: Calendar;
  calendarUrl: string;
+}
+
+function AddEventDropdown({ calendarId, onAddExisting }: { calendarId: string; onAddExisting: () => void }) {
+ const [isOpen, setIsOpen] = useState(false);
+ const ref = useRef<HTMLDivElement>(null);
+
+ useEffect(() => {
+  const handleClickOutside = (e: MouseEvent) => {
+   if (ref.current && !ref.current.contains(e.target as Node)) {
+    setIsOpen(false);
+   }
+  };
+  if (isOpen) document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+ }, [isOpen]);
+
+ return (
+  <div className="relative" ref={ref}>
+   <button
+    onClick={() => setIsOpen(!isOpen)}
+    className="flex items-center gap-1.5 rounded-lg bg-primary px-2.5 py-1.5 sm:px-3.5 sm:py-1.5 text-xs font-medium text-white transition-all hover:bg-primary/80"
+   >
+    <Plus className="h-3.5 w-3.5" />
+    <span className="hidden sm:inline">Add Event</span>
+    <ChevronDown className={`h-3 w-3 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+   </button>
+   {isOpen && (
+    <div className="absolute right-0 top-full z-50 mt-1.5 min-w-44 overflow-hidden rounded-xl border border-white/10 bg-card-background backdrop-blur-xl shadow-lg">
+     <Link
+      href={`/event-creation?calendarId=${calendarId}`}
+      className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-foreground hover:bg-white/5 transition-all"
+      onClick={() => setIsOpen(false)}
+     >
+      <CalendarPlus className="h-4 w-4 text-muted-foreground" />
+      Create New Event
+     </Link>
+     <button
+      onClick={() => { onAddExisting(); setIsOpen(false); }}
+      className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-sm text-foreground hover:bg-white/5 transition-all cursor-pointer"
+     >
+      <ListPlus className="h-4 w-4 text-muted-foreground" />
+      Add Existing Event
+     </button>
+    </div>
+   )}
+  </div>
+ );
 }
 
 export default function CalendarClient({
@@ -456,16 +506,13 @@ export default function CalendarClient({
      {/* Management Buttons */}
      {canManage && (
       <div className="flex gap-1.5">
-       <button
-        onClick={() => setShowAddEventsModal(true)}
-        className="flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1.5 sm:px-3.5 sm:py-1.5 text-xs font-medium text-white transition-all hover:bg-primary/80"
-       >
-        <Plus className="h-3.5 w-3.5" />
-        <span className="hidden sm:inline">Add Events</span>
-       </button>
+       <AddEventDropdown
+        calendarId={calendar.id}
+        onAddExisting={() => setShowAddEventsModal(true)}
+       />
        <Link
         href={`/calendars/${calendar.calendarUrl}/edit`}
-        className="flex items-center gap-1.5 rounded-full border border-white/10 bg-card-background px-2.5 py-1.5 sm:px-3.5 sm:py-1.5 text-xs font-medium text-foreground transition-all hover:bg-white/5"
+        className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-card-background px-2.5 py-1.5 sm:px-3.5 sm:py-1.5 text-xs font-medium text-foreground transition-all hover:bg-white/5"
        >
         <Edit3 className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">Edit</span>
@@ -473,7 +520,7 @@ export default function CalendarClient({
        {isOwner && (
         <button
          onClick={handleDelete}
-         className="flex items-center rounded-full border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-xs font-medium text-red-400 transition-all hover:bg-red-500/20"
+         className="flex items-center rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-xs font-medium text-red-400 transition-all hover:bg-red-500/20"
         >
          <Trash2 className="h-3.5 w-3.5" />
         </button>

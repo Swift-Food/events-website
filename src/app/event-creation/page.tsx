@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import EventForm from "@/components/EventForm";
 
 export default function EventCreationPage() {
  const { isAuthenticated, isLoading } = useAuth();
  const router = useRouter();
+ const searchParams = useSearchParams();
+ const calendarId = searchParams.get("calendarId");
 
  useEffect(() => {
   if (!isLoading && !isAuthenticated) {
@@ -26,6 +28,6 @@ export default function EventCreationPage() {
  if (!isAuthenticated) {
   return null;
  }
- 
- return <div className="min-h-screen py-6"><EventForm mode="create" /></div>;
+
+ return <div className="min-h-screen py-6"><EventForm mode="create" initialCalendarId={calendarId ?? undefined} /></div>;
 }
