@@ -12,6 +12,10 @@ export default function EventCreationPage() {
  const calendarId = searchParams.get("calendarId");
 
  useEffect(() => {
+  document.querySelector("main")?.scrollTo(0, 0);
+ }, []);
+
+ useEffect(() => {
   if (!isLoading && !isAuthenticated) {
    router.push("/auth?redirect=/event-creation");
   }
