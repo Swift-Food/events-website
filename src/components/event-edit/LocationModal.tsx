@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { MapPin, Link, Video } from "lucide-react";
 import { useEventCreation } from "@/context/EventCreationContext";
 import { GOOGLE_MAPS_CONFIG } from "@/constants/google-maps";
@@ -98,6 +99,9 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
   // Validation error
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  // Trigger rect for portal positioning
+  const [triggerRect, setTriggerRect] = useState<DOMRect | null>(null);
+
   // Google services refs
   const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
   const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
@@ -136,6 +140,25 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
   useEffect(() => {
     setHighlightedIndex(-1);
   }, [predictions, inputValue]);
+
+  // Track trigger position for portal positioning
+  useEffect(() => {
+    if (!isOpen) {
+      setTriggerRect(null);
+      return;
+    }
+    const trigger = document.querySelector('[data-location-trigger]');
+    if (!trigger) return;
+    const updateRect = () => setTriggerRect(trigger.getBoundingClientRect());
+    updateRect();
+    const main = document.querySelector('main');
+    main?.addEventListener('scroll', updateRect);
+    window.addEventListener('resize', updateRect);
+    return () => {
+      main?.removeEventListener('scroll', updateRect);
+      window.removeEventListener('resize', updateRect);
+    };
+  }, [isOpen]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -426,7 +449,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
     }
   }, [getSelectableOptions, highlightedIndex, onClose, handleSelectVirtualLink, handleSelectPlace, handleUseAsManualEntry, handleAddVirtualLinkClick, editMode, handleSaveVirtualLink, inputValue]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !triggerRect) return null;
 
   const isUrlInput = isLikelyUrl(inputValue);
   const showVirtualOptions = !inputValue.trim() && !editMode;
@@ -438,61 +461,238 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
   // Calculate option indices for highlighting
   let optionIndex = 0;
 
+  const dropdownStyle = {
+    top: triggerRect.bottom + 8,
+    left: triggerRect.left,
+    width: triggerRect.width,
+  };
+
   // Virtual Link Edit Mode
   if (editMode?.type === 'virtual') {
-    return (
-      <div
-        ref={dropdownRef}
-        className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
-      >
-        <div className="p-3">
-          {/* URL Input */}
-          <input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Enter virtual meeting link..."
-            className="w-full bg-transparent text-base text-white outline-none placeholder:text-white/40 border-b border-white/10 pb-3"
-            autoFocus
-          />
+    return createPortal(
+      <div className="fixed inset-0 z-50 pointer-events-none">
+  
+        <div
+          ref={dropdownRef}
+          className="absolute rounded-xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl shadow-black/50 overflow-hidden pointer-events-auto"
+          style={dropdownStyle}
+        >
+          <div className="p-3">
+            {/* URL Input */}
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Enter virtual meeting link..."
+              className="w-full bg-transparent text-base text-white outline-none placeholder:text-white/40 border-b border-white/10 pb-3"
+              autoFocus
+            />
 
-          {validationError && (
-            <div className="mt-3 p-2 bg-red-500/10 border border-red-500/30 rounded-lg">
-              <p className="text-xs text-red-400">{validationError}</p>
-            </div>
-          )}
-
-          {/* Preview */}
-          {inputValue && (
-            <button
-              type="button"
-              onClick={handleSaveVirtualLink}
-              className="w-full mt-3 flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-left"
-            >
-              <Video className="h-5 w-5 text-white/60" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white">Virtual</p>
-                <p className="text-xs text-white/60 truncate">
-                  {normalizeUrl(inputValue)}
-                </p>
+            {validationError && (
+              <div className="mt-3 p-2 bg-red-500/10 border border-red-500/30 rounded-lg">
+                <p className="text-xs text-red-400">{validationError}</p>
               </div>
-            </button>
-          )}
+            )}
+
+            {/* Preview */}
+            {inputValue && (
+              <button
+                type="button"
+                onClick={handleSaveVirtualLink}
+                className="w-full mt-3 flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-left"
+              >
+                <Video className="h-5 w-5 text-white/60" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white">Virtual</p>
+                  <p className="text-xs text-white/60 truncate">
+                    {normalizeUrl(inputValue)}
+                  </p>
+                </div>
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
   // Venue Edit Mode
   if (editMode?.type === 'venue') {
-    return (
+    return createPortal(
+      <div className="fixed inset-0 z-50 pointer-events-none">
+  
+        <div
+          ref={dropdownRef}
+          className="absolute rounded-xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl shadow-black/50 overflow-hidden pointer-events-auto"
+          style={dropdownStyle}
+        >
+          <div className="p-3 max-h-[70vh] overflow-y-auto">
+            {/* Search Input */}
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Search for a new location..."
+              className="w-full bg-transparent text-base text-white outline-none placeholder:text-white/40"
+              autoFocus
+            />
+
+            {validationError && (
+              <div className="mt-3 p-2 bg-red-500/10 border border-red-500/30 rounded-lg">
+                <p className="text-xs text-red-400">{validationError}</p>
+              </div>
+            )}
+
+            {/* Predictions */}
+            {showPredictions && (
+              <div className="mt-2">
+                {predictions.map((prediction, idx) => (
+                  <button
+                    key={prediction.place_id}
+                    type="button"
+                    onClick={() => handleSelectPlace(prediction)}
+                    onMouseEnter={() => setHighlightedIndex(idx)}
+                    className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left ${
+                      highlightedIndex === idx ? 'bg-white/10' : 'hover:bg-white/5'
+                    }`}
+                  >
+                    <MapPin className="h-5 w-5 text-white/60 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate">
+                        {prediction.structured_formatting.main_text}
+                      </p>
+                      <p className="text-xs text-white/60 truncate">
+                        {prediction.structured_formatting.secondary_text}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Divider */}
+            <div className="h-px bg-white/10 my-2"></div>
+
+            {/* Manual Address Form */}
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-white/60 mb-1.5">
+                  Venue Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={localVenueName}
+                  onChange={(e) => setLocalVenueName(e.target.value)}
+                  placeholder="e.g., UCL Student Centre"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-white/60 mb-1.5">
+                  Address Line 1 <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={localAddressLine1}
+                  onChange={(e) => {
+                    setLocalAddressLine1(e.target.value);
+                    setLocalLatitude(null);
+                    setLocalLongitude(null);
+                  }}
+                  placeholder="Street address"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-white/60 mb-1.5">
+                  Address Line 2 (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={localAddressLine2}
+                  onChange={(e) => setLocalAddressLine2(e.target.value)}
+                  placeholder="Apartment, suite, building, etc."
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-white/60 mb-1.5">
+                    City <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={localCity}
+                    onChange={(e) => {
+                      setLocalCity(e.target.value);
+                      setLocalLatitude(null);
+                      setLocalLongitude(null);
+                    }}
+                    placeholder="City"
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-white/60 mb-1.5">
+                    Postcode <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={localPostcode}
+                    onChange={(e) => {
+                      setLocalPostcode(e.target.value.toUpperCase());
+                      setLocalLatitude(null);
+                      setLocalLongitude(null);
+                    }}
+                    placeholder="e.g., SW1A 1AA"
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              {localPostcode && (
+                <div>
+                  {validateUKPostcode(localPostcode) ? (
+                    <p className="text-xs text-green-400">Valid UK postcode</p>
+                  ) : (
+                    <p className="text-xs text-red-400">Please enter a valid UK postcode</p>
+                  )}
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={handleSaveVenue}
+                className="w-full rounded-lg bg-amber-600 py-2.5 text-sm font-semibold text-white transition-all hover:bg-amber-500"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
+  // Default Search Mode
+  return createPortal(
+    <div className="fixed inset-0 z-50 pointer-events-none">
+
       <div
         ref={dropdownRef}
-        className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
+        className="absolute rounded-xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
+        style={dropdownStyle}
       >
-        <div className="p-3 max-h-[70vh] overflow-y-auto">
+        <div className="p-3">
           {/* Search Input */}
           <input
             ref={inputRef}
@@ -500,28 +700,51 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Search for a new location..."
+            placeholder="Enter location or virtual link"
             className="w-full bg-transparent text-base text-white outline-none placeholder:text-white/40"
             autoFocus
           />
+        </div>
 
-          {validationError && (
-            <div className="mt-3 p-2 bg-red-500/10 border border-red-500/30 rounded-lg">
-              <p className="text-xs text-red-400">{validationError}</p>
-            </div>
-          )}
+        {validationError && (
+          <div className="mx-3 mb-3 p-2 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <p className="text-xs text-red-400">{validationError}</p>
+          </div>
+        )}
 
-          {/* Predictions */}
-          {showPredictions && (
-            <div className="mt-2">
-              {predictions.map((prediction, idx) => (
+        {/* URL Option - when URL is detected */}
+        {showUrlOption && (
+          <div className="px-1 pb-2">
+            <button
+              type="button"
+              onClick={handleSelectVirtualLink}
+              onMouseEnter={() => setHighlightedIndex(0)}
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${
+                highlightedIndex === 0 ? 'bg-white/10' : 'hover:bg-white/5'
+              }`}
+            >
+              <Video className="h-5 w-5 text-white/60" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white">Virtual</p>
+                <p className="text-xs text-white/60 truncate">{normalizeUrl(inputValue)}</p>
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* Place Predictions */}
+        {showPredictions && (
+          <div className="px-1 pb-2">
+            {predictions.map((prediction) => {
+              const currentIndex = optionIndex++;
+              return (
                 <button
                   key={prediction.place_id}
                   type="button"
                   onClick={() => handleSelectPlace(prediction)}
-                  onMouseEnter={() => setHighlightedIndex(idx)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left ${
-                    highlightedIndex === idx ? 'bg-white/10' : 'hover:bg-white/5'
+                  onMouseEnter={() => setHighlightedIndex(currentIndex)}
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${
+                    highlightedIndex === currentIndex ? 'bg-white/10' : 'hover:bg-white/5'
                   }`}
                 >
                   <MapPin className="h-5 w-5 text-white/60 flex-shrink-0" />
@@ -534,266 +757,87 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
                     </p>
                   </div>
                 </button>
-              ))}
-            </div>
-          )}
+              );
+            })}
 
-          {/* Divider */}
-          <div className="h-px bg-white/10 my-2"></div>
-
-          {/* Manual Address Form */}
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-white/60 mb-1.5">
-                Venue Name (Optional)
-              </label>
-              <input
-                type="text"
-                value={localVenueName}
-                onChange={(e) => setLocalVenueName(e.target.value)}
-                placeholder="e.g., UCL Student Centre"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-white/60 mb-1.5">
-                Address Line 1 <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text"
-                value={localAddressLine1}
-                onChange={(e) => {
-                  setLocalAddressLine1(e.target.value);
-                  setLocalLatitude(null);
-                  setLocalLongitude(null);
-                }}
-                placeholder="Street address"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-white/60 mb-1.5">
-                Address Line 2 (Optional)
-              </label>
-              <input
-                type="text"
-                value={localAddressLine2}
-                onChange={(e) => setLocalAddressLine2(e.target.value)}
-                placeholder="Apartment, suite, building, etc."
-                className={inputClass}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-white/60 mb-1.5">
-                  City <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={localCity}
-                  onChange={(e) => {
-                    setLocalCity(e.target.value);
-                    setLocalLatitude(null);
-                    setLocalLongitude(null);
-                  }}
-                  placeholder="City"
-                  className={inputClass}
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-white/60 mb-1.5">
-                  Postcode <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={localPostcode}
-                  onChange={(e) => {
-                    setLocalPostcode(e.target.value.toUpperCase());
-                    setLocalLatitude(null);
-                    setLocalLongitude(null);
-                  }}
-                  placeholder="e.g., SW1A 1AA"
-                  className={inputClass}
-                />
-              </div>
-            </div>
-
-            {localPostcode && (
-              <div>
-                {validateUKPostcode(localPostcode) ? (
-                  <p className="text-xs text-green-400">Valid UK postcode</p>
-                ) : (
-                  <p className="text-xs text-red-400">Please enter a valid UK postcode</p>
-                )}
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={handleSaveVenue}
-              className="w-full rounded-lg bg-amber-600 py-2.5 text-sm font-semibold text-white transition-all hover:bg-amber-500"
-            >
-              Save Changes
-            </button>
+            {/* Use as text option */}
+            {showUseAsText && (() => {
+              const currentIndex = optionIndex++;
+              return (
+                <button
+                  type="button"
+                  onClick={handleUseAsManualEntry}
+                  onMouseEnter={() => setHighlightedIndex(currentIndex)}
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${
+                    highlightedIndex === currentIndex ? 'bg-white/10' : 'hover:bg-white/5'
+                  }`}
+                >
+                  <MapPin className="h-5 w-5 text-white/60" />
+                  <p className="text-sm text-white/60">
+                    Use &quot;{inputValue}&quot;
+                  </p>
+                </button>
+              );
+            })()}
           </div>
-        </div>
-      </div>
-    );
-  }
+        )}
 
-  // Default Search Mode
-  return (
-    <div
-      ref={dropdownRef}
-      className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
-    >
-      <div className="p-3">
-        {/* Search Input */}
-        <input
-          ref={inputRef}
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Enter location or virtual link"
-          className="w-full bg-transparent text-base text-white outline-none placeholder:text-white/40"
-          autoFocus
-        />
-      </div>
-
-      {validationError && (
-        <div className="mx-3 mb-3 p-2 bg-red-500/10 border border-red-500/30 rounded-lg">
-          <p className="text-xs text-red-400">{validationError}</p>
-        </div>
-      )}
-
-      {/* URL Option - when URL is detected */}
-      {showUrlOption && (
-        <div className="px-1 pb-2">
-          <button
-            type="button"
-            onClick={handleSelectVirtualLink}
-            onMouseEnter={() => setHighlightedIndex(0)}
-            className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${
-              highlightedIndex === 0 ? 'bg-white/10' : 'hover:bg-white/5'
-            }`}
-          >
-            <Video className="h-5 w-5 text-white/60" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white">Virtual</p>
-              <p className="text-xs text-white/60 truncate">{normalizeUrl(inputValue)}</p>
+        {/* Virtual Options - shown when input is empty */}
+        {showVirtualOptions && (
+          <div className="border-t border-white/10">
+            <div className="px-4 py-2">
+              <p className="text-xs font-medium text-white/40 uppercase tracking-wider">
+                Virtual Options
+              </p>
             </div>
-          </button>
-        </div>
-      )}
-
-      {/* Place Predictions */}
-      {showPredictions && (
-        <div className="px-1 pb-2">
-          {predictions.map((prediction) => {
-            const currentIndex = optionIndex++;
-            return (
-              <button
-                key={prediction.place_id}
-                type="button"
-                onClick={() => handleSelectPlace(prediction)}
-                onMouseEnter={() => setHighlightedIndex(currentIndex)}
-                className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${
-                  highlightedIndex === currentIndex ? 'bg-white/10' : 'hover:bg-white/5'
-                }`}
-              >
-                <MapPin className="h-5 w-5 text-white/60 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">
-                    {prediction.structured_formatting.main_text}
-                  </p>
-                  <p className="text-xs text-white/60 truncate">
-                    {prediction.structured_formatting.secondary_text}
-                  </p>
-                </div>
-              </button>
-            );
-          })}
-
-          {/* Use as text option */}
-          {showUseAsText && (() => {
-            const currentIndex = optionIndex++;
-            return (
+            <div className="px-1 pb-2">
               <button
                 type="button"
-                onClick={handleUseAsManualEntry}
-                onMouseEnter={() => setHighlightedIndex(currentIndex)}
+                onClick={handleAddVirtualLinkClick}
+                onMouseEnter={() => setHighlightedIndex(0)}
                 className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${
-                  highlightedIndex === currentIndex ? 'bg-white/10' : 'hover:bg-white/5'
+                  highlightedIndex === 0 ? 'bg-white/10' : 'hover:bg-white/5'
                 }`}
               >
-                <MapPin className="h-5 w-5 text-white/60" />
-                <p className="text-sm text-white/60">
-                  Use &quot;{inputValue}&quot;
-                </p>
+                <Link className="h-5 w-5 text-white/60" />
+                <p className="text-sm font-medium text-white">Add Virtual Link</p>
               </button>
-            );
-          })()}
-        </div>
-      )}
-
-      {/* Virtual Options - shown when input is empty */}
-      {showVirtualOptions && (
-        <div className="border-t border-white/10">
-          <div className="px-4 py-2">
-            <p className="text-xs font-medium text-white/40 uppercase tracking-wider">
-              Virtual Options
-            </p>
+            </div>
+            <div className="px-4 pb-3">
+              <p className="text-xs text-white/60">
+                If you have a virtual event link, you can enter or paste it above.
+              </p>
+            </div>
           </div>
+        )}
+
+        {/* Loading state */}
+        {isLoadingPredictions && inputValue.trim() && !isUrlInput && (
+          <div className="px-4 pb-3">
+            <p className="text-xs text-white/60">Searching...</p>
+          </div>
+        )}
+
+        {/* No results */}
+        {showNoResultsUseText && (
           <div className="px-1 pb-2">
             <button
               type="button"
-              onClick={handleAddVirtualLinkClick}
+              onClick={handleUseAsManualEntry}
               onMouseEnter={() => setHighlightedIndex(0)}
               className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${
                 highlightedIndex === 0 ? 'bg-white/10' : 'hover:bg-white/5'
               }`}
             >
-              <Link className="h-5 w-5 text-white/60" />
-              <p className="text-sm font-medium text-white">Add Virtual Link</p>
+              <MapPin className="h-5 w-5 text-white/60" />
+              <p className="text-sm text-white/60">
+                Use &quot;{inputValue}&quot;
+              </p>
             </button>
           </div>
-          <div className="px-4 pb-3">
-            <p className="text-xs text-white/60">
-              If you have a virtual event link, you can enter or paste it above.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Loading state */}
-      {isLoadingPredictions && inputValue.trim() && !isUrlInput && (
-        <div className="px-4 pb-3">
-          <p className="text-xs text-white/60">Searching...</p>
-        </div>
-      )}
-
-      {/* No results */}
-      {showNoResultsUseText && (
-        <div className="px-1 pb-2">
-          <button
-            type="button"
-            onClick={handleUseAsManualEntry}
-            onMouseEnter={() => setHighlightedIndex(0)}
-            className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${
-              highlightedIndex === 0 ? 'bg-white/10' : 'hover:bg-white/5'
-            }`}
-          >
-            <MapPin className="h-5 w-5 text-white/60" />
-            <p className="text-sm text-white/60">
-              Use &quot;{inputValue}&quot;
-            </p>
-          </button>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </div>,
+    document.body
   );
 }

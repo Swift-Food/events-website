@@ -561,9 +561,13 @@ input[type="datetime-local"] {
 .user-stagger-2 { animation: user-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 150ms forwards; opacity: 0; }
 .user-stagger-3 { animation: user-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 350ms forwards; opacity: 0; }
 
-/* Event creation page staggered entrance */
-.event-creation-stagger-1 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0ms forwards; opacity: 0; }
-.event-creation-stagger-2 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 100ms forwards; opacity: 0; }
+/* Event creation page staggered entrance — ends with transform:none to avoid stacking-context issues with modals */
+@keyframes event-creation-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+.event-creation-stagger-1 { animation: event-creation-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0ms forwards; opacity: 0; }
+.event-creation-stagger-2 { animation: event-creation-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 100ms forwards; opacity: 0; }
 
 /* Individual ticket card animation */
 .ticket-card-animate {
