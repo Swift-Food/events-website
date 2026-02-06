@@ -47,6 +47,7 @@ export interface CreateEventDto {
   hideFullAddress?: boolean;
   externalEventUrl?: string;
   registrationNotifyFrequency?: RegistrationNotifyFrequency;
+  calendarIds?: string[];
 }
 
 export interface UpdateEventDto {
@@ -76,6 +77,7 @@ export interface UpdateEventDto {
   hideFullAddress?: boolean;
   externalEventUrl?: string;
   registrationNotifyFrequency?: RegistrationNotifyFrequency;
+  calendarIds?: string[];
 }
 
 export interface EventQueryDto {

@@ -3,6 +3,7 @@ export { default as EventThemeSection } from "./EventThemeSection";
 export { default as EventNameInput } from "./EventNameInput";
 export { default as EventDateTimeSection } from "./EventDateTimeSection";
 export { default as EventCategoriesSection } from "./EventCategoriesSection";
+export { default as EventCalendarsSection } from "./EventCalendarsSection";
 export { default as EventLocationSection } from "./EventLocationSection";
 export { default as EventSettingsCard } from "./EventSettingsCard";
 export { default as TicketTypesSection } from "./TicketTypesSection";

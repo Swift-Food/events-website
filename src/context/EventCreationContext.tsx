@@ -93,6 +93,10 @@ interface EventCreationContextType {
   selectedSubcategoryIds: string[];
   setSelectedSubcategoryIds: Dispatch<SetStateAction<string[]>>;
 
+  // Calendars
+  selectedCalendarIds: string[];
+  setSelectedCalendarIds: Dispatch<SetStateAction<string[]>>;
+
   // Organiser terms acceptance
   acceptedOrganizerTerms: boolean;
   setAcceptedOrganizerTerms: Dispatch<SetStateAction<boolean>>;
@@ -144,6 +148,7 @@ type EventDraft = {
   coverName: string;
   selectedCategoryIds: string[];
   selectedSubcategoryIds: string[];
+  selectedCalendarIds: string[];
   acceptedOrganizerTerms: boolean;
   externalEventUrl: string;
   eventTheme: EventThemeConfig;
@@ -303,6 +308,11 @@ export function EventCreationProvider({
     storedDraft.selectedSubcategoryIds ?? []
   );
 
+  // Calendars
+  const [selectedCalendarIds, setSelectedCalendarIds] = useState<string[]>(
+    storedDraft.selectedCalendarIds ?? []
+  );
+
   // Organiser terms acceptance
   const [acceptedOrganizerTerms, setAcceptedOrganizerTerms] = useState(
     storedDraft.acceptedOrganizerTerms ?? false
@@ -381,6 +391,7 @@ export function EventCreationProvider({
       coverName,
       selectedCategoryIds,
       selectedSubcategoryIds,
+      selectedCalendarIds,
       acceptedOrganizerTerms,
       externalEventUrl,
       eventTheme,
@@ -420,6 +431,7 @@ export function EventCreationProvider({
     longitude,
     selectedCategoryIds,
     selectedSubcategoryIds,
+    selectedCalendarIds,
     acceptedOrganizerTerms,
     externalEventUrl,
     eventTheme,
@@ -460,6 +472,7 @@ export function EventCreationProvider({
     setCoverName("invite-cover.png");
     setSelectedCategoryIds([]);
     setSelectedSubcategoryIds([]);
+    setSelectedCalendarIds([]);
     setAcceptedOrganizerTerms(false);
     setExternalEventUrl("");
     setEventTheme(DEFAULT_THEME_CONFIG);
@@ -531,6 +544,8 @@ export function EventCreationProvider({
         setSelectedCategoryIds,
         selectedSubcategoryIds,
         setSelectedSubcategoryIds,
+        selectedCalendarIds,
+        setSelectedCalendarIds,
         acceptedOrganizerTerms,
         setAcceptedOrganizerTerms,
         externalEventUrl,

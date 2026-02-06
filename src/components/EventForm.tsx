@@ -21,6 +21,7 @@ import { EventFormat } from "@/types/event/status";
 import { eventService } from "@/services/event.service";
 import { eventCoverService } from "@/services/event-cover.service";
 import { CreateEventDto, QuestionType } from "@/types";
+import { calendarService } from "@/services/calendar.service";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";
@@ -39,6 +40,7 @@ import {
   EventNameInput,
   EventDateTimeSection,
   EventCategoriesSection,
+  EventCalendarsSection,
   EventLocationSection,
   EventSettingsCard,
   TicketTypesSection,
@@ -95,6 +97,8 @@ function EventFormInner({
     setCoverName,
     selectedCategoryIds,
     selectedSubcategoryIds,
+    selectedCalendarIds,
+    setSelectedCalendarIds,
     acceptedOrganizerTerms,
     externalEventUrl,
     eventTheme,
@@ -272,6 +276,15 @@ function EventFormInner({
         setSelectedSubcategoryIds(initialData.subcategories.map((sub: any) => sub.id));
       }
 
+      // Load calendars containing this event
+      if (eventId) {
+        calendarService.getCalendarsForEvent(eventId).then((cals) => {
+          setSelectedCalendarIds(cals.map((c) => c.id));
+        }).catch(() => {
+          // Calendar loading is non-critical
+        });
+      }
+
       if (initialData.eventTickets?.length > 0) {
         const ticketsToLoad = initialData.eventTickets.map((ticket: any, index: number) => {
           const price = parseFloat(ticket.price) || 0;
@@ -429,6 +442,7 @@ function EventFormInner({
         } : undefined,
         categoryIds: selectedCategoryIds,
         subcategoryIds: selectedSubcategoryIds,
+        calendarIds: selectedCalendarIds.length > 0 ? selectedCalendarIds : undefined,
         eventUrl: undefined,
         tickets: ticketsPayload,
         externalEventUrl: externalEventUrl || undefined,
@@ -508,6 +522,8 @@ function EventFormInner({
 
         {/* Right column - Form fields */}
         <section className="flex-1 space-y-3">
+          <EventCalendarsSection />
+
           <EventNameInput
             ref={validation.refs.eventName}
             error={validation.errors.eventName}
