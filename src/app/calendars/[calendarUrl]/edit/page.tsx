@@ -19,6 +19,8 @@ import {
  Clock,
  Sparkles,
  Plus,
+ Camera,
+ Calendar as CalendarIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -350,6 +352,135 @@ export default function EditCalendarPage() {
 
     {/* Form */}
     <form onSubmit={handleSubmit} className="space-y-3">
+     {/* Banner & Calendar Image Preview */}
+     <div>
+      <div className="relative">
+       {/* Banner Image */}
+       <button
+        type="button"
+        onClick={calendarBannerImageUrl ? undefined : bannerCropper.triggerFileInput}
+        className="relative aspect-[4/1] w-full overflow-hidden rounded-2xl group"
+        style={{ backgroundColor: calendarColor || "#6366f1" }}
+       >
+        {calendarBannerImageUrl ? (
+         <>
+          <Image
+           src={calendarBannerImageUrl}
+           alt="Banner preview"
+           fill
+           className="object-cover"
+          />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+           <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+            <span
+             onClick={(e) => { e.stopPropagation(); bannerCropper.triggerFileInput(); }}
+             className="rounded-full bg-black/60 p-2 text-white backdrop-blur-sm hover:bg-black/80 cursor-pointer"
+            >
+             <Camera className="h-4 w-4" />
+            </span>
+            <span
+             onClick={(e) => { e.stopPropagation(); setCalendarBannerImageUrl(""); }}
+             className="rounded-full bg-black/60 p-2 text-white backdrop-blur-sm hover:bg-red-500/80 cursor-pointer"
+            >
+             <X className="h-4 w-4" />
+            </span>
+           </div>
+          </div>
+         </>
+        ) : (
+         <div className="absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-white/20 rounded-2xl hover:border-white/30 transition-colors">
+          {bannerCropper.isUploading ? (
+           <Loader2 className="h-6 w-6 animate-spin text-white/50" />
+          ) : (
+           <>
+            <Camera className="h-5 w-5 text-white/40 mb-1" />
+            <p className="text-xs text-white/40">Upload banner</p>
+           </>
+          )}
+         </div>
+        )}
+       </button>
+       <input
+        ref={bannerCropper.fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={bannerCropper.handleImageSelect}
+        className="hidden"
+       />
+
+       {/* Calendar Profile Image - overlapping banner */}
+       <div className="absolute -bottom-10 left-4 sm:left-6">
+        <label
+         htmlFor="image-upload-edit"
+         className="relative block h-24 w-24 sm:h-28 sm:w-28 overflow-hidden rounded-xl border-4 border-[var(--background)] shadow-lg cursor-pointer group"
+        >
+         {calendarImage ? (
+          <>
+           <Image
+            src={calendarImage}
+            alt="Calendar preview"
+            fill
+            className="object-cover"
+           />
+           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5">
+             <span className="rounded-full bg-black/60 p-1.5 text-white backdrop-blur-sm">
+              <Camera className="h-3.5 w-3.5" />
+             </span>
+             <span
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCalendarImage(""); }}
+              className="rounded-full bg-black/60 p-1.5 text-white backdrop-blur-sm hover:bg-red-500/80 cursor-pointer"
+             >
+              <X className="h-3.5 w-3.5" />
+             </span>
+            </div>
+           </div>
+          </>
+         ) : (
+          <div
+           className="flex h-full w-full flex-col items-center justify-center bg-card-secondary-background group-hover:bg-card-background transition-colors"
+           style={{ backgroundColor: calendarColor || "#6366f1" }}
+          >
+           {uploadingImage ? (
+            <Loader2 className="h-6 w-6 animate-spin text-white/50" />
+           ) : (
+            <>
+             <CalendarIcon className="h-8 w-8 sm:h-10 sm:w-10 text-white/30" />
+             <Camera className="h-3.5 w-3.5 text-white/40 mt-1" />
+            </>
+           )}
+          </div>
+         )}
+         <input
+          type="file"
+          id="image-upload-edit"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="hidden"
+          disabled={uploadingImage}
+         />
+        </label>
+       </div>
+      </div>
+      {/* Spacer for overlapping profile image */}
+      <div className="h-12" />
+     </div>
+
+     {/* Banner Image Crop Modal */}
+     <ImageCropModal
+      isOpen={bannerCropper.isCropModalOpen}
+      imageToCrop={bannerCropper.imageToCrop}
+      crop={bannerCropper.crop}
+      zoom={bannerCropper.zoom}
+      isUploading={bannerCropper.isUploading}
+      aspect={bannerCropper.aspect}
+      onCropChange={bannerCropper.setCrop}
+      onZoomChange={bannerCropper.setZoom}
+      onCropComplete={bannerCropper.onCropAreaComplete}
+      onSave={bannerCropper.handleSave}
+      onCancel={bannerCropper.handleCancel}
+     />
+
      {/* Name */}
      <div>
       <label htmlFor="name" className="block text-xs font-medium text-muted-foreground mb-1">
@@ -408,120 +539,6 @@ export default function EditCalendarPage() {
        3-100 characters, lowercase letters, numbers, and hyphens only
       </p>
      </div>
-
-     {/* Image Upload */}
-     <div>
-      <label className="block text-xs font-medium text-muted-foreground mb-1">
-       Calendar Image
-      </label>
-      {calendarImage ? (
-       <div className="relative aspect-video w-full max-w-md overflow-hidden rounded-lg border border-white/10">
-        <Image
-         src={calendarImage}
-         alt="Calendar preview"
-         fill
-         className="object-cover"
-        />
-        <button
-         type="button"
-         onClick={() => setCalendarImage("")}
-         className="absolute right-2 top-2 rounded-full bg-black/50 p-2 text-white backdrop-blur-sm transition-colors hover:bg-black/70"
-        >
-         <X className="h-4 w-4" />
-        </button>
-       </div>
-      ) : (
-       <label
-        htmlFor="image-upload"
-        className="flex aspect-video w-full max-w-md cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/10 bg-card-background transition-colors hover:border-white/20"
-       >
-        {uploadingImage ? (
-         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        ) : (
-         <>
-          <ImageIcon className="mb-2 h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">
-           Click to upload image
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-           Max 5MB
-          </p>
-         </>
-        )}
-        <input
-         type="file"
-         id="image-upload"
-         accept="image/*"
-         onChange={handleImageUpload}
-         className="hidden"
-         disabled={uploadingImage}
-        />
-       </label>
-      )}
-     </div>
-
-     {/* Banner Image Upload */}
-     <div>
-      <label className="block text-xs font-medium text-muted-foreground mb-1">
-       Banner Image
-      </label>
-      <p className="text-xs text-muted-foreground mb-1">
-       Wide image displayed at the top of your calendar page (4:1 ratio)
-      </p>
-      {calendarBannerImageUrl ? (
-       <div className="relative aspect-[4/1] w-full overflow-hidden rounded-lg border border-white/10">
-        <Image
-         src={calendarBannerImageUrl}
-         alt="Banner preview"
-         fill
-         className="object-cover"
-        />
-        <button
-         type="button"
-         onClick={() => setCalendarBannerImageUrl("")}
-         className="absolute right-2 top-2 rounded-full bg-black/50 p-2 text-white backdrop-blur-sm transition-colors hover:bg-black/70"
-        >
-         <X className="h-4 w-4" />
-        </button>
-       </div>
-      ) : (
-       <button
-        type="button"
-        onClick={bannerCropper.triggerFileInput}
-        className="flex aspect-[4/1] w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/10 bg-card-background transition-colors hover:border-white/20"
-       >
-        <ImageIcon className="mb-2 h-8 w-8 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">
-         Click to upload banner image
-        </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-         Max 5MB
-        </p>
-       </button>
-      )}
-      <input
-       ref={bannerCropper.fileInputRef}
-       type="file"
-       accept="image/*"
-       onChange={bannerCropper.handleImageSelect}
-       className="hidden"
-      />
-     </div>
-
-     {/* Banner Image Crop Modal */}
-     <ImageCropModal
-      isOpen={bannerCropper.isCropModalOpen}
-      imageToCrop={bannerCropper.imageToCrop}
-      crop={bannerCropper.crop}
-      zoom={bannerCropper.zoom}
-      isUploading={bannerCropper.isUploading}
-      aspect={bannerCropper.aspect}
-      onCropChange={bannerCropper.setCrop}
-      onZoomChange={bannerCropper.setZoom}
-      onCropComplete={bannerCropper.onCropAreaComplete}
-      onSave={bannerCropper.handleSave}
-      onCancel={bannerCropper.handleCancel}
-     />
 
      {/* Color Picker */}
      <div>
