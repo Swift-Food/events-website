@@ -361,8 +361,7 @@ export default function EditCalendarPage() {
        <button
         type="button"
         onClick={calendarBannerImageUrl ? undefined : bannerCropper.triggerFileInput}
-        className="relative aspect-[4/1] w-full overflow-hidden sm:rounded-2xl group"
-        style={{ backgroundColor: calendarColor || "#6366f1" }}
+        className="relative aspect-[4/1] w-full overflow-hidden sm:rounded-2xl group bg-card-secondary-background"
        >
         {calendarBannerImageUrl ? (
          <>
@@ -441,7 +440,6 @@ export default function EditCalendarPage() {
          ) : (
           <div
            className="flex h-full w-full flex-col items-center justify-center bg-card-secondary-background group-hover:bg-card-background transition-colors"
-           style={{ backgroundColor: calendarColor || "#6366f1" }}
           >
            {uploadingImage ? (
             <Loader2 className="h-6 w-6 animate-spin text-white/50" />

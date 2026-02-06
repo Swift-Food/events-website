@@ -218,8 +218,7 @@ export default function CreateCalendarPage() {
        <button
         type="button"
         onClick={calendarBannerImageUrl ? undefined : bannerCropper.triggerFileInput}
-        className="relative aspect-[4/1] w-full overflow-hidden sm:rounded-2xl group"
-        style={{ backgroundColor: calendarColor || "#6366f1" }}
+        className="relative aspect-[4/1] w-full overflow-hidden sm:rounded-2xl group bg-card-background"
        >
         {calendarBannerImageUrl ? (
          <>
@@ -297,8 +296,7 @@ export default function CreateCalendarPage() {
           </>
          ) : (
           <div
-           className="flex h-full w-full flex-col items-center justify-center bg-card-secondary-background group-hover:bg-card-background transition-colors"
-           style={{ backgroundColor: calendarColor || "#6366f1" }}
+           className="flex h-full w-full flex-col items-center justify-center bg-card-background group-hover:bg-card-background transition-colors"
           >
            {uploadingImage ? (
             <Loader2 className="h-6 w-6 animate-spin text-white/50" />
@@ -444,7 +442,7 @@ export default function CreateCalendarPage() {
           type="button"
           onClick={() => setIsPublic(!isPublic)}
           className={`h-5 w-8 rounded-full transition-all ${
-           isPublic ? "bg-primary" : "bg-card-secondary-background"
+           isPublic ? "bg-primary" : "bg-card-background"
           }`}
          >
           <span
@@ -465,7 +463,7 @@ export default function CreateCalendarPage() {
           type="button"
           onClick={() => setShowSubscriberCount(!showSubscriberCount)}
           className={`h-5 w-8 rounded-full transition-all ${
-           showSubscriberCount ? "bg-primary" : "bg-card-secondary-background"
+           showSubscriberCount ? "bg-primary" : "bg-card-background"
           }`}
          >
           <span
