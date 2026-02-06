@@ -11,19 +11,17 @@ interface EventsTimelineProps {
   enablePreviewModal?: boolean;
   /** Whether to link to management page instead of public event page */
   linkToManagement?: boolean;
-  /** Top position for sticky headers (e.g., "top-36" or "top-20") */
-  stickyTopClass?: string;
-  /** Root margin for intersection observer (adjusts when headers become "stuck") */
-  observerRootMargin?: string;
+  /** Sticky top offset in pixels for date headers */
+  stickyTopOffset?: number;
 }
 
 export default function EventsTimeline({
   events,
   enablePreviewModal = true,
   linkToManagement = false,
-  stickyTopClass = "top-34",
-  observerRootMargin = "-144px 0px 0px 0px",
+  stickyTopOffset = 8,
 }: EventsTimelineProps) {
+  const stickyStyle = useMemo(() => ({ top: stickyTopOffset }), [stickyTopOffset]);
   // Track which date headers are stuck
   const [stuckHeaders, setStuckHeaders] = useState<Set<string>>(new Set());
   const sentinelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -53,8 +51,25 @@ export default function EventsTimeline({
     return Array.from(groups.entries());
   }, [events]);
 
-  // Intersection observer to detect when headers become stuck
+  // Find the scroll container (nearest ancestor with overflow-y: auto/scroll)
+  const scrollContainerRef = useRef<HTMLElement | null>(null);
+
+  // Detect stuck headers using IntersectionObserver rooted in the scroll container
   useEffect(() => {
+    // Find the scroll container from the first sentinel
+    const firstSentinel = sentinelRefs.current.values().next().value;
+    if (firstSentinel && !scrollContainerRef.current) {
+      let el: HTMLElement | null = firstSentinel.parentElement;
+      while (el) {
+        const style = getComputedStyle(el);
+        if (style.overflowY === "auto" || style.overflowY === "scroll") {
+          scrollContainerRef.current = el;
+          break;
+        }
+        el = el.parentElement;
+      }
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -73,7 +88,8 @@ export default function EventsTimeline({
         });
       },
       {
-        rootMargin: observerRootMargin,
+        root: scrollContainerRef.current,
+        rootMargin: `-${stickyTopOffset}px 0px 0px 0px`,
         threshold: 0,
       }
     );
@@ -83,7 +99,7 @@ export default function EventsTimeline({
     });
 
     return () => observer.disconnect();
-  }, [groupedEvents, observerRootMargin]);
+  }, [groupedEvents, stickyTopOffset]);
 
   const handleEventClick = (_e: React.MouseEvent, event: EventResponseDto) => {
     if (enablePreviewModal) {
@@ -119,7 +135,7 @@ export default function EventsTimeline({
                 {/* Continuous line */}
                 <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-white/20" />
                 {/* Dot positioned at header level */}
-                <div className={`sticky ${stickyTopClass} z-10 flex h-8 items-center justify-center`}>
+                <div className="sticky z-10 flex h-8 items-center justify-center" style={stickyStyle}>
                   <div
                     className={`h-2 w-2 rounded-full transition-colors ${
                       stuckHeaders.has(dateKey)
@@ -142,7 +158,7 @@ export default function EventsTimeline({
                 />
 
                 {/* Sticky Date Header */}
-                <div className={`sticky ${stickyTopClass} z-10 pb-3`}>
+                <div className="sticky z-10 pb-3" style={stickyStyle}>
                   <div
                     className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors ${
                       stuckHeaders.has(dateKey)

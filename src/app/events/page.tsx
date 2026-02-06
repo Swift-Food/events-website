@@ -523,8 +523,7 @@ function EventsPageContent() {
     {!loading && !error && events.length > 0 && (
      <EventsTimeline
       events={events}
-      stickyTopClass={filteredSubcategories.length > 0 ? "top-[100px]" : "top-[60px]"}
-      observerRootMargin={filteredSubcategories.length > 0 ? "-108px 0px 0px 0px" : "-68px 0px 0px 0px"}
+      stickyTopOffset={filteredSubcategories.length > 0 ? 100 : 60}
      />
     )}
 

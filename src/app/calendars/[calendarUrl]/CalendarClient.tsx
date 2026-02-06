@@ -564,7 +564,7 @@ export default function CalendarClient({
          </p>
         </div>
        ) : (
-        <EventsTimeline events={displayedEvents} stickyTopClass="top-2"/>
+        <EventsTimeline events={displayedEvents} />
        )}
       </div>
      </section>

@@ -427,8 +427,6 @@ function EventManagementContent() {
                     events={filteredEvents}
                     linkToManagement={true}
                     enablePreviewModal={false}
-                    stickyTopClass="top-2"
-                    observerRootMargin="-80px 0px 0px 0px"
                   />
                 )}
               </div>
