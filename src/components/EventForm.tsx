@@ -516,7 +516,7 @@ function EventFormInner({
 
       <div className="relative z-10 flex w-full max-w-5xl flex-col gap-6 text-foreground md:flex-row">
         {/* Left column - Cover and Theme */}
-        <section className="flex flex-col gap-5 rounded-3xl md:p-7 md:w-80 lg:w-96 md:shrink-0">
+        <section className="flex flex-col gap-5 rounded-3xl md:p-7 md:w-80 lg:w-96 md:shrink-0 event-creation-stagger-1">
           <EventCoverSection
             onImageSelect={imageCropper.handleImageSelect}
             onOpenCoverPicker={() => setIsCoverPickerOpen(true)}
@@ -531,7 +531,7 @@ function EventFormInner({
         </section>
 
         {/* Right column - Form fields */}
-        <section className="flex-1 space-y-3">
+        <section className="flex-1 space-y-3 event-creation-stagger-2">
           <EventCalendarsSection />
 
           <EventNameInput
