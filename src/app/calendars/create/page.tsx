@@ -399,8 +399,8 @@ export default function CreateCalendarPage() {
       </p>
      </div>
 
-     {/* Color Picker */}
-     <div>
+     {/* Color Picker - hidden for now */}
+     {/* <div>
       <label className="block text-xs font-medium text-muted-foreground mb-1">
        Calendar Color
       </label>
@@ -427,7 +427,7 @@ export default function CreateCalendarPage() {
         title="Custom color"
        />
       </div>
-     </div>
+     </div> */}
 
      {/* Settings */}
      <div>
