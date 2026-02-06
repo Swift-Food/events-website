@@ -57,29 +57,52 @@ function EventManagementContent() {
   const [loadingCalendars, setLoadingCalendars] = useState(true);
   const [calendarsError, setCalendarsError] = useState<string | null>(null);
 
-  // Events filter tab refs for animated indicator
+  // Tab refs for animated indicators
   const eventsTabContainerRef = useRef<HTMLDivElement>(null);
   const upcomingTabRef = useRef<HTMLButtonElement>(null);
   const pastTabRef = useRef<HTMLButtonElement>(null);
-  const [tabIndicator, setTabIndicator] = useState({ left: 0, width: 0 });
+  const [filterIndicator, setFilterIndicator] = useState({ left: 0, width: 0 });
 
-  const updateTabIndicator = useCallback(() => {
+  const primaryTabContainerRef = useRef<HTMLDivElement>(null);
+  const eventsTabRef = useRef<HTMLButtonElement>(null);
+  const calendarsTabRef = useRef<HTMLButtonElement>(null);
+  const [primaryIndicator, setPrimaryIndicator] = useState({ left: 0, width: 0 });
+
+  const updateFilterIndicator = useCallback(() => {
     const activeRef = eventsFilter === "upcoming" ? upcomingTabRef : pastTabRef;
     const container = eventsTabContainerRef.current;
     const button = activeRef.current;
     if (container && button) {
       const containerRect = container.getBoundingClientRect();
       const buttonRect = button.getBoundingClientRect();
-      setTabIndicator({
+      setFilterIndicator({
         left: buttonRect.left - containerRect.left,
         width: buttonRect.width,
       });
     }
   }, [eventsFilter]);
 
+  const updatePrimaryIndicator = useCallback(() => {
+    const activeRef = primaryTab === "events" ? eventsTabRef : calendarsTabRef;
+    const container = primaryTabContainerRef.current;
+    const button = activeRef.current;
+    if (container && button) {
+      const containerRect = container.getBoundingClientRect();
+      const buttonRect = button.getBoundingClientRect();
+      setPrimaryIndicator({
+        left: buttonRect.left - containerRect.left,
+        width: buttonRect.width,
+      });
+    }
+  }, [primaryTab]);
+
   useEffect(() => {
-    updateTabIndicator();
-  }, [eventsFilter, events.length, updateTabIndicator]);
+    updateFilterIndicator();
+  }, [eventsFilter, events.length, updateFilterIndicator]);
+
+  useEffect(() => {
+    updatePrimaryIndicator();
+  }, [primaryTab, events.length, calendars.length, updatePrimaryIndicator]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -244,10 +267,11 @@ function EventManagementContent() {
           <>
             {/* Primary Tabs - Underline Style */}
             <div className="mb-8 manage-stagger-2">
-              <div className="flex gap-8 border-b border-white/10">
+              <div ref={primaryTabContainerRef} className="relative flex gap-8 border-b border-white/10">
                 <button
+                  ref={eventsTabRef}
                   onClick={() => handlePrimaryTabChange("events")}
-                  className={`relative pb-3 text-sm font-medium transition-colors ${
+                  className={`pb-3 text-sm font-medium transition-colors ${
                     primaryTab === "events"
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground"
@@ -265,15 +289,11 @@ function EventManagementContent() {
                       {formatCount(totalEventsCount)}
                     </span>
                   </span>
-                  <span
-                    className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${
-                      primaryTab === "events" ? "w-full" : "w-0"
-                    }`}
-                  />
                 </button>
                 <button
+                  ref={calendarsTabRef}
                   onClick={() => handlePrimaryTabChange("calendars")}
-                  className={`relative pb-3 text-sm font-medium transition-colors ${
+                  className={`pb-3 text-sm font-medium transition-colors ${
                     primaryTab === "calendars"
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground"
@@ -291,12 +311,15 @@ function EventManagementContent() {
                       {formatCount(calendarsCount)}
                     </span>
                   </span>
-                  <span
-                    className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${
-                      primaryTab === "calendars" ? "w-full" : "w-0"
-                    }`}
-                  />
                 </button>
+                {/* Animated underline */}
+                <span
+                  className="absolute bottom-0 h-0.5 bg-primary transition-all duration-300 ease-out"
+                  style={{
+                    left: primaryIndicator.left,
+                    width: primaryIndicator.width,
+                  }}
+                />
               </div>
             </div>
 
@@ -310,8 +333,8 @@ function EventManagementContent() {
                     <div
                       className="absolute top-0.5 bottom-0.5 rounded-full bg-primary transition-all duration-300 ease-out"
                       style={{
-                        width: tabIndicator.width,
-                        left: tabIndicator.left,
+                        width: filterIndicator.width,
+                        left: filterIndicator.left,
                       }}
                     />
                     <button
