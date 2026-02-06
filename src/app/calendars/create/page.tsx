@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
+import { useImageCropper } from "@/components/event-form/hooks/useImageCropper";
+import ImageCropModal from "@/components/event-form/ImageCropModal";
 
 export default function CreateCalendarPage() {
  const router = useRouter();
@@ -25,6 +27,7 @@ export default function CreateCalendarPage() {
  const [description, setDescription] = useState("");
  const [calendarUrl, setCalendarUrl] = useState("");
  const [calendarImage, setCalendarImage] = useState("");
+ const [calendarBannerImageUrl, setCalendarBannerImageUrl] = useState("");
  const [calendarColor, setCalendarColor] = useState("#6366f1");
  const [calendarType, setCalendarType] = useState<CalendarType>(CalendarType.PERSONAL);
  const [isPublic, setIsPublic] = useState(true);
@@ -35,6 +38,14 @@ export default function CreateCalendarPage() {
  const [isSubmitting, setIsSubmitting] = useState(false);
  const [uploadingImage, setUploadingImage] = useState(false);
  const [autoGenerateUrl, setAutoGenerateUrl] = useState(true);
+
+ // Banner image cropper
+ const bannerCropper = useImageCropper({
+  aspect: 4,
+  onCropComplete: (imageUrl) => {
+   setCalendarBannerImageUrl(imageUrl);
+  },
+ });
 
  // Preset colors
  const presetColors = [
@@ -139,6 +150,7 @@ export default function CreateCalendarPage() {
     description: description || undefined,
     calendarUrl,
     calendarImage: calendarImage || undefined,
+    calendarBannerImageUrl: calendarBannerImageUrl || undefined,
     calendarColor,
     calendarType,
     isPublic,
@@ -308,6 +320,69 @@ export default function CreateCalendarPage() {
       )}
      </div>
 
+     {/* Banner Image Upload */}
+     <div>
+      <label className="block text-sm font-medium text-foreground mb-2">
+       Banner Image
+      </label>
+      <p className="text-xs text-muted-foreground mb-2">
+       Wide image displayed at the top of your calendar page (4:1 ratio)
+      </p>
+      {calendarBannerImageUrl ? (
+       <div className="relative aspect-[4/1] w-full overflow-hidden rounded-lg border border-white/10">
+        <Image
+         src={calendarBannerImageUrl}
+         alt="Banner preview"
+         fill
+         className="object-cover"
+        />
+        <button
+         type="button"
+         onClick={() => setCalendarBannerImageUrl("")}
+         className="absolute right-2 top-2 rounded-full bg-black/50 p-2 text-white backdrop-blur-sm transition-colors hover:bg-black/70"
+        >
+         <X className="h-4 w-4" />
+        </button>
+       </div>
+      ) : (
+       <button
+        type="button"
+        onClick={bannerCropper.triggerFileInput}
+        className="flex aspect-[4/1] w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-white/10 bg-card-background transition-colors hover:border-white/20"
+       >
+        <ImageIcon className="mb-2 h-8 w-8 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">
+         Click to upload banner image
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+         Max 5MB
+        </p>
+       </button>
+      )}
+      <input
+       ref={bannerCropper.fileInputRef}
+       type="file"
+       accept="image/*"
+       onChange={bannerCropper.handleImageSelect}
+       className="hidden"
+      />
+     </div>
+
+     {/* Banner Image Crop Modal */}
+     <ImageCropModal
+      isOpen={bannerCropper.isCropModalOpen}
+      imageToCrop={bannerCropper.imageToCrop}
+      crop={bannerCropper.crop}
+      zoom={bannerCropper.zoom}
+      isUploading={bannerCropper.isUploading}
+      aspect={bannerCropper.aspect}
+      onCropChange={bannerCropper.setCrop}
+      onZoomChange={bannerCropper.setZoom}
+      onCropComplete={bannerCropper.onCropAreaComplete}
+      onSave={bannerCropper.handleSave}
+      onCancel={bannerCropper.handleCancel}
+     />
+
      {/* Color Picker */}
      <div>
       <label className="block text-sm font-medium text-foreground mb-2">
@@ -420,7 +495,7 @@ export default function CreateCalendarPage() {
       </button>
       <button
        type="submit"
-       disabled={isSubmitting || uploadingImage}
+       disabled={isSubmitting || uploadingImage || bannerCropper.isUploading}
        className="flex-1 rounded-lg bg-primary px-6 py-3 font-semibold text-white transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
        {isSubmitting ? (

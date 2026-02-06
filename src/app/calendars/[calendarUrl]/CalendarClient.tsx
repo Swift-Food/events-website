@@ -396,9 +396,9 @@ export default function CalendarClient({
       className="relative aspect-[4/1] w-full overflow-hidden sm:rounded-2xl"
       style={{ backgroundColor: calendar.calendarColor || "#6366f1" }}
      >
-      {calendar.calendarImage && (
+      {(calendar.calendarBannerImageUrl || calendar.calendarImage) && (
        <Image
-        src={calendar.calendarImage}
+        src={calendar.calendarBannerImageUrl || calendar.calendarImage!}
         alt={`${calendar.name} banner`}
         fill
         className="object-cover"

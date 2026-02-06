@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 interface UseImageCropperOptions {
   onCropComplete: (imageUrl: string, imageName: string) => void;
+  aspect?: number;
 }
 
 interface UseImageCropperReturn {
@@ -14,6 +15,7 @@ interface UseImageCropperReturn {
   crop: { x: number; y: number };
   zoom: number;
   isUploading: boolean;
+  aspect: number;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   handleImageSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
   setCrop: (crop: { x: number; y: number }) => void;
@@ -26,6 +28,7 @@ interface UseImageCropperReturn {
 
 export function useImageCropper({
   onCropComplete,
+  aspect = 1,
 }: UseImageCropperOptions): UseImageCropperReturn {
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
@@ -157,6 +160,7 @@ export function useImageCropper({
     crop,
     zoom,
     isUploading,
+    aspect,
     fileInputRef,
     handleImageSelect,
     setCrop,

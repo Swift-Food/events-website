@@ -33,6 +33,7 @@ export interface CreateCalendarDto {
   name: string; // Required, 1-255 chars
   description?: string;
   calendarImage?: string; // URL, max 500 chars
+  calendarBannerImageUrl?: string; // URL, max 500 chars
   calendarColor?: string; // Hex color, default: '#6366f1'
   ownerEventUserId: string; // UUID - Required
   calendarUrl: string; // Required, 3-100 chars, unique slug
@@ -48,6 +49,7 @@ export interface UpdateCalendarDto {
   name?: string; // Max 255 chars
   description?: string;
   calendarImage?: string; // URL, max 500 chars
+  calendarBannerImageUrl?: string; // URL, max 500 chars
   calendarColor?: string; // Hex color
   calendarUrl?: string; // Max 100 chars
   calendarType?: CalendarType;

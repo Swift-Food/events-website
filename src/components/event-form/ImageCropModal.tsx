@@ -9,6 +9,7 @@ interface ImageCropModalProps {
   crop: { x: number; y: number };
   zoom: number;
   isUploading: boolean;
+  aspect?: number;
   onCropChange: (crop: { x: number; y: number }) => void;
   onZoomChange: (zoom: number) => void;
   onCropComplete: (croppedArea: Area, croppedAreaPixels: Area) => void;
@@ -22,6 +23,7 @@ export default function ImageCropModal({
   crop,
   zoom,
   isUploading,
+  aspect = 1,
   onCropChange,
   onZoomChange,
   onCropComplete,
@@ -40,7 +42,7 @@ export default function ImageCropModal({
             image={imageToCrop}
             crop={crop}
             zoom={zoom}
-            aspect={1}
+            aspect={aspect}
             onCropChange={onCropChange}
             onZoomChange={onZoomChange}
             onCropComplete={onCropComplete}

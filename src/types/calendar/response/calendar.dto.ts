@@ -44,6 +44,7 @@ export interface Calendar {
   name: string;
   description?: string;
   calendarImage?: string;
+  calendarBannerImageUrl?: string;
   calendarColor: string;
   ownerEventUserId: string;
   calendarUrl: string;
