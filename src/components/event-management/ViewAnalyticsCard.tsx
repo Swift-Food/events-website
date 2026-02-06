@@ -110,11 +110,11 @@ export function ViewAnalyticsCard({ eventId }: ViewAnalyticsCardProps) {
 
       {/* Chart - Desktop (all 30 days) */}
       <div className="hidden sm:block">
-        <div className="flex items-end gap-[2px] h-24">
+        <div className="flex gap-[2px] h-24">
           {analytics.dailyViews.map((day, index) => (
             <div
               key={day.date}
-              className="flex-1 group relative"
+              className="flex-1 group relative flex flex-col justify-end"
             >
               <div
                 className="w-full bg-primary/60 hover:bg-primary transition-colors rounded-t-sm"
@@ -143,26 +143,27 @@ export function ViewAnalyticsCard({ eventId }: ViewAnalyticsCardProps) {
 
       {/* Chart - Mobile (last 7 days) */}
       <div className="sm:hidden">
-        <div className="flex items-end gap-1 h-20">
+        <div className="flex gap-1 h-20">
           {last7Days.map((day) => (
             <div
               key={day.date}
               className="flex-1 flex flex-col items-center gap-1"
             >
-              <div className="w-full flex justify-center">
+              <div className="w-full flex justify-center shrink-0">
                 <span className="text-[10px] text-muted-foreground">
                   {day.viewCount > 0 ? day.viewCount : ""}
                 </span>
               </div>
-              <div
-                className="w-full bg-primary/60 rounded-t-sm"
-                style={{
-                  height: `${Math.max((day.viewCount / maxViews) * 100, day.viewCount > 0 ? 8 : 0)}%`,
-                  minHeight: day.viewCount > 0 ? "4px" : "0px",
-                  flex: 1,
-                }}
-              />
-              <span className="text-[10px] text-muted-foreground">
+              <div className="w-full flex-1 flex items-end">
+                <div
+                  className="w-full bg-primary/60 rounded-t-sm"
+                  style={{
+                    height: `${Math.max((day.viewCount / maxViews) * 100, day.viewCount > 0 ? 8 : 0)}%`,
+                    minHeight: day.viewCount > 0 ? "4px" : "0px",
+                  }}
+                />
+              </div>
+              <span className="text-[10px] text-muted-foreground shrink-0">
                 {formatShortDate(day.date)}
               </span>
             </div>
