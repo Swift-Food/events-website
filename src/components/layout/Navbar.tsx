@@ -37,6 +37,18 @@ export default function Navbar() {
   const pathname = usePathname();
   const isLandingPage = pathname === "/";
   const hasSolidBackground = false;
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  useEffect(() => {
+    const scrollContainer = document.querySelector("main");
+    if (!scrollContainer) return;
+    const handleScroll = () => {
+      setHasScrolled(scrollContainer.scrollTop > 10);
+    };
+    handleScroll();
+    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+    return () => scrollContainer.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -111,7 +123,14 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm">
+      <header
+        className="fixed top-0 left-0 right-0 z-50"
+        style={{
+          backdropFilter: hasScrolled ? "blur(4px)" : "none",
+          WebkitBackdropFilter: hasScrolled ? "blur(4px)" : "none",
+          transition: "backdrop-filter 0.3s, -webkit-backdrop-filter 0.3s",
+        }}
+      >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             {/* Mobile logo links to /discover, desktop logo links to / */}
