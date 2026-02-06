@@ -328,7 +328,7 @@ export default function EditCalendarPage() {
 
  return (
   <div className="min-h-screen ">
-   <div className="mx-auto max-w-2xl px-3 md:px-6 pb-4 pt-6">
+   <div className="mx-auto max-w-2xl px-3 md:px-6 pb-16 pt-6">
     {/* Back Button */}
     <button
      onClick={() => router.push(`/calendars/${calendarUrl}`)}
