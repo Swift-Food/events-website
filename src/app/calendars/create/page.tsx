@@ -271,7 +271,7 @@ export default function CreateCalendarPage() {
        <div className="absolute -bottom-10 left-4 sm:left-6">
         <label
          htmlFor="image-upload-create"
-         className="relative block h-24 w-24 sm:h-28 sm:w-28 overflow-hidden rounded-xl border-4 border-[var(--background)] shadow-lg cursor-pointer group"
+         className="relative block h-24 w-24 sm:h-28 sm:w-28 overflow-hidden rounded-xl border-2 border-[var(--background)] shadow-lg cursor-pointer group"
         >
          {calendarImage ? (
           <>
