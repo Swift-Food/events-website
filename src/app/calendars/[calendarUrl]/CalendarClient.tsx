@@ -368,7 +368,7 @@ export default function CalendarClient({
  return (
   <div className="min-h-screen ">
    {/* Management Banner - Mobile */}
-   {canManage && (
+   {/* {canManage && (
     <div
      className={`sm:hidden border-y ${
       userRole === "owner"
@@ -395,11 +395,11 @@ export default function CalendarClient({
       </Link>
      </div>
     </div>
-   )}
+   )} */}
 
    <div className="mx-auto max-w-6xl px-6 pt-0 pb-8 sm:py-8">
     {/* Management Banner - Desktop */}
-    {canManage && (
+    {/* {canManage && (
      <div
       className={`hidden sm:flex mb-6 items-center justify-between gap-4 rounded-lg border px-4 py-3 ${
        userRole === "owner"
@@ -437,7 +437,7 @@ export default function CalendarClient({
        <span className="text-xs">↗</span>
       </Link>
      </div>
-    )}
+    )} */}
 
     {/* Banner Section - full bleed on mobile */}
     <div className="relative -mx-6 sm:mx-0 calendar-stagger-1">
