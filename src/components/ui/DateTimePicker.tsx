@@ -130,6 +130,7 @@ export default function DateTimePicker({
 
     const isoString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
     onChange(isoString);
+    setIsOpen(false);
   };
 
   const handleDateClick = () => {
