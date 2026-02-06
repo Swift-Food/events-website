@@ -545,6 +545,22 @@ input[type="datetime-local"] {
 .tickets-stagger-2 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 80ms forwards; opacity: 0; }
 .tickets-stagger-3 { animation: discover-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 160ms forwards; opacity: 0; }
 
+/* User profile page - deeper fade-up with more vertical travel */
+@keyframes user-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-stagger-1 { animation: user-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0ms forwards; opacity: 0; }
+.user-stagger-2 { animation: user-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 150ms forwards; opacity: 0; }
+.user-stagger-3 { animation: user-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 350ms forwards; opacity: 0; }
+
 /* Individual ticket card animation */
 .ticket-card-animate {
   animation: discover-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;

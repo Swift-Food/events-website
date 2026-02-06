@@ -246,8 +246,8 @@ export default function UserProfileClient({
  return (
   <div className="min-h-screen ">
    <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
-    {/* Profile Header */}
-    <div className="mb-8">
+    {/* Profile Header - Avatar + Name */}
+    <div className="mb-0 user-stagger-1">
      <div className="flex flex-col items-center text-center">
       {/* Avatar */}
       <div className="h-32 w-32 sm:h-36 sm:w-36 rounded-full overflow-hidden bg-primary/10">
@@ -284,7 +284,12 @@ export default function UserProfileClient({
         FOLLOWS YOU
        </p>
       )}
+     </div>
+    </div>
 
+    {/* Social, Follow, Bio, Stats */}
+    <div className="mb-8 user-stagger-2">
+     <div className="flex flex-col items-center text-center">
       {/* Social Links - Public only */}
       {isPublic && (
        <div className="flex items-center justify-center gap-5 mt-4">
@@ -376,103 +381,117 @@ export default function UserProfileClient({
 
     {/* Events Section - Only show for public profiles */}
     {isPublic && (
-     <div>
+     <div className="user-stagger-3">
       <h2 className="text-lg font-semibold text-foreground mb-4">
        Events by {displayName}
       </h2>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
-       <button
-        onClick={() => setActiveTab("upcoming")}
-        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-         activeTab === "upcoming"
-          ? "bg-primary text-white"
-          : "bg-white/5 text-muted-foreground hover:bg-white/10"
-        }`}
-       >
-        Upcoming{!loading && ` (${upcomingCount})`}
-       </button>
-       <button
-        onClick={() => setActiveTab("past")}
-        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-         activeTab === "past"
-          ? "bg-primary text-white"
-          : "bg-white/5 text-muted-foreground hover:bg-white/10"
-        }`}
-       >
-        Past{!loading && ` (${pastCount})`}
-       </button>
-      </div>
-
-      {/* Loading State */}
-      {loading && (
-       <div className="flex min-h-[300px] items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
-       </div>
-      )}
-
-      {/* Error State */}
-      {error && !loading && (
-       <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center">
-        <p className="text-red-400">{error}</p>
+      {!loading && (
+       <div className="flex gap-2 mb-6">
         <button
-         onClick={fetchEvents}
-         className="mt-4 rounded-full bg-primary px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/80"
+         onClick={() => setActiveTab("upcoming")}
+         className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+          activeTab === "upcoming"
+           ? "bg-primary text-white"
+           : "bg-white/5 text-muted-foreground hover:bg-white/10"
+         }`}
         >
-         Try Again
+         Upcoming ({upcomingCount})
+        </button>
+        <button
+         onClick={() => setActiveTab("past")}
+         className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+          activeTab === "past"
+           ? "bg-primary text-white"
+           : "bg-white/5 text-muted-foreground hover:bg-white/10"
+         }`}
+        >
+         Past ({pastCount})
         </button>
        </div>
       )}
 
-      {/* Empty State */}
-      {!loading && !error && filteredEvents.length === 0 && (
-       <div className="rounded-xl border border-white/10 bg-card-background p-12 text-center">
-        <Calendar className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
-        <h3 className="mb-2 text-xl font-semibold text-foreground">
-         {events.length === 0
-          ? "No events yet"
-          : activeTab === "upcoming"
-          ? "No upcoming events"
-          : "No past events"}
-        </h3>
-        <p className="text-muted-foreground">
-         {events.length === 0
-          ? "This user hasn't published any events yet."
-          : activeTab === "upcoming"
-          ? "Check back later for new events."
-          : "This user hasn't had any past events."}
+      {/* Loading State - skeleton tabs + content */}
+      {loading && (
+       <div className="flex gap-2 mb-6">
+        <div className="h-10 w-28 rounded-full skeleton-shimmer" />
+        <div className="h-10 w-20 rounded-full skeleton-shimmer" />
+       </div>
+      )}
+
+      <div>
+       {/* Loading State - skeleton events */}
+       {loading && (
+        <div className="space-y-3">
+         {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-24 rounded-xl skeleton-shimmer" />
+         ))}
+        </div>
+       )}
+
+       {/* Error State */}
+       {error && !loading && (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center">
+         <p className="text-red-400">{error}</p>
+         <button
+          onClick={fetchEvents}
+          className="mt-4 rounded-full bg-primary px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/80"
+         >
+          Try Again
+         </button>
+        </div>
+       )}
+
+       {/* Empty State */}
+       {!loading && !error && filteredEvents.length === 0 && (
+        <div className="rounded-xl border border-white/10 bg-card-background p-12 text-center">
+         <Calendar className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+         <h3 className="mb-2 text-xl font-semibold text-foreground">
+          {events.length === 0
+           ? "No events yet"
+           : activeTab === "upcoming"
+           ? "No upcoming events"
+           : "No past events"}
+         </h3>
+         <p className="text-muted-foreground">
+          {events.length === 0
+           ? "This user hasn't published any events yet."
+           : activeTab === "upcoming"
+           ? "Check back later for new events."
+           : "This user hasn't had any past events."}
+         </p>
+        </div>
+       )}
+
+       {/* Events Timeline */}
+       {!loading && !error && filteredEvents.length > 0 && (
+        <EventsTimeline events={filteredEvents} />
+       )}
+
+       {/* Infinite scroll sentinel */}
+       <div ref={sentinelRef} className="h-4" />
+
+       {/* Loading more indicator */}
+       {loadingMore && (
+        <div className="flex justify-center py-8">
+         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+        </div>
+       )}
+
+       {/* End of results */}
+       {!loading && !hasMore && filteredEvents.length > 0 && (
+        <p className="text-center text-sm text-muted-foreground py-8">
+         You&apos;ve reached the end
         </p>
-       </div>
-      )}
-
-      {/* Events Timeline */}
-      {!loading && !error && filteredEvents.length > 0 && (
-       <EventsTimeline events={filteredEvents} />
-      )}
-
-      {/* Infinite scroll sentinel */}
-      <div ref={sentinelRef} className="h-4" />
-
-      {/* Loading more indicator */}
-      {loadingMore && (
-       <div className="flex justify-center py-8">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-       </div>
-      )}
-
-      {/* End of results */}
-      {!loading && !hasMore && filteredEvents.length > 0 && (
-       <p className="text-center text-sm text-muted-foreground py-8">
-        You&apos;ve reached the end
-       </p>
-      )}
+       )}
+      </div>
      </div>
     )}
 
     {/* Private Profile Notice */}
     {!isPublic && (
-     <div className="rounded-xl border border-white/10 bg-card-background p-12 text-center">
+     <div className="rounded-xl border border-white/10 bg-card-background p-12 text-center user-stagger-3">
       <User className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
       <h3 className="mb-2 text-xl font-semibold text-foreground">
        This profile is private
