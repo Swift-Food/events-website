@@ -165,7 +165,7 @@ export default function RootLayout({
         <div className="relative h-dvh overflow-hidden">
          <div className="fixed inset-0 -z-10" style={{ background: "linear-gradient(to bottom, #41296e 0%, #000000 15%)" }} />
          <Navbar />
-         <main className="h-dvh overflow-y-auto overscroll-none pt-[72px]">
+         <main className="h-dvh overflow-y-auto overscroll-none pt-[68px]">
           {children}
           <Footer />
          </main>
