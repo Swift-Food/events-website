@@ -56,11 +56,10 @@ export default function CategoryModal({
     if (!trigger) return;
     const updateRect = () => setTriggerRect(trigger.getBoundingClientRect());
     updateRect();
-    const main = document.querySelector('main');
-    main?.addEventListener('scroll', updateRect);
+    window.addEventListener('scroll', updateRect, true);
     window.addEventListener('resize', updateRect);
     return () => {
-      main?.removeEventListener('scroll', updateRect);
+      window.removeEventListener('scroll', updateRect, true);
       window.removeEventListener('resize', updateRect);
     };
   }, [isOpen]);
