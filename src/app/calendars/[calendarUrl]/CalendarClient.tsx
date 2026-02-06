@@ -409,7 +409,7 @@ export default function CalendarClient({
     </div>
 
     {/* Profile image row with subscribe/manage buttons */}
-    <div className="flex items-end justify-between mb-6 px-4 sm:px-6 -mt-12 sm:-mt-14">
+    <div className="flex items-end justify-between mb-6 pl-4 pr-0 sm:px-6 -mt-12 sm:-mt-14">
      {/* Calendar Profile Image - overlapping banner */}
      <div className="relative h-24 w-24 sm:h-28 sm:w-28 overflow-hidden rounded-xl border-4 border-[var(--background)] bg-card-secondary-background shadow-lg shrink-0">
       {calendar.calendarImage ? (
@@ -455,25 +455,25 @@ export default function CalendarClient({
 
      {/* Management Buttons */}
      {canManage && (
-      <div className="flex gap-2">
+      <div className="flex gap-1.5 sm:gap-2">
        <button
         onClick={() => setShowAddEventsModal(true)}
-        className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 font-semibold text-white transition-all hover:bg-primary/80 text-sm"
+        className="flex items-center gap-2 rounded-lg bg-primary px-2.5 py-2 sm:px-5 sm:py-2.5 font-semibold text-white transition-all hover:bg-primary/80 text-sm"
        >
         <Plus className="h-4 w-4" />
-        Add Events
+        <span className="hidden sm:inline">Add Events</span>
        </button>
        <Link
         href={`/calendars/${calendar.calendarUrl}/edit`}
-        className="flex items-center gap-2 rounded-lg border border-white/10 bg-card-background px-5 py-2.5 font-semibold text-foreground transition-all hover:bg-white/5 text-sm"
+        className="flex items-center gap-2 rounded-lg border border-white/10 bg-card-background px-2.5 py-2 sm:px-5 sm:py-2.5 font-semibold text-foreground transition-all hover:bg-white/5 text-sm"
        >
         <Edit3 className="h-4 w-4" />
-        Edit
+        <span className="hidden sm:inline">Edit</span>
        </Link>
        {isOwner && (
         <button
          onClick={handleDelete}
-         className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-5 py-2.5 font-semibold text-red-400 transition-all hover:bg-red-500/20 text-sm"
+         className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-2 sm:px-5 sm:py-2.5 font-semibold text-red-400 transition-all hover:bg-red-500/20 text-sm"
         >
          <Trash2 className="h-4 w-4" />
         </button>
