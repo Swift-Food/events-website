@@ -328,31 +328,31 @@ export default function EditCalendarPage() {
 
  return (
   <div className="min-h-screen ">
-   <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8">
+   <div className="mx-auto max-w-2xl px-3 md:px-6 pb-4 pt-6">
     {/* Back Button */}
     <button
      onClick={() => router.push(`/calendars/${calendarUrl}`)}
-     className="mb-6 flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
+     className="mb-4 flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
     >
-     <ArrowLeft className="h-5 w-5" />
+     <ArrowLeft className="h-4 w-4" />
      Back to Calendar
     </button>
 
     {/* Header */}
-    <div className="mb-8">
-     <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+    <div className="mb-5">
+     <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
       Edit Calendar
      </h1>
-     <p className="mt-2 text-md text-muted-foreground">
+     <p className="mt-1 text-sm text-muted-foreground">
       Update your calendar details
      </p>
     </div>
 
     {/* Form */}
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-3">
      {/* Name */}
      <div>
-      <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
+      <label htmlFor="name" className="block text-xs font-medium text-muted-foreground mb-1">
        Calendar Name <span className="text-red-400">*</span>
       </label>
       <input
@@ -362,7 +362,7 @@ export default function EditCalendarPage() {
        onChange={(e) => setName(e.target.value)}
        placeholder="e.g., Tech Events 2025"
        maxLength={255}
-       className="w-full rounded-lg border border-white/10 bg-card-background px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+       className="w-full rounded-xl border border-white/10 bg-card-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
        required
       />
       <p className="mt-1 text-xs text-muted-foreground">
@@ -372,7 +372,7 @@ export default function EditCalendarPage() {
 
      {/* Description */}
      <div>
-      <label htmlFor="description" className="block text-sm font-medium text-foreground mb-2">
+      <label htmlFor="description" className="block text-xs font-medium text-muted-foreground mb-1">
        Description
       </label>
       <textarea
@@ -381,13 +381,13 @@ export default function EditCalendarPage() {
        onChange={(e) => setDescription(e.target.value)}
        placeholder="Describe your calendar..."
        rows={4}
-       className="w-full rounded-lg border border-white/10 bg-card-background px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+       className="w-full rounded-xl border border-white/10 bg-card-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
       />
      </div>
 
      {/* Calendar URL */}
      <div>
-      <label htmlFor="calendarUrl" className="block text-sm font-medium text-foreground mb-2">
+      <label htmlFor="calendarUrl" className="block text-xs font-medium text-muted-foreground mb-1">
        Calendar URL <span className="text-red-400">*</span>
       </label>
       <div className="flex items-center gap-2">
@@ -400,7 +400,7 @@ export default function EditCalendarPage() {
         placeholder="tech-events-2025"
         maxLength={100}
         pattern="[a-z0-9-]+"
-        className="flex-1 rounded-lg border border-white/10 bg-card-background px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        className="flex-1 rounded-xl border border-white/10 bg-card-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         required
        />
       </div>
@@ -411,7 +411,7 @@ export default function EditCalendarPage() {
 
      {/* Image Upload */}
      <div>
-      <label className="block text-sm font-medium text-foreground mb-2">
+      <label className="block text-xs font-medium text-muted-foreground mb-1">
        Calendar Image
       </label>
       {calendarImage ? (
@@ -462,10 +462,10 @@ export default function EditCalendarPage() {
 
      {/* Banner Image Upload */}
      <div>
-      <label className="block text-sm font-medium text-foreground mb-2">
+      <label className="block text-xs font-medium text-muted-foreground mb-1">
        Banner Image
       </label>
-      <p className="text-xs text-muted-foreground mb-2">
+      <p className="text-xs text-muted-foreground mb-1">
        Wide image displayed at the top of your calendar page (4:1 ratio)
       </p>
       {calendarBannerImageUrl ? (
@@ -525,16 +525,16 @@ export default function EditCalendarPage() {
 
      {/* Color Picker */}
      <div>
-      <label className="block text-sm font-medium text-foreground mb-2">
+      <label className="block text-xs font-medium text-muted-foreground mb-1">
        Calendar Color
       </label>
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2">
        {presetColors.map((color) => (
         <button
          key={color}
          type="button"
          onClick={() => setCalendarColor(color)}
-         className={`h-10 w-10 rounded-lg transition-all ${
+         className={`h-8 w-8 rounded-lg transition-all ${
           calendarColor === color
            ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
            : "hover:scale-110"
@@ -547,7 +547,7 @@ export default function EditCalendarPage() {
         type="color"
         value={calendarColor}
         onChange={(e) => setCalendarColor(e.target.value)}
-        className="h-10 w-10 cursor-pointer rounded-lg border border-white/10"
+        className="h-8 w-8 cursor-pointer rounded-lg border border-white/10"
         title="Custom color"
        />
       </div>
@@ -555,10 +555,10 @@ export default function EditCalendarPage() {
 
 
      {/* Public/Private Toggle */}
-     <div className="flex items-center justify-between rounded-lg border border-white/10 bg-card-background p-4">
+     <div className="flex items-center justify-between rounded-xl border border-white/10 bg-card-background px-4 py-3">
       <div>
-       <p className="font-medium text-foreground">Public Calendar</p>
-       <p className="text-sm text-muted-foreground">
+       <p className="text-sm font-medium text-foreground">Public Calendar</p>
+       <p className="text-xs text-muted-foreground">
         Anyone can discover and subscribe to this calendar
        </p>
       </div>
@@ -578,10 +578,10 @@ export default function EditCalendarPage() {
      </div>
 
      {/* Show Subscriber Count Toggle */}
-     <div className="flex items-center justify-between rounded-lg border border-white/10 bg-card-background p-4">
+     <div className="flex items-center justify-between rounded-xl border border-white/10 bg-card-background px-4 py-3">
       <div>
-       <p className="font-medium text-foreground">Show Subscriber Count</p>
-       <p className="text-sm text-muted-foreground">
+       <p className="text-sm font-medium text-foreground">Show Subscriber Count</p>
+       <p className="text-xs text-muted-foreground">
         Display the number of subscribers on your calendar
        </p>
       </div>
@@ -602,7 +602,7 @@ export default function EditCalendarPage() {
 
      {/* Auto-delete past events */}
      <div>
-      <label htmlFor="autoDelete" className="block text-sm font-medium text-foreground mb-2">
+      <label htmlFor="autoDelete" className="block text-xs font-medium text-muted-foreground mb-1">
        Auto-delete Past Events
       </label>
       <select
@@ -611,7 +611,7 @@ export default function EditCalendarPage() {
        onChange={(e) => setAutoDeletePastEventsAfterDays(
         e.target.value === "never" ? null : parseInt(e.target.value)
        )}
-       className="w-full rounded-lg border border-white/10 bg-card-background px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+       className="w-full rounded-xl border border-white/10 bg-card-background px-4 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
       >
        <option value="never">Never (keep all past events)</option>
        <option value="0">Immediately after event ends</option>
@@ -625,22 +625,22 @@ export default function EditCalendarPage() {
      </div>
 
      {/* Submit Button */}
-     <div className="flex gap-3 pt-4">
+     <div className="flex gap-2 pt-2">
       <button
        type="button"
        onClick={() => router.push(`/calendars/${calendarUrl}`)}
-       className="flex-1 rounded-lg border border-white/10 bg-card-background px-6 py-3 font-semibold text-foreground transition-colors hover:bg-white/5"
+       className="flex-1 rounded-lg border border-white/10 bg-card-background px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-white/5"
       >
        Cancel
       </button>
       <button
        type="submit"
        disabled={isSubmitting || uploadingImage || bannerCropper.isUploading}
-       className="flex-1 rounded-lg bg-primary px-6 py-3 font-semibold text-white transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+       className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
        {isSubmitting ? (
         <>
-         <Loader2 className="h-5 w-5 animate-spin" />
+         <Loader2 className="h-4 w-4 animate-spin" />
          Saving...
         </>
        ) : (
