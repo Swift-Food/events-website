@@ -430,7 +430,7 @@ export default function CreateCalendarPage() {
      </div> */}
 
      {/* Settings */}
-     <div>
+     <div className="mt-6">
       <label className="block text-xs font-medium text-muted-foreground mb-1">
        Settings
       </label>
