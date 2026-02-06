@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { ShaderGradient, ShaderGradientCanvas } from "@shadergradient/react";
 import type { ShaderPreset } from "@/types/event/theme";
 import { DEFAULT_SHADER_SETTINGS } from "@/lib/theme-presets";
@@ -10,8 +11,18 @@ export default function ShaderBackgroundInner({
   preset: ShaderPreset;
 }) {
   const s = { ...DEFAULT_SHADER_SETTINGS, ...preset.settings };
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setReady(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
+    <div
+      className="absolute inset-0 transition-opacity duration-700"
+      style={{ opacity: ready ? 1 : 0 }}
+    >
     <ShaderGradientCanvas>
       <ShaderGradient
         animate="on"
@@ -43,5 +54,6 @@ export default function ShaderBackgroundInner({
         wireframe={false}
       />
     </ShaderGradientCanvas>
+    </div>
   );
 }

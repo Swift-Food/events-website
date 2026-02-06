@@ -55,7 +55,16 @@ export default function EventThemeBackground({
       )}
 
       {config.type === "shader" && shader && (
-        <ShaderBackgroundInner preset={shader} />
+        <>
+          {/* Static gradient placeholder — visible immediately while shader loads */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(135deg, ${shader.color1} 0%, ${shader.color2} 50%, ${shader.color3} 100%)`,
+            }}
+          />
+          <ShaderBackgroundInner preset={shader} />
+        </>
       )}
 
       {config.type === "pattern" && config.pattern && (
