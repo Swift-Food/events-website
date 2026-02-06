@@ -93,13 +93,31 @@ export default function EventsTimeline({
     setSelectedEventId(null);
   };
 
+  // The active date is the last (most recent) stuck header
+  const activeDate = useMemo(() => {
+    const stuckDates = groupedEvents
+      .map(([dateKey]) => dateKey)
+      .filter((dateKey) => stuckHeaders.has(dateKey));
+    return stuckDates[stuckDates.length - 1] ?? null;
+  }, [groupedEvents, stuckHeaders]);
+
   if (events.length === 0) {
     return null;
   }
 
   return (
     <>
-      <div>
+      <div className="relative">
+        {/* Overlay: single sticky blue dot spanning entire timeline - desktop only */}
+        <div className="hidden sm:block absolute left-0 w-8 top-0 bottom-0 z-20 pointer-events-none">
+          <div
+            className="sticky flex h-8 items-center justify-center"
+            style={stickyStyle}
+          >
+            <div className="h-2 w-2 rounded-full bg-primary" />
+          </div>
+        </div>
+
         {groupedEvents.map(([dateKey, dateEvents]) => {
           const firstEventDate = new Date(dateEvents[0].startDateTime);
           const monthAbbrev = firstEventDate.toLocaleDateString("en-US", {
@@ -112,20 +130,18 @@ export default function EventsTimeline({
 
           return (
             <div key={dateKey} className="relative flex">
-              {/* Timeline column - continuous line */}
+              {/* Timeline column with gray dot per date */}
               <div className="hidden sm:block sm:w-8 relative">
                 {/* Continuous line */}
                 <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-white/20" />
-                {/* Dot positioned at header level */}
+                {/* Gray dot at header level - hidden when stuck (blue dot overlays) */}
                 <div
                   className="sticky z-10 flex h-8 items-center justify-center"
                   style={stickyStyle}
                 >
                   <div
-                    className={`h-2 w-2 rounded-full transition-colors ${
-                      stuckHeaders.has(dateKey)
-                        ? "bg-primary"
-                        : "bg-muted-foreground"
+                    className={`h-2 w-2 rounded-full transition-opacity bg-muted-foreground ${
+                      stuckHeaders.has(dateKey) ? "opacity-0" : "opacity-100"
                     }`}
                   />
                 </div>
@@ -154,7 +170,7 @@ export default function EventsTimeline({
                     {/* Mobile dot - only show on mobile */}
                     <div
                       className={`h-2 w-2 flex-shrink-0 rounded-full transition-colors sm:hidden ${
-                        stuckHeaders.has(dateKey)
+                        dateKey === activeDate
                           ? "bg-primary"
                           : "bg-muted-foreground"
                       }`}
