@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, Suspense } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { eventService } from "@/services/event.service";
@@ -12,11 +12,8 @@ import {
   CalendarDays,
   Plus,
   Loader2,
-  Users,
-  History,
   Sparkles,
 } from "lucide-react";
-import HorizontalCalendarCard from "@/components/HorizontalCalendarCard";
 import CalendarCard from "@/components/CalendarCard";
 import EventsTimeline from "@/components/EventsTimeline";
 import Link from "next/link";
@@ -59,6 +56,30 @@ function EventManagementContent() {
   const [calendars, setCalendars] = useState<CalendarType[]>([]);
   const [loadingCalendars, setLoadingCalendars] = useState(true);
   const [calendarsError, setCalendarsError] = useState<string | null>(null);
+
+  // Events filter tab refs for animated indicator
+  const eventsTabContainerRef = useRef<HTMLDivElement>(null);
+  const upcomingTabRef = useRef<HTMLButtonElement>(null);
+  const pastTabRef = useRef<HTMLButtonElement>(null);
+  const [tabIndicator, setTabIndicator] = useState({ left: 0, width: 0 });
+
+  const updateTabIndicator = useCallback(() => {
+    const activeRef = eventsFilter === "upcoming" ? upcomingTabRef : pastTabRef;
+    const container = eventsTabContainerRef.current;
+    const button = activeRef.current;
+    if (container && button) {
+      const containerRect = container.getBoundingClientRect();
+      const buttonRect = button.getBoundingClientRect();
+      setTabIndicator({
+        left: buttonRect.left - containerRect.left,
+        width: buttonRect.width,
+      });
+    }
+  }, [eventsFilter]);
+
+  useEffect(() => {
+    updateTabIndicator();
+  }, [eventsFilter, events.length, updateTabIndicator]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -284,46 +305,36 @@ function EventManagementContent() {
               <div className="manage-stagger-3">
                 {/* Secondary Tabs + Create Button */}
                 <div className="mb-6 flex items-center justify-between">
-                  <div className="flex gap-2">
+                  <div ref={eventsTabContainerRef} className="relative flex rounded-full bg-card-background p-0.5">
+                    {/* Animated background indicator */}
+                    <div
+                      className="absolute top-0.5 bottom-0.5 rounded-full bg-primary transition-all duration-300 ease-out"
+                      style={{
+                        width: tabIndicator.width,
+                        left: tabIndicator.left,
+                      }}
+                    />
                     <button
+                      ref={upcomingTabRef}
                       onClick={() => setEventsFilter("upcoming")}
-                      className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                      className={`relative z-10 flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors duration-300 ${
                         eventsFilter === "upcoming"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-card-background text-muted-foreground hover:text-foreground"
+                          ? "text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      <Users className="h-4 w-4" />
-                      Upcoming
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs ${
-                          eventsFilter === "upcoming"
-                            ? "bg-primary-foreground/20 text-primary-foreground"
-                            : "bg-white/5 text-muted-foreground"
-                        }`}
-                      >
-                        {formatCount(upcomingEvents.length)}
-                      </span>
+                      Upcoming ({formatCount(upcomingEvents.length)})
                     </button>
                     <button
+                      ref={pastTabRef}
                       onClick={() => setEventsFilter("past")}
-                      className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                      className={`relative z-10 flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors duration-300 ${
                         eventsFilter === "past"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-card-background text-muted-foreground hover:text-foreground"
+                          ? "text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      <History className="h-4 w-4" />
-                      Past
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs ${
-                          eventsFilter === "past"
-                            ? "bg-primary-foreground/20 text-primary-foreground"
-                            : "bg-white/5 text-muted-foreground"
-                        }`}
-                      >
-                        {formatCount(pastEvents.length)}
-                      </span>
+                      Past ({formatCount(pastEvents.length)})
                     </button>
                   </div>
                   <Link
