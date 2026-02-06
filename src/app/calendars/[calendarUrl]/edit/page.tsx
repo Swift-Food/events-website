@@ -356,12 +356,12 @@ export default function EditCalendarPage() {
     <form onSubmit={handleSubmit} className="space-y-3">
      {/* Banner & Calendar Image Preview */}
      <div>
-      <div className="relative">
+      <div className="relative -mx-6 sm:mx-0">
        {/* Banner Image */}
        <button
         type="button"
         onClick={calendarBannerImageUrl ? undefined : bannerCropper.triggerFileInput}
-        className="relative aspect-[4/1] w-full overflow-hidden rounded-2xl group"
+        className="relative aspect-[4/1] w-full overflow-hidden sm:rounded-2xl group"
         style={{ backgroundColor: calendarColor || "#6366f1" }}
        >
         {calendarBannerImageUrl ? (
@@ -390,7 +390,7 @@ export default function EditCalendarPage() {
           </div>
          </>
         ) : (
-         <div className="absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-white/20 rounded-2xl hover:border-white/30 transition-colors">
+         <div className="absolute inset-0 flex flex-col items-center justify-center border-2 border-dashed border-white/20 sm:rounded-2xl hover:border-white/30 transition-colors">
           {bannerCropper.isUploading ? (
            <Loader2 className="h-6 w-6 animate-spin text-white/50" />
           ) : (
