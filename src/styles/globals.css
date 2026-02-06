@@ -580,6 +580,12 @@ input[type="datetime-local"] {
 .event-page-stagger-4 { animation: event-page-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 450ms both; opacity: 0; }
 .event-page-stagger-5 { animation: event-page-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 600ms both; opacity: 0; }
 
+/* Calendar page staggered entrance */
+.calendar-stagger-1 { animation: discover-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0ms both; opacity: 0; }
+.calendar-stagger-2 { animation: discover-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 100ms both; opacity: 0; }
+.calendar-stagger-3 { animation: discover-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 200ms both; opacity: 0; }
+.calendar-stagger-4 { animation: discover-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 300ms both; opacity: 0; }
+
 /* Individual ticket card animation */
 .ticket-card-animate {
   animation: discover-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;

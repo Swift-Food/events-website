@@ -440,7 +440,7 @@ export default function CalendarClient({
     )}
 
     {/* Banner Section - full bleed on mobile */}
-    <div className="relative -mx-6 sm:mx-0">
+    <div className="relative -mx-6 sm:mx-0 calendar-stagger-1">
      {/* Banner Image / Color */}
      <div
       className="relative aspect-[4/1] w-full overflow-hidden sm:rounded-2xl"
@@ -459,7 +459,7 @@ export default function CalendarClient({
     </div>
 
     {/* Profile image row with subscribe/manage buttons */}
-    <div className="flex items-end justify-between mb-6 pl-4 pr-0 sm:px-6 -mt-12 sm:-mt-14">
+    <div className="flex items-end justify-between mb-6 pl-4 pr-0 sm:px-6 -mt-12 sm:-mt-14 calendar-stagger-2">
      {/* Calendar Profile Image - overlapping banner */}
      <div className="relative h-24 w-24 sm:h-28 sm:w-28 overflow-hidden rounded-xl border-4 border-[var(--background)] bg-card-secondary-background shadow-lg shrink-0">
       {calendar.calendarImage ? (
@@ -530,7 +530,7 @@ export default function CalendarClient({
     </div>
 
     {/* Calendar Name and Description */}
-    <div className="mb-6 mt-4">
+    <div className="mb-6 mt-4 calendar-stagger-3">
      <h1 className="mb-2 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
       {calendar.name}
      </h1>
@@ -555,7 +555,7 @@ export default function CalendarClient({
     )}
 
     {/* Content Below Banner */}
-    <div className="flex flex-col gap-6 lg:flex-row">
+    <div className="flex flex-col gap-6 lg:flex-row calendar-stagger-4">
      {/* Main Content */}
      <section className="flex-1 min-w-0 space-y-6">
       {/* Events Section */}
