@@ -338,21 +338,18 @@ export default function CreateCalendarPage() {
      />
 
      {/* Name */}
-     <div>
-      <label htmlFor="name" className="block text-xs font-medium text-muted-foreground mb-1">
-       Calendar Name <span className="text-red-400">*</span>
-      </label>
+     <div className="space-y-1">
       <input
        type="text"
        id="name"
        value={name}
-       onChange={(e) => setName(e.target.value)}
-       placeholder="e.g., Tech Events 2025"
+       onChange={(e) => setName(e.target.value.slice(0, 255))}
+       placeholder="Calendar Name"
        maxLength={255}
-       className="w-full rounded-xl border border-white/10 bg-card-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+       className="w-full bg-transparent text-xl md:text-3xl font-bold text-foreground outline-none placeholder:text-muted-foreground/50"
        required
       />
-      <p className="mt-1 text-xs text-muted-foreground">
+      <p className={`text-xs ${name.length >= 255 ? "text-amber-400" : "text-muted-foreground"}`}>
        {name.length}/255 characters
       </p>
      </div>
