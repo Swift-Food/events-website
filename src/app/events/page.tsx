@@ -290,7 +290,7 @@ function EventsPageContent() {
     </div>
 
     {/* Sticky Search Bar */}
-    <div className="sticky top-0 z-40 -mx-4 px-4 sm:-mx-6 sm:px-6 backdrop-blur-md">
+    <div className="sticky top-0 z-40 -mx-4 px-4 sm:-mx-6 sm:px-6">
      {/* Search Bar with Filter Button */}
      <div ref={filterDropdownRef} className="relative flex items-center gap-2">
       <div className="relative flex-1">
