@@ -434,7 +434,7 @@ export default function CalendarClient({
       <button
        onClick={handleSubscribe}
        disabled={loadingSubscription}
-       className={`flex items-center gap-1.5 sm:gap-2 rounded-lg px-4 py-2 sm:px-6 sm:py-2.5 text-sm sm:text-base font-semibold transition-all ${
+       className={`flex items-center gap-1.5 sm:gap-2 rounded-full px-4 py-1.5 sm:px-5 sm:py-2 text-sm font-medium transition-all ${
         isSubscribed
          ? "border border-white/10 bg-card-background text-foreground hover:bg-white/5"
          : "bg-primary text-white hover:bg-primary/80"
