@@ -21,7 +21,10 @@ export default function EventsTimeline({
   linkToManagement = false,
   stickyTopOffset = 8,
 }: EventsTimelineProps) {
-  const stickyStyle = useMemo(() => ({ top: stickyTopOffset }), [stickyTopOffset]);
+  const stickyStyle = useMemo(
+    () => ({ top: stickyTopOffset }),
+    [stickyTopOffset],
+  );
   // Track which date headers are stuck
   const [stuckHeaders, setStuckHeaders] = useState<Set<string>>(new Set());
   const sentinelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -51,54 +54,33 @@ export default function EventsTimeline({
     return Array.from(groups.entries());
   }, [events]);
 
-  // Find the scroll container (nearest ancestor with overflow-y: auto/scroll)
-  const scrollContainerRef = useRef<HTMLElement | null>(null);
-
-  // Detect stuck headers using IntersectionObserver rooted in the scroll container
+  // Detect stuck headers via scroll events on <main>
   useEffect(() => {
-    // Find the scroll container from the first sentinel
-    const firstSentinel = sentinelRefs.current.values().next().value;
-    if (firstSentinel && !scrollContainerRef.current) {
-      let el: HTMLElement | null = firstSentinel.parentElement;
-      while (el) {
-        const style = getComputedStyle(el);
-        if (style.overflowY === "auto" || style.overflowY === "scroll") {
-          scrollContainerRef.current = el;
-          break;
-        }
-        el = el.parentElement;
-      }
-    }
+    const scrollContainer = document.querySelector("main");
+    if (!scrollContainer) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const dateKey = entry.target.getAttribute("data-date-key");
-          if (dateKey) {
-            setStuckHeaders((prev) => {
-              const next = new Set(prev);
-              if (entry.isIntersecting) {
-                next.delete(dateKey);
-              } else {
-                next.add(dateKey);
-              }
-              return next;
-            });
+    const updateStuck = () => {
+      const containerTop = scrollContainer.getBoundingClientRect().top;
+
+      setStuckHeaders((prev) => {
+        const next = new Set<string>();
+        sentinelRefs.current.forEach((el, dateKey) => {
+          const relativeTop = el.getBoundingClientRect().top;
+          const stickyThreshold = containerTop + stickyTopOffset;
+          if (relativeTop <= stickyThreshold + 50) {
+            next.add(dateKey);
           }
         });
-      },
-      {
-        root: scrollContainerRef.current,
-        rootMargin: `-${stickyTopOffset}px 0px 0px 0px`,
-        threshold: 0,
-      }
-    );
+        if (next.size === prev.size && [...next].every((k) => prev.has(k))) {
+          return prev;
+        }
+        return next;
+      });
+    };
 
-    sentinelRefs.current.forEach((element) => {
-      observer.observe(element);
-    });
-
-    return () => observer.disconnect();
+    scrollContainer.addEventListener("scroll", updateStuck, { passive: true });
+    updateStuck();
+    return () => scrollContainer.removeEventListener("scroll", updateStuck);
   }, [groupedEvents, stickyTopOffset]);
 
   const handleEventClick = (_e: React.MouseEvent, event: EventResponseDto) => {
@@ -135,7 +117,10 @@ export default function EventsTimeline({
                 {/* Continuous line */}
                 <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-white/20" />
                 {/* Dot positioned at header level */}
-                <div className="sticky z-10 flex h-8 items-center justify-center" style={stickyStyle}>
+                <div
+                  className="sticky z-10 flex h-8 items-center justify-center"
+                  style={stickyStyle}
+                >
                   <div
                     className={`h-2 w-2 rounded-full transition-colors ${
                       stuckHeaders.has(dateKey)
@@ -190,7 +175,9 @@ export default function EventsTimeline({
                       <HorizontalEventCard
                         event={event}
                         linkToManagement={linkToManagement}
-                        onClick={enablePreviewModal ? handleEventClick : undefined}
+                        onClick={
+                          enablePreviewModal ? handleEventClick : undefined
+                        }
                       />
                       {index < dateEvents.length - 1 && (
                         <div className="ml-[104px] sm:ml-[120px] border-b border-white/10" />
