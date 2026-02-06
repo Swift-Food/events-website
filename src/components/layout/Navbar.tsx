@@ -145,8 +145,8 @@ export default function Navbar() {
       <header
         className="fixed top-0 left-0 right-0 z-50"
         style={{
-          backdropFilter: hasScrolled ? "blur(4px)" : "none",
-          WebkitBackdropFilter: hasScrolled ? "blur(4px)" : "none",
+          backdropFilter: hasScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: hasScrolled ? "blur(8px)" : "none",
           maskImage: hasScrolled
             ? "linear-gradient(to bottom, black 80%, transparent 100%)"
             : "none",
