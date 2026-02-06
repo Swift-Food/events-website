@@ -41,6 +41,7 @@ export default function AddEventsToCalendarModal({
 
   const skipRef = useRef(0);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const initialLoadDone = useRef(false);
   const eventsPerPage = 10;
 
   const fetchEvents = useCallback(async (reset = false) => {
@@ -83,24 +84,26 @@ export default function AddEventsToCalendarModal({
     }
   }, [searchQuery]);
 
-  // Initial fetch
-  useEffect(() => {
-    fetchEvents(true);
-  }, []);
-
-  // Debounced search
+  // Fetch events: immediate on first mount, debounced on search changes
   useEffect(() => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
-    searchTimeoutRef.current = setTimeout(() => {
+
+    if (!initialLoadDone.current) {
+      initialLoadDone.current = true;
       fetchEvents(true);
-    }, 300);
+    } else {
+      searchTimeoutRef.current = setTimeout(() => {
+        fetchEvents(true);
+      }, 300);
+    }
 
     return () => {
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
       }
+      initialLoadDone.current = false;
     };
   }, [searchQuery, fetchEvents]);
 
