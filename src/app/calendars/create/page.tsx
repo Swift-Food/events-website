@@ -13,6 +13,9 @@ import {
  X,
  Camera,
  Calendar as CalendarIcon,
+ Globe,
+ Eye,
+ Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -365,7 +368,7 @@ export default function CreateCalendarPage() {
        onChange={(e) => setDescription(e.target.value)}
        placeholder="Describe your calendar..."
        rows={4}
-       className="w-full rounded-xl border border-white/10 bg-card-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+       className="w-full rounded-xl bg-card-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none resize-none"
       />
      </div>
 
@@ -387,7 +390,7 @@ export default function CreateCalendarPage() {
         placeholder="tech-events-2025"
         maxLength={100}
         pattern="[a-z0-9-]+"
-        className="flex-1 rounded-xl border border-white/10 bg-card-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        className="flex-1 rounded-xl bg-card-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
         required
        />
       </div>
@@ -420,81 +423,76 @@ export default function CreateCalendarPage() {
         type="color"
         value={calendarColor}
         onChange={(e) => setCalendarColor(e.target.value)}
-        className="h-8 w-8 cursor-pointer rounded-lg border border-white/10"
+        className="h-8 w-8 cursor-pointer rounded-lg"
         title="Custom color"
        />
       </div>
      </div>
 
-
-     {/* Public/Private Toggle */}
-     <div className="flex items-center justify-between rounded-xl border border-white/10 bg-card-background px-4 py-3">
-      <div>
-       <p className="text-sm font-medium text-foreground">Public Calendar</p>
-       <p className="text-xs text-muted-foreground">
-        Anyone can discover and subscribe to this calendar
-       </p>
-      </div>
-      <button
-       type="button"
-       onClick={() => setIsPublic(!isPublic)}
-       className={`relative h-6 w-11 rounded-full transition-colors ${
-        isPublic ? "bg-primary" : "bg-white/10"
-       }`}
-      >
-       <div
-        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-         isPublic ? "translate-x-5" : "translate-x-0.5"
+     {/* Settings Block */}
+     <div className="rounded-2xl bg-card-background overflow-hidden">
+      {/* Public Calendar */}
+      <div className="flex items-center gap-3 px-4 py-3.5">
+       <Globe className="h-5 w-5 text-muted-foreground shrink-0" />
+       <p className="flex-1 text-sm font-medium text-foreground">Public Calendar</p>
+       <button
+        type="button"
+        onClick={() => setIsPublic(!isPublic)}
+        className={`relative h-6 w-11 rounded-full transition-colors shrink-0 ${
+         isPublic ? "bg-primary" : "bg-white/10"
         }`}
-       />
-      </button>
-     </div>
-
-     {/* Show Subscriber Count Toggle */}
-     <div className="flex items-center justify-between rounded-xl border border-white/10 bg-card-background px-4 py-3">
-      <div>
-       <p className="text-sm font-medium text-foreground">Show Subscriber Count</p>
-       <p className="text-xs text-muted-foreground">
-        Display the number of subscribers on your calendar
-       </p>
+       >
+        <div
+         className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+          isPublic ? "translate-x-5" : "translate-x-0.5"
+         }`}
+        />
+       </button>
       </div>
-      <button
-       type="button"
-       onClick={() => setShowSubscriberCount(!showSubscriberCount)}
-       className={`relative h-6 w-11 rounded-full transition-colors ${
-        showSubscriberCount ? "bg-primary" : "bg-white/10"
-       }`}
-      >
-       <div
-        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-         showSubscriberCount ? "translate-x-5" : "translate-x-0.5"
-        }`}
-       />
-      </button>
-     </div>
+      <div className="mx-4 border-t border-white/5" />
 
-     {/* Auto-delete past events */}
-     <div>
-      <label htmlFor="autoDelete" className="block text-xs font-medium text-muted-foreground mb-1">
-       Auto-delete Past Events
-      </label>
-      <select
-       id="autoDelete"
-       value={autoDeletePastEventsAfterDays === null ? "never" : autoDeletePastEventsAfterDays.toString()}
-       onChange={(e) => setAutoDeletePastEventsAfterDays(
-        e.target.value === "never" ? null : parseInt(e.target.value)
-       )}
-       className="w-full rounded-xl border border-white/10 bg-card-background px-4 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-      >
-       <option value="never">Never (keep all past events)</option>
-       <option value="0">Immediately after event ends</option>
-       <option value="1">1 day after event ends</option>
-       <option value="7">7 days after event ends</option>
-       <option value="30">30 days after event ends</option>
-      </select>
-      <p className="mt-1 text-xs text-muted-foreground">
-       Automatically remove events from this calendar after they end
-      </p>
+      {/* Show Subscriber Count */}
+      <div className="flex items-center gap-3 px-4 py-3.5">
+       <Eye className="h-5 w-5 text-muted-foreground shrink-0" />
+       <p className="flex-1 text-sm font-medium text-foreground">Show Subscriber Count</p>
+       <button
+        type="button"
+        onClick={() => setShowSubscriberCount(!showSubscriberCount)}
+        className={`relative h-6 w-11 rounded-full transition-colors shrink-0 ${
+         showSubscriberCount ? "bg-primary" : "bg-white/10"
+        }`}
+       >
+        <div
+         className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+          showSubscriberCount ? "translate-x-5" : "translate-x-0.5"
+         }`}
+        />
+       </button>
+      </div>
+      <div className="mx-4 border-t border-white/5" />
+
+      {/* Auto-delete past events */}
+      <div className="flex items-center gap-3 px-4 py-3.5">
+       <Trash2 className="h-5 w-5 text-muted-foreground shrink-0" />
+       <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-foreground">Auto-delete Past Events</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Remove events after they end</p>
+       </div>
+       <select
+        id="autoDelete"
+        value={autoDeletePastEventsAfterDays === null ? "never" : autoDeletePastEventsAfterDays.toString()}
+        onChange={(e) => setAutoDeletePastEventsAfterDays(
+         e.target.value === "never" ? null : parseInt(e.target.value)
+        )}
+        className="bg-transparent text-sm text-muted-foreground focus:outline-none cursor-pointer shrink-0"
+       >
+        <option value="never">Never</option>
+        <option value="0">Immediately</option>
+        <option value="1">After 1 day</option>
+        <option value="7">After 7 days</option>
+        <option value="30">After 30 days</option>
+       </select>
+      </div>
      </div>
 
      {/* Submit Button */}
