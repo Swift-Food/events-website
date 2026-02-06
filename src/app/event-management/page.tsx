@@ -97,8 +97,9 @@ function EventManagementContent() {
   }, [primaryTab]);
 
   useEffect(() => {
-    updateFilterIndicator();
-  }, [eventsFilter, events.length, updateFilterIndicator]);
+    // Need rAF because the filter tab buttons may have just mounted
+    requestAnimationFrame(() => updateFilterIndicator());
+  }, [eventsFilter, events.length, primaryTab, updateFilterIndicator]);
 
   useEffect(() => {
     updatePrimaryIndicator();
