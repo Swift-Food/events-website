@@ -156,7 +156,7 @@ export default function EventCoverPicker({
             onClick={() => handleImageClick(imageUrl)}
             className={`relative aspect-[4/3] rounded-xl overflow-hidden group transition-all cursor-pointer ${
               selectedImage === imageUrl
-                ? "ring-3 ring-amber-500 ring-offset-2 ring-offset-[#1a1a1a]"
+                ? "ring-3 ring-accent-dark ring-offset-2 ring-offset-[#1a1a1a]"
                 : "hover:ring-2 hover:ring-white/20"
             }`}
           >
@@ -167,10 +167,8 @@ export default function EventCoverPicker({
               loading="lazy"
             />
             {selectedImage === imageUrl && (
-              <div className="absolute inset-0 bg-amber-600/20 flex items-center justify-center">
-                <div className="rounded-full bg-amber-600 p-1.5">
-                  <Check className="h-4 w-4 text-white" />
-                </div>
+              <div className="absolute top-2 right-2 rounded-full bg-accent-dark p-1.5 shadow-lg">
+                <Check className="h-4 w-4 text-white" />
               </div>
             )}
           </button>
@@ -210,7 +208,7 @@ export default function EventCoverPicker({
               type="button"
               onClick={handleRandom}
               disabled={loading}
-              className="flex items-center gap-2 rounded-full bg-amber-600/20 px-4 py-2 text-sm font-medium text-amber-400 transition-all hover:bg-amber-600/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 rounded-full bg-accent-dark px-4 py-2 text-sm font-medium text-white transition-all hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -250,7 +248,7 @@ export default function EventCoverPicker({
                   onClick={() => setActiveCategory(category)}
                   className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-all ${
                     activeCategory === category
-                      ? "bg-amber-600/20 text-amber-400 border-r-2 border-amber-500"
+                      ? "bg-accent text-accent-dark border-r-2 border-accent-dark"
                       : "text-white/60 hover:bg-white/5 hover:text-white"
                   }`}
                 >
@@ -277,7 +275,7 @@ export default function EventCoverPicker({
                       onClick={() => setActiveCategory(category)}
                       className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                         activeCategory === category
-                          ? "bg-amber-600 text-white"
+                          ? "bg-accent-dark text-white"
                           : "bg-white/10 text-white/60 hover:bg-white/15"
                       }`}
                     >
