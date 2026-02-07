@@ -314,6 +314,7 @@ export default function GroupPurchaseModal({
                             width={24}
                             height={24}
                             className="rounded-full"
+                            unoptimized
                           />
                         ) : (
                           <div className="h-6 w-6 rounded-full bg-primary/30 flex items-center justify-center">
@@ -380,6 +381,7 @@ export default function GroupPurchaseModal({
                           width={40}
                           height={40}
                           className="rounded-full"
+                          unoptimized
                         />
                       ) : (
                         <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
@@ -481,6 +483,7 @@ export default function GroupPurchaseModal({
                           width={40}
                           height={40}
                           className="rounded-full"
+                          unoptimized
                         />
                       ) : (
                         <div className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center">

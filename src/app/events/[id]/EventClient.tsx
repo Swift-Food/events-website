@@ -915,6 +915,7 @@ export default function EventClient({
               width={48}
               height={48}
               className="rounded-full"
+              unoptimized
              />
             ) : (
              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground/10">
@@ -1392,6 +1393,7 @@ export default function EventClient({
              width={48}
              height={48}
              className="rounded-full"
+             unoptimized
             />
            ) : (
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground/10">

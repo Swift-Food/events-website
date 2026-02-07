@@ -235,6 +235,7 @@ export default function HighlightViewer({
                 width={40}
                 height={40}
                 className="rounded-full border-2 border-white"
+                unoptimized
               />
             ) : (
               <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-primary/20">
