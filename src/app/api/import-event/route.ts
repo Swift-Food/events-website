@@ -288,6 +288,26 @@ function normalizeEventData(jsonLd: JsonLdEvent, metaTags: Partial<JsonLdEvent>,
   };
 }
 
+function htmlToDescription(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<\/h[1-6]>/gi, "\n\n")
+    .replace(/<li[^>]*>/gi, "\n- ")
+    .replace(/<hr[^>]*\/?>/gi, "\n---\n")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/[ \t]+$/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData {
   const result: NormalizedEventData = {};
 
@@ -355,21 +375,32 @@ function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData
   }
 
   // 4. Description from common content patterns
+  //    Use inner HTML → htmlToDescription to preserve paragraph/list structure
   if (!result.description) {
     const descSelectors = [
+      // Drupal body field (full article body)
+      ".field--name-body .field__item",
+      ".field--name-body",
+      // Generic event description patterns
       ".event-description",
       ".event-content",
       ".event-details",
+      // WordPress (The Events Calendar)
       ".tribe-events-single-event-description",
+      // Schema.org itemprop
       '[itemprop="description"]',
-      "article p",
+      // Broad fallbacks
+      "article .content",
+      "article",
     ];
 
     for (const selector of descSelectors) {
       const el = $(selector).first();
-      const text = el.text().trim();
+      const rawHtml = el.html();
+      if (!rawHtml) continue;
+      const text = htmlToDescription(rawHtml);
       if (text && text.length > 20) {
-        result.description = text.substring(0, 2000);
+        result.description = text.substring(0, 5000);
         break;
       }
     }
