@@ -189,6 +189,13 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
       // Handle address and try to extract postcode if not provided
       let addressToSet = importedData.location.address || "";
       let postcodeToSet = importedData.location.postalCode || "";
+      let cityToSet = importedData.location.city || "";
+
+      // If no structured address but we have a venue name, use it as
+      // addressLine1 so the venue card renders in the form
+      if (!addressToSet && importedData.location.name) {
+        addressToSet = importedData.location.name;
+      }
 
       // If no postcode but we have an address, try to extract postcode from it
       if (!postcodeToSet && addressToSet) {
@@ -207,11 +214,24 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
         }
       }
 
+      // Try to extract city from venue name if not provided
+      // e.g. "The Grand, London" → city: "London"
+      if (!cityToSet && importedData.location.name) {
+        const parts = importedData.location.name.split(",").map((p: string) => p.trim());
+        if (parts.length >= 2) {
+          // Last meaningful part is often the city (strip any extracted postcode)
+          const candidate = parts[parts.length - 1].replace(UK_POSTCODE_REGEX, "").trim();
+          if (candidate && candidate.length > 1) {
+            cityToSet = candidate;
+          }
+        }
+      }
+
       if (addressToSet) {
         setAddressLine1(addressToSet);
       }
-      if (importedData.location.city) {
-        setCity(importedData.location.city);
+      if (cityToSet) {
+        setCity(cityToSet);
       }
       if (postcodeToSet) {
         setPostcode(postcodeToSet);
@@ -219,6 +239,11 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
       if (importedData.location.latitude && importedData.location.longitude) {
         setLatitude(importedData.location.latitude);
         setLongitude(importedData.location.longitude);
+      }
+
+      // Default to IN_PERSON when we have location data but no explicit format
+      if (!importedData.eventFormat) {
+        setEventFormat(EventFormat.IN_PERSON);
       }
     }
 

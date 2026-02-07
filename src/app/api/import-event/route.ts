@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import * as cheerio from "cheerio";
 
 interface JsonLdEvent {
   "@type"?: string;
@@ -31,6 +32,24 @@ interface JsonLdEvent {
   organizer?: {
     name?: string;
   };
+}
+
+interface NormalizedEventData {
+  name?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  location?: {
+    name?: string;
+    address?: string;
+    city?: string;
+    postalCode?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+  image?: string;
+  url?: string;
+  eventFormat?: "IN_PERSON" | "VIRTUAL" | "BOTH";
 }
 
 function extractJsonLd(html: string): JsonLdEvent | null {
@@ -73,23 +92,49 @@ function extractJsonLd(html: string): JsonLdEvent | null {
   return null;
 }
 
-function extractMetaTags(html: string): Partial<JsonLdEvent> {
-  const result: Partial<JsonLdEvent> = {};
+function extractOgTags($: ReturnType<typeof cheerio.load>): NormalizedEventData {
+  const result: NormalizedEventData = {};
 
-  // Extract Open Graph tags
-  const ogTitleMatch = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i);
-  if (ogTitleMatch) result.name = ogTitleMatch[1];
+  // Core OG tags
+  const ogTitle = $('meta[property="og:title"]').attr("content");
+  const ogDesc = $('meta[property="og:description"]').attr("content");
+  const ogImage = $('meta[property="og:image"]').attr("content");
+  const ogUrl = $('meta[property="og:url"]').attr("content");
 
-  const ogDescMatch = html.match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["']/i);
-  if (ogDescMatch) result.description = ogDescMatch[1];
+  if (ogTitle) result.name = ogTitle;
+  if (ogDesc) result.description = ogDesc;
+  if (ogImage) result.image = ogImage;
+  if (ogUrl) result.url = ogUrl;
 
-  const ogImageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i);
-  if (ogImageMatch) result.image = ogImageMatch[1];
-
-  // Try title tag as fallback
+  // Fallback to <title> tag
   if (!result.name) {
-    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-    if (titleMatch) result.name = titleMatch[1].trim();
+    const title = $("title").text().trim();
+    if (title) result.name = title;
+  }
+
+  // Fallback to meta description
+  if (!result.description) {
+    const metaDesc = $('meta[name="description"]').attr("content");
+    if (metaDesc) result.description = metaDesc;
+  }
+
+  // Event-specific meta properties (some platforms emit these)
+  const startTime =
+    $('meta[property="event:start_time"]').attr("content") ||
+    $('meta[property="og:event:start_time"]').attr("content");
+  if (startTime) result.startDate = startTime;
+
+  const endTime =
+    $('meta[property="event:end_time"]').attr("content") ||
+    $('meta[property="og:event:end_time"]').attr("content");
+  if (endTime) result.endDate = endTime;
+
+  // Location from og:locality / og:region (less common but used by some sites)
+  const ogLocality = $('meta[property="og:locality"]').attr("content") ||
+    $('meta[property="place:location:locality"]').attr("content");
+  if (ogLocality) {
+    result.location = result.location || {};
+    result.location.city = ogLocality;
   }
 
   return result;
@@ -243,6 +288,162 @@ function normalizeEventData(jsonLd: JsonLdEvent, metaTags: Partial<JsonLdEvent>,
   };
 }
 
+function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData {
+  const result: NormalizedEventData = {};
+
+  // 1. <time datetime=""> elements for dates
+  const dateTimes: string[] = [];
+  $("time[datetime]").each((_, el) => {
+    const dt = $(el).attr("datetime");
+    if (dt) dateTimes.push(dt);
+  });
+  if (dateTimes.length >= 1) result.startDate = dateTimes[0];
+  if (dateTimes.length >= 2) result.endDate = dateTimes[1];
+
+  // 2. Heading tags for event name
+  const h1 = $("h1").first().text().trim();
+  if (h1) {
+    result.name = h1;
+  } else {
+    const h2 = $("h2").first().text().trim();
+    if (h2) result.name = h2;
+  }
+
+  // 3. Common CMS field classes
+
+  // Drupal
+  const drupalVenue = $(".field--name-field-event-venue").first().text().trim();
+  if (drupalVenue) {
+    result.location = result.location || {};
+    result.location.name = drupalVenue;
+  }
+
+  const drupalLocation = $(".field--name-field-event-location, .field--name-field-location").first().text().trim();
+  if (drupalLocation) {
+    result.location = result.location || {};
+    if (!result.location.address) result.location.address = drupalLocation;
+  }
+
+  // WordPress (The Events Calendar & common patterns)
+  const wpVenue = $(".tribe-venue, .event-venue, .venue-name, .tribe-venue-name").first().text().trim();
+  if (wpVenue && !result.location?.name) {
+    result.location = result.location || {};
+    result.location.name = wpVenue;
+  }
+
+  const wpAddress = $(".tribe-venue-address, .tribe-street-address, .event-address, .venue-address").first().text().trim();
+  if (wpAddress && !result.location?.address) {
+    result.location = result.location || {};
+    result.location.address = wpAddress;
+  }
+
+  // Squarespace
+  const sqDate = $(".eventitem-column-date, .event-date").first().text().trim();
+  if (sqDate && !result.startDate) result.startDate = sqDate;
+
+  const sqLocation = $(".eventitem-column-location, .event-location").first().text().trim();
+  if (sqLocation && !result.location?.name) {
+    result.location = result.location || {};
+    result.location.name = sqLocation;
+  }
+
+  // <address> elements
+  const addressEl = $("address").first().text().trim();
+  if (addressEl && !result.location?.address) {
+    result.location = result.location || {};
+    result.location.address = addressEl;
+  }
+
+  // 4. Description from common content patterns
+  if (!result.description) {
+    const descSelectors = [
+      ".event-description",
+      ".event-content",
+      ".event-details",
+      ".tribe-events-single-event-description",
+      '[itemprop="description"]',
+      "article p",
+    ];
+
+    for (const selector of descSelectors) {
+      const el = $(selector).first();
+      const text = el.text().trim();
+      if (text && text.length > 20) {
+        result.description = text.substring(0, 2000);
+        break;
+      }
+    }
+  }
+
+  // 5. Structured <dl> with dt/dd pairs for labeled fields
+  $("dl").each((_, dl) => {
+    $(dl).find("dt").each((_, dt) => {
+      const label = $(dt).text().trim().toLowerCase();
+      const value = $(dt).next("dd").text().trim();
+      if (!value) return;
+
+      if (/\b(date|when|time|starts?)\b/.test(label) && !result.startDate) {
+        result.startDate = value;
+      } else if (/\b(end|ends|until)\b/.test(label) && !result.endDate) {
+        result.endDate = value;
+      } else if (/\b(location|where|venue|place|address)\b/.test(label) && !result.location?.name) {
+        result.location = result.location || {};
+        result.location.name = value;
+      }
+    });
+  });
+
+  // 6. List items and spans with "Label: Value" patterns
+  $("li, .detail-item, .event-meta-item, .event-info-item").each((_, el) => {
+    const text = $(el).text().trim();
+    const labelMatch = text.match(
+      /^(date|time|when|starts?|location|where|venue|place|address)\s*[:：]\s*(.+)/i
+    );
+    if (!labelMatch) return;
+    const [, label, value] = labelMatch;
+    const lowerLabel = label.toLowerCase();
+
+    if (/^(date|time|when|starts?)$/.test(lowerLabel) && !result.startDate) {
+      result.startDate = value.trim();
+    } else if (/^(location|where|venue|place|address)$/.test(lowerLabel) && !result.location?.name) {
+      result.location = result.location || {};
+      result.location.name = value.trim();
+    }
+  });
+
+  return result;
+}
+
+function hasMinimumData(data: NormalizedEventData): boolean {
+  return Boolean(data.name && data.startDate);
+}
+
+function mergeEventData(...layers: NormalizedEventData[]): NormalizedEventData {
+  const result: NormalizedEventData = {};
+
+  for (const layer of layers) {
+    if (!result.name && layer.name) result.name = layer.name;
+    if (!result.description && layer.description) result.description = layer.description;
+    if (!result.startDate && layer.startDate) result.startDate = layer.startDate;
+    if (!result.endDate && layer.endDate) result.endDate = layer.endDate;
+    if (!result.image && layer.image) result.image = layer.image;
+    if (!result.url && layer.url) result.url = layer.url;
+    if (!result.eventFormat && layer.eventFormat) result.eventFormat = layer.eventFormat;
+
+    if (layer.location) {
+      result.location = result.location || {};
+      if (!result.location.name && layer.location.name) result.location.name = layer.location.name;
+      if (!result.location.address && layer.location.address) result.location.address = layer.location.address;
+      if (!result.location.city && layer.location.city) result.location.city = layer.location.city;
+      if (!result.location.postalCode && layer.location.postalCode) result.location.postalCode = layer.location.postalCode;
+      if (result.location.latitude == null && layer.location.latitude != null) result.location.latitude = layer.location.latitude;
+      if (result.location.longitude == null && layer.location.longitude != null) result.location.longitude = layer.location.longitude;
+    }
+  }
+
+  return result;
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const url = searchParams.get("url");
@@ -281,18 +482,28 @@ export async function GET(request: NextRequest) {
     }
 
     const html = await response.text();
+    const $ = cheerio.load(html);
 
-    // Try to extract JSON-LD first
+    // Layer 1: JSON-LD (highest fidelity)
     const jsonLd = extractJsonLd(html);
+    const jsonLdResult = normalizeEventData(jsonLd || {}, {}, url);
 
-    // Also extract meta tags as fallback
-    const metaTags = extractMetaTags(html);
+    // Layer 2: OG meta tags (always run — cheap and fills gaps like image)
+    const ogResult = extractOgTags($);
 
-    // Normalize and return whatever data we found
-    const eventData = normalizeEventData(jsonLd || {}, metaTags, url);
+    // Merge JSON-LD + OG so far
+    let merged = mergeEventData(jsonLdResult, ogResult);
 
-    // Return the data even if incomplete - let the frontend handle what's available
-    return NextResponse.json(eventData);
+    // Layer 3: DOM parsing (only if we still lack name + date)
+    if (!hasMinimumData(merged)) {
+      const domResult = extractFromDom($);
+      merged = mergeEventData(merged, domResult);
+    }
+
+    // Ensure URL is always set
+    if (!merged.url) merged.url = url;
+
+    return NextResponse.json(merged);
   } catch (error) {
     console.error("Error importing event:", error);
 
