@@ -1437,54 +1437,52 @@ export default function EventClient({
         invitationPreview?.success &&
         (event.userTicket ? (
          // User already has a ticket - show info banner instead
-         <div className="rounded-xl bg-blue-500/10 p-4 mb-6">
-          <div className="flex items-center gap-3">
-           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20">
-            <Ticket className="h-5 w-5 text-blue-400" />
+         <div className="relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-[24px] border border-foreground/10 shadow-[0_4px_16px_rgba(0,0,0,0.15)] flex items-center justify-between px-4 py-3 mb-6">
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+           <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border backdrop-blur-md border-primary/40 bg-primary/25 text-foreground shadow-[0_0_12px_rgba(0,0,0,0.1)]">
+            <Ticket className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+             Registered
+            </span>
            </div>
-           <div className="flex-1">
-            <h3 className="font-semibold text-blue-400">
-             You already have a ticket
-            </h3>
-            <p className="text-sm text-blue-300/80">
-             You already have a ticket for this event. View it in
-             your tickets.
-            </p>
-           </div>
-           <Link
-            href="/my-tickets"
-            className="shrink-0 rounded-lg bg-blue-500/20 px-4 py-2 text-sm font-medium text-blue-300 transition-colors hover:bg-blue-500/30"
-           >
-            View My Tickets
-           </Link>
+           <p className="text-sm font-medium theme-text-sub opacity-80">
+            You already have a ticket for this event.
+           </p>
           </div>
+          <Link
+           href="/my-tickets"
+           className="relative shrink-0 flex items-center gap-2 bg-white text-zinc-950 px-5 py-2.5 rounded-2xl text-xs font-bold hover:bg-zinc-100 transition-all active:scale-[0.96] group/btn shadow-xl shadow-white/5"
+          >
+           View My Tickets
+           <ArrowUpRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+          </Link>
          </div>
         ) : (
          // Show invitation banner
-         <div className="rounded-xl bg-emerald-500/10 p-4 mb-6">
-          <div className="flex items-center gap-3">
-           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20">
-            <Gift className="h-5 w-5 text-emerald-400" />
+         <div className="relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-[24px] border border-foreground/10 shadow-[0_4px_16px_rgba(0,0,0,0.15)] flex items-center justify-between px-4 py-3 mb-6">
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+           <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border backdrop-blur-md border-primary/40 bg-primary/25 text-foreground shadow-[0_0_12px_rgba(0,0,0,0.1)]">
+            <Gift className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+             Invited
+            </span>
            </div>
-           <div className="flex-1">
-            <h3 className="font-semibold text-emerald-400">
-             You&apos;ve been invited!
-            </h3>
-            <p className="text-sm text-emerald-300/80">
-             You have an invitation for the{" "}
-             <span className="font-medium">
-              {invitationPreview.ticket?.name}
-             </span>{" "}
-             ticket
-             {invitationPreview.ticket?.bypassPayment &&
-              invitationPreview.ticket?.isPaid && (
-               <span className="ml-1">(payment waived)</span>
-              )}
-             {invitationPreview.bypassApproval && (
-              <span className="ml-1">(no approval required)</span>
+           <p className="text-sm font-medium theme-text-sub opacity-80">
+            You have an invitation for the{" "}
+            <span className="font-semibold">
+             {invitationPreview.ticket?.name}
+            </span>{" "}
+            ticket
+            {invitationPreview.ticket?.bypassPayment &&
+             invitationPreview.ticket?.isPaid && (
+              <span className="ml-1">(payment waived)</span>
              )}
-            </p>
-           </div>
+            {invitationPreview.bypassApproval && (
+             <span className="ml-1">(no approval required)</span>
+            )}
+           </p>
           </div>
          </div>
         ))}
@@ -1689,7 +1687,7 @@ export default function EventClient({
                   ? "bg-card-secondary-background border-green-500/50 cursor-default"
                   : "bg-card-secondary-background border-yellow-500/50 cursor-default"
                  : isInvitedTicket
-                 ? "bg-emerald-500/10 border-transparent cursor-pointer ring-2 ring-emerald-500/30"
+                 ? "bg-card-secondary-background border-white/50 cursor-pointer"
                  : isDisabledByInvitation
                  ? "bg-card-secondary-background border-transparent opacity-40 cursor-not-allowed"
                  : isDisabled
@@ -1709,7 +1707,7 @@ export default function EventClient({
                   }`}
                  />
                 ) : isInvitedTicket ? (
-                 <Gift className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-emerald-400" />
+                 <Gift className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-primary" />
                 ) : (
                  canRegister &&
                  !isManuallyUnavailable &&
@@ -1729,15 +1727,11 @@ export default function EventClient({
                 <div className="min-w-0 flex-1">
                  <div className="flex items-center gap-4 flex-wrap">
                   <h3
-                   className={`text-sm sm:text-base font-semibold break-words ${
-                    isInvitedTicket
-                     ? "text-emerald-400"
-                     : "text-foreground"
-                   }`}
+                   className="text-sm sm:text-base font-semibold break-words text-foreground"
                   >
                    {ticket.name}
                    {isInvitedTicket && (
-                    <span className="ml-2 text-xs font-normal text-emerald-300/80">
+                    <span className="ml-2 text-xs font-normal text-muted-foreground">
                      (Invited)
                     </span>
                    )}
@@ -1773,7 +1767,7 @@ export default function EventClient({
                     </span>
                    )
                   ) : isInvitedTicket ? (
-                   <span className="text-emerald-300/80">
+                   <span className="text-muted-foreground">
                     {invitationPreview?.ticket
                      ?.bypassPayment &&
                     invitationPreview?.ticket?.isPaid
@@ -1804,7 +1798,7 @@ export default function EventClient({
                    invitationPreview?.ticket
                     ?.bypassPayment &&
                    invitationPreview?.ticket?.isPaid
-                    ? "text-emerald-400 line-through decoration-emerald-400/50"
+                    ? "text-muted-foreground line-through decoration-muted-foreground/50"
                     : "text-foreground"
                   }`}
                  >
@@ -1815,7 +1809,7 @@ export default function EventClient({
                  {isInvitedTicket &&
                   invitationPreview?.ticket?.bypassPayment &&
                   invitationPreview?.ticket?.isPaid && (
-                   <p className="text-sm font-semibold text-emerald-400">
+                   <p className="text-sm font-semibold text-foreground">
                     Free
                    </p>
                   )}
@@ -1835,7 +1829,7 @@ export default function EventClient({
               handleRegisterClick(invitedTicketId)
              }
              disabled={isRegistering}
-             className="w-full mt-4 rounded-xl bg-emerald-500 px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+             className="w-full mt-4 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
              {isRegistering ? (
               <>
