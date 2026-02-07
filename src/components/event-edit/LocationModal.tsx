@@ -688,7 +688,7 @@ export default function LocationModal({ isOpen, onClose, editMode = null }: Loca
 
       <div
         ref={dropdownRef}
-        className="absolute rounded-xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl shadow-black/50 overflow-hidden"
+        className="absolute rounded-xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl shadow-black/50 overflow-hidden pointer-events-auto"
         style={dropdownStyle}
       >
         <div className="p-3">
