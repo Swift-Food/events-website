@@ -2,6 +2,7 @@
 
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
+import { X } from "lucide-react";
 
 interface ImageCropModalProps {
   isOpen: boolean;
@@ -33,25 +34,35 @@ export default function ImageCropModal({
   if (!isOpen || !imageToCrop) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-      <div className="w-full max-w-3xl rounded-3xl bg-card-background backdrop-blur-2xl p-8 text-foreground">
-        <h2 className="mb-6 text-3xl font-bold">Crop Image</h2>
-
-        <div className="relative h-[500px] w-full rounded-2xl bg-black">
-          <Cropper
-            image={imageToCrop}
-            crop={crop}
-            zoom={zoom}
-            aspect={aspect}
-            onCropChange={onCropChange}
-            onZoomChange={onZoomChange}
-            onCropComplete={onCropComplete}
-          />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="relative w-full max-w-lg rounded-2xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl overflow-hidden">
+        <div className="px-6 pt-6 pb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-foreground">Crop Image</h2>
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isUploading}
+            className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors disabled:opacity-50"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
-        <div className="mt-6 flex flex-col gap-5">
-          <div className="flex items-center gap-4 bg-white/5 backdrop-blur-md rounded-2xl p-4">
-            <label className="text-sm font-semibold text-foreground">
+        <div className="px-6 pb-6 space-y-4">
+          <div className="relative h-[300px] w-full rounded-xl bg-black overflow-hidden">
+            <Cropper
+              image={imageToCrop}
+              crop={crop}
+              zoom={zoom}
+              aspect={aspect}
+              onCropChange={onCropChange}
+              onZoomChange={onZoomChange}
+              onCropComplete={onCropComplete}
+            />
+          </div>
+
+          <div className="flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 px-3 py-2.5">
+            <label className="text-xs font-medium text-muted-foreground">
               Zoom
             </label>
             <input
@@ -65,12 +76,12 @@ export default function ImageCropModal({
             />
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex justify-end gap-3 pt-2 border-t border-white/10">
             <button
               type="button"
               onClick={onCancel}
               disabled={isUploading}
-              className="flex-1 rounded-full bg-card-background backdrop-blur-md py-4 text-center font-semibold text-foreground transition-all hover:bg-white/15 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2.5 text-sm font-medium text-white/60 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
@@ -78,7 +89,7 @@ export default function ImageCropModal({
               type="button"
               onClick={onSave}
               disabled={isUploading}
-              className="flex-1 rounded-full bg-primary py-4 text-center font-bold text-primary-foreground transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isUploading ? "Uploading..." : "Save"}
             </button>
