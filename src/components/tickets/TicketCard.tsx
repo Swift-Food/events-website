@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { GuestTicketWithEventResponseDto, GuestTicketStatus } from "@/types/guest-ticket";
 import { Calendar, Ticket, QrCode, X, Clock, CheckCircle2, XCircle, AlertCircle, Loader2, ExternalLink, AlertTriangle, RotateCcw } from "lucide-react";
@@ -23,6 +24,7 @@ interface TicketCardProps {
   waitlistPosition?: number;
   waitlistTotal?: number;
   autoShowQR?: boolean;
+  onQRClose?: () => void;
 }
 
 // Confirmation Modal Component
@@ -151,6 +153,7 @@ export default function TicketCard({
   waitlistPosition,
   waitlistTotal,
   autoShowQR = false,
+  onQRClose,
 }: TicketCardProps) {
   const [showQRModal, setShowQRModal] = useState(autoShowQR);
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -471,14 +474,14 @@ export default function TicketCard({
         variant="danger"
       />
 
-      {/* QR Code Modal */}
-      {showQRModal && ticket.qrCode && (
+      {/* QR Code Modal - portaled to body to avoid transform containment */}
+      {showQRModal && ticket.qrCode && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
           <div className="bg-card-background rounded-2xl p-6 max-w-xs w-full shadow-2xl border border-white/5">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-bold text-foreground">Your Ticket</h3>
               <button
-                onClick={() => setShowQRModal(false)}
+                onClick={() => { setShowQRModal(false); onQRClose?.(); }}
                 className="p-1.5 rounded-full hover:bg-foreground/10 transition-colors"
               >
                 <X className="h-5 w-5 text-muted-foreground" />
@@ -510,7 +513,8 @@ export default function TicketCard({
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

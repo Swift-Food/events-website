@@ -34,6 +34,13 @@ function MyTicketsContent() {
   const searchParams = useSearchParams();
   const highlightTicketId = searchParams.get("ticketId");
 
+  const clearTicketIdParam = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("ticketId");
+    const newUrl = params.toString() ? `/my-tickets?${params.toString()}` : "/my-tickets";
+    router.replace(newUrl, { scroll: false });
+  };
+
   const [tickets, setTickets] = useState<GuestTicketWithEventResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>("active");
@@ -468,6 +475,7 @@ function MyTicketsContent() {
                           onLeaveWaitlist={handleLeaveWaitlist}
                           isLeavingWaitlist={leavingWaitlistTicketId === ticket.id}
                           autoShowQR={ticket.id === highlightTicketId}
+                          onQRClose={ticket.id === highlightTicketId ? clearTicketIdParam : undefined}
                         />
                       </div>
                     ))}
