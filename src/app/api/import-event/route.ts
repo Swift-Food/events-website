@@ -308,6 +308,39 @@ function htmlToDescription(html: string): string {
     .trim();
 }
 
+const ADDRESS_POSTCODE_REGEX = /\b([A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2})\b/i;
+
+function parseAddressString(address: string): { address?: string; city?: string; postalCode?: string } | null {
+  if (!address || address.length < 3) return null;
+  const result: { address?: string; city?: string; postalCode?: string } = {};
+
+  // Extract UK postcode
+  const postcodeMatch = address.match(ADDRESS_POSTCODE_REGEX);
+  if (postcodeMatch) {
+    result.postalCode = postcodeMatch[1].toUpperCase();
+  }
+
+  // Remove postcode for further parsing
+  const remaining = address
+    .replace(ADDRESS_POSTCODE_REGEX, "")
+    .replace(/,\s*$/, "")
+    .trim();
+
+  // Split by comma
+  const parts = remaining.split(",").map(p => p.trim()).filter(Boolean);
+
+  if (parts.length >= 2) {
+    // Last part is typically the city (e.g. "London" from "15 Gordon St, London")
+    result.city = parts[parts.length - 1];
+    // Everything before is the street address
+    result.address = parts.slice(0, -1).join(", ");
+  } else if (parts.length === 1) {
+    result.address = parts[0];
+  }
+
+  return result;
+}
+
 function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData {
   const result: NormalizedEventData = {};
 
@@ -441,6 +474,51 @@ function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData
       result.location.name = value.trim();
     }
   });
+
+  // 7. Scan body content for labeled address lines
+  //    e.g. <p><strong>Location:</strong> 15 Gordon St, London WC1H 0AH</p>
+  const bodySelectors = [
+    ".field--name-body .field__item",
+    ".field--name-body",
+    ".event-description",
+    ".event-content",
+    ".event-details",
+    ".tribe-events-single-event-description",
+    '[itemprop="description"]',
+    "article .content",
+    "article",
+  ];
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let bodyEl: any = null;
+  for (const sel of bodySelectors) {
+    const el = $(sel).first();
+    if (el.length) {
+      bodyEl = el;
+      break;
+    }
+  }
+
+  if (bodyEl) {
+    bodyEl.find("p, div, li, span, td").each((_: number, el: any) => {
+      const text = $(el).text().replace(/\u00a0/g, " ").trim();
+      const match = text.match(
+        /^(?:location|address|venue|where)\s*[:：]\s*(.+)/i
+      );
+      if (!match) return;
+
+      const fullAddress = match[1].trim();
+      const parsed = parseAddressString(fullAddress);
+      if (!parsed) return;
+
+      result.location = result.location || {};
+      if (parsed.address && !result.location.address) result.location.address = parsed.address;
+      if (parsed.city && !result.location.city) result.location.city = parsed.city;
+      if (parsed.postalCode && !result.location.postalCode) result.location.postalCode = parsed.postalCode;
+
+      return false; // Stop after first match
+    });
+  }
 
   return result;
 }
