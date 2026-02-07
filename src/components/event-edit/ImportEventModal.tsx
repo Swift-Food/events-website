@@ -265,7 +265,7 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
         <div className="relative px-6 pt-6 pb-4">
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+            className="absolute right-4 top-4 p-1.5 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -275,8 +275,8 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
               <Sparkles className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Import Event</h2>
-              <p className="text-sm text-muted-foreground">Paste a link to auto-fill details</p>
+              <h2 className="text-lg font-semibold text-white">Import Event</h2>
+              <p className="text-sm text-white/60">Paste a link to auto-fill details</p>
             </div>
           </div>
         </div>
@@ -285,7 +285,7 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
         <div className="px-6 pb-6 space-y-4">
           {/* URL Input */}
           <div className="relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50">
               <Link2 className="h-4 w-4" />
             </div>
             <input
@@ -302,7 +302,7 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
               onKeyDown={handleKeyDown}
               placeholder="Paste event URL..."
               disabled={status === "loading"}
-              className="w-full rounded-xl bg-card-secondary-background pl-10 pr-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 border border-white/10 focus:border-primary/50 transition-all disabled:opacity-50"
+              className="w-full rounded-xl bg-white/5 pl-10 pr-4 py-3 text-sm text-white outline-none placeholder:text-white/40 border border-white/10 focus:border-primary/50 transition-all disabled:opacity-50"
             />
           </div>
 
@@ -312,8 +312,8 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
               <div className="flex items-center gap-3">
                 <Loader2 className="h-5 w-5 text-primary animate-spin" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground">Fetching event details...</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">This may take a moment</p>
+                  <p className="text-sm font-medium text-white">Fetching event details...</p>
+                  <p className="text-xs text-white/60 mt-0.5">This may take a moment</p>
                 </div>
               </div>
               <div className="mt-4 space-y-2.5">
@@ -345,12 +345,12 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-green-400">Data found!</p>
                   {importedData.name && (
-                    <p className="text-sm text-foreground font-medium mt-1.5 truncate">
+                    <p className="text-sm text-white font-medium mt-1.5 truncate">
                       {importedData.name}
                     </p>
                   )}
                   {importedData.startDate && (
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <p className="text-xs text-white/60 mt-0.5">
                       {new Date(importedData.startDate).toLocaleDateString("en-GB", {
                         weekday: "short",
                         day: "numeric",
@@ -361,12 +361,12 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
                     </p>
                   )}
                   {importedData.location?.name && (
-                    <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                    <p className="text-xs text-white/60 mt-0.5 truncate">
                       {importedData.location.name}
                     </p>
                   )}
                   {!importedData.name && !importedData.startDate && !importedData.location?.name && (
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-white/60 mt-1">
                       {importedData.description ? "Description" : ""}
                       {importedData.image ? (importedData.description ? ", Image" : "Image") : ""} found
                     </p>
@@ -396,7 +396,7 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
           </button>
 
           {/* Warning note */}
-          <p className="text-xs text-center text-muted-foreground">
+          <p className="text-xs text-center text-white/50">
             Imported data may be incomplete. Verify all fields, particularly the description. Tickets are not imported.
           </p>
         </div>
