@@ -211,9 +211,9 @@ export default function CalendarDiscoveryPage() {
 
     {/* Calendar Grid */}
     {!loading && !error && calendars.length > 0 && (
-     <div className="flex flex-wrap gap-4">
+     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
       {calendars.map((calendar) => (
-       <SquareCalendarCard key={calendar.id} calendar={calendar} size={180} />
+       <SquareCalendarCard key={calendar.id} calendar={calendar} />
       ))}
      </div>
     )}
