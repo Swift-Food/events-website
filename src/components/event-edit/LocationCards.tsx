@@ -75,7 +75,7 @@ export function VenueCard({
                   {addressSummary}
                 </p>
               )}
-              {isPartialAddress && hasCoordinates && (
+              {isPartialAddress && (
                 <p className="text-xs text-amber-400 mt-1">
                   Partial address imported - tap edit to complete
                 </p>
