@@ -288,23 +288,44 @@ function normalizeEventData(jsonLd: JsonLdEvent, metaTags: Partial<JsonLdEvent>,
   };
 }
 
-function htmlToDescription(html: string): string {
+// Tags supported by our Tiptap editor (StarterKit + Underline + Link)
+const EDITOR_ALLOWED_TAGS = new Set([
+  "h1", "h2", "h3", "h4", "h5", "h6",
+  "p", "blockquote", "pre",
+  "ul", "ol", "li",
+  "hr", "br",
+  "strong", "b", "em", "i", "u", "s", "code",
+  "a",
+]);
+
+function sanitizeHtmlForEditor(html: string): string {
   return html
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/p>/gi, "\n\n")
-    .replace(/<\/div>/gi, "\n")
-    .replace(/<\/h[1-6]>/gi, "\n\n")
-    .replace(/<li[^>]*>/gi, "\n- ")
-    .replace(/<hr[^>]*\/?>/gi, "\n---\n")
-    .replace(/<[^>]*>/g, "")
     .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/[ \t]+$/gm, "")
-    .replace(/\n{3,}/g, "\n\n")
+    // Strip tags not in allowlist but keep their text content
+    .replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b([^>]*?)(\/?)>/g, (match, tag, attrs) => {
+      const lower = tag.toLowerCase();
+      if (!EDITOR_ALLOWED_TAGS.has(lower)) return "";
+
+      // Closing tag
+      if (match.startsWith("</")) return `</${lower}>`;
+
+      // Self-closing
+      if (lower === "br") return "<br>";
+      if (lower === "hr") return "<hr>";
+
+      // For <a>, preserve href only
+      if (lower === "a") {
+        const hrefMatch = attrs.match(/href=["']([^"']*?)["']/i);
+        return hrefMatch ? `<a href="${hrefMatch[1]}">` : "<a>";
+      }
+
+      // All other allowed tags — strip attributes
+      return `<${lower}>`;
+    })
+    // Clean up empty blocks
+    .replace(/<p>\s*<\/p>/g, "")
+    .replace(/<h[1-6]>\s*<\/h[1-6]>/g, "")
+    .replace(/(<br\s*\/?>){3,}/g, "<br><br>")
     .trim();
 }
 
@@ -408,7 +429,7 @@ function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData
   }
 
   // 4. Description from common content patterns
-  //    Use inner HTML → htmlToDescription to preserve paragraph/list structure
+  //    Sanitize HTML to only Tiptap-compatible tags so formatting is preserved
   if (!result.description) {
     const descSelectors = [
       // Drupal body field (full article body)
@@ -431,9 +452,9 @@ function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData
       const el = $(selector).first();
       const rawHtml = el.html();
       if (!rawHtml) continue;
-      const text = htmlToDescription(rawHtml);
-      if (text && text.length > 20) {
-        result.description = text.substring(0, 5000);
+      const sanitized = sanitizeHtmlForEditor(rawHtml);
+      if (sanitized && sanitized.length > 20) {
+        result.description = sanitized.substring(0, 10000);
         break;
       }
     }
