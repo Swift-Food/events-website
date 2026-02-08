@@ -445,6 +445,21 @@ function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData
   if (dateTimes.length >= 1) result.startDate = dateTimes[0];
   if (dateTimes.length >= 2) result.endDate = dateTimes[1];
 
+  // If we have a start but no end, look for a time range like "9:00 to 10:00"
+  if (result.startDate && !result.endDate) {
+    const timeText = $(".time-wrapper, time.datetime, .event-time, .date-time")
+      .text().replace(/\u00a0/g, " ").trim();
+    const rangeMatch = timeText.match(/(\d{1,2}:\d{2})\s*(?:to|–|—|-)\s*(\d{1,2}:\d{2})/i);
+    if (rangeMatch) {
+      try {
+        const startDt = new Date(result.startDate);
+        const [endH, endM] = rangeMatch[2].split(":").map(Number);
+        startDt.setHours(endH, endM, 0, 0);
+        result.endDate = startDt.toISOString();
+      } catch { /* ignore parse errors */ }
+    }
+  }
+
   // 2. Heading tags for event name
   const h1 = $("h1").first().text().trim();
   if (h1) {
