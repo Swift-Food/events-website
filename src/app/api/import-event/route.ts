@@ -298,9 +298,24 @@ const EDITOR_ALLOWED_TAGS = new Set([
   "a",
 ]);
 
+function decodeCfEmail(encoded: string): string {
+  const key = parseInt(encoded.substring(0, 2), 16);
+  let result = "";
+  for (let i = 2; i < encoded.length; i += 2) {
+    result += String.fromCharCode(parseInt(encoded.substring(i, i + 2), 16) ^ key);
+  }
+  return result;
+}
+
 function sanitizeHtmlForEditor(html: string): string {
   return html
     .replace(/&nbsp;/g, " ")
+    // Decode Cloudflare email protection ([email protected] → real address)
+    .replace(/<(?:a|span)[^>]*data-cfemail="([^"]+)"[^>]*>[^<]*<\/(?:a|span)>/gi, (_, encoded) => {
+      return decodeCfEmail(encoded);
+    })
+    // Strip mailto: links but keep their text (Tiptap only supports http/https)
+    .replace(/<a\b[^>]*href=["']mailto:[^"']*["'][^>]*>([\s\S]*?)<\/a>/gi, "$1")
     // Strip tags not in allowlist but keep their text content
     .replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b([^>]*?)(\/?)>/g, (match, tag, attrs) => {
       const lower = tag.toLowerCase();
