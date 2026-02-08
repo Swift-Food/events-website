@@ -311,11 +311,14 @@ function sanitizeHtmlForEditor(html: string): string {
   return html
     .replace(/&nbsp;/g, " ")
     // Decode Cloudflare email protection ([email protected] → real address)
-    .replace(/<(?:a|span)[^>]*data-cfemail="([^"]+)"[^>]*>[^<]*<\/(?:a|span)>/gi, (_, encoded) => {
-      return decodeCfEmail(encoded);
+    .replace(/<(?:a|span)[^>]*data-cfemail="([^"]+)"[^>]*>[\s\S]*?<\/(?:a|span)>/gi, (_, encoded) => {
+      const email = decodeCfEmail(encoded);
+      return `<u>${email}</u>`;
     })
-    // Strip mailto: links but keep their text (Tiptap only supports http/https)
-    .replace(/<a\b[^>]*href=["']mailto:[^"']*["'][^>]*>([\s\S]*?)<\/a>/gi, "$1")
+    // Unwrap Cloudflare email protection links — keep inner content
+    .replace(/<a\b[^>]*href=["'][^"']*\/cdn-cgi\/l\/email-protection[^"']*["'][^>]*>([\s\S]*?)<\/a>/gi, "$1")
+    // Strip mailto: links but keep their text underlined
+    .replace(/<a\b[^>]*href=["']mailto:[^"']*["'][^>]*>([\s\S]*?)<\/a>/gi, "<u>$1</u>")
     // Strip tags not in allowlist but keep their text content
     .replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b([^>]*?)(\/?)>/g, (match, tag, attrs) => {
       const lower = tag.toLowerCase();
@@ -342,6 +345,39 @@ function sanitizeHtmlForEditor(html: string): string {
     .replace(/<h[1-6]>\s*<\/h[1-6]>/g, "")
     .replace(/(<br\s*\/?>){3,}/g, "<br><br>")
     .trim();
+}
+
+/**
+ * Pre-process Cheerio DOM to decode all Cloudflare email-protected elements.
+ * This is more robust than regex on raw HTML since Cheerio understands nesting.
+ */
+function decodeCfEmailsInDom($: ReturnType<typeof cheerio.load>): void {
+  // Decode <span data-cfemail="..."> elements
+  $("[data-cfemail]").each((_, el) => {
+    const encoded = $(el).attr("data-cfemail");
+    if (encoded) {
+      const email = decodeCfEmail(encoded);
+      $(el).replaceWith(`<u>${email}</u>`);
+    }
+  });
+
+  // Unwrap <a href="/cdn-cgi/l/email-protection"> links — keep inner content
+  $('a[href*="/cdn-cgi/l/email-protection"]').each((_, el) => {
+    const inner = $(el).html();
+    if (inner) {
+      $(el).replaceWith(inner);
+    } else {
+      $(el).remove();
+    }
+  });
+
+  // Convert mailto: links to underlined text
+  $('a[href^="mailto:"]').each((_, el) => {
+    const inner = $(el).html();
+    if (inner) {
+      $(el).replaceWith(`<u>${inner}</u>`);
+    }
+  });
 }
 
 const ADDRESS_POSTCODE_REGEX = /\b([A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2})\b/i;
@@ -379,6 +415,9 @@ function parseAddressString(address: string): { address?: string; city?: string;
 
 function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData {
   const result: NormalizedEventData = {};
+
+  // Pre-process: decode Cloudflare-protected emails in the DOM
+  decodeCfEmailsInDom($);
 
   // 1. <time datetime=""> elements for dates
   const dateTimes: string[] = [];
