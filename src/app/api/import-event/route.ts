@@ -548,6 +548,8 @@ function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData
   //    Sanitize HTML to only Tiptap-compatible tags so formatting is preserved
   if (!result.description) {
     const descSelectors = [
+      // Luma
+      ".spark-content",
       // Drupal body field (full article body)
       ".field--name-body .field__item",
       ".field--name-body",
@@ -660,9 +662,6 @@ function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData
   return result;
 }
 
-function hasMinimumData(data: NormalizedEventData): boolean {
-  return Boolean(data.name && data.startDate);
-}
 
 function mergeEventData(...layers: NormalizedEventData[]): NormalizedEventData {
   const result: NormalizedEventData = {};
@@ -740,13 +739,16 @@ export async function GET(request: NextRequest) {
     // Merge JSON-LD + OG so far
     let merged = mergeEventData(jsonLdResult, ogResult);
 
-    // Layer 3: DOM parsing — run if we lack name+date OR if location address is missing/bogus
-    const needsMoreData = !hasMinimumData(merged);
-    const addressMatchesVenue = merged.location?.address?.trim() === merged.location?.name?.trim();
-    const needsAddress = merged.location?.name && (!merged.location?.address || addressMatchesVenue);
-    if (needsMoreData || needsAddress) {
-      const domResult = extractFromDom($);
-      merged = mergeEventData(merged, domResult);
+    // Layer 3: DOM parsing — always run to enrich with structured address + richer description
+    const domResult = extractFromDom($);
+    merged = mergeEventData(merged, domResult);
+
+    // Prefer DOM description when it contains HTML formatting (richer than plain text)
+    if (domResult.description && domResult.description.length > 20) {
+      const hasFormatting = /<(?:p|h[1-6]|strong|em|ul|ol|li|hr|blockquote|a\s)/i.test(domResult.description);
+      if (hasFormatting) {
+        merged.description = domResult.description;
+      }
     }
 
     // Ensure URL is always set
