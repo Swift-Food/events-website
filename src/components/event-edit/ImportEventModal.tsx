@@ -191,9 +191,9 @@ export default function ImportEventModal({ isOpen, onClose }: ImportEventModalPr
       let postcodeToSet = importedData.location.postalCode || "";
       let cityToSet = importedData.location.city || "";
 
-      // If no structured address but we have a venue name, use it as
-      // addressLine1 so the venue card renders in the form
-      if (!addressToSet && importedData.location.name) {
+      // If no structured address but we have a venue name and no other
+      // location fields, use venue name as addressLine1 so the venue card renders
+      if (!addressToSet && importedData.location.name && !postcodeToSet && !cityToSet) {
         addressToSet = importedData.location.name;
       }
 

@@ -198,12 +198,16 @@ function normalizeEventData(jsonLd: JsonLdEvent, metaTags: Partial<JsonLdEvent>,
 
     if (loc.address) {
       if (typeof loc.address === "string") {
-        // Skip placeholder addresses like "Register to See Address"
-        if (!isPlaceholderAddress(loc.address)) {
+        // Skip placeholder addresses and addresses that just repeat the venue name
+        if (!isPlaceholderAddress(loc.address) && loc.address.trim() !== loc.name?.trim()) {
           locationData.address = loc.address;
         }
       } else {
-        locationData.address = loc.address.streetAddress;
+        // Skip streetAddress if it just repeats the venue name
+        const street = loc.address.streetAddress?.trim();
+        if (street && street !== loc.name?.trim()) {
+          locationData.address = street;
+        }
         locationData.city = loc.address.addressLocality;
         locationData.postalCode = loc.address.postalCode;
       }
@@ -392,14 +396,20 @@ function parseAddressString(address: string): { address?: string; city?: string;
     result.postalCode = postcodeMatch[1].toUpperCase();
   }
 
+  // Country suffixes to strip (often appended by platforms like Luma)
+  const COUNTRY_SUFFIXES = /^(uk|united kingdom|england|scotland|wales|us|usa|united states)$/i;
+
   // Remove postcode for further parsing
   const remaining = address
     .replace(ADDRESS_POSTCODE_REGEX, "")
     .replace(/,\s*$/, "")
     .trim();
 
-  // Split by comma
-  const parts = remaining.split(",").map(p => p.trim()).filter(Boolean);
+  // Split by comma and strip trailing country name
+  let parts = remaining.split(",").map(p => p.trim()).filter(Boolean);
+  if (parts.length >= 2 && COUNTRY_SUFFIXES.test(parts[parts.length - 1])) {
+    parts = parts.slice(0, -1);
+  }
 
   if (parts.length >= 2) {
     // Last part is typically the city (e.g. "London" from "15 Gordon St, London")
@@ -475,11 +485,56 @@ function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData
     result.location.name = sqLocation;
   }
 
+  // Luma (lu.ma) — address in .text-tinted inside .info, venue name in .fw-medium
+  const lumaInfo = $(".info").first();
+  if (lumaInfo.length) {
+    const lumaVenue = lumaInfo.find(".fw-medium").first().text().trim();
+    if (lumaVenue && !result.location?.name) {
+      result.location = result.location || {};
+      result.location.name = lumaVenue;
+    }
+    const lumaAddress = lumaInfo.find(".text-tinted").first().text().trim();
+    if (lumaAddress && !result.location?.address) {
+      result.location = result.location || {};
+      const parsed = parseAddressString(lumaAddress);
+      if (parsed) {
+        if (parsed.address) result.location.address = parsed.address;
+        if (parsed.city && !result.location.city) result.location.city = parsed.city;
+        if (parsed.postalCode && !result.location.postalCode) result.location.postalCode = parsed.postalCode;
+      } else {
+        result.location.address = lumaAddress;
+      }
+    }
+  }
+
   // <address> elements
   const addressEl = $("address").first().text().trim();
   if (addressEl && !result.location?.address) {
     result.location = result.location || {};
     result.location.address = addressEl;
+  }
+
+  // General address pattern scanner — find elements containing a UK postcode
+  if (!result.location?.address) {
+    $("div, span, p, li, td").each((_, el) => {
+      if (result.location?.address) return false; // already found
+      const text = $(el).text().replace(/\u00a0/g, " ").trim();
+      // Look for text that contains a UK postcode and has comma-separated parts (looks like an address)
+      if (text.length > 10 && text.length < 200 && ADDRESS_POSTCODE_REGEX.test(text) && text.includes(",")) {
+        // Skip if it looks like a full paragraph (too many words without commas)
+        const commaCount = (text.match(/,/g) || []).length;
+        if (commaCount >= 2) {
+          const parsed = parseAddressString(text);
+          if (parsed) {
+            result.location = result.location || {};
+            if (parsed.address) result.location.address = parsed.address;
+            if (parsed.city && !result.location.city) result.location.city = parsed.city;
+            if (parsed.postalCode && !result.location.postalCode) result.location.postalCode = parsed.postalCode;
+            return false; // stop scanning
+          }
+        }
+      }
+    });
   }
 
   // 4. Description from common content patterns
@@ -678,8 +733,11 @@ export async function GET(request: NextRequest) {
     // Merge JSON-LD + OG so far
     let merged = mergeEventData(jsonLdResult, ogResult);
 
-    // Layer 3: DOM parsing (only if we still lack name + date)
-    if (!hasMinimumData(merged)) {
+    // Layer 3: DOM parsing — run if we lack name+date OR if location address is missing/bogus
+    const needsMoreData = !hasMinimumData(merged);
+    const addressMatchesVenue = merged.location?.address?.trim() === merged.location?.name?.trim();
+    const needsAddress = merged.location?.name && (!merged.location?.address || addressMatchesVenue);
+    if (needsMoreData || needsAddress) {
       const domResult = extractFromDom($);
       merged = mergeEventData(merged, domResult);
     }
