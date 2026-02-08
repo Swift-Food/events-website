@@ -179,7 +179,7 @@ function EventFormInner({
 
   // Auto-infer eventFormat based on what's been added
   useEffect(() => {
-    const hasVenue = Boolean(addressLine1 && city && postcode);
+    const hasVenue = Boolean(addressLine1);
     const hasVirtualLink = Boolean(virtualMeetingUrl);
 
     let inferredFormat: EventFormat | null = null;
@@ -194,7 +194,7 @@ function EventFormInner({
     if (inferredFormat !== eventFormat) {
       setEventFormat(inferredFormat);
     }
-  }, [addressLine1, city, postcode, virtualMeetingUrl, eventFormat, setEventFormat]);
+  }, [addressLine1, virtualMeetingUrl, eventFormat, setEventFormat]);
 
   // Preselect a random cover image on mount (create mode only)
   useEffect(() => {

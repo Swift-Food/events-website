@@ -20,6 +20,7 @@
     "@tiptap/starter-kit": "^3.11.0",
     "axios": "^1.13.2",
     "camera-controls": "^3.1.2",
+    "cheerio": "^1.2.0",
     "date-fns": "^4.1.0",
     "html5-qrcode": "^2.3.8",
     "lucide-react": "^0.554.0",
