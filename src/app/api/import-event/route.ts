@@ -385,9 +385,16 @@ function decodeCfEmailsInDom($: ReturnType<typeof cheerio.load>): void {
 }
 
 const ADDRESS_POSTCODE_REGEX = /\b([A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2})\b/i;
+const ADDRESS_LABEL_PREFIX = /^(?:location|address|venue|where)\s*[:：]\s*/i;
+
+function stripAddressLabel(text: string): string {
+  return text.replace(ADDRESS_LABEL_PREFIX, "").trim();
+}
 
 function parseAddressString(address: string): { address?: string; city?: string; postalCode?: string } | null {
   if (!address || address.length < 3) return null;
+  // Strip common label prefixes like "Location: " or "Address: "
+  address = stripAddressLabel(address);
   const result: { address?: string; city?: string; postalCode?: string } = {};
 
   // Extract UK postcode
@@ -459,7 +466,7 @@ function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData
   const drupalLocation = $(".field--name-field-event-location, .field--name-field-location").first().text().trim();
   if (drupalLocation) {
     result.location = result.location || {};
-    if (!result.location.address) result.location.address = drupalLocation;
+    if (!result.location.address) result.location.address = stripAddressLabel(drupalLocation);
   }
 
   // WordPress (The Events Calendar & common patterns)
@@ -472,7 +479,7 @@ function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData
   const wpAddress = $(".tribe-venue-address, .tribe-street-address, .event-address, .venue-address").first().text().trim();
   if (wpAddress && !result.location?.address) {
     result.location = result.location || {};
-    result.location.address = wpAddress;
+    result.location.address = stripAddressLabel(wpAddress);
   }
 
   // Squarespace
@@ -502,7 +509,7 @@ function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData
         if (parsed.city && !result.location.city) result.location.city = parsed.city;
         if (parsed.postalCode && !result.location.postalCode) result.location.postalCode = parsed.postalCode;
       } else {
-        result.location.address = lumaAddress;
+        result.location.address = stripAddressLabel(lumaAddress);
       }
     }
   }
@@ -511,7 +518,7 @@ function extractFromDom($: ReturnType<typeof cheerio.load>): NormalizedEventData
   const addressEl = $("address").first().text().trim();
   if (addressEl && !result.location?.address) {
     result.location = result.location || {};
-    result.location.address = addressEl;
+    result.location.address = stripAddressLabel(addressEl);
   }
 
   // General address pattern scanner — find elements containing a UK postcode
