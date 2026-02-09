@@ -141,7 +141,7 @@ export default function EventCoverPicker({
         {Array.from({ length: cols === "grid-cols-3" ? 9 : 6 }).map((_, i) => (
           <div
             key={i}
-            className="aspect-[4/3] rounded-xl bg-white/5 animate-pulse"
+            className="aspect-square rounded-xl bg-white/5 animate-pulse"
           />
         ))}
       </div>
@@ -156,7 +156,7 @@ export default function EventCoverPicker({
             key={`${activeCategory}-${index}`}
             type="button"
             onClick={() => handleImageClick(imageUrl)}
-            className={`relative aspect-[4/3] rounded-xl overflow-hidden group transition-all cursor-pointer ${
+            className={`relative aspect-square rounded-xl overflow-hidden group transition-all cursor-pointer ${
               selectedImage === imageUrl
                 ? "ring-3 ring-accent-dark ring-offset-2 ring-offset-[#1a1a1a]"
                 : "hover:ring-2 hover:ring-white/20"
