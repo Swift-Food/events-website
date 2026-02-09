@@ -52,7 +52,9 @@ export default function EventCoverPicker({
       try {
         const data = await eventCoverService.getAll();
         setImagesByCategory(data);
-        const cats = Object.keys(data);
+        const cats = Object.keys(data).sort((a, b) =>
+          formatCategoryName(a).localeCompare(formatCategoryName(b))
+        );
         setCategories(cats);
         if (cats.length > 0) {
           setActiveCategory(cats[0]);
