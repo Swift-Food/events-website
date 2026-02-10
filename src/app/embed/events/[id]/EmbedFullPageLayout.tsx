@@ -309,8 +309,8 @@ export default function EmbedFullPageLayout({
      {/* Left Column - Main Content */}
      <section className="flex-1 space-y-6">
        {/* Title and Categories - Desktop only */}
-       <div className="hidden sm:block">
-        <h1 className="mb-4 text-2xl md:text-3xl lg:text-5xl font-bold tracking-tight text-foreground">
+        <div className="hidden sm:block sm:pt-4 md:pt-6">
+         <h1 className="mb-4 text-2xl md:text-3xl lg:text-5xl font-bold tracking-tight text-foreground">
         {event.name}
        </h1>
 
