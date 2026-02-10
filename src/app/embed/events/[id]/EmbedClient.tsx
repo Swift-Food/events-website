@@ -182,54 +182,56 @@ export default function EmbedClient({
      />
     )}
 
-    {/* Footer bar: Prismo logo left, View Full Event Page right */}
-    <div
-     className="flex items-center justify-between px-4 py-2"
-     style={{ borderTop: `1px solid ${activePalette.borderEnabled ? activePalette.borderColor : 'transparent'}` }}
-    >
-     <a
-      href="https://prismo.live"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-1.5 transition-opacity hover:opacity-80"
+    {/* Footer bar — only for full page layout */}
+    {isFullPage && (
+     <div
+      className="flex items-center justify-between px-4 py-2"
+      style={{ borderTop: `1px solid ${activePalette.borderEnabled ? activePalette.borderColor : 'transparent'}` }}
      >
-      <div
-       className="h-4 w-4 shrink-0"
-       style={{
-        backgroundColor: activePalette.subTextColor,
-        WebkitMaskImage: "url(/logo.svg)",
-        WebkitMaskSize: "contain",
-        WebkitMaskRepeat: "no-repeat",
-        WebkitMaskPosition: "center",
-        maskImage: "url(/logo.svg)",
-        maskSize: "contain",
-        maskRepeat: "no-repeat",
-        maskPosition: "center",
-       } as React.CSSProperties}
-       role="img"
-       aria-label="Prismo logo"
-      />
-      <span
-       className="text-xs font-normal"
-       style={{
-        color: activePalette.subTextColor,
-        fontFamily: "var(--font-satoshi), sans-serif",
-       }}
+      <a
+       href="https://prismo.live"
+       target="_blank"
+       rel="noopener noreferrer"
+       className="flex items-center gap-1.5 transition-opacity hover:opacity-80"
       >
-       PRISMO
-      </span>
-     </a>
-     <a
-      href={eventPageUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-1 text-[11px] font-medium transition-opacity hover:opacity-80"
-      style={{ color: activePalette.primaryColor }}
-     >
-      View Full Event Page
-      <ExternalLink className="h-3 w-3" />
-     </a>
-    </div>
+       <div
+        className="h-4 w-4 shrink-0"
+        style={{
+         backgroundColor: activePalette.subTextColor,
+         WebkitMaskImage: "url(/logo.svg)",
+         WebkitMaskSize: "contain",
+         WebkitMaskRepeat: "no-repeat",
+         WebkitMaskPosition: "center",
+         maskImage: "url(/logo.svg)",
+         maskSize: "contain",
+         maskRepeat: "no-repeat",
+         maskPosition: "center",
+        } as React.CSSProperties}
+        role="img"
+        aria-label="Prismo logo"
+       />
+       <span
+        className="text-xs font-normal"
+        style={{
+         color: activePalette.subTextColor,
+         fontFamily: "var(--font-satoshi), sans-serif",
+        }}
+       >
+        PRISMO
+       </span>
+      </a>
+      <a
+       href={eventPageUrl}
+       target="_blank"
+       rel="noopener noreferrer"
+       className="flex items-center gap-1 text-[11px] font-medium transition-opacity hover:opacity-80"
+       style={{ color: activePalette.primaryColor }}
+      >
+       View Full Event Page
+       <ExternalLink className="h-3 w-3" />
+      </a>
+     </div>
+    )}
    </div>
   </div>
  );

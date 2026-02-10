@@ -91,7 +91,7 @@ export default function EmbedCardLayout({
 
  return (
    <div
-    className="flex overflow-hidden rounded-xl border"
+    className="relative flex overflow-hidden rounded-xl border"
     style={{
      backgroundColor: palette.cardBackground,
      borderColor: palette.borderEnabled ? palette.borderColor : "transparent",
@@ -229,24 +229,60 @@ export default function EmbedCardLayout({
     )}
    </div>
 
-   {/* Right: CTA */}
-   {showSection("cta") && (
-    <div className="flex shrink-0 items-center pr-4">
-     <a
-      href={eventPageUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-2 text-xs font-semibold transition-opacity hover:opacity-90"
+    {/* Right: CTA */}
+    {showSection("cta") && (
+     <div className="flex shrink-0 items-center pr-4">
+      <a
+       href={eventPageUrl}
+       target="_blank"
+       rel="noopener noreferrer"
+       className="flex items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-2 text-xs font-semibold transition-opacity hover:opacity-90"
+       style={{
+        backgroundColor: palette.primaryColor,
+        color: palette.primaryForegroundColor,
+       }}
+      >
+       {event.acceptingNewTickets ? "Register" : "View"}
+       <ExternalLink className="h-3 w-3" />
+      </a>
+     </div>
+    )}
+
+    {/* Prismo logo — bottom right */}
+    <a
+     href="https://prismo.live"
+     target="_blank"
+     rel="noopener noreferrer"
+     className="absolute bottom-1.5 right-2 flex items-center gap-1 transition-opacity hover:opacity-80"
+    >
+     <div
+      className="h-3 w-3 shrink-0"
       style={{
-       backgroundColor: palette.primaryColor,
-       color: palette.primaryForegroundColor,
+       backgroundColor: palette.subTextColor,
+       opacity: 0.4,
+       WebkitMaskImage: "url(/logo.svg)",
+       WebkitMaskSize: "contain",
+       WebkitMaskRepeat: "no-repeat",
+       WebkitMaskPosition: "center",
+       maskImage: "url(/logo.svg)",
+       maskSize: "contain",
+       maskRepeat: "no-repeat",
+       maskPosition: "center",
+      } as React.CSSProperties}
+      role="img"
+      aria-label="Prismo logo"
+     />
+     <span
+      className="text-[9px] font-normal"
+      style={{
+       color: palette.subTextColor,
+       opacity: 0.4,
+       fontFamily: "var(--font-satoshi), sans-serif",
       }}
      >
-      {event.acceptingNewTickets ? "Register" : "View"}
-      <ExternalLink className="h-3 w-3" />
-     </a>
-    </div>
-   )}
-  </div>
+      PRISMO
+     </span>
+    </a>
+   </div>
  );
 }
