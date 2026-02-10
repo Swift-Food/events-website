@@ -161,19 +161,21 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
     {/* Left: Configuration */}
     <div className="min-w-0 space-y-5">
      {/* Layout Picker */}
-     <div className="rounded-lg border border-border bg-card-background p-4 space-y-3">
-      <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-       <LayoutTemplate className="h-4 w-4 text-primary" />
-       Layout
-      </h3>
+      <div className="rounded-2xl border border-white/5 bg-card-background p-5 sm:p-6 space-y-4">
+       <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+        <div className="rounded-lg bg-primary/10 p-1.5">
+         <LayoutTemplate className="h-4 w-4 text-primary" />
+        </div>
+        Layout
+       </h3>
       <div className="grid grid-cols-2 gap-3">
         <button
          onClick={() => setLayout("card")}
-         className={`flex flex-col items-center rounded-lg border-2 p-3 transition-all ${
-          layout === "card"
-           ? "border-primary bg-primary/10"
-           : "border-border hover:border-muted-foreground/30"
-         }`}
+          className={`flex flex-col items-center rounded-xl border-2 p-3 transition-all ${
+           layout === "card"
+            ? "border-primary bg-primary/10"
+            : "border-white/10 hover:border-white/20"
+          }`}
         >
          <div className="flex h-16 w-full items-center">
           <div className="flex h-10 w-full rounded border border-current/20 overflow-hidden">
@@ -193,11 +195,11 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
         </button>
        <button
         onClick={() => setLayout("full")}
-        className={`flex flex-col items-center gap-2 rounded-lg border-2 p-3 transition-all ${
-         layout === "full"
-          ? "border-primary bg-primary/10"
-          : "border-border hover:border-muted-foreground/30"
-        }`}
+         className={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all ${
+          layout === "full"
+           ? "border-primary bg-primary/10"
+           : "border-white/10 hover:border-white/20"
+         }`}
        >
         <div className="flex h-16 w-full rounded border border-current/20 overflow-hidden">
          <div className="flex-1 space-y-1 p-1.5">
@@ -217,11 +219,13 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
      </div>
 
      {/* Sections Toggle */}
-     <div className="rounded-lg border border-border bg-card-background p-4 space-y-3">
-      <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-       <Settings2 className="h-4 w-4 text-primary" />
-       Visible Sections
-      </h3>
+      <div className="rounded-2xl border border-white/5 bg-card-background p-5 sm:p-6 space-y-4">
+       <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+        <div className="rounded-lg bg-primary/10 p-1.5">
+         <Settings2 className="h-4 w-4 text-primary" />
+        </div>
+        Visible Sections
+       </h3>
        <div className="grid grid-cols-2 gap-2">
         {[...SECTION_OPTIONS].sort((a, b) => {
          if (layout === "card") {
@@ -238,13 +242,13 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
            key={section.id}
            onClick={() => toggleSection(section.id)}
            disabled={isDisabledForLayout}
-           className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-xs font-medium transition-all ${
-            isDisabledForLayout
-             ? "border-border/50 text-muted-foreground/30 cursor-not-allowed opacity-50"
-             : isEnabled
-              ? "border-primary/50 bg-primary/10 text-foreground"
-              : "border-border text-muted-foreground hover:border-muted-foreground/30"
-           }`}
+            className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm font-medium transition-all ${
+             isDisabledForLayout
+              ? "border-white/5 text-muted-foreground/30 cursor-not-allowed opacity-50"
+              : isEnabled
+               ? "border-primary/50 bg-primary/10 text-foreground"
+               : "border-white/10 text-muted-foreground hover:border-white/20"
+            }`}
           >
            <div
             className={`flex h-4 w-4 items-center justify-center rounded transition-colors ${
@@ -274,11 +278,13 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
      </div>
 
      {/* Theme Picker */}
-     <div className="rounded-lg border border-border bg-card-background p-4 space-y-3">
-      <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-       <Palette className="h-4 w-4 text-primary" />
-       Theme
-      </h3>
+      <div className="rounded-2xl border border-white/5 bg-card-background p-5 sm:p-6 space-y-4">
+       <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+        <div className="rounded-lg bg-primary/10 p-1.5">
+         <Palette className="h-4 w-4 text-primary" />
+        </div>
+        Theme
+       </h3>
       <div className="flex gap-2">
        {(
         [
@@ -290,11 +296,11 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
         <button
          key={opt.id}
          onClick={() => setTheme(opt.id)}
-         className={`flex flex-1 items-center gap-2 rounded-lg border-2 px-3 py-2 transition-all ${
-          theme === opt.id
-           ? "border-primary bg-primary/10"
-           : "border-border hover:border-muted-foreground/30"
-         }`}
+          className={`flex flex-1 items-center gap-2 rounded-xl border-2 px-3 py-2.5 transition-all ${
+           theme === opt.id
+            ? "border-primary bg-primary/10"
+            : "border-white/10 hover:border-white/20"
+          }`}
         >
          <div className="flex -space-x-1">
           {opt.colors.map((c, i) => (
@@ -305,11 +311,11 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
            />
           ))}
          </div>
-         <span
-          className={`text-xs font-medium ${
-           theme === opt.id ? "text-primary" : "text-muted-foreground"
-          }`}
-         >
+          <span
+           className={`text-sm font-medium ${
+            theme === opt.id ? "text-primary" : "text-muted-foreground"
+           }`}
+          >
           {opt.label}
          </span>
         </button>
@@ -318,34 +324,36 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
       </div>
 
       {/* Dimensions */}
-      <div className="rounded-lg border border-border bg-card-background p-4 space-y-3">
-       <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-        <Settings2 className="h-4 w-4 text-primary" />
-        Dimensions
-       </h3>
+       <div className="rounded-2xl border border-white/5 bg-card-background p-5 sm:p-6 space-y-4">
+        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+         <div className="rounded-lg bg-primary/10 p-1.5">
+          <Settings2 className="h-4 w-4 text-primary" />
+         </div>
+         Dimensions
+        </h3>
        <div className="grid grid-cols-2 gap-3">
         <div>
-         <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Width</label>
-         <input
-          type="text"
-          value={customWidth}
-          onChange={(e) => setCustomWidth(e.target.value)}
-          className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none"
-          placeholder="e.g. 100%, 500"
-         />
+          <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Width</label>
+          <input
+           type="text"
+           value={customWidth}
+           onChange={(e) => setCustomWidth(e.target.value)}
+           className="w-full rounded-lg border border-white/10 bg-card-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+           placeholder="e.g. 100%, 500"
+          />
         </div>
         <div>
-         <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Height</label>
-         <input
-          type="text"
-          value={customHeight}
-          onChange={(e) => setCustomHeight(e.target.value)}
-          className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none"
-          placeholder="e.g. 150, 800"
-         />
+          <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Height</label>
+          <input
+           type="text"
+           value={customHeight}
+           onChange={(e) => setCustomHeight(e.target.value)}
+           className="w-full rounded-lg border border-white/10 bg-card-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+           placeholder="e.g. 150, 800"
+          />
         </div>
        </div>
-       <p className="text-[10px] text-muted-foreground/60">
+        <p className="text-xs text-muted-foreground">
         Use numbers for pixels or include % for percentages. The resize script will auto-adjust height.
        </p>
       </div>
@@ -354,13 +362,15 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
      {/* Right: Preview + Code */}
     <div className="min-w-0 space-y-5">
      {/* Live Preview */}
-     <div className="rounded-lg border border-border bg-card-background p-4 space-y-3">
-      <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-       <Eye className="h-4 w-4 text-primary" />
-       Live Preview
-      </h3>
-      <div
-       className="flex items-start justify-center rounded-lg p-4"
+      <div className="rounded-2xl border border-white/5 bg-card-background p-5 sm:p-6 space-y-4">
+       <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+        <div className="rounded-lg bg-primary/10 p-1.5">
+         <Eye className="h-4 w-4 text-primary" />
+        </div>
+        Live Preview
+       </h3>
+       <div
+        className="flex items-start justify-center rounded-xl p-4"
           style={{
            backgroundColor: theme === "light" ? "#f3f4f6" : theme === "dark" ? "#0a0a0a" : "#1a1a2e",
            minHeight: "150px",
@@ -384,15 +394,17 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
      </div>
 
      {/* Embed Code */}
-     <div className="rounded-lg border border-border bg-card-background p-4 space-y-3">
-      <div className="flex items-center justify-between">
-       <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-        <Code className="h-4 w-4 text-primary" />
-        Embed Code
-       </h3>
+      <div className="rounded-2xl border border-white/5 bg-card-background p-5 sm:p-6 space-y-4">
+       <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+         <div className="rounded-lg bg-primary/10 p-1.5">
+          <Code className="h-4 w-4 text-primary" />
+         </div>
+         Embed Code
+        </h3>
        <button
         onClick={handleCopy}
-        className="flex items-center gap-1.5 rounded-lg border border-border bg-card-secondary-background px-3 py-1.5 text-xs font-medium text-foreground transition-all hover:bg-primary/10 hover:border-primary/50"
+         className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-card-secondary-background px-3 py-2 text-sm font-medium text-foreground transition-all hover:bg-primary/10 hover:border-primary/50"
        >
         {copied ? (
          <>
@@ -408,13 +420,13 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
        </button>
       </div>
       <div className="relative">
-       <pre className="overflow-x-auto rounded-lg bg-card-secondary-background p-3 text-xs text-muted-foreground font-mono leading-relaxed whitespace-pre-wrap break-all">
+        <pre className="overflow-x-auto rounded-xl bg-card-secondary-background p-4 text-sm text-muted-foreground font-mono leading-relaxed whitespace-pre-wrap break-all">
         <code>{iframeSnippetWithResize}</code>
        </pre>
       </div>
-      <div className="flex items-start gap-2 rounded-lg bg-primary/5 border border-primary/20 p-3">
-       <Info className="h-4 w-4 shrink-0 text-primary mt-0.5" />
-       <p className="text-xs text-muted-foreground leading-relaxed">
+       <div className="flex items-start gap-3 rounded-xl bg-primary/5 border border-primary/20 p-4">
+        <Info className="h-4 w-4 shrink-0 text-primary mt-0.5" />
+        <p className="text-sm text-muted-foreground leading-relaxed">
         Paste this code into your website&apos;s HTML where you want the event
         to appear. The resize script automatically adjusts the iframe height to
         fit the content. You can also adjust the <code className="text-primary">width</code> and{" "}
