@@ -72,6 +72,9 @@ export default function EmbedCardLayout({
  const showSection = (s: EmbedSection) => sections.has(s);
  const priceRange = getPriceRange(event.eventTickets);
 
+ // When all info sections are visible, content fills the card naturally — no need to split
+ const allInfoSections = showSection("time") && showSection("organizer") && showSection("location");
+
  const isVirtual = isVirtualEvent(event.format);
  const isHybrid = isHybridEvent(event.format);
 
@@ -127,9 +130,7 @@ export default function EmbedCardLayout({
      )}
 
     {/* Center: Details column */}
-    <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
-     {/* Top: info, pushed down to center */}
-     <div className="flex flex-1 flex-col justify-center gap-1.5">
+    <div className={`flex min-w-0 flex-1 flex-col gap-1.5 p-3 sm:p-4 ${allInfoSections ? "justify-center" : "justify-between"}`}>
       {/* Date & Time */}
       {showSection("time") && (
        <div
@@ -215,12 +216,11 @@ export default function EmbedCardLayout({
          </span>
         )}
        </div>
-      )}
-     </div>
+       )}
 
-     {/* Bottom: Price + CTA, always stuck to bottom */}
+      {/* Price + CTA row */}
      {(showSection("tickets") || showSection("cta")) && (
-      <div className="flex items-center gap-2 pt-1.5">
+      <div className="flex items-center gap-2">
        {showSection("tickets") && priceRange && (
         <div
          className="flex items-center gap-1 text-xs font-medium"
