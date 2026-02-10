@@ -25,6 +25,22 @@ export interface MinimalRestaurantOrder {
   restaurantName:string;
 }
 
+// Bundle Selection Types
+export interface BundleSelection {
+  bundleId: string;
+  quantity: number;
+}
+
+export interface BundleSelectionDetails {
+  bundleId: string;
+  bundleName: string;
+  quantity: number;
+  pricePerPerson: number;
+  baseGuestCount: number;
+  guestsServed: number;
+  bundleTotal: number;
+}
+
 export interface MealSession {
   sessionName?: string;
   sessionDate: string;
@@ -33,6 +49,7 @@ export interface MealSession {
   guestCount?: number;
   specialRequirements?: string;
   orderItems: MinimalRestaurantOrder[];
+  bundleSelections?: BundleSelection[];
 }
 
 export interface CreateCateringOrderDto {
@@ -110,6 +127,11 @@ export interface CateringOrder {
   pickupContactPhone?: string;
   pickupContactEmail?: string;
 
+  /**
+   * @deprecated Use mealSessions[].orderItems instead.
+   * This field is no longer written to by the backend.
+   * See: backend/docs/plans/2026-02-10-deprecate-order-orderItems.md
+   */
   orderItems?: MinimalRestaurantOrder[];
   mealSessions?: MealSession[];
 
@@ -158,6 +180,7 @@ export interface MealSessionRequest {
   guestCount?: number;
   specialRequirements?: string;
   orderItems: CateringRestaurantOrderRequest[];
+  bundleSelections?: BundleSelection[];
 }
 
 export interface CateringPricingRequest {
