@@ -97,162 +97,160 @@ export default function EmbedCardLayout({
      borderColor: palette.borderEnabled ? palette.borderColor : "transparent",
     }}
    >
-    {/* Left: Image — fixed square */}
-    {showSection("image") && (
+     {/* Left: Image — responsive square */}
+     {showSection("image") && (
+      <a
+       href={eventPageUrl}
+       target="_blank"
+       rel="noopener noreferrer"
+       className="relative block shrink-0 aspect-square w-[100px] sm:w-[140px]"
+      >
+       {event.eventImage ? (
+        <div className="relative h-full w-full overflow-hidden">
+         <Image
+          src={event.eventImage}
+          alt={event.name}
+          fill
+          className="object-cover transition-transform duration-300 hover:scale-105"
+          sizes="140px"
+         />
+        </div>
+       ) : (
+        <div
+         className="h-full w-full"
+         style={{
+          backgroundColor: event.eventColor || palette.primaryColor,
+         }}
+        />
+       )}
+      </a>
+     )}
+
+    {/* Center: Details + CTA */}
+    <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-3 sm:p-4">
+     {/* Date & Time */}
+     {showSection("time") && (
+      <div
+       className="flex items-center gap-1.5 text-xs"
+       style={{ color: palette.subTextColor }}
+      >
+       <Calendar className="h-3 w-3 shrink-0" style={{ color: palette.primaryColor }} />
+       <span>
+        {formatDateShort(event.startDateTime)} &middot;{" "}
+        {formatTime(event.startDateTime)} - {formatTime(event.endDateTime)}
+       </span>
+      </div>
+     )}
+
+     {/* Title */}
      <a
       href={eventPageUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="relative block shrink-0 aspect-square"
-      style={{ width: "140px" }}
+      className="block"
      >
-      {event.eventImage ? (
-       <div className="relative h-full w-full overflow-hidden">
-        <Image
-         src={event.eventImage}
-         alt={event.name}
-         fill
-         className="object-cover transition-transform duration-300 hover:scale-105"
-         sizes="140px"
-        />
-       </div>
-      ) : (
-       <div
-        className="h-full w-full"
-        style={{
-         backgroundColor: event.eventColor || palette.primaryColor,
-        }}
-       />
-      )}
+      <h2
+       className="text-sm font-bold font-heading leading-tight hover:underline line-clamp-2"
+       style={{ color: palette.mainTextColor }}
+      >
+       {event.name}
+      </h2>
      </a>
-    )}
 
-   {/* Center: Details */}
-   <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4">
-    {/* Date & Time */}
-    {showSection("time") && (
-     <div
-      className="flex items-center gap-1.5 text-xs"
-      style={{ color: palette.subTextColor }}
-     >
-      <Calendar className="h-3 w-3 shrink-0" style={{ color: palette.primaryColor }} />
-      <span>
-       {formatDateShort(event.startDateTime)} &middot;{" "}
-       {formatTime(event.startDateTime)} - {formatTime(event.endDateTime)}
-      </span>
-     </div>
-    )}
+     {/* Organizer */}
+     {showSection("organizer") && (
+      <div className="flex items-center gap-1.5">
+       {profilePicture ? (
+        <Image
+         src={profilePicture}
+         alt={ownerName}
+         width={16}
+         height={16}
+         className="rounded-full object-cover"
+        />
+       ) : (
+        <div
+         className="flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-semibold"
+         style={{
+          backgroundColor: palette.primaryColor,
+          color: palette.primaryForegroundColor,
+         }}
+        >
+         {ownerName.charAt(0).toUpperCase()}
+        </div>
+       )}
+       <span
+        className="text-[11px] font-medium truncate"
+        style={{ color: palette.subTextColor }}
+       >
+        {ownerName}
+       </span>
+      </div>
+     )}
 
-    {/* Title */}
-    <a
-     href={eventPageUrl}
-     target="_blank"
-     rel="noopener noreferrer"
-     className="block"
-    >
-     <h2
-      className="text-sm font-bold font-heading leading-tight hover:underline line-clamp-2"
-      style={{ color: palette.mainTextColor }}
-     >
-      {event.name}
-     </h2>
-    </a>
+     {/* Location */}
+     {showSection("location") && locationText && (
+      <div
+       className="flex items-center gap-1.5 text-xs"
+       style={{ color: palette.subTextColor }}
+      >
+       {isVirtual ? (
+        <Video className="h-3 w-3 shrink-0" style={{ color: palette.primaryColor }} />
+       ) : (
+        <MapPin className="h-3 w-3 shrink-0" style={{ color: palette.primaryColor }} />
+       )}
+       <span className="truncate text-[11px]">{locationText}</span>
+       {isHybrid && (
+        <span
+         className="ml-1 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-medium"
+         style={{
+          backgroundColor: palette.cardSecondaryBackground,
+          color: palette.primaryColor,
+         }}
+        >
+         <Globe className="h-2 w-2" />
+         Hybrid
+        </span>
+       )}
+      </div>
+     )}
 
-    {/* Organizer */}
-    {showSection("organizer") && (
-     <div className="flex items-center gap-1.5">
-      {profilePicture ? (
-       <Image
-        src={profilePicture}
-        alt={ownerName}
-        width={16}
-        height={16}
-        className="rounded-full object-cover"
-       />
-      ) : (
+     {/* Price + CTA inline */}
+     <div className="flex items-center gap-2">
+      {showSection("tickets") && priceRange && (
        <div
-        className="flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-semibold"
+        className="flex items-center gap-1 text-xs font-medium"
+        style={{ color: palette.mainTextColor }}
+       >
+        <Ticket className="h-3 w-3" style={{ color: palette.primaryColor }} />
+        <span className="text-[11px]">{priceRange}</span>
+       </div>
+      )}
+
+      {showSection("cta") && (
+       <a
+        href={eventPageUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="ml-auto flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-opacity hover:opacity-90"
         style={{
          backgroundColor: palette.primaryColor,
          color: palette.primaryForegroundColor,
         }}
        >
-        {ownerName.charAt(0).toUpperCase()}
-       </div>
-      )}
-      <span
-       className="text-[11px] font-medium truncate"
-       style={{ color: palette.subTextColor }}
-      >
-       {ownerName}
-      </span>
-     </div>
-    )}
-
-    {/* Location */}
-    {showSection("location") && locationText && (
-     <div
-      className="flex items-center gap-1.5 text-xs"
-      style={{ color: palette.subTextColor }}
-     >
-      {isVirtual ? (
-       <Video className="h-3 w-3 shrink-0" style={{ color: palette.primaryColor }} />
-      ) : (
-       <MapPin className="h-3 w-3 shrink-0" style={{ color: palette.primaryColor }} />
-      )}
-      <span className="truncate text-[11px]">{locationText}</span>
-      {isHybrid && (
-       <span
-        className="ml-1 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-medium"
-        style={{
-         backgroundColor: palette.cardSecondaryBackground,
-         color: palette.primaryColor,
-        }}
-       >
-        <Globe className="h-2 w-2" />
-        Hybrid
-       </span>
+        {event.acceptingNewTickets ? "Register" : "View"}
+        <ExternalLink className="h-3 w-3" />
+       </a>
       )}
      </div>
-    )}
+    </div>
 
-    {/* Price */}
-    {showSection("tickets") && priceRange && (
-     <div
-      className="flex items-center gap-1 text-xs font-medium"
-      style={{ color: palette.mainTextColor }}
-     >
-      <Ticket className="h-3 w-3" style={{ color: palette.primaryColor }} />
-      <span className="text-[11px]">{priceRange}</span>
-     </div>
-    )}
-   </div>
-
-    {/* Right: CTA */}
-    {showSection("cta") && (
-     <div className="flex shrink-0 items-center pr-4">
-      <a
-       href={eventPageUrl}
-       target="_blank"
-       rel="noopener noreferrer"
-       className="flex items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-2 text-xs font-semibold transition-opacity hover:opacity-90"
-       style={{
-        backgroundColor: palette.primaryColor,
-        color: palette.primaryForegroundColor,
-       }}
-      >
-       {event.acceptingNewTickets ? "Register" : "View"}
-       <ExternalLink className="h-3 w-3" />
-      </a>
-     </div>
-    )}
-
-    {/* Prismo logo — bottom right */}
+    {/* Prismo logo — top right */}
     <a
      href="https://prismo.live"
      target="_blank"
      rel="noopener noreferrer"
-     className="absolute bottom-1.5 right-2 flex items-center gap-1 transition-opacity hover:opacity-80"
+     className="absolute top-1.5 right-2 flex items-center gap-1 transition-opacity hover:opacity-80"
     >
      <div
       className="h-3 w-3 shrink-0"
