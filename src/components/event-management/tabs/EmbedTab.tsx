@@ -58,12 +58,14 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
  );
  const [copied, setCopied] = useState(false);
  const [baseUrl, setBaseUrl] = useState("");
+ const [customWidth, setCustomWidth] = useState("100%");
+ const [customHeight, setCustomHeight] = useState("150");
 
  useEffect(() => {
   setBaseUrl(window.location.origin);
  }, []);
 
- // When switching to card layout, remove sections that aren't supported
+ // When switching layout, remove unsupported sections and reset dimensions
  useEffect(() => {
   if (layout === "card") {
    setEnabledSections((prev) => {
@@ -71,6 +73,11 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
     CARD_DISABLED_SECTIONS.forEach((s) => next.delete(s));
     return next;
    });
+   setCustomWidth("100%");
+   setCustomHeight("150");
+  } else {
+   setCustomWidth("100%");
+   setCustomHeight("800");
   }
  }, [layout]);
 
@@ -109,8 +116,8 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
   return `${baseUrl}/embed/events/${eventData.id}${queryString ? `?${queryString}` : ""}`;
  }, [baseUrl, layout, enabledSections, theme, eventData.id]);
 
- const iframeWidth = "100%";
- const iframeHeight = layout === "card" ? "150" : "800";
+ const iframeWidth = customWidth;
+ const iframeHeight = customHeight;
 
  const iframeStyle = layout === "card"
   ? "border: none; border-radius: 12px; overflow: hidden;"
@@ -299,10 +306,43 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
         </button>
        ))}
       </div>
-     </div>
-    </div>
+      </div>
 
-    {/* Right: Preview + Code */}
+      {/* Dimensions */}
+      <div className="rounded-lg border border-border bg-card-background p-4 space-y-3">
+       <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+        <Settings2 className="h-4 w-4 text-primary" />
+        Dimensions
+       </h3>
+       <div className="grid grid-cols-2 gap-3">
+        <div>
+         <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Width</label>
+         <input
+          type="text"
+          value={customWidth}
+          onChange={(e) => setCustomWidth(e.target.value)}
+          className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none"
+          placeholder="e.g. 100%, 500"
+         />
+        </div>
+        <div>
+         <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Height</label>
+         <input
+          type="text"
+          value={customHeight}
+          onChange={(e) => setCustomHeight(e.target.value)}
+          className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none"
+          placeholder="e.g. 150, 800"
+         />
+        </div>
+       </div>
+       <p className="text-[10px] text-muted-foreground/60">
+        Use numbers for pixels or include % for percentages. The resize script will auto-adjust height.
+       </p>
+      </div>
+     </div>
+
+     {/* Right: Preview + Code */}
     <div className="min-w-0 space-y-5">
      {/* Live Preview */}
      <div className="rounded-lg border border-border bg-card-background p-4 space-y-3">
@@ -312,16 +352,16 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
       </h3>
       <div
        className="flex items-start justify-center rounded-lg p-4"
-         style={{
-          backgroundColor: theme === "light" ? "#f3f4f6" : theme === "dark" ? "#0a0a0a" : "#1a1a2e",
-          minHeight: layout === "card" ? "150px" : "600px",
-         }}
-        >
-          {embedUrl && (
-           <iframe
-            src={embedUrl}
-            width="100%"
-            height={layout === "card" ? "150" : "800"}
+          style={{
+           backgroundColor: theme === "light" ? "#f3f4f6" : theme === "dark" ? "#0a0a0a" : "#1a1a2e",
+           minHeight: "150px",
+          }}
+         >
+           {embedUrl && (
+            <iframe
+             src={embedUrl}
+             width="100%"
+             height={customHeight}
           style={{
            border: "none",
            borderRadius: "12px",
