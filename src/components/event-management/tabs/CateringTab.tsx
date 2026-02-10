@@ -620,7 +620,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
               <span className="text-foreground">
-                ${pricing?.subtotal ?? calculateGrandTotal()}
+                £{pricing?.subtotal ?? calculateGrandTotal()}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">
@@ -628,7 +628,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
               {isLoadingPricing ? (
                 <span className="text-muted-foreground">Calculating...</span>
               ) : pricing?.deliveryFee !== undefined ? (
-                <span className="text-foreground">${pricing.deliveryFee.toFixed(2)}</span>
+                <span className="text-foreground">£{pricing.deliveryFee.toFixed(2)}</span>
               ) : (
                 <span className="text-muted-foreground">--</span>
               )}
@@ -636,7 +636,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
             {pricing &&(pricing.totalDiscount ?? 0) > 0 && (
               <div className="flex items-center justify-between text-sm">
                 <span className="text-green-400">Discount</span>
-                <span className="text-green-400">-${pricing.totalDiscount}</span>
+                <span className="text-green-400">-£{pricing.totalDiscount}</span>
               </div>
             )}
             <div className="flex items-center justify-between pt-2 border-t border-white/5">
@@ -645,7 +645,7 @@ export function CateringTab({ eventData }: CateringTabProps) {
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
               ) : (
                 <span className="text-xl font-bold text-primary">
-                  ${pricing?.total ?? calculateGrandTotal()}
+                  £{pricing?.total ?? calculateGrandTotal()}
                 </span>
               )}
             </div>
