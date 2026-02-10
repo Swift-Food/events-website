@@ -90,43 +90,43 @@ export default function EmbedCardLayout({
  })();
 
  return (
-  <div
-   className="flex overflow-hidden rounded-xl border"
-   style={{
-    backgroundColor: palette.cardBackground,
-    borderColor: palette.borderEnabled ? palette.borderColor : "transparent",
-   }}
-  >
-   {/* Left: Image */}
-   {showSection("image") && (
-    <a
-     href={eventPageUrl}
-     target="_blank"
-     rel="noopener noreferrer"
-     className="relative block shrink-0"
-     style={{ width: "180px" }}
-    >
-     {event.eventImage ? (
-      <div className="relative h-full w-full overflow-hidden">
-       <Image
-        src={event.eventImage}
-        alt={event.name}
-        fill
-        className="object-cover transition-transform duration-300 hover:scale-105"
-        sizes="180px"
+   <div
+    className="flex overflow-hidden rounded-xl border"
+    style={{
+     backgroundColor: palette.cardBackground,
+     borderColor: palette.borderEnabled ? palette.borderColor : "transparent",
+     minHeight: "140px",
+    }}
+   >
+    {/* Left: Image — fixed square */}
+    {showSection("image") && (
+     <a
+      href={eventPageUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="relative block shrink-0 aspect-square"
+      style={{ width: "140px" }}
+     >
+      {event.eventImage ? (
+       <div className="relative h-full w-full overflow-hidden">
+        <Image
+         src={event.eventImage}
+         alt={event.name}
+         fill
+         className="object-cover transition-transform duration-300 hover:scale-105"
+         sizes="140px"
+        />
+       </div>
+      ) : (
+       <div
+        className="h-full w-full"
+        style={{
+         backgroundColor: event.eventColor || palette.primaryColor,
+        }}
        />
-      </div>
-     ) : (
-      <div
-       className="h-full w-full"
-       style={{
-        backgroundColor: event.eventColor || palette.primaryColor,
-        minHeight: "140px",
-       }}
-      />
-     )}
-    </a>
-   )}
+      )}
+     </a>
+    )}
 
    {/* Center: Details */}
    <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4">
