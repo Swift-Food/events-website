@@ -8,7 +8,6 @@ import {
  Copy,
  Check,
  LayoutTemplate,
- PanelTop,
  Eye,
  Palette,
  Settings2,
@@ -23,7 +22,7 @@ import {
  Info,
 } from "lucide-react";
 
-type EmbedLayout = "card" | "banner";
+type EmbedLayout = "card" | "full";
 type EmbedTheme = "event" | "light" | "dark";
 
 interface SectionOption {
@@ -94,8 +93,8 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
   return `${baseUrl}/embed/events/${eventData.id}${queryString ? `?${queryString}` : ""}`;
  }, [baseUrl, layout, enabledSections, theme, eventData.id]);
 
- const iframeWidth = layout === "card" ? "400" : "100%";
- const iframeHeight = layout === "card" ? "520" : "180";
+ const iframeWidth = "100%";
+ const iframeHeight = layout === "card" ? "180" : "800";
 
  const iframeSnippet = useMemo(() => {
   if (!embedUrl) return "";
@@ -141,46 +140,48 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
        Layout
       </h3>
       <div className="grid grid-cols-2 gap-3">
+        <button
+         onClick={() => setLayout("card")}
+         className={`flex flex-col items-center gap-2 rounded-lg border-2 p-3 transition-all ${
+          layout === "card"
+           ? "border-primary bg-primary/10"
+           : "border-border hover:border-muted-foreground/30"
+         }`}
+        >
+         <div className="flex h-10 w-full rounded border border-current/20 overflow-hidden">
+          <div className="w-10 bg-current/10" />
+          <div className="flex-1 space-y-1 p-1">
+           <div className="h-1 w-full rounded bg-current/20" />
+           <div className="h-1 w-3/4 rounded bg-current/10" />
+          </div>
+          <div className="flex items-center px-1">
+           <div className="h-3 w-6 rounded bg-current/15" />
+          </div>
+         </div>
+         <span className={`text-xs font-medium ${layout === "card" ? "text-primary" : "text-muted-foreground"}`}>
+          Card
+         </span>
+        </button>
        <button
-        onClick={() => setLayout("card")}
+        onClick={() => setLayout("full")}
         className={`flex flex-col items-center gap-2 rounded-lg border-2 p-3 transition-all ${
-         layout === "card"
+         layout === "full"
           ? "border-primary bg-primary/10"
           : "border-border hover:border-muted-foreground/30"
         }`}
        >
-        <div className="flex h-16 w-12 flex-col rounded border border-current/20 overflow-hidden">
-         <div className="h-6 bg-current/10" />
-         <div className="flex-1 space-y-1 p-1">
-          <div className="h-1 w-full rounded bg-current/20" />
-          <div className="h-1 w-3/4 rounded bg-current/10" />
+        <div className="flex h-16 w-full rounded border border-current/20 overflow-hidden">
+         <div className="flex-1 space-y-1 p-1.5">
+          <div className="h-1.5 w-3/4 rounded bg-current/20" />
           <div className="h-1 w-1/2 rounded bg-current/10" />
+          <div className="h-1 w-full rounded bg-current/10" />
+          <div className="h-1 w-2/3 rounded bg-current/10" />
+          <div className="mt-1 h-2 w-10 rounded bg-current/15" />
          </div>
-        </div>
-        <span className={`text-xs font-medium ${layout === "card" ? "text-primary" : "text-muted-foreground"}`}>
-         Card
-        </span>
-       </button>
-       <button
-        onClick={() => setLayout("banner")}
-        className={`flex flex-col items-center gap-2 rounded-lg border-2 p-3 transition-all ${
-         layout === "banner"
-          ? "border-primary bg-primary/10"
-          : "border-border hover:border-muted-foreground/30"
-        }`}
-       >
-        <div className="flex h-10 w-full rounded border border-current/20 overflow-hidden">
          <div className="w-10 bg-current/10" />
-         <div className="flex-1 space-y-1 p-1">
-          <div className="h-1 w-full rounded bg-current/20" />
-          <div className="h-1 w-3/4 rounded bg-current/10" />
-         </div>
-         <div className="flex items-center px-1">
-          <div className="h-3 w-6 rounded bg-current/15" />
-         </div>
         </div>
-        <span className={`text-xs font-medium ${layout === "banner" ? "text-primary" : "text-muted-foreground"}`}>
-         Banner
+        <span className={`text-xs font-medium ${layout === "full" ? "text-primary" : "text-muted-foreground"}`}>
+         Full Page
         </span>
        </button>
       </div>
@@ -283,16 +284,16 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
       </h3>
       <div
        className="flex items-start justify-center rounded-lg p-4"
-       style={{
-        backgroundColor: theme === "light" ? "#f3f4f6" : theme === "dark" ? "#0a0a0a" : "#1a1a2e",
-        minHeight: layout === "card" ? "400px" : "180px",
-       }}
-      >
-       {embedUrl && (
-        <iframe
-         src={embedUrl}
-         width={layout === "card" ? "380" : "100%"}
-         height={layout === "card" ? "520" : "180"}
+         style={{
+          backgroundColor: theme === "light" ? "#f3f4f6" : theme === "dark" ? "#0a0a0a" : "#1a1a2e",
+          minHeight: layout === "card" ? "180px" : "600px",
+         }}
+        >
+         {embedUrl && (
+          <iframe
+           src={embedUrl}
+           width="100%"
+           height={layout === "card" ? "180" : "800"}
          style={{
           border: "none",
           borderRadius: "12px",

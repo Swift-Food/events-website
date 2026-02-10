@@ -6,8 +6,9 @@ import { useEventTheme } from "@/context/EventThemeContext";
 import { getThemeCSSVariables } from "@/lib/theme-presets";
 import type { ColorPalette } from "@/types/event/theme";
 import EventThemeBackground from "@/components/theme/EventThemeBackground";
+import { ExternalLink } from "lucide-react";
 import EmbedCardLayout from "./EmbedCardLayout";
-import EmbedBannerLayout from "./EmbedBannerLayout";
+import EmbedFullPageLayout from "./EmbedFullPageLayout";
 
 const LIGHT_PALETTE: ColorPalette = {
  pageBackground: "#ffffff",
@@ -124,7 +125,7 @@ export default function EmbedClient({
   ? `${window.location.origin.replace("/embed", "")}/events/${event.eventUrl || event.id}`
   : `/events/${event.eventUrl || event.id}`;
 
- const isCard = layout !== "banner";
+ const isFullPage = layout === "full";
 
  return (
   <div
@@ -147,8 +148,8 @@ export default function EmbedClient({
 
     {/* Content sits above the background */}
     <div className="relative z-10">
-    {isCard ? (
-     <EmbedCardLayout
+    {isFullPage ? (
+     <EmbedFullPageLayout
       event={event}
       sections={visibleSections}
       eventPageUrl={eventPageUrl}
@@ -156,7 +157,7 @@ export default function EmbedClient({
       hasVisualTheme={useEventThemeBackground && themeConfig.type !== "solid"}
      />
     ) : (
-     <EmbedBannerLayout
+     <EmbedCardLayout
       event={event}
       sections={visibleSections}
       eventPageUrl={eventPageUrl}
@@ -165,15 +166,52 @@ export default function EmbedClient({
      />
     )}
 
-    {/* Powered by Prismo */}
-    <div className="flex justify-center py-2">
+    {/* Footer bar: Prismo logo left, View Full Event Page right */}
+    <div
+     className="flex items-center justify-between px-4 py-2"
+     style={{ borderTop: `1px solid ${activePalette.borderEnabled ? activePalette.borderColor : 'transparent'}` }}
+    >
      <a
       href="https://prismo.live"
       target="_blank"
       rel="noopener noreferrer"
-      className="text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+      className="flex items-center gap-1.5 transition-opacity hover:opacity-80"
      >
-      Powered by Prismo
+      <div
+       className="h-4 w-4 shrink-0"
+       style={{
+        backgroundColor: activePalette.subTextColor,
+        WebkitMaskImage: "url(/logo.svg)",
+        WebkitMaskSize: "contain",
+        WebkitMaskRepeat: "no-repeat",
+        WebkitMaskPosition: "center",
+        maskImage: "url(/logo.svg)",
+        maskSize: "contain",
+        maskRepeat: "no-repeat",
+        maskPosition: "center",
+       } as React.CSSProperties}
+       role="img"
+       aria-label="Prismo logo"
+      />
+      <span
+       className="text-xs font-normal"
+       style={{
+        color: activePalette.subTextColor,
+        fontFamily: "var(--font-satoshi), sans-serif",
+       }}
+      >
+       PRISMO
+      </span>
+     </a>
+     <a
+      href={eventPageUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-1 text-[11px] font-medium transition-opacity hover:opacity-80"
+      style={{ color: activePalette.primaryColor }}
+     >
+      View Full Event Page
+      <ExternalLink className="h-3 w-3" />
      </a>
     </div>
    </div>

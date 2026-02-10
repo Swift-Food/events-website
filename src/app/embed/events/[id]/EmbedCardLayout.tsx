@@ -1,20 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import { EventResponseDto, EventFormat } from "@/types/event";
+import { EventResponseDto } from "@/types/event";
 import { isVirtualEvent, isHybridEvent } from "@/types/event/status";
 import type { ColorPalette } from "@/types/event/theme";
 import type { EmbedSection } from "./EmbedClient";
 import {
  Calendar,
- Clock,
  MapPin,
  User,
- Tag,
- Ticket,
  ExternalLink,
  Video,
  Globe,
+ Ticket,
 } from "lucide-react";
 
 interface EmbedCardLayoutProps {
@@ -25,13 +23,12 @@ interface EmbedCardLayoutProps {
  hasVisualTheme?: boolean;
 }
 
-function formatDate(date: string | Date): string {
+function formatDateShort(date: string | Date): string {
  const d = new Date(date);
  return d.toLocaleDateString("en-GB", {
   weekday: "short",
   day: "numeric",
   month: "short",
-  year: "numeric",
  });
 }
 
@@ -74,9 +71,6 @@ export default function EmbedCardLayout({
 }: EmbedCardLayoutProps) {
  const showSection = (s: EmbedSection) => sections.has(s);
  const priceRange = getPriceRange(event.eventTickets);
- const plainDescription = event.description
-  ? stripHtml(event.description)
-  : "";
 
  const isVirtual = isVirtualEvent(event.format);
  const isHybrid = isHybridEvent(event.format);
@@ -97,54 +91,56 @@ export default function EmbedCardLayout({
 
  return (
   <div
-   className="overflow-hidden rounded-xl border"
+   className="flex overflow-hidden rounded-xl border"
    style={{
     backgroundColor: palette.cardBackground,
     borderColor: palette.borderEnabled ? palette.borderColor : "transparent",
    }}
   >
-   {/* Event Image */}
+   {/* Left: Image */}
    {showSection("image") && (
     <a
      href={eventPageUrl}
      target="_blank"
      rel="noopener noreferrer"
-     className="block"
+     className="relative block shrink-0"
+     style={{ width: "180px" }}
     >
      {event.eventImage ? (
-      <div className="relative aspect-[16/9] w-full overflow-hidden">
+      <div className="relative h-full w-full overflow-hidden">
        <Image
         src={event.eventImage}
         alt={event.name}
         fill
         className="object-cover transition-transform duration-300 hover:scale-105"
-        sizes="400px"
+        sizes="180px"
        />
       </div>
      ) : (
       <div
-       className="aspect-[16/9] w-full"
-       style={{ backgroundColor: event.eventColor || palette.primaryColor }}
+       className="h-full w-full"
+       style={{
+        backgroundColor: event.eventColor || palette.primaryColor,
+        minHeight: "140px",
+       }}
       />
      )}
     </a>
    )}
 
-   {/* Content */}
-   <div className="p-4 space-y-3">
+   {/* Center: Details */}
+   <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4">
     {/* Date & Time */}
     {showSection("time") && (
-     <div className="flex items-center gap-3 text-xs" style={{ color: palette.subTextColor }}>
-      <div className="flex items-center gap-1.5">
-       <Calendar className="h-3.5 w-3.5 shrink-0" style={{ color: palette.primaryColor }} />
-       <span>{formatDate(event.startDateTime)}</span>
-      </div>
-      <div className="flex items-center gap-1.5">
-       <Clock className="h-3.5 w-3.5 shrink-0" style={{ color: palette.primaryColor }} />
-       <span>
-        {formatTime(event.startDateTime)} - {formatTime(event.endDateTime)}
-       </span>
-      </div>
+     <div
+      className="flex items-center gap-1.5 text-xs"
+      style={{ color: palette.subTextColor }}
+     >
+      <Calendar className="h-3 w-3 shrink-0" style={{ color: palette.primaryColor }} />
+      <span>
+       {formatDateShort(event.startDateTime)} &middot;{" "}
+       {formatTime(event.startDateTime)} - {formatTime(event.endDateTime)}
+      </span>
      </div>
     )}
 
@@ -156,7 +152,7 @@ export default function EmbedCardLayout({
      className="block"
     >
      <h2
-      className="text-base font-bold font-heading leading-tight hover:underline"
+      className="text-sm font-bold font-heading leading-tight hover:underline line-clamp-2"
       style={{ color: palette.mainTextColor }}
      >
       {event.name}
@@ -165,18 +161,18 @@ export default function EmbedCardLayout({
 
     {/* Organizer */}
     {showSection("organizer") && (
-     <div className="flex items-center gap-2">
+     <div className="flex items-center gap-1.5">
       {profilePicture ? (
        <Image
         src={profilePicture}
         alt={ownerName}
-        width={20}
-        height={20}
+        width={16}
+        height={16}
         className="rounded-full object-cover"
        />
       ) : (
        <div
-        className="flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold"
+        className="flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-semibold"
         style={{
          backgroundColor: palette.primaryColor,
          color: palette.primaryForegroundColor,
@@ -186,7 +182,7 @@ export default function EmbedCardLayout({
        </div>
       )}
       <span
-       className="text-xs font-medium"
+       className="text-[11px] font-medium truncate"
        style={{ color: palette.subTextColor }}
       >
        {ownerName}
@@ -201,92 +197,56 @@ export default function EmbedCardLayout({
       style={{ color: palette.subTextColor }}
      >
       {isVirtual ? (
-       <Video className="h-3.5 w-3.5 shrink-0" style={{ color: palette.primaryColor }} />
+       <Video className="h-3 w-3 shrink-0" style={{ color: palette.primaryColor }} />
       ) : (
-       <MapPin className="h-3.5 w-3.5 shrink-0" style={{ color: palette.primaryColor }} />
+       <MapPin className="h-3 w-3 shrink-0" style={{ color: palette.primaryColor }} />
       )}
-      <span className="truncate">{locationText}</span>
+      <span className="truncate text-[11px]">{locationText}</span>
       {isHybrid && (
        <span
-        className="ml-1 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+        className="ml-1 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-medium"
         style={{
          backgroundColor: palette.cardSecondaryBackground,
          color: palette.primaryColor,
         }}
        >
-        <Globe className="h-2.5 w-2.5" />
+        <Globe className="h-2 w-2" />
         Hybrid
        </span>
       )}
      </div>
     )}
 
-    {/* Description */}
-    {showSection("description") && plainDescription && (
-     <p
-      className="text-xs leading-relaxed line-clamp-3"
-      style={{ color: palette.subTextColor }}
-     >
-      {plainDescription}
-     </p>
-    )}
-
-    {/* Categories */}
-    {showSection("categories") && event.categories && event.categories.length > 0 && (
-     <div className="flex flex-wrap gap-1.5">
-      {event.categories.slice(0, 3).map((cat) => (
-       <span
-        key={cat.id}
-        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium"
-        style={{
-         backgroundColor: palette.cardSecondaryBackground,
-         color: palette.subTextColor,
-         border: palette.borderEnabled ? `1px solid ${palette.borderColor}` : "none",
-        }}
-       >
-        <Tag className="h-2.5 w-2.5" />
-        {cat.name}
-       </span>
-      ))}
-      {event.categories.length > 3 && (
-       <span
-        className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium"
-        style={{ color: palette.subTextColor }}
-       >
-        +{event.categories.length - 3} more
-       </span>
-      )}
-     </div>
-    )}
-
-    {/* Tickets / Price */}
+    {/* Price */}
     {showSection("tickets") && priceRange && (
      <div
-      className="flex items-center gap-1.5 text-xs font-medium"
+      className="flex items-center gap-1 text-xs font-medium"
       style={{ color: palette.mainTextColor }}
      >
-      <Ticket className="h-3.5 w-3.5" style={{ color: palette.primaryColor }} />
-      <span>{priceRange}</span>
+      <Ticket className="h-3 w-3" style={{ color: palette.primaryColor }} />
+      <span className="text-[11px]">{priceRange}</span>
      </div>
     )}
+   </div>
 
-    {/* CTA Button */}
-    {showSection("cta") && (
+   {/* Right: CTA */}
+   {showSection("cta") && (
+    <div className="flex shrink-0 items-center pr-4">
      <a
       href={eventPageUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
+      className="flex items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-2 text-xs font-semibold transition-opacity hover:opacity-90"
       style={{
        backgroundColor: palette.primaryColor,
        color: palette.primaryForegroundColor,
       }}
      >
-      {event.acceptingNewTickets ? "Register" : "View Event"}
-      <ExternalLink className="h-3.5 w-3.5" />
+      {event.acceptingNewTickets ? "Register" : "View"}
+      <ExternalLink className="h-3 w-3" />
      </a>
-    )}
-   </div>
+    </div>
+   )}
   </div>
  );
 }
