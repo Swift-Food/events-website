@@ -143,27 +143,28 @@ export default function EmbedClient({
 
  const isFullPage = layout === "full";
 
- return (
-  <div
-   ref={containerRef}
-   style={{
-    ...(cssVars as React.CSSProperties),
-    backgroundColor: activePalette.pageBackground,
-   }}
-   className={`relative font-sans ${isFullPage ? "" : "overflow-hidden rounded-xl"}`}
-  >
-   {/* Theme background — rendered behind content */}
-   {useEventThemeBackground && (
-    <EventThemeBackground
-     config={themeConfig}
-     palette={activePalette}
-     shader={shader}
-     landscape={landscape}
-    />
-   )}
+  return (
+   <div
+    ref={containerRef}
+     style={{
+      ...(cssVars as React.CSSProperties),
+      backgroundColor: activePalette.pageBackground,
+      ...(!isFullPage ? { height: "100vh", overflow: "hidden" } : {}),
+     }}
+     className={`relative font-sans ${isFullPage ? "" : "overflow-hidden rounded-xl"}`}
+    >
+     {/* Theme background */}
+     {useEventThemeBackground && (
+     <EventThemeBackground
+      config={themeConfig}
+      palette={activePalette}
+      shader={shader}
+      landscape={landscape}
+     />
+    )}
 
-    {/* Content sits above the background */}
-    <div className="relative z-10">
+     {/* Content sits above the background */}
+     <div className={`relative z-10 ${isFullPage ? "" : "h-[100vh] overflow-hidden"}`}>
     {isFullPage ? (
      <EmbedFullPageLayout
       event={event}

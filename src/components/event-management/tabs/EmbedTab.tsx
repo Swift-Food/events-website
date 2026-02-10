@@ -110,7 +110,7 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
  }, [baseUrl, layout, enabledSections, theme, eventData.id]);
 
  const iframeWidth = "100%";
- const iframeHeight = layout === "card" ? "180" : "800";
+ const iframeHeight = layout === "card" ? "150" : "800";
 
  const iframeStyle = layout === "card"
   ? "border: none; border-radius: 12px; overflow: hidden;"
@@ -314,14 +314,14 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
        className="flex items-start justify-center rounded-lg p-4"
          style={{
           backgroundColor: theme === "light" ? "#f3f4f6" : theme === "dark" ? "#0a0a0a" : "#1a1a2e",
-          minHeight: layout === "card" ? "180px" : "600px",
+          minHeight: layout === "card" ? "150px" : "600px",
          }}
         >
           {embedUrl && (
            <iframe
             src={embedUrl}
             width="100%"
-            height={layout === "card" ? "180" : "800"}
+            height={layout === "card" ? "150" : "800"}
           style={{
            border: "none",
            borderRadius: "12px",

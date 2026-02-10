@@ -91,11 +91,10 @@ export default function EmbedCardLayout({
 
  return (
    <div
-    className="relative flex overflow-hidden rounded-xl border"
+    className="relative flex h-[100vh] overflow-hidden rounded-xl border"
     style={{
      backgroundColor: palette.cardBackground,
      borderColor: palette.borderEnabled ? palette.borderColor : "transparent",
-     minHeight: "140px",
     }}
    >
     {/* Left: Image — fixed square */}
