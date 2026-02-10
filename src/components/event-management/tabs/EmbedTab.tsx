@@ -223,7 +223,14 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
        Visible Sections
       </h3>
        <div className="grid grid-cols-2 gap-2">
-        {SECTION_OPTIONS.map((section) => {
+        {[...SECTION_OPTIONS].sort((a, b) => {
+         if (layout === "card") {
+          const aDisabled = CARD_DISABLED_SECTIONS.has(a.id) ? 1 : 0;
+          const bDisabled = CARD_DISABLED_SECTIONS.has(b.id) ? 1 : 0;
+          return aDisabled - bDisabled;
+         }
+         return 0;
+        }).map((section) => {
          const isDisabledForLayout = layout === "card" && CARD_DISABLED_SECTIONS.has(section.id);
          const isEnabled = !isDisabledForLayout && enabledSections.has(section.id);
          return (
