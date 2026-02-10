@@ -20,6 +20,7 @@ interface EmbedBannerLayoutProps {
  sections: Set<EmbedSection>;
  eventPageUrl: string;
  palette: ColorPalette;
+ hasVisualTheme?: boolean;
 }
 
 function formatDateShort(date: string | Date): string {
@@ -66,6 +67,7 @@ export default function EmbedBannerLayout({
  sections,
  eventPageUrl,
  palette,
+ hasVisualTheme = false,
 }: EmbedBannerLayoutProps) {
  const showSection = (s: EmbedSection) => sections.has(s);
  const priceRange = getPriceRange(event.eventTickets);
@@ -89,9 +91,11 @@ export default function EmbedBannerLayout({
 
  return (
   <div
-   className="flex overflow-hidden rounded-xl border"
+   className={`flex overflow-hidden rounded-xl border ${hasVisualTheme ? "backdrop-blur-xl" : ""}`}
    style={{
-    backgroundColor: palette.cardBackground,
+    backgroundColor: hasVisualTheme
+     ? `${palette.cardBackground}cc`
+     : palette.cardBackground,
     borderColor: palette.borderEnabled ? palette.borderColor : "transparent",
    }}
   >

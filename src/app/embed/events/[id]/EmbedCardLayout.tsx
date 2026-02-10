@@ -22,6 +22,7 @@ interface EmbedCardLayoutProps {
  sections: Set<EmbedSection>;
  eventPageUrl: string;
  palette: ColorPalette;
+ hasVisualTheme?: boolean;
 }
 
 function formatDate(date: string | Date): string {
@@ -69,6 +70,7 @@ export default function EmbedCardLayout({
  sections,
  eventPageUrl,
  palette,
+ hasVisualTheme = false,
 }: EmbedCardLayoutProps) {
  const showSection = (s: EmbedSection) => sections.has(s);
  const priceRange = getPriceRange(event.eventTickets);
@@ -95,9 +97,11 @@ export default function EmbedCardLayout({
 
  return (
   <div
-   className="overflow-hidden rounded-xl border"
+   className={`overflow-hidden rounded-xl border ${hasVisualTheme ? "backdrop-blur-xl" : ""}`}
    style={{
-    backgroundColor: palette.cardBackground,
+    backgroundColor: hasVisualTheme
+     ? `${palette.cardBackground}cc`
+     : palette.cardBackground,
     borderColor: palette.borderEnabled ? palette.borderColor : "transparent",
    }}
   >

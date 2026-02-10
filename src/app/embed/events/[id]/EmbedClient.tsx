@@ -5,6 +5,7 @@ import { EventResponseDto } from "@/types/event";
 import { useEventTheme } from "@/context/EventThemeContext";
 import { getThemeCSSVariables } from "@/lib/theme-presets";
 import type { ColorPalette } from "@/types/event/theme";
+import EventThemeBackground from "@/components/theme/EventThemeBackground";
 import EmbedCardLayout from "./EmbedCardLayout";
 import EmbedBannerLayout from "./EmbedBannerLayout";
 
@@ -67,7 +68,8 @@ export default function EmbedClient({
  theme,
 }: EmbedClientProps) {
  const containerRef = useRef<HTMLDivElement>(null);
- const { palette: eventPalette } = useEventTheme();
+ const { config: themeConfig, palette: eventPalette, shader, landscape } = useEventTheme();
+ const useEventThemeBackground = theme === "event";
 
  const visibleSections = useMemo<Set<EmbedSection>>(() => {
   if (!show || show === "all") return new Set(ALL_SECTIONS);
@@ -122,34 +124,49 @@ export default function EmbedClient({
   <div
    ref={containerRef}
    style={cssVars as React.CSSProperties}
-   className="font-sans"
+   className="relative overflow-hidden rounded-xl font-sans"
   >
-   {isCard ? (
-    <EmbedCardLayout
-     event={event}
-     sections={visibleSections}
-     eventPageUrl={eventPageUrl}
+   {/* Theme background — rendered behind content */}
+   {useEventThemeBackground && (
+    <EventThemeBackground
+     config={themeConfig}
      palette={activePalette}
-    />
-   ) : (
-    <EmbedBannerLayout
-     event={event}
-     sections={visibleSections}
-     eventPageUrl={eventPageUrl}
-     palette={activePalette}
+     shader={shader}
+     landscape={landscape}
     />
    )}
 
-   {/* Powered by Prismo */}
-   <div className="flex justify-center py-2">
-    <a
-     href="https://prismo.live"
-     target="_blank"
-     rel="noopener noreferrer"
-     className="text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-    >
-     Powered by Prismo
-    </a>
+   {/* Content sits above the background */}
+   <div className="relative z-10">
+    {isCard ? (
+     <EmbedCardLayout
+      event={event}
+      sections={visibleSections}
+      eventPageUrl={eventPageUrl}
+      palette={activePalette}
+      hasVisualTheme={useEventThemeBackground && themeConfig.type !== "solid"}
+     />
+    ) : (
+     <EmbedBannerLayout
+      event={event}
+      sections={visibleSections}
+      eventPageUrl={eventPageUrl}
+      palette={activePalette}
+      hasVisualTheme={useEventThemeBackground && themeConfig.type !== "solid"}
+     />
+    )}
+
+    {/* Powered by Prismo */}
+    <div className="flex justify-center py-2">
+     <a
+      href="https://prismo.live"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+     >
+      Powered by Prismo
+     </a>
+    </div>
    </div>
   </div>
  );
