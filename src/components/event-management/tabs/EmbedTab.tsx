@@ -169,23 +169,25 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
       <div className="grid grid-cols-2 gap-3">
         <button
          onClick={() => setLayout("card")}
-         className={`flex flex-col items-center gap-2 rounded-lg border-2 p-3 transition-all ${
+         className={`flex flex-col items-center rounded-lg border-2 p-3 transition-all ${
           layout === "card"
            ? "border-primary bg-primary/10"
            : "border-border hover:border-muted-foreground/30"
          }`}
         >
-         <div className="flex h-10 w-full rounded border border-current/20 overflow-hidden">
-          <div className="w-10 bg-current/10" />
-          <div className="flex-1 space-y-1 p-1">
-           <div className="h-1 w-full rounded bg-current/20" />
-           <div className="h-1 w-3/4 rounded bg-current/10" />
-          </div>
-          <div className="flex items-center px-1">
-           <div className="h-3 w-6 rounded bg-current/15" />
+         <div className="flex h-16 w-full items-center">
+          <div className="flex h-10 w-full rounded border border-current/20 overflow-hidden">
+           <div className="w-10 bg-current/10" />
+           <div className="flex-1 space-y-1 p-1">
+            <div className="h-1 w-full rounded bg-current/20" />
+            <div className="h-1 w-3/4 rounded bg-current/10" />
+           </div>
+           <div className="flex items-center px-1">
+            <div className="h-3 w-6 rounded bg-current/15" />
+           </div>
           </div>
          </div>
-         <span className={`text-xs font-medium ${layout === "card" ? "text-primary" : "text-muted-foreground"}`}>
+         <span className={`mt-2 text-xs font-medium ${layout === "card" ? "text-primary" : "text-muted-foreground"}`}>
           Card
          </span>
         </button>
