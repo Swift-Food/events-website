@@ -131,9 +131,9 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
     </p>
    </div>
 
-   <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+   <div className="grid gap-6 lg:grid-cols-[1fr_1fr] min-w-0">
     {/* Left: Configuration */}
-    <div className="space-y-5">
+    <div className="min-w-0 space-y-5">
      {/* Layout Picker */}
      <div className="rounded-lg border border-border bg-card-background p-4 space-y-3">
       <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -274,7 +274,7 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
     </div>
 
     {/* Right: Preview + Code */}
-    <div className="space-y-5">
+    <div className="min-w-0 space-y-5">
      {/* Live Preview */}
      <div className="rounded-lg border border-border bg-card-background p-4 space-y-3">
       <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -330,7 +330,7 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
        </button>
       </div>
       <div className="relative">
-       <pre className="overflow-x-auto rounded-lg bg-card-secondary-background p-3 text-xs text-muted-foreground font-mono leading-relaxed">
+       <pre className="overflow-x-auto rounded-lg bg-card-secondary-background p-3 text-xs text-muted-foreground font-mono leading-relaxed whitespace-pre-wrap break-all">
         <code>{iframeSnippetWithResize}</code>
        </pre>
       </div>
