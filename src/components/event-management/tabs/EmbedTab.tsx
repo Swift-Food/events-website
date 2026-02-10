@@ -96,10 +96,14 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
  const iframeWidth = "100%";
  const iframeHeight = layout === "card" ? "180" : "800";
 
+ const iframeStyle = layout === "card"
+  ? "border: none; border-radius: 12px; overflow: hidden;"
+  : "border: none; border-radius: 12px;";
+
  const iframeSnippet = useMemo(() => {
   if (!embedUrl) return "";
-  return `<iframe\n  src="${embedUrl}"\n  width="${iframeWidth}"\n  height="${iframeHeight}"\n  frameborder="0"\n  style="border: none; border-radius: 12px; overflow: hidden;"\n  loading="lazy"\n></iframe>`;
- }, [embedUrl, iframeWidth, iframeHeight]);
+  return `<iframe\n  src="${embedUrl}"\n  width="${iframeWidth}"\n  height="${iframeHeight}"\n  frameborder="0"\n  style="${iframeStyle}"\n  loading="lazy"\n></iframe>`;
+ }, [embedUrl, iframeWidth, iframeHeight, iframeStyle]);
 
  const iframeSnippetWithResize = useMemo(() => {
   if (!baseUrl) return "";
@@ -289,20 +293,20 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
           minHeight: layout === "card" ? "180px" : "600px",
          }}
         >
-         {embedUrl && (
-          <iframe
-           src={embedUrl}
-           width="100%"
-           height={layout === "card" ? "180" : "800"}
-         style={{
-          border: "none",
-          borderRadius: "12px",
-          overflow: "hidden",
-          maxWidth: "100%",
-         }}
-         loading="lazy"
-        />
-       )}
+          {embedUrl && (
+           <iframe
+            src={embedUrl}
+            width="100%"
+            height={layout === "card" ? "180" : "800"}
+          style={{
+           border: "none",
+           borderRadius: "12px",
+           overflow: layout === "card" ? "hidden" : undefined,
+           maxWidth: "100%",
+          }}
+          loading="lazy"
+         />
+        )}
       </div>
      </div>
 

@@ -89,6 +89,22 @@ export default function EmbedClient({
   [activePalette]
  );
 
+ // Override global overflow:hidden so embed pages can scroll when viewed directly.
+ // Inject a <style> tag for maximum specificity — inline style overrides can lose to
+ // CSS-in-JS or late-loading stylesheets.
+ useEffect(() => {
+  const style = document.createElement("style");
+  style.textContent = `
+   html, body {
+    overflow: auto !important;
+    height: auto !important;
+    overscroll-behavior: auto !important;
+   }
+  `;
+  document.head.appendChild(style);
+  return () => { style.remove(); };
+ }, []);
+
  // Set body background to match the active palette so no dark gaps appear
  useEffect(() => {
   document.documentElement.style.backgroundColor = activePalette.pageBackground;
@@ -134,7 +150,7 @@ export default function EmbedClient({
     ...(cssVars as React.CSSProperties),
     backgroundColor: activePalette.pageBackground,
    }}
-   className="relative overflow-hidden rounded-xl font-sans"
+   className={`relative font-sans ${isFullPage ? "" : "overflow-hidden rounded-xl"}`}
   >
    {/* Theme background — rendered behind content */}
    {useEventThemeBackground && (
