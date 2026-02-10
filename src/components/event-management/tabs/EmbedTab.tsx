@@ -43,6 +43,9 @@ const SECTION_OPTIONS: SectionOption[] = [
  { id: "cta", label: "Register Button", icon: <MousePointerClick className="h-4 w-4" />, defaultEnabled: true },
 ];
 
+// Sections not available in the card layout
+const CARD_DISABLED_SECTIONS = new Set(["description", "categories"]);
+
 interface EmbedTabProps {
  eventData: EventResponseDto;
 }
@@ -60,7 +63,20 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
   setBaseUrl(window.location.origin);
  }, []);
 
+ // When switching to card layout, remove sections that aren't supported
+ useEffect(() => {
+  if (layout === "card") {
+   setEnabledSections((prev) => {
+    const next = new Set(prev);
+    CARD_DISABLED_SECTIONS.forEach((s) => next.delete(s));
+    return next;
+   });
+  }
+ }, [layout]);
+
  const toggleSection = useCallback((sectionId: string) => {
+  // Don't allow toggling sections disabled for the current layout
+  if (layout === "card" && CARD_DISABLED_SECTIONS.has(sectionId)) return;
   setEnabledSections((prev) => {
    const next = new Set(prev);
    if (next.has(sectionId)) {
@@ -70,7 +86,7 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
    }
    return next;
   });
- }, []);
+ }, [layout]);
 
  const embedUrl = useMemo(() => {
   if (!baseUrl) return "";
@@ -197,40 +213,48 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
        <Settings2 className="h-4 w-4 text-primary" />
        Visible Sections
       </h3>
-      <div className="grid grid-cols-2 gap-2">
-       {SECTION_OPTIONS.map((section) => {
-        const isEnabled = enabledSections.has(section.id);
-        return (
-         <button
-          key={section.id}
-          onClick={() => toggleSection(section.id)}
-          className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-xs font-medium transition-all ${
-           isEnabled
-            ? "border-primary/50 bg-primary/10 text-foreground"
-            : "border-border text-muted-foreground hover:border-muted-foreground/30"
-          }`}
-         >
-          <div
-           className={`flex h-4 w-4 items-center justify-center rounded transition-colors ${
-            isEnabled
-             ? "text-primary"
-             : "text-muted-foreground/50"
+       <div className="grid grid-cols-2 gap-2">
+        {SECTION_OPTIONS.map((section) => {
+         const isDisabledForLayout = layout === "card" && CARD_DISABLED_SECTIONS.has(section.id);
+         const isEnabled = !isDisabledForLayout && enabledSections.has(section.id);
+         return (
+          <button
+           key={section.id}
+           onClick={() => toggleSection(section.id)}
+           disabled={isDisabledForLayout}
+           className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-xs font-medium transition-all ${
+            isDisabledForLayout
+             ? "border-border/50 text-muted-foreground/30 cursor-not-allowed opacity-50"
+             : isEnabled
+              ? "border-primary/50 bg-primary/10 text-foreground"
+              : "border-border text-muted-foreground hover:border-muted-foreground/30"
            }`}
           >
-           {section.icon}
-          </div>
-          <span className="truncate">{section.label}</span>
-          <div
-           className={`ml-auto h-3 w-3 rounded-full border-2 transition-colors ${
-            isEnabled
-             ? "border-primary bg-primary"
-             : "border-muted-foreground/30"
-           }`}
-          />
-         </button>
-        );
-       })}
-      </div>
+           <div
+            className={`flex h-4 w-4 items-center justify-center rounded transition-colors ${
+             isDisabledForLayout
+              ? "text-muted-foreground/30"
+              : isEnabled
+               ? "text-primary"
+               : "text-muted-foreground/50"
+            }`}
+           >
+            {section.icon}
+           </div>
+           <span className={`truncate ${isDisabledForLayout ? "line-through" : ""}`}>{section.label}</span>
+           <div
+            className={`ml-auto h-3 w-3 rounded-full border-2 transition-colors ${
+             isDisabledForLayout
+              ? "border-muted-foreground/20"
+              : isEnabled
+               ? "border-primary bg-primary"
+               : "border-muted-foreground/30"
+            }`}
+           />
+          </button>
+         );
+        })}
+       </div>
      </div>
 
      {/* Theme Picker */}
