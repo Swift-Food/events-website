@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { EventResponseDto } from "@/types";
 import { cateringService } from "@/services/catering.service";
 import {
@@ -19,11 +19,23 @@ import {
   Phone,
   ShoppingCart,
   CheckCircle2,
-  Package,
   Clock,
+  User,
+  Search,
 } from "lucide-react";
 import { BundleDetailsModal } from "../BundleDetailsModal";
 import { ExistingOrderView, MealSessionCard } from "./catering";
+import { GOOGLE_MAPS_CONFIG } from "@/constants/google-maps";
+import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
+
+interface PlacePrediction {
+  place_id: string;
+  description: string;
+  structured_formatting: {
+    main_text: string;
+    secondary_text: string;
+  };
+}
 
 interface CateringTabProps {
   eventData: EventResponseDto;
@@ -53,6 +65,156 @@ export function CateringTab({ eventData }: CateringTabProps) {
   const [isLoadingOrder, setIsLoadingOrder] = useState(true);
   const [pricing, setPricing] = useState<CateringPricingResult | null>(null);
   const [isLoadingPricing, setIsLoadingPricing] = useState(false);
+
+  // Editable customer fields (autofilled from event data)
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryLatitude, setDeliveryLatitude] = useState<number | null>(null);
+  const [deliveryLongitude, setDeliveryLongitude] = useState<number | null>(null);
+
+  // Google Maps autocomplete state
+  const [addressInput, setAddressInput] = useState("");
+  const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
+  const [isLoadingPredictions, setIsLoadingPredictions] = useState(false);
+  const [showPredictions, setShowPredictions] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
+  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
+  const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
+  const addressInputRef = useRef<HTMLInputElement>(null);
+  const predictionsRef = useRef<HTMLDivElement>(null);
+
+  // Autofill customer fields from event data
+  useEffect(() => {
+    const name = [eventData.owner?.user?.firstName, eventData.owner?.user?.lastName]
+      .filter(Boolean)
+      .join(" ");
+    if (name) setCustomerName(name);
+    if (eventData.owner?.user?.email) setCustomerEmail(eventData.owner.user.email);
+
+    if (eventData.address) {
+      const addr = [
+        eventData.address.addressLine1,
+        eventData.address.addressLine2,
+        eventData.address.city,
+        eventData.address.zipcode,
+      ]
+        .filter(Boolean)
+        .join(", ");
+      setDeliveryAddress(addr);
+      setAddressInput(addr);
+      if (eventData.address.location) {
+        setDeliveryLatitude(eventData.address.location.latitude);
+        setDeliveryLongitude(eventData.address.location.longitude);
+      }
+    }
+  }, [eventData]);
+
+  // Initialize Google Maps Places services
+  useEffect(() => {
+    const initializeServices = async () => {
+      await loadGoogleMapsScript();
+      if (window.google?.maps?.places) {
+        autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
+        sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
+        const dummyDiv = document.createElement("div");
+        placesServiceRef.current = new google.maps.places.PlacesService(dummyDiv);
+      }
+    };
+    initializeServices();
+  }, []);
+
+  // Fetch predictions when address input changes (debounced)
+  useEffect(() => {
+    if (!addressInput.trim() || addressInput === deliveryAddress) {
+      setPredictions([]);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      if (autocompleteServiceRef.current && sessionTokenRef.current) {
+        setIsLoadingPredictions(true);
+        autocompleteServiceRef.current.getPlacePredictions(
+          {
+            input: addressInput,
+            componentRestrictions: { country: GOOGLE_MAPS_CONFIG.COUNTRY_RESTRICTION },
+            sessionToken: sessionTokenRef.current,
+          },
+          (results, status) => {
+            setIsLoadingPredictions(false);
+            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+              setPredictions(results as PlacePrediction[]);
+              setShowPredictions(true);
+            } else {
+              setPredictions([]);
+            }
+          }
+        );
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [addressInput, deliveryAddress]);
+
+  // Close predictions dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        predictionsRef.current &&
+        !predictionsRef.current.contains(event.target as Node) &&
+        addressInputRef.current &&
+        !addressInputRef.current.contains(event.target as Node)
+      ) {
+        setShowPredictions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelectPlace = useCallback((prediction: PlacePrediction) => {
+    if (!placesServiceRef.current) return;
+
+    placesServiceRef.current.getDetails(
+      {
+        placeId: prediction.place_id,
+        fields: ["address_components", "formatted_address", "geometry", "name"],
+        sessionToken: sessionTokenRef.current!,
+      },
+      (place, status) => {
+        if (status !== google.maps.places.PlacesServiceStatus.OK || !place) return;
+
+        sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
+
+        const lat = place.geometry?.location?.lat() ?? null;
+        const lng = place.geometry?.location?.lng() ?? null;
+
+        const formatted = place.formatted_address || prediction.description;
+        setDeliveryAddress(formatted);
+        setAddressInput(formatted);
+        setDeliveryLatitude(lat);
+        setDeliveryLongitude(lng);
+        setPredictions([]);
+        setShowPredictions(false);
+      }
+    );
+  }, []);
+
+  const handleAddressKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((prev) => Math.min(prev + 1, predictions.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((prev) => Math.max(prev - 1, -1));
+    } else if (e.key === "Enter" && highlightedIndex >= 0 && predictions[highlightedIndex]) {
+      e.preventDefault();
+      handleSelectPlace(predictions[highlightedIndex]);
+    } else if (e.key === "Escape") {
+      setShowPredictions(false);
+    }
+  };
 
   // Fetch bundles on mount
   useEffect(() => {
@@ -235,9 +397,9 @@ export function CateringTab({ eventData }: CateringTabProps) {
         return;
       }
 
-      // Get delivery location from event address if available
-      const deliveryLocation = eventData.address?.location?.latitude && eventData.address?.location?.longitude
-        ? { latitude: eventData.address.location.latitude, longitude: eventData.address.location.longitude }
+      // Get delivery location from editable delivery coordinates
+      const deliveryLocation = deliveryLatitude && deliveryLongitude
+        ? { latitude: deliveryLatitude, longitude: deliveryLongitude }
         : undefined;
 
       try {
@@ -266,12 +428,27 @@ export function CateringTab({ eventData }: CateringTabProps) {
     // Debounce the pricing fetch
     const timeoutId = setTimeout(fetchPricing, 500);
     return () => clearTimeout(timeoutId);
-  }, [sessions, bundles, eventData.address, transformSessionToPricingRequest]);
+  }, [sessions, bundles, deliveryLatitude, deliveryLongitude, transformSessionToPricingRequest]);
 
   const handleSubmitOrder = async () => {
     // Validation
     if (sessions.length === 0) {
       toast.error("Please add at least one meal session");
+      return;
+    }
+
+    if (!customerName.trim()) {
+      toast.error("Please provide a contact name");
+      return;
+    }
+
+    if (!customerEmail.trim()) {
+      toast.error("Please provide a contact email");
+      return;
+    }
+
+    if (!deliveryAddress.trim()) {
+      toast.error("Please provide a delivery address");
       return;
     }
 
@@ -295,11 +472,6 @@ export function CateringTab({ eventData }: CateringTabProps) {
       }
     }
 
-    if (!eventData.address) {
-      toast.error("Event address is required for catering orders");
-      return;
-    }
-
     if (!eventData.owner?.user) {
       toast.error("Event owner information is missing");
       return;
@@ -308,26 +480,12 @@ export function CateringTab({ eventData }: CateringTabProps) {
     try {
       setIsSubmitting(true);
 
-      const deliveryAddress = [
-        eventData.address.addressLine1,
-        eventData.address.addressLine2,
-        eventData.address.city,
-        eventData.address.zipcode,
-      ]
-        .filter(Boolean)
-        .join(", ");
-
-      const customerName =
-        [eventData.owner.user.firstName, eventData.owner.user.lastName]
-          .filter(Boolean)
-          .join(" ") || eventData.name;
-
       const orderData: CreateCateringOrderDto = {
         userId: eventData.owner.user.id,
-        customerName,
-        customerEmail: eventData.owner.user.email,
+        customerName: customerName.trim(),
+        customerEmail: customerEmail.trim(),
         customerPhone: customerPhone.trim(),
-        deliveryAddress,
+        deliveryAddress: deliveryAddress.trim(),
         eventId: eventData.id,
         mealSessions: sessions.map((session) => ({
           sessionName: session.sessionName,
@@ -352,6 +510,12 @@ export function CateringTab({ eventData }: CateringTabProps) {
       // Reset form after successful order
       setSessions([]);
       setCustomerPhone("");
+      setCustomerName("");
+      setCustomerEmail("");
+      setDeliveryAddress("");
+      setAddressInput("");
+      setDeliveryLatitude(null);
+      setDeliveryLongitude(null);
     } catch (error: any) {
       console.error("Error creating order:", error);
 
@@ -416,75 +580,110 @@ export function CateringTab({ eventData }: CateringTabProps) {
           </button>
         </div>
 
-        {/* Event Info Summary */}
+        {/* Customer Details */}
         <div className="mt-6 space-y-4">
-          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="group rounded-xl bg-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
-              <div className="flex items-start gap-3">
-                <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
-                  <MapPin className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                    Delivery Address
-                  </p>
-                  <p className="text-sm font-semibold text-foreground truncate">
-                    {eventData.address?.addressLine1 || "Not set"}
-                  </p>
-                </div>
+          {/* Delivery Address with Google Maps Autocomplete */}
+          <div className="rounded-xl bg-gradient-to-br from-card-secondary-background to-card-background border border-white/5 p-5 hover:border-primary/20 transition-all">
+            <label className="flex items-center gap-2 text-sm font-semibold text-foreground mb-3">
+              <div className="rounded-lg bg-primary/10 p-1.5">
+                <MapPin className="h-4 w-4 text-primary" />
               </div>
+              Delivery Address
+              <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  ref={addressInputRef}
+                  type="text"
+                  value={addressInput}
+                  onChange={(e) => {
+                    setAddressInput(e.target.value);
+                    if (e.target.value !== deliveryAddress) {
+                      setDeliveryLatitude(null);
+                      setDeliveryLongitude(null);
+                    }
+                  }}
+                  onFocus={() => predictions.length > 0 && setShowPredictions(true)}
+                  onKeyDown={handleAddressKeyDown}
+                  placeholder="Search for delivery address..."
+                  className="w-full rounded-lg border border-white/10 bg-card-background pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                />
+              </div>
+              {showPredictions && predictions.length > 0 && (
+                <div
+                  ref={predictionsRef}
+                  className="absolute z-50 mt-1 w-full rounded-lg border border-white/10 bg-card-background shadow-xl overflow-hidden"
+                >
+                  {predictions.map((prediction, idx) => (
+                    <button
+                      key={prediction.place_id}
+                      type="button"
+                      onClick={() => handleSelectPlace(prediction)}
+                      onMouseEnter={() => setHighlightedIndex(idx)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+                        highlightedIndex === idx
+                          ? "bg-primary/10"
+                          : "hover:bg-white/5"
+                      }`}
+                    >
+                      <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {prediction.structured_formatting.main_text}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {prediction.structured_formatting.secondary_text}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {isLoadingPredictions && addressInput.trim() && (
+                <div className="absolute z-50 mt-1 w-full rounded-lg border border-white/10 bg-card-background shadow-xl px-4 py-3">
+                  <p className="text-xs text-muted-foreground">Searching...</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {/* Contact Name */}
+            <div className="rounded-xl bg-gradient-to-br from-card-secondary-background to-card-background border border-white/5 p-5 hover:border-primary/20 transition-all">
+              <label className="flex items-center gap-2 text-sm font-semibold text-foreground mb-3">
+                <div className="rounded-lg bg-primary/10 p-1.5">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
+                Contact Name
+                <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                placeholder="Enter contact name"
+                className="w-full rounded-lg border border-white/10 bg-card-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              />
             </div>
 
-            <div className="group rounded-xl bg-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
-              <div className="flex items-start gap-3">
-                <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
-                  <Mail className="h-5 w-5 text-primary" />
+            {/* Contact Email */}
+            <div className="rounded-xl bg-gradient-to-br from-card-secondary-background to-card-background border border-white/5 p-5 hover:border-primary/20 transition-all">
+              <label className="flex items-center gap-2 text-sm font-semibold text-foreground mb-3">
+                <div className="rounded-lg bg-primary/10 p-1.5">
+                  <Mail className="h-4 w-4 text-primary" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                    Contact Email
-                  </p>
-                  <p className="text-sm font-semibold text-foreground truncate">
-                    {eventData.owner?.user?.email || "Not set"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="group rounded-xl bg-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
-              <div className="flex items-start gap-3">
-                <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
-                  <Phone className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                    Contact Name
-                  </p>
-                  <p className="text-sm font-semibold text-foreground truncate">
-                    {[eventData.owner?.user?.firstName, eventData.owner?.user?.lastName]
-                      .filter(Boolean)
-                      .join(" ") ||
-                      eventData.owner?.user?.username ||
-                      "Not set"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="group rounded-xl bg-card-background border border-white/5 p-4 hover:border-primary/30 transition-all hover:shadow-lg">
-              <div className="flex items-start gap-3">
-                <div className="rounded-lg bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
-                  <Package className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                    Available Bundles
-                  </p>
-                  <p className="text-sm font-semibold text-foreground">
-                    {bundles.length} {bundles.length === 1 ? "bundle" : "bundles"}
-                  </p>
-                </div>
-              </div>
+                Contact Email
+                <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                value={customerEmail}
+                onChange={(e) => setCustomerEmail(e.target.value)}
+                placeholder="Enter contact email"
+                className="w-full rounded-lg border border-white/10 bg-card-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              />
             </div>
           </div>
 

@@ -550,7 +550,7 @@ function EventFormInner({
             >
               <Download className="h-5 w-5 text-primary flex-shrink-0" />
               <span className="text-sm text-muted-foreground">
-                Have an event on Eventbrite, Meetup, Luma, or elsewhere?{" "}
+                Have an event on Eventbrite, Meetup, Student Union or elsewhere?{" "}
                 <span className="text-primary font-medium">Import it</span>
               </span>
             </button>
