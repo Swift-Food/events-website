@@ -88,6 +88,12 @@ export default function EmbedClient({
   [activePalette]
  );
 
+ // Set body background to match the active palette so no dark gaps appear
+ useEffect(() => {
+  document.documentElement.style.backgroundColor = activePalette.pageBackground;
+  document.body.style.backgroundColor = activePalette.pageBackground;
+ }, [activePalette.pageBackground]);
+
  // Send height to parent for auto-resize
  useEffect(() => {
   const sendHeight = () => {
@@ -123,7 +129,10 @@ export default function EmbedClient({
  return (
   <div
    ref={containerRef}
-   style={cssVars as React.CSSProperties}
+   style={{
+    ...(cssVars as React.CSSProperties),
+    backgroundColor: activePalette.pageBackground,
+   }}
    className="relative overflow-hidden rounded-xl font-sans"
   >
    {/* Theme background — rendered behind content */}

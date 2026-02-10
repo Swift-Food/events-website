@@ -131,7 +131,7 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
     </p>
    </div>
 
-   <div className="grid gap-6 lg:grid-cols-[1fr_1fr] min-w-0">
+   <div className="grid gap-6 lg:grid-cols-[340px_1fr] min-w-0">
     {/* Left: Configuration */}
     <div className="min-w-0 space-y-5">
      {/* Layout Picker */}
