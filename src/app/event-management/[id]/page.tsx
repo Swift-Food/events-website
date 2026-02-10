@@ -26,9 +26,10 @@ import {
  RegistrationTab,
  TeamTab,
  CateringTab,
+ EmbedTab,
 } from "@/components/event-management/tabs";
 
-type TabType = "overview" | "guests" | "registration" | "team" | "catering";
+type TabType = "overview" | "guests" | "registration" | "team" | "catering" | "embed";
 
 // User role for this event - determines what they can see/do
 type UserRole = "owner" | "admin" | "scanner" | null;
@@ -309,6 +310,7 @@ export default function EventManagementPage() {
   { id: "registration", label: "Registration" },
   { id: "team", label: "Team" },
   { id: "catering", label: "Catering" },
+  { id: "embed", label: "Embed" },
  ];
 
  // Scanner role can only see overview tab
@@ -438,8 +440,9 @@ export default function EventManagementPage() {
     {currentTab === "team" && (
      <TeamTab eventId={eventId} ownerId={eventData.owner?.user?.id} />
     )}
-    {currentTab === "catering" && <CateringTab eventData={eventData} />}
-   </div>
+     {currentTab === "catering" && <CateringTab eventData={eventData} />}
+     {currentTab === "embed" && <EmbedTab eventData={eventData} />}
+    </div>
 
    {/* Edit Event Slide-out Modal */}
    {showEditModal && (
