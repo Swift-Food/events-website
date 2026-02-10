@@ -112,11 +112,11 @@ export default function EmbedFullPageLayout({
    <EventThemeStyles />
    <div className="mx-auto max-w-6xl px-6 py-4">
     {/* Main Content - Responsive Layout (mirroring EventClient) */}
-    <div className="flex flex-col gap-6 lg:flex-row-reverse">
+     <div className="flex flex-col gap-6 sm:flex-row-reverse">
 
-     {/* Right Column - Image and Sidebar */}
-     <section className="flex flex-col gap-6 lg:w-96 lg:shrink-0">
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:flex lg:flex-col">
+      {/* Right Column - Image and Sidebar */}
+      <section className="flex flex-col gap-6 sm:w-56 md:w-72 lg:w-96 sm:shrink-0">
+       <div className="flex flex-col gap-6">
 
        {/* Image */}
        {showSection("image") && (
@@ -137,9 +137,9 @@ export default function EmbedFullPageLayout({
         </div>
        )}
 
-       {/* Title & Categories - Mobile/Tablet only */}
-       <div className="block lg:hidden sm:flex sm:flex-col sm:items-center sm:justify-center">
-        <h1 className="mb-4 text-2xl sm:text-3xl font-bold tracking-tight text-foreground sm:text-center">
+        {/* Title & Categories - Mobile only */}
+        <div className="block sm:hidden">
+         <h1 className="mb-4 text-2xl font-bold tracking-tight text-foreground">
          {event.name}
         </h1>
 
@@ -147,7 +147,7 @@ export default function EmbedFullPageLayout({
         {showSection("categories") &&
          event.categories &&
          event.categories.length > 0 && (
-          <div className="flex flex-wrap gap-2 sm:justify-center">
+           <div className="flex flex-wrap gap-2">
            {event.categories.map((category) => (
             <span
              key={category.id}
@@ -163,7 +163,7 @@ export default function EmbedFullPageLayout({
         {showSection("organizer") && (
          <>
           <div className="mt-6 h-px bg-foreground/10" />
-          <div className="py-4 flex items-center gap-3 sm:justify-center">
+           <div className="py-4 flex items-center gap-3">
            {profilePicture ? (
             <Image
              src={profilePicture}
@@ -308,9 +308,9 @@ export default function EmbedFullPageLayout({
 
      {/* Left Column - Main Content */}
      <section className="flex-1 space-y-6">
-      {/* Title and Categories - Desktop only */}
-      <div className="hidden lg:block">
-       <h1 className="mb-4 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+       {/* Title and Categories - Desktop only */}
+       <div className="hidden sm:block">
+        <h1 className="mb-4 text-2xl md:text-3xl lg:text-5xl font-bold tracking-tight text-foreground">
         {event.name}
        </h1>
 
