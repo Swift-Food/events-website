@@ -126,123 +126,127 @@ export default function EmbedCardLayout({
       </a>
      )}
 
-    {/* Center: Details + CTA */}
-    <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-3 sm:p-4">
-     {/* Date & Time */}
-     {showSection("time") && (
-      <div
-       className="flex items-center gap-1.5 text-xs"
-       style={{ color: palette.subTextColor }}
-      >
-       <Calendar className="h-3 w-3 shrink-0" style={{ color: palette.primaryColor }} />
-       <span>
-        {formatDateShort(event.startDateTime)} &middot;{" "}
-        {formatTime(event.startDateTime)} - {formatTime(event.endDateTime)}
-       </span>
-      </div>
-     )}
+    {/* Center: Details column */}
+    <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
+     {/* Top: info, pushed down to center */}
+     <div className="flex flex-1 flex-col justify-center gap-1.5">
+      {/* Date & Time */}
+      {showSection("time") && (
+       <div
+        className="flex items-center gap-1.5 text-xs"
+        style={{ color: palette.subTextColor }}
+       >
+        <Calendar className="h-3 w-3 shrink-0" style={{ color: palette.primaryColor }} />
+        <span>
+         {formatDateShort(event.startDateTime)} &middot;{" "}
+         {formatTime(event.startDateTime)} - {formatTime(event.endDateTime)}
+        </span>
+       </div>
+      )}
 
-     {/* Title */}
-     <a
-      href={eventPageUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="block"
-     >
-      <h2
-       className="text-sm font-bold font-heading leading-tight hover:underline line-clamp-2"
-       style={{ color: palette.mainTextColor }}
+      {/* Title */}
+      <a
+       href={eventPageUrl}
+       target="_blank"
+       rel="noopener noreferrer"
+       className="block"
       >
-       {event.name}
-      </h2>
-     </a>
+       <h2
+        className="text-sm font-bold font-heading leading-tight hover:underline line-clamp-2"
+        style={{ color: palette.mainTextColor }}
+       >
+        {event.name}
+       </h2>
+      </a>
 
-     {/* Organizer */}
-     {showSection("organizer") && (
-      <div className="flex items-center gap-1.5">
-       {profilePicture ? (
-        <Image
-         src={profilePicture}
-         alt={ownerName}
-         width={16}
-         height={16}
-         className="rounded-full object-cover"
-        />
-       ) : (
+      {/* Organizer */}
+      {showSection("organizer") && (
+       <div className="flex items-center gap-1.5">
+        {profilePicture ? (
+         <Image
+          src={profilePicture}
+          alt={ownerName}
+          width={16}
+          height={16}
+          className="rounded-full object-cover"
+         />
+        ) : (
+         <div
+          className="flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-semibold"
+          style={{
+           backgroundColor: palette.primaryColor,
+           color: palette.primaryForegroundColor,
+          }}
+         >
+          {ownerName.charAt(0).toUpperCase()}
+         </div>
+        )}
+        <span
+         className="text-[11px] font-medium truncate"
+         style={{ color: palette.subTextColor }}
+        >
+         {ownerName}
+        </span>
+       </div>
+      )}
+
+      {/* Location */}
+      {showSection("location") && locationText && (
+       <div
+        className="flex items-center gap-1.5 text-xs"
+        style={{ color: palette.subTextColor }}
+       >
+        {isVirtual ? (
+         <Video className="h-3 w-3 shrink-0" style={{ color: palette.primaryColor }} />
+        ) : (
+         <MapPin className="h-3 w-3 shrink-0" style={{ color: palette.primaryColor }} />
+        )}
+        <span className="truncate text-[11px]">{locationText}</span>
+        {isHybrid && (
+         <span
+          className="ml-1 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-medium"
+          style={{
+           backgroundColor: palette.cardSecondaryBackground,
+           color: palette.primaryColor,
+          }}
+         >
+          <Globe className="h-2 w-2" />
+          Hybrid
+         </span>
+        )}
+       </div>
+      )}
+     </div>
+
+     {/* Bottom: Price + CTA, always stuck to bottom */}
+     {(showSection("tickets") || showSection("cta")) && (
+      <div className="flex items-center gap-2 pt-1.5">
+       {showSection("tickets") && priceRange && (
         <div
-         className="flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-semibold"
+         className="flex items-center gap-1 text-xs font-medium"
+         style={{ color: palette.mainTextColor }}
+        >
+         <Ticket className="h-3 w-3" style={{ color: palette.primaryColor }} />
+         <span className="text-[11px]">{priceRange}</span>
+        </div>
+       )}
+       {showSection("cta") && (
+        <a
+         href={eventPageUrl}
+         target="_blank"
+         rel="noopener noreferrer"
+         className="ml-auto flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-opacity hover:opacity-90"
          style={{
           backgroundColor: palette.primaryColor,
           color: palette.primaryForegroundColor,
          }}
         >
-         {ownerName.charAt(0).toUpperCase()}
-        </div>
-       )}
-       <span
-        className="text-[11px] font-medium truncate"
-        style={{ color: palette.subTextColor }}
-       >
-        {ownerName}
-       </span>
-      </div>
-     )}
-
-     {/* Location */}
-     {showSection("location") && locationText && (
-      <div
-       className="flex items-center gap-1.5 text-xs"
-       style={{ color: palette.subTextColor }}
-      >
-       {isVirtual ? (
-        <Video className="h-3 w-3 shrink-0" style={{ color: palette.primaryColor }} />
-       ) : (
-        <MapPin className="h-3 w-3 shrink-0" style={{ color: palette.primaryColor }} />
-       )}
-       <span className="truncate text-[11px]">{locationText}</span>
-       {isHybrid && (
-        <span
-         className="ml-1 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-medium"
-         style={{
-          backgroundColor: palette.cardSecondaryBackground,
-          color: palette.primaryColor,
-         }}
-        >
-         <Globe className="h-2 w-2" />
-         Hybrid
-        </span>
+         {event.acceptingNewTickets ? "Register" : "View"}
+         <ExternalLink className="h-3 w-3" />
+        </a>
        )}
       </div>
      )}
-
-     {/* Price + CTA inline */}
-     <div className="flex items-center gap-2">
-      {showSection("tickets") && priceRange && (
-       <div
-        className="flex items-center gap-1 text-xs font-medium"
-        style={{ color: palette.mainTextColor }}
-       >
-        <Ticket className="h-3 w-3" style={{ color: palette.primaryColor }} />
-        <span className="text-[11px]">{priceRange}</span>
-       </div>
-      )}
-
-      {showSection("cta") && (
-       <a
-        href={eventPageUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="ml-auto flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-opacity hover:opacity-90"
-        style={{
-         backgroundColor: palette.primaryColor,
-         color: palette.primaryForegroundColor,
-        }}
-       >
-        {event.acceptingNewTickets ? "Register" : "View"}
-        <ExternalLink className="h-3 w-3" />
-       </a>
-      )}
-     </div>
     </div>
 
     {/* Prismo logo — top right */}
