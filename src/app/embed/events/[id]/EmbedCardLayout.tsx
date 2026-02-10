@@ -97,11 +97,9 @@ export default function EmbedCardLayout({
 
  return (
   <div
-   className={`overflow-hidden rounded-xl border ${hasVisualTheme ? "backdrop-blur-xl" : ""}`}
+   className="overflow-hidden rounded-xl border"
    style={{
-    backgroundColor: hasVisualTheme
-     ? `${palette.cardBackground}cc`
-     : palette.cardBackground,
+    backgroundColor: palette.cardBackground,
     borderColor: palette.borderEnabled ? palette.borderColor : "transparent",
    }}
   >

@@ -145,8 +145,8 @@ export default function EmbedClient({
     />
    )}
 
-   {/* Content sits above the background */}
-   <div className="relative z-10">
+    {/* Content sits above the background */}
+    <div className="relative z-10">
     {isCard ? (
      <EmbedCardLayout
       event={event}

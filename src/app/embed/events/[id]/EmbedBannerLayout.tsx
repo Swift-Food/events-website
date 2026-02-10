@@ -91,11 +91,9 @@ export default function EmbedBannerLayout({
 
  return (
   <div
-   className={`flex overflow-hidden rounded-xl border ${hasVisualTheme ? "backdrop-blur-xl" : ""}`}
+   className="flex overflow-hidden rounded-xl border"
    style={{
-    backgroundColor: hasVisualTheme
-     ? `${palette.cardBackground}cc`
-     : palette.cardBackground,
+    backgroundColor: palette.cardBackground,
     borderColor: palette.borderEnabled ? palette.borderColor : "transparent",
    }}
   >
