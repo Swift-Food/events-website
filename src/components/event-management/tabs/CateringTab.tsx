@@ -5,9 +5,6 @@ import { EventResponseDto } from "@/types";
 import { cateringService } from "@/services/catering.service";
 import {
   CateringBundle,
-  MealSession,
-  MinimalRestaurantOrder,
-  MinimalMenuItem,
   CreateCateringOrderDto,
   CateringOrder,
   CateringPricingResult,
@@ -181,9 +178,19 @@ export function CateringTab({ eventData }: CateringTabProps) {
     }, 0);
   };
 
-  const calculateGrandTotal = (): number => {
-    return sessions.reduce((total, session) => total + calculateSessionTotal(session), 0);
-  };
+  const calculateGrandTotal = useCallback(() => {
+    return sessions.reduce((total, session) => {
+      return total + Object.entries(session.bundleQuantities).reduce(
+        (sessionTotal, [bundleId, quantity]) => {
+          const bundle = bundles.find((b) => b.id === bundleId);
+          if (!bundle) return sessionTotal;
+          // Use bundle pricePerPerson
+          return sessionTotal + (bundle.pricePerPerson * bundle.baseGuestCount * quantity);
+        },
+        0
+      );
+    }, 0);
+  }, [sessions, bundles]);
 
   // Transform session to pricing API request format
   const transformSessionToPricingRequest = useCallback(
@@ -282,44 +289,6 @@ export function CateringTab({ eventData }: CateringTabProps) {
     return () => clearTimeout(timeoutId);
   }, [sessions, bundles, eventData.address, transformSessionToPricingRequest]);
 
-  const transformSessionToMealSession = (session: MealSessionFormData): MealSession => {
-    const restaurantMap = new Map<string, MinimalRestaurantOrder>();
-
-    Object.entries(session.bundleQuantities).forEach(([bundleId, bundleQuantity]) => {
-      const bundle = bundles.find((b) => b.id === bundleId);
-      if (!bundle) return;
-
-      bundle.items.forEach((item) => {
-        if (!restaurantMap.has(item.restaurantId)) {
-          restaurantMap.set(item.restaurantId, {
-            restaurantName: item.restaurantName,
-            restaurantId: item.restaurantId,
-            menuItems: [],
-          });
-        }
-
-        const restaurant = restaurantMap.get(item.restaurantId)!;
-        const menuItem: MinimalMenuItem = {
-          menuItemId: item.menuItemId,
-          quantity: item.quantity * bundleQuantity,
-          selectedAddons: item.selectedAddons,
-          menuItemName: item.menuItemName,
-        };
-
-        restaurant.menuItems.push(menuItem);
-      });
-    });
-
-    return {
-      sessionName: session.sessionName,
-      sessionDate: session.sessionDate,
-      eventTime: session.eventTime,
-      collectionTime: session.collectionTime || undefined,
-      specialRequirements: session.specialRequirements || undefined,
-      orderItems: Array.from(restaurantMap.values()),
-    };
-  };
-
   const handleSubmitOrder = async () => {
     // Validation
     if (sessions.length === 0) {
@@ -381,7 +350,17 @@ export function CateringTab({ eventData }: CateringTabProps) {
         customerPhone: customerPhone.trim(),
         deliveryAddress,
         eventId: eventData.id,
-        mealSessions: sessions.map(transformSessionToMealSession),
+        mealSessions: sessions.map((session) => ({
+          sessionName: session.sessionName,
+          sessionDate: session.sessionDate,
+          eventTime: session.eventTime,
+          collectionTime: session.collectionTime || undefined,
+          specialRequirements: session.specialRequirements || undefined,
+          // Send bundle selections instead of expanded items
+          bundleSelections: Object.entries(session.bundleQuantities)
+            .filter(([_, quantity]) => quantity > 0)
+            .map(([bundleId, quantity]) => ({ bundleId, quantity })),
+        })),
         estimatedTotal: calculateGrandTotal(),
       };
 

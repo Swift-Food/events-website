@@ -48,7 +48,8 @@ export interface MealSession {
   collectionTime?: string;
   guestCount?: number;
   specialRequirements?: string;
-  orderItems: MinimalRestaurantOrder[];
+  // Optional when bundleSelections is provided - backend will expand bundles
+  orderItems?: MinimalRestaurantOrder[];
   bundleSelections?: BundleSelection[];
 }
 
