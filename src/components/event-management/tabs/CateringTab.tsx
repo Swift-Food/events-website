@@ -195,43 +195,22 @@ export function CateringTab({ eventData }: CateringTabProps) {
   // Transform session to pricing API request format
   const transformSessionToPricingRequest = useCallback(
     (session: MealSessionFormData): MealSessionRequest | null => {
-      if (Object.keys(session.bundleQuantities).length === 0) return null;
+      const bundleSelections = Object.entries(session.bundleQuantities)
+        .filter(([_, quantity]) => quantity > 0)
+        .map(([bundleId, quantity]) => ({ bundleId, quantity }));
 
-      const restaurantMap = new Map<string, { restaurantId: string; menuItems: { menuItemId: string; quantity: number; selectedAddons?: { name: string; quantity: number; groupTitle?: string }[] }[] }>();
-
-      Object.entries(session.bundleQuantities).forEach(([bundleId, bundleQuantity]) => {
-        const bundle = bundles.find((b) => b.id === bundleId);
-        if (!bundle) return;
-
-        bundle.items.forEach((item) => {
-          if (!restaurantMap.has(item.restaurantId)) {
-            restaurantMap.set(item.restaurantId, {
-              restaurantId: item.restaurantId,
-              menuItems: [],
-            });
-          }
-
-          const restaurant = restaurantMap.get(item.restaurantId)!;
-          restaurant.menuItems.push({
-            menuItemId: item.menuItemId,
-            quantity: item.quantity * bundleQuantity,
-            selectedAddons: item.selectedAddons?.map((addon) => ({
-              name: addon.name,
-              quantity: addon.quantity,
-            })),
-          });
-        });
-      });
+      if (bundleSelections.length === 0) return null;
 
       return {
         sessionName: session.sessionName || "Meal Session",
         sessionDate: session.sessionDate || new Date().toISOString().split("T")[0],
         eventTime: session.eventTime || "12:00",
         specialRequirements: session.specialRequirements || undefined,
-        orderItems: Array.from(restaurantMap.values()),
+        bundleSelections, // Send bundle selections, not expanded orderItems
+        orderItems: [], // Empty - backend will expand from bundleSelections
       };
     },
-    [bundles]
+    []
   );
 
   // Fetch pricing when sessions or bundles change
