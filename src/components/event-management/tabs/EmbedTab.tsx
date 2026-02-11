@@ -348,9 +348,9 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
         }}
        >
         {embedUrl && (
-         <iframe
+          <iframe
           src={embedUrl}
-          width="100%"
+          width={customWidth}
           height={customHeight}
           style={{
            border: "none",
