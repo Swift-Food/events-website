@@ -7,10 +7,7 @@ import {
  Code,
  Copy,
  Check,
- LayoutTemplate,
  Eye,
- Palette,
- Settings2,
  Image,
  Clock,
  User,
@@ -33,17 +30,16 @@ interface SectionOption {
 }
 
 const SECTION_OPTIONS: SectionOption[] = [
- { id: "image", label: "Cover Image", icon: <Image className="h-4 w-4" />, defaultEnabled: true },
- { id: "time", label: "Date & Time", icon: <Clock className="h-4 w-4" />, defaultEnabled: true },
- { id: "organizer", label: "Organizer", icon: <User className="h-4 w-4" />, defaultEnabled: true },
- { id: "location", label: "Location", icon: <MapPin className="h-4 w-4" />, defaultEnabled: true },
- { id: "description", label: "Description", icon: <FileText className="h-4 w-4" />, defaultEnabled: true },
- { id: "categories", label: "Categories", icon: <Tag className="h-4 w-4" />, defaultEnabled: true },
- { id: "tickets", label: "Ticket Price", icon: <Ticket className="h-4 w-4" />, defaultEnabled: true },
- { id: "cta", label: "Register Button", icon: <MousePointerClick className="h-4 w-4" />, defaultEnabled: true },
+ { id: "image", label: "Image", icon: <Image className="h-3.5 w-3.5" />, defaultEnabled: true },
+ { id: "time", label: "Date & Time", icon: <Clock className="h-3.5 w-3.5" />, defaultEnabled: true },
+ { id: "organizer", label: "Organizer", icon: <User className="h-3.5 w-3.5" />, defaultEnabled: true },
+ { id: "location", label: "Location", icon: <MapPin className="h-3.5 w-3.5" />, defaultEnabled: true },
+ { id: "description", label: "Description", icon: <FileText className="h-3.5 w-3.5" />, defaultEnabled: true },
+ { id: "categories", label: "Categories", icon: <Tag className="h-3.5 w-3.5" />, defaultEnabled: true },
+ { id: "tickets", label: "Price", icon: <Ticket className="h-3.5 w-3.5" />, defaultEnabled: true },
+ { id: "cta", label: "Register", icon: <MousePointerClick className="h-3.5 w-3.5" />, defaultEnabled: true },
 ];
 
-// Sections not available in the card layout
 const CARD_DISABLED_SECTIONS = new Set(["description", "categories"]);
 
 interface EmbedTabProps {
@@ -65,7 +61,6 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
   setBaseUrl(window.location.origin);
  }, []);
 
- // When switching layout, remove unsupported sections and reset dimensions
  useEffect(() => {
   if (layout === "card") {
    setEnabledSections((prev) => {
@@ -82,7 +77,6 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
  }, [layout]);
 
  const toggleSection = useCallback((sectionId: string) => {
-  // Don't allow toggling sections disabled for the current layout
   if (layout === "card" && CARD_DISABLED_SECTIONS.has(sectionId)) return;
   setEnabledSections((prev) => {
    const next = new Set(prev);
@@ -102,7 +96,6 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
   params.set("layout", layout);
 
   const showSections = Array.from(enabledSections).join(",");
-  // Only include 'show' param if not all sections are enabled
   const allEnabled = SECTION_OPTIONS.every((s) => enabledSections.has(s.id));
   if (!allEnabled) {
    params.set("show", showSections);
@@ -116,17 +109,14 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
   return `${baseUrl}/embed/events/${eventData.id}${queryString ? `?${queryString}` : ""}`;
  }, [baseUrl, layout, enabledSections, theme, eventData.id]);
 
- const iframeWidth = customWidth;
- const iframeHeight = customHeight;
-
  const iframeStyle = layout === "card"
   ? "border: none; border-radius: 12px; overflow: hidden;"
   : "border: none; border-radius: 12px;";
 
  const iframeSnippet = useMemo(() => {
   if (!embedUrl) return "";
-  return `<iframe\n  src="${embedUrl}"\n  width="${iframeWidth}"\n  height="${iframeHeight}"\n  frameborder="0"\n  style="${iframeStyle}"\n  loading="lazy"\n></iframe>`;
- }, [embedUrl, iframeWidth, iframeHeight, iframeStyle]);
+  return `<iframe\n  src="${embedUrl}"\n  width="${customWidth}"\n  height="${customHeight}"\n  frameborder="0"\n  style="${iframeStyle}"\n  loading="lazy"\n></iframe>`;
+ }, [embedUrl, customWidth, customHeight, iframeStyle]);
 
  const iframeSnippetWithResize = useMemo(() => {
   if (!baseUrl) return "";
@@ -144,6 +134,17 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
   }
  }, [iframeSnippetWithResize]);
 
+ const sortedSections = useMemo(() => {
+  return [...SECTION_OPTIONS].sort((a, b) => {
+   if (layout === "card") {
+    const aDisabled = CARD_DISABLED_SECTIONS.has(a.id) ? 1 : 0;
+    const bDisabled = CARD_DISABLED_SECTIONS.has(b.id) ? 1 : 0;
+    return aDisabled - bDisabled;
+   }
+   return 0;
+  });
+ }, [layout]);
+
  return (
   <div className="space-y-6 py-4">
    {/* Header */}
@@ -153,285 +154,233 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
      Embed Event
     </h2>
     <p className="mt-1 text-sm text-muted-foreground">
-     Generate an embed code to display this event on any website. Customize the layout, visible sections, and theme below.
+     Add this event to any website with a simple embed code.
     </p>
    </div>
 
-   <div className="grid gap-6 lg:grid-cols-[340px_1fr] min-w-0">
+   <div className="grid gap-6 lg:grid-cols-[320px_1fr] min-w-0">
     {/* Left: Configuration */}
     <div className="min-w-0 space-y-5">
-     {/* Layout Picker */}
-      <div className="rounded-2xl border border-white/5 bg-card-background p-5 sm:p-6 space-y-4">
-       <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-        <div className="rounded-lg bg-primary/10 p-1.5">
-         <LayoutTemplate className="h-4 w-4 text-primary" />
-        </div>
-        Layout
-       </h3>
-      <div className="grid grid-cols-2 gap-3">
+     {/* Layout + Theme combined */}
+     <div className="rounded-2xl border border-white/5 bg-card-background p-5 space-y-5">
+      {/* Layout */}
+      <div className="space-y-3">
+       <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Layout</h3>
+       <div className="grid grid-cols-2 gap-2">
         <button
          onClick={() => setLayout("card")}
-          className={`flex flex-col items-center rounded-xl border-2 p-3 transition-all ${
-           layout === "card"
-            ? "border-primary bg-primary/10"
-            : "border-white/10 hover:border-white/20"
-          }`}
+         className={`group relative flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all ${
+          layout === "card"
+           ? "border-primary bg-primary/5"
+           : "border-white/10 hover:border-white/20"
+         }`}
         >
-         <div className="flex h-16 w-full items-center">
-          <div className="flex h-10 w-full rounded border border-current/20 overflow-hidden">
-           <div className="w-10 bg-current/10" />
-           <div className="flex-1 space-y-1 p-1">
-            <div className="h-1 w-full rounded bg-current/20" />
-            <div className="h-1 w-3/4 rounded bg-current/10" />
-           </div>
-           <div className="flex items-center px-1">
-            <div className="h-3 w-6 rounded bg-current/15" />
-           </div>
+         {/* Card wireframe */}
+         <div className="flex h-12 w-full items-center rounded-md border border-current/10 overflow-hidden">
+          <div className="w-10 h-full bg-current/8" />
+          <div className="flex-1 space-y-1 p-1.5">
+           <div className="h-1 w-full rounded-full bg-current/15" />
+           <div className="h-1 w-3/4 rounded-full bg-current/10" />
+          </div>
+          <div className="flex items-center px-1.5">
+           <div className="h-2.5 w-5 rounded bg-current/12" />
           </div>
          </div>
-         <span className={`mt-2 text-xs font-medium ${layout === "card" ? "text-primary" : "text-muted-foreground"}`}>
+         <span className={`text-xs font-medium ${layout === "card" ? "text-primary" : "text-muted-foreground"}`}>
           Card
          </span>
         </button>
-       <button
-        onClick={() => setLayout("full")}
-         className={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all ${
+
+        <button
+         onClick={() => setLayout("full")}
+         className={`group relative flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all ${
           layout === "full"
-           ? "border-primary bg-primary/10"
+           ? "border-primary bg-primary/5"
            : "border-white/10 hover:border-white/20"
          }`}
-       >
-        <div className="flex h-16 w-full rounded border border-current/20 overflow-hidden">
-         <div className="flex-1 space-y-1 p-1.5">
-          <div className="h-1.5 w-3/4 rounded bg-current/20" />
-          <div className="h-1 w-1/2 rounded bg-current/10" />
-          <div className="h-1 w-full rounded bg-current/10" />
-          <div className="h-1 w-2/3 rounded bg-current/10" />
-          <div className="mt-1 h-2 w-10 rounded bg-current/15" />
+        >
+         {/* Full page wireframe */}
+         <div className="flex h-12 w-full rounded-md border border-current/10 overflow-hidden">
+          <div className="flex-1 space-y-1 p-1.5">
+           <div className="h-1 w-3/4 rounded-full bg-current/15" />
+           <div className="h-1 w-1/2 rounded-full bg-current/10" />
+           <div className="h-1 w-full rounded-full bg-current/8" />
+           <div className="mt-1 h-2 w-8 rounded bg-current/12" />
+          </div>
+          <div className="w-8 bg-current/8" />
          </div>
-         <div className="w-10 bg-current/10" />
-        </div>
-        <span className={`text-xs font-medium ${layout === "full" ? "text-primary" : "text-muted-foreground"}`}>
-         Full Page
-        </span>
-       </button>
-      </div>
-     </div>
-
-     {/* Sections Toggle */}
-      <div className="rounded-2xl border border-white/5 bg-card-background p-5 sm:p-6 space-y-4">
-       <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-        <div className="rounded-lg bg-primary/10 p-1.5">
-         <Settings2 className="h-4 w-4 text-primary" />
-        </div>
-        Visible Sections
-       </h3>
-       <div className="grid grid-cols-2 gap-2">
-        {[...SECTION_OPTIONS].sort((a, b) => {
-         if (layout === "card") {
-          const aDisabled = CARD_DISABLED_SECTIONS.has(a.id) ? 1 : 0;
-          const bDisabled = CARD_DISABLED_SECTIONS.has(b.id) ? 1 : 0;
-          return aDisabled - bDisabled;
-         }
-         return 0;
-        }).map((section) => {
-         const isDisabledForLayout = layout === "card" && CARD_DISABLED_SECTIONS.has(section.id);
-         const isEnabled = !isDisabledForLayout && enabledSections.has(section.id);
-         return (
-          <button
-           key={section.id}
-           onClick={() => toggleSection(section.id)}
-           disabled={isDisabledForLayout}
-            className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm font-medium transition-all ${
-             isDisabledForLayout
-              ? "border-white/5 text-muted-foreground/30 cursor-not-allowed opacity-50"
-              : isEnabled
-               ? "border-primary/50 bg-primary/10 text-foreground"
-               : "border-white/10 text-muted-foreground hover:border-white/20"
-            }`}
-          >
-           <div
-            className={`flex h-4 w-4 items-center justify-center rounded transition-colors ${
-             isDisabledForLayout
-              ? "text-muted-foreground/30"
-              : isEnabled
-               ? "text-primary"
-               : "text-muted-foreground/50"
-            }`}
-           >
-            {section.icon}
-           </div>
-           <span className={`truncate ${isDisabledForLayout ? "line-through" : ""}`}>{section.label}</span>
-           <div
-            className={`ml-auto h-3 w-3 rounded-full border-2 transition-colors ${
-             isDisabledForLayout
-              ? "border-muted-foreground/20"
-              : isEnabled
-               ? "border-primary bg-primary"
-               : "border-muted-foreground/30"
-            }`}
-           />
-          </button>
-         );
-        })}
+         <span className={`text-xs font-medium ${layout === "full" ? "text-primary" : "text-muted-foreground"}`}>
+          Full Page
+         </span>
+        </button>
        </div>
-     </div>
+      </div>
 
-     {/* Theme Picker */}
-      <div className="rounded-2xl border border-white/5 bg-card-background p-5 sm:p-6 space-y-4">
-       <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-        <div className="rounded-lg bg-primary/10 p-1.5">
-         <Palette className="h-4 w-4 text-primary" />
-        </div>
-        Theme
-       </h3>
+      {/* Divider */}
+      <div className="border-t border-white/5" />
+
+      {/* Theme */}
+      <div className="space-y-3">
+       <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Theme</h3>
        <div className="grid grid-cols-3 gap-2">
-        {(
-         [
-          { id: "event", label: "Event", colors: ["#7c3aed", "#a78bfa"] },
-          { id: "light", label: "Light", colors: ["#ffffff", "#f3f4f6"] },
-          { id: "dark", label: "Dark", colors: ["#18181b", "#27272a"] },
-         ] as const
-        ).map((opt) => (
+        {([
+         { id: "event", label: "Event", colors: ["#7c3aed", "#a78bfa"] },
+         { id: "light", label: "Light", colors: ["#ffffff", "#e5e7eb"] },
+         { id: "dark", label: "Dark", colors: ["#18181b", "#3f3f46"] },
+        ] as const).map((opt) => (
          <button
           key={opt.id}
           onClick={() => setTheme(opt.id)}
-           className={`flex flex-col items-center gap-2 rounded-xl border-2 px-2 py-3 transition-all ${
-            theme === opt.id
-             ? "border-primary bg-primary/10"
-             : "border-white/10 hover:border-white/20"
-           }`}
+          className={`flex items-center gap-2 rounded-lg border-2 px-3 py-2 transition-all ${
+           theme === opt.id
+            ? "border-primary bg-primary/5"
+            : "border-white/10 hover:border-white/20"
+          }`}
          >
-          <div className="flex -space-x-1">
+          <div className="flex -space-x-1.5">
            {opt.colors.map((c, i) => (
             <div
              key={i}
-             className="h-5 w-5 rounded-full border border-white/20"
+             className="h-4 w-4 rounded-full border border-white/20"
              style={{ backgroundColor: c }}
             />
            ))}
           </div>
-           <span
-            className={`text-sm font-medium ${
-             theme === opt.id ? "text-primary" : "text-muted-foreground"
-            }`}
-           >
+          <span className={`text-xs font-medium ${theme === opt.id ? "text-primary" : "text-muted-foreground"}`}>
            {opt.label}
           </span>
          </button>
         ))}
        </div>
       </div>
+     </div>
 
-      {/* Dimensions */}
-       <div className="rounded-2xl border border-white/5 bg-card-background p-5 sm:p-6 space-y-4">
-        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-         <div className="rounded-lg bg-primary/10 p-1.5">
-          <Settings2 className="h-4 w-4 text-primary" />
-         </div>
-         Dimensions
-        </h3>
-       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Width</label>
-          <input
-           type="text"
-           value={customWidth}
-           onChange={(e) => setCustomWidth(e.target.value)}
-           className="w-full rounded-lg border border-white/10 bg-card-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-           placeholder="e.g. 100%, 500"
-          />
-        </div>
-        <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Height</label>
-          <input
-           type="text"
-           value={customHeight}
-           onChange={(e) => setCustomHeight(e.target.value)}
-           className="w-full rounded-lg border border-white/10 bg-card-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-           placeholder="e.g. 150, 800"
-          />
-        </div>
-       </div>
-        <p className="text-xs text-muted-foreground">
-        Use numbers for pixels or include % for percentages. The resize script will auto-adjust height.
-       </p>
+     {/* Sections */}
+     <div className="rounded-2xl border border-white/5 bg-card-background p-5 space-y-3">
+      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Sections</h3>
+      <div className="flex flex-wrap gap-1.5">
+       {sortedSections.map((section) => {
+        const isDisabledForLayout = layout === "card" && CARD_DISABLED_SECTIONS.has(section.id);
+        const isEnabled = !isDisabledForLayout && enabledSections.has(section.id);
+        return (
+         <button
+          key={section.id}
+          onClick={() => toggleSection(section.id)}
+          disabled={isDisabledForLayout}
+          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+           isDisabledForLayout
+            ? "text-muted-foreground/30 cursor-not-allowed"
+            : isEnabled
+             ? "bg-primary/10 text-primary ring-1 ring-primary/30"
+             : "bg-white/5 text-muted-foreground hover:bg-white/10"
+          }`}
+         >
+          {section.icon}
+          {section.label}
+         </button>
+        );
+       })}
       </div>
      </div>
 
-     {/* Right: Preview + Code */}
+     {/* Dimensions */}
+     <div className="rounded-2xl border border-white/5 bg-card-background p-5 space-y-3">
+      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Dimensions</h3>
+      <div className="grid grid-cols-2 gap-3">
+       <div>
+        <label className="text-xs text-muted-foreground/70 mb-1 block">Width</label>
+        <input
+         type="text"
+         value={customWidth}
+         onChange={(e) => setCustomWidth(e.target.value)}
+         className="w-full rounded-lg border border-white/10 bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+         placeholder="100%"
+        />
+       </div>
+       <div>
+        <label className="text-xs text-muted-foreground/70 mb-1 block">Height</label>
+        <input
+         type="text"
+         value={customHeight}
+         onChange={(e) => setCustomHeight(e.target.value)}
+         className="w-full rounded-lg border border-white/10 bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+         placeholder="150"
+        />
+       </div>
+      </div>
+      <p className="text-[11px] text-muted-foreground/50">
+       The resize script auto-adjusts height to fit content.
+      </p>
+     </div>
+    </div>
+
+    {/* Right: Preview + Code */}
     <div className="min-w-0 space-y-5">
      {/* Live Preview */}
-      <div className="rounded-2xl border border-white/5 bg-card-background p-5 sm:p-6 space-y-4">
-       <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-        <div className="rounded-lg bg-primary/10 p-1.5">
-         <Eye className="h-4 w-4 text-primary" />
-        </div>
-        Live Preview
-       </h3>
-       <div
-        className="flex items-start justify-center rounded-xl p-4"
-          style={{
-           backgroundColor: theme === "light" ? "#f3f4f6" : theme === "dark" ? "#0a0a0a" : "#1a1a2e",
-           minHeight: "150px",
-          }}
-         >
-           {embedUrl && (
-            <iframe
-             src={embedUrl}
-             width="100%"
-             height={customHeight}
-          style={{
-           border: "none",
-           borderRadius: "12px",
-           overflow: layout === "card" ? "hidden" : undefined,
-           maxWidth: "100%",
-          }}
-          loading="lazy"
-         />
-        )}
+     <div className="rounded-2xl border border-white/5 bg-card-background p-5 space-y-3">
+      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+       <Eye className="h-3.5 w-3.5" />
+       Preview
+      </h3>
+      <div
+       className="rounded-xl p-4"
+       style={{
+        backgroundColor: theme === "light" ? "#f3f4f6" : theme === "dark" ? "#0a0a0a" : "#1a1a2e",
+        minHeight: "150px",
+       }}
+      >
+       {embedUrl && (
+        <iframe
+         src={embedUrl}
+         width="100%"
+         height={customHeight}
+         style={{
+          border: "none",
+          borderRadius: "12px",
+          overflow: layout === "card" ? "hidden" : undefined,
+          maxWidth: "100%",
+         }}
+         loading="lazy"
+        />
+       )}
       </div>
      </div>
 
      {/* Embed Code */}
-      <div className="rounded-2xl border border-white/5 bg-card-background p-5 sm:p-6 space-y-4">
-       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-         <div className="rounded-lg bg-primary/10 p-1.5">
-          <Code className="h-4 w-4 text-primary" />
-         </div>
-         Embed Code
-        </h3>
+     <div className="rounded-2xl border border-white/5 bg-card-background p-5 space-y-3">
+      <div className="flex items-center justify-between">
+       <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+        <Code className="h-3.5 w-3.5" />
+        Embed Code
+       </h3>
        <button
         onClick={handleCopy}
-         className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-card-secondary-background px-3 py-2 text-sm font-medium text-foreground transition-all hover:bg-primary/10 hover:border-primary/50"
+        className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+         copied
+          ? "bg-green-500/10 text-green-400"
+          : "bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground"
+        }`}
        >
         {copied ? (
          <>
-          <Check className="h-3.5 w-3.5 text-green-400" />
+          <Check className="h-3 w-3" />
           Copied
          </>
         ) : (
          <>
-          <Copy className="h-3.5 w-3.5" />
+          <Copy className="h-3 w-3" />
           Copy
          </>
         )}
        </button>
       </div>
-      <div className="relative">
-        <pre className="overflow-x-auto rounded-xl bg-card-secondary-background p-4 text-sm text-muted-foreground font-mono leading-relaxed whitespace-pre-wrap break-all">
-        <code>{iframeSnippetWithResize}</code>
-       </pre>
-      </div>
-       <div className="flex items-start gap-3 rounded-xl bg-primary/5 border border-primary/20 p-4">
-        <Info className="h-4 w-4 shrink-0 text-primary mt-0.5" />
-        <p className="text-sm text-muted-foreground leading-relaxed">
-        Paste this code into your website&apos;s HTML where you want the event
-        to appear. The resize script automatically adjusts the iframe height to
-        fit the content. You can also adjust the <code className="text-primary">width</code> and{" "}
-        <code className="text-primary">height</code> attributes to fit your
-        design.
+      <pre className="overflow-x-auto rounded-xl bg-black/20 p-4 text-xs text-muted-foreground font-mono leading-relaxed whitespace-pre-wrap break-all">
+       <code>{iframeSnippetWithResize}</code>
+      </pre>
+      <div className="flex items-start gap-2.5 rounded-lg bg-primary/5 px-3.5 py-3">
+       <Info className="h-3.5 w-3.5 shrink-0 text-primary/60 mt-0.5" />
+       <p className="text-xs text-muted-foreground/70 leading-relaxed">
+        Paste this into your website&apos;s HTML. The resize script auto-adjusts the iframe height.
        </p>
       </div>
      </div>
