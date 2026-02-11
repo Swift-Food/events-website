@@ -16,7 +16,7 @@ import {
  ExternalLink,
  Globe,
 } from "lucide-react";
-import EventThemeStyles from "@/components/theme/EventThemeStyles";
+import EmbedThemeStyles from "./EmbedThemeStyles";
 
 interface EmbedFullPageLayoutProps {
  event: EventResponseDto;
@@ -109,7 +109,7 @@ export default function EmbedFullPageLayout({
 
  return (
   <>
-   <EventThemeStyles />
+    <EmbedThemeStyles palette={palette} />
    <div className="mx-auto max-w-6xl px-6 py-4">
     {/* Main Content - Responsive Layout (mirroring EventClient) */}
      <div className="flex flex-col gap-6 sm:flex-row-reverse">
