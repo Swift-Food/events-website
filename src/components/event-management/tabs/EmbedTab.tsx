@@ -7,7 +7,6 @@ import {
  Code,
  Copy,
  Check,
- Eye,
  Image,
  Clock,
  User,
@@ -321,35 +320,49 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
 
     {/* Right: Preview + Code */}
     <div className="min-w-0 space-y-5">
-     {/* Live Preview */}
-     <div className="rounded-2xl border border-white/5 bg-card-background p-5 space-y-3">
-      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-       <Eye className="h-3.5 w-3.5" />
-       Preview
-      </h3>
-      <div
-       className="rounded-xl p-4"
-       style={{
-        backgroundColor: theme === "light" ? "#f3f4f6" : theme === "dark" ? "#0a0a0a" : "#1a1a2e",
-        minHeight: "150px",
-       }}
-      >
-       {embedUrl && (
-        <iframe
-         src={embedUrl}
-         width="100%"
-         height={customHeight}
-         style={{
-          border: "none",
-          borderRadius: "12px",
-          overflow: layout === "card" ? "hidden" : undefined,
-          maxWidth: "100%",
-         }}
-         loading="lazy"
-        />
-       )}
+     {/* Live Preview — Browser mockup */}
+      <div className="rounded-2xl border border-white/[0.08] bg-[#1a1a1a] overflow-hidden">
+       {/* Title bar */}
+       <div className="flex items-center px-3 py-2 border-b border-white/[0.06]">
+        {/* Traffic lights */}
+        <div className="flex items-center gap-1.5 w-10 shrink-0">
+         <div className="h-2 w-2 rounded-full bg-white/[0.15]" />
+         <div className="h-2 w-2 rounded-full bg-white/[0.15]" />
+         <div className="h-2 w-2 rounded-full bg-white/[0.15]" />
+        </div>
+        {/* URL bar */}
+        <div className="flex-1 flex justify-center">
+         <div className="flex items-center justify-center rounded-md bg-white/[0.06] px-4 h-6">
+          <span className="text-[11px] font-mono text-muted-foreground/50">your-website.com</span>
+         </div>
+        </div>
+        {/* Spacer to balance traffic lights */}
+        <div className="w-10 shrink-0" />
+       </div>
+       {/* Page content area */}
+       <div
+        className="flex items-center justify-center p-6 sm:p-8"
+        style={{
+         backgroundColor: theme === "light" ? "#f3f4f6" : theme === "dark" ? "#0a0a0a" : "#1a1a2e",
+         minHeight: "200px",
+        }}
+       >
+        {embedUrl && (
+         <iframe
+          src={embedUrl}
+          width="100%"
+          height={customHeight}
+          style={{
+           border: "none",
+           borderRadius: "12px",
+           overflow: layout === "card" ? "hidden" : undefined,
+           maxWidth: "100%",
+          }}
+          loading="lazy"
+         />
+        )}
+       </div>
       </div>
-     </div>
 
      {/* Embed Code */}
      <div className="rounded-2xl border border-white/5 bg-card-background p-5 space-y-3">
