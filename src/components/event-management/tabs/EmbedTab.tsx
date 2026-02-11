@@ -166,66 +166,68 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
     {/* Left: Configuration */}
     <div className="min-w-0 space-y-5">
      {/* Layout + Theme combined */}
-     <div className="rounded-2xl border border-white/5 bg-card-background p-5 space-y-5">
+      <div className="rounded-2xl border border-white/5 bg-card-background p-5 space-y-7">
       {/* Layout */}
       <div className="space-y-3">
-       <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Layout</h3>
+        <h3 className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-wider">Layout</h3>
        <div className="grid grid-cols-2 gap-2">
-        <button
-         onClick={() => setLayout("card")}
-         className={`group relative flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all ${
-          layout === "card"
-           ? "border-primary bg-primary/5"
-           : "border-white/10 hover:border-white/20"
-         }`}
-        >
-         {/* Card wireframe */}
-         <div className="flex h-12 w-full items-center rounded-md border border-current/10 overflow-hidden">
-          <div className="w-10 h-full bg-current/8" />
-          <div className="flex-1 space-y-1 p-1.5">
-           <div className="h-1 w-full rounded-full bg-current/15" />
-           <div className="h-1 w-3/4 rounded-full bg-current/10" />
+         <button
+          onClick={() => setLayout("card")}
+          className={`group relative flex flex-col rounded-xl border-2 p-3 transition-all ${
+           layout === "card"
+            ? "border-primary bg-primary/5"
+            : "border-white/10 hover:border-white/20"
+          }`}
+         >
+          {/* Wireframe area — fixed height, card centered */}
+          <div className="flex h-24 w-full items-center justify-center">
+           <div className="flex h-12 w-full items-center rounded-md border border-current/10 overflow-hidden">
+            <div className="w-10 h-full bg-current/8" />
+            <div className="flex-1 space-y-1 p-1.5">
+             <div className="h-1 w-full rounded-full bg-current/15" />
+             <div className="h-1 w-3/4 rounded-full bg-current/10" />
+            </div>
+            <div className="flex items-center px-1.5">
+             <div className="h-2.5 w-5 rounded bg-current/12" />
+            </div>
+           </div>
           </div>
-          <div className="flex items-center px-1.5">
-           <div className="h-2.5 w-5 rounded bg-current/12" />
-          </div>
-         </div>
-         <span className={`text-xs font-medium ${layout === "card" ? "text-primary" : "text-muted-foreground"}`}>
-          Card
-         </span>
-        </button>
+          <span className={`mt-2 text-xs font-medium text-center w-full ${layout === "card" ? "text-primary" : "text-muted-foreground"}`}>
+           Card
+          </span>
+         </button>
 
-        <button
-         onClick={() => setLayout("full")}
-         className={`group relative flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all ${
-          layout === "full"
-           ? "border-primary bg-primary/5"
-           : "border-white/10 hover:border-white/20"
-         }`}
-        >
-         {/* Full page wireframe */}
-         <div className="flex h-12 w-full rounded-md border border-current/10 overflow-hidden">
-          <div className="flex-1 space-y-1 p-1.5">
-           <div className="h-1 w-3/4 rounded-full bg-current/15" />
-           <div className="h-1 w-1/2 rounded-full bg-current/10" />
-           <div className="h-1 w-full rounded-full bg-current/8" />
-           <div className="mt-1 h-2 w-8 rounded bg-current/12" />
+         <button
+          onClick={() => setLayout("full")}
+          className={`group relative flex flex-col rounded-xl border-2 p-3 transition-all ${
+           layout === "full"
+            ? "border-primary bg-primary/5"
+            : "border-white/10 hover:border-white/20"
+          }`}
+         >
+          {/* Wireframe area — fixed height, full page fills it */}
+          <div className="flex h-24 w-full items-end">
+           <div className="flex h-24 w-full rounded-md border border-current/10 overflow-hidden">
+            <div className="flex-1 space-y-1.5 p-2">
+             <div className="h-1.5 w-3/4 rounded-full bg-current/15" />
+             <div className="h-1 w-1/2 rounded-full bg-current/10" />
+             <div className="h-1 w-full rounded-full bg-current/8" />
+             <div className="h-1 w-2/3 rounded-full bg-current/8" />
+             <div className="mt-2 h-2.5 w-10 rounded bg-current/12" />
+            </div>
+            <div className="w-10 bg-current/8" />
+           </div>
           </div>
-          <div className="w-8 bg-current/8" />
-         </div>
-         <span className={`text-xs font-medium ${layout === "full" ? "text-primary" : "text-muted-foreground"}`}>
-          Full Page
-         </span>
-        </button>
+          <span className={`mt-2 text-xs font-medium text-center w-full ${layout === "full" ? "text-primary" : "text-muted-foreground"}`}>
+           Full Page
+          </span>
+         </button>
        </div>
       </div>
 
-      {/* Divider */}
-      <div className="border-t border-white/5" />
-
-       {/* Theme */}
-       <div className="space-y-3">
-        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Visual Style</h3>
+        {/* Theme */}
+        <div className="space-y-3">
+         <h3 className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-wider">Visual Style</h3>
         <div className="flex rounded-lg bg-white/[0.06] p-0.5">
          {([
           { id: "event", label: "Event" },
@@ -247,12 +249,9 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
         </div>
        </div>
 
-       {/* Divider */}
-       <div className="border-t border-white/5" />
-
-       {/* Dimensions */}
-       <div className="space-y-3">
-        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Dimensions</h3>
+        {/* Dimensions */}
+        <div className="space-y-3">
+         <h3 className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-wider">Dimensions</h3>
         <div className="grid grid-cols-2 gap-3">
          <div>
           <label className="text-xs text-muted-foreground/70 mb-1 block">Width</label>
@@ -283,7 +282,7 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
 
       {/* Sections */}
      <div className="rounded-2xl border border-white/5 bg-card-background p-5 space-y-3">
-      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Sections</h3>
+       <h3 className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-wider">Sections</h3>
       <div className="flex flex-wrap gap-1.5">
        {sortedSections.map((section) => {
         const isDisabledForLayout = layout === "card" && CARD_DISABLED_SECTIONS.has(section.id);
