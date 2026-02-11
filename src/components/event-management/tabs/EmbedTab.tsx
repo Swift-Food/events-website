@@ -285,42 +285,42 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
         </div>
         Theme
        </h3>
-      <div className="flex gap-2">
-       {(
-        [
-         { id: "event", label: "Event Theme", colors: ["#7c3aed", "#a78bfa"] },
-         { id: "light", label: "Light", colors: ["#ffffff", "#f3f4f6"] },
-         { id: "dark", label: "Dark", colors: ["#18181b", "#27272a"] },
-        ] as const
-       ).map((opt) => (
-        <button
-         key={opt.id}
-         onClick={() => setTheme(opt.id)}
-          className={`flex flex-1 items-center gap-2 rounded-xl border-2 px-3 py-2.5 transition-all ${
-           theme === opt.id
-            ? "border-primary bg-primary/10"
-            : "border-white/10 hover:border-white/20"
-          }`}
-        >
-         <div className="flex -space-x-1">
-          {opt.colors.map((c, i) => (
-           <div
-            key={i}
-            className="h-4 w-4 rounded-full border border-white/20"
-            style={{ backgroundColor: c }}
-           />
-          ))}
-         </div>
-          <span
-           className={`text-sm font-medium ${
-            theme === opt.id ? "text-primary" : "text-muted-foreground"
+       <div className="grid grid-cols-3 gap-2">
+        {(
+         [
+          { id: "event", label: "Event", colors: ["#7c3aed", "#a78bfa"] },
+          { id: "light", label: "Light", colors: ["#ffffff", "#f3f4f6"] },
+          { id: "dark", label: "Dark", colors: ["#18181b", "#27272a"] },
+         ] as const
+        ).map((opt) => (
+         <button
+          key={opt.id}
+          onClick={() => setTheme(opt.id)}
+           className={`flex flex-col items-center gap-2 rounded-xl border-2 px-2 py-3 transition-all ${
+            theme === opt.id
+             ? "border-primary bg-primary/10"
+             : "border-white/10 hover:border-white/20"
            }`}
-          >
-          {opt.label}
-         </span>
-        </button>
-       ))}
-      </div>
+         >
+          <div className="flex -space-x-1">
+           {opt.colors.map((c, i) => (
+            <div
+             key={i}
+             className="h-5 w-5 rounded-full border border-white/20"
+             style={{ backgroundColor: c }}
+            />
+           ))}
+          </div>
+           <span
+            className={`text-sm font-medium ${
+             theme === opt.id ? "text-primary" : "text-muted-foreground"
+            }`}
+           >
+           {opt.label}
+          </span>
+         </button>
+        ))}
+       </div>
       </div>
 
       {/* Dimensions */}
