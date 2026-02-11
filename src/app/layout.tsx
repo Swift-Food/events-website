@@ -1,27 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Inter } from "next/font/google";
-// import { Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import Script from "next/script";
 import "@/styles/globals.css";
-import Navbar from "../components/layout/Navbar";
-import Footer from "../components/layout/Footer";
-import { AuthProvider } from "@/lib/auth/authContext";
-import { CategoriesProvider } from "@/lib/categories-context";
 import { Toaster } from "sonner";
-import { SearchModalProvider } from "@/components/search/SearchModalContext";
-import { NotificationProvider } from "@/context/NotificationContext";
 
 const geistSans = Geist({
  variable: "--font-geist-sans",
  subsets: ["latin"],
  weight: ["300", "400", "500", "600", "700"],
 });
-
-// const geistMono = Geist_Mono({
-//  variable: "--font-geist-mono",
-//  subsets: ["latin"],
-// });
 
 const inter = Inter({
  variable: "--font-inter",
@@ -54,7 +42,6 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
  title: "Prismo",
  description: "",
- // Apparently keywords meta tag is ignored by Google
  keywords: [
   "luma",
   "eventbrite",
@@ -146,7 +133,7 @@ export default function RootLayout({
  return (
   <html lang="en">
    <head>
-        <Script
+    <Script
      src="https://accounts.google.com/gsi/client"
      strategy="beforeInteractive"
     />
@@ -158,27 +145,12 @@ export default function RootLayout({
    <body
     className={`${inter.variable} ${geistSans.variable} ${satoshi.variable} antialiased`}
    >
-    <AuthProvider>
-     <CategoriesProvider>
-      <NotificationProvider>
-       <SearchModalProvider>
-        <div className="relative h-dvh overflow-hidden">
-         <div className="fixed inset-0 -z-10" style={{ background: "linear-gradient(to bottom, #41296e 0%, #000000 15%)" }} />
-         <Navbar />
-         <main className="h-dvh overflow-y-auto overscroll-none pt-[56px] md:pt-[68px]">
-          {children}
-          <Footer />
-         </main>
-        </div>
-       </SearchModalProvider>
-      </NotificationProvider>
-     </CategoriesProvider>
-    </AuthProvider>
+    {children}
     <Toaster
      position="top-right"
      richColors
      closeButton
-     theme="dark" // or "light" based on your theme
+     theme="dark"
     />
    </body>
   </html>

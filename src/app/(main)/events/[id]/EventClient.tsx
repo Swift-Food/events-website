@@ -828,13 +828,13 @@ export default function EventClient({
      </div>
 
      {/* Main Content - Responsive Layout */}
-     <div className="flex flex-col gap-6 lg:flex-row-reverse">
+     <div className="flex flex-col gap-6 sm:flex-row-reverse">
       {/* Left Column - Image and Sidebar */}
-      <section className="flex flex-col gap-6 lg:w-96 lg:shrink-0 event-page-stagger-2">
-       {/* 2×2 Grid on sm-md, Flex column on lg+ */}
-       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:flex lg:flex-col">
+      <section className="flex flex-col gap-6 sm:w-56 md:w-72 lg:w-96 sm:shrink-0 event-page-stagger-2">
+       {/* Flex column at all sizes */}
+       <div className="flex flex-col gap-6">
         {/* Top Left: Image with Status Badge */}
-        <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+        <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background">
          {event.eventImage ? (
           <Image
            src={event.eventImage}
@@ -852,8 +852,8 @@ export default function EventClient({
         </div>
 
         {/* Event Title & Categories - Show on mobile & tablet, hide on desktop */}
-        <div className="block lg:hidden sm:col-span-1 sm:row-span-1 sm:flex sm:flex-col sm:items-center sm:justify-center">
-         <h1 className="mb-4 text-2xl sm:text-3xl font-bold tracking-tight text-foreground sm:text-center">
+        <div className="block sm:hidden">
+         <h1 className="mb-4 text-2xl font-bold tracking-tight text-foreground">
           {event.name}
          </h1>
 
@@ -861,7 +861,7 @@ export default function EventClient({
          {((event.categories && event.categories.length > 0) ||
           (event.subcategories &&
            event.subcategories.length > 0)) && (
-          <div className="flex flex-wrap gap-2 sm:justify-center">
+          <div className="flex flex-wrap gap-2">
            {event.categories?.map((category) => (
             <Link
              key={category.id}
@@ -896,7 +896,7 @@ export default function EventClient({
 
          {/* Organizer - Mobile/Tablet */}
          <div className="mt-6 h-px bg-foreground/10" />
-         <div className="py-4 flex items-center gap-3 sm:justify-center">
+         <div className="py-4 flex items-center gap-3">
           {event.owner?.user ? (
            <Link
             href={`/user/${event.owner.id}`}
@@ -955,7 +955,7 @@ export default function EventClient({
         </div>
 
         {/* Date & Time Card - Bottom left on tablet, normal on mobile/desktop */}
-        <div className="rounded-xl bg-card-background backdrop-blur-sm p-4 sm:p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+        <div className="rounded-xl bg-card-background backdrop-blur-sm p-4 sm:p-6">
          <h3 className="mb-4 text-lg font-semibold text-foreground">
           Date & Time
          </h3>
@@ -1150,7 +1150,7 @@ export default function EventClient({
         </div>
 
         {/* Location Card - Bottom right */}
-        <div className="rounded-xl bg-card-background backdrop-blur-sm overflow-hidden sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+        <div className="rounded-xl bg-card-background backdrop-blur-sm overflow-hidden">
          {isVirtualEvent(event.format) ? (
           <div className="p-4 sm:p-6">
            <div className="h-32 w-full bg-primary/10 rounded-lg flex flex-col items-center justify-center gap-2 mb-4">
@@ -1331,8 +1331,8 @@ export default function EventClient({
       {/* Right Column - Main Content */}
       <section className="flex-1 space-y-6 event-page-stagger-3">
        {/* Event Title and Categories - Only show on desktop */}
-       <div className="hidden lg:block">
-        <h1 className="mb-4 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+       <div className="hidden sm:block">
+        <h1 className="mb-4 text-2xl md:text-3xl lg:text-5xl font-bold tracking-tight text-foreground">
          {event.name}
         </h1>
 
