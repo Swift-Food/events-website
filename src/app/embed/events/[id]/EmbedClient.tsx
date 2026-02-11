@@ -60,6 +60,7 @@ interface EmbedClientProps {
  layout: string;
  show: string;
  theme: string;
+ eventPageUrl: string;
 }
 
 export default function EmbedClient({
@@ -67,6 +68,7 @@ export default function EmbedClient({
  layout,
  show,
  theme,
+ eventPageUrl,
 }: EmbedClientProps) {
  const containerRef = useRef<HTMLDivElement>(null);
  const { config: themeConfig, palette: eventPalette, shader, landscape } = useEventTheme();
@@ -135,11 +137,6 @@ export default function EmbedClient({
 
   return () => observer.disconnect();
  }, [event.id]);
-
- // Build event page URL
- const eventPageUrl = typeof window !== "undefined"
-  ? `${window.location.origin.replace("/embed", "")}/events/${event.eventUrl || event.id}`
-  : `/events/${event.eventUrl || event.id}`;
 
  const isFullPage = layout === "full";
 

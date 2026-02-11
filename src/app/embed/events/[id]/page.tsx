@@ -60,18 +60,22 @@ export default async function EmbedEventPage({
   notFound();
  }
 
- const layout = (search.layout as string) || "card";
- const show = (search.show as string) || "image,time,organizer,location,description,categories,tickets,cta";
- const theme = (search.theme as string) || "event";
+  const layout = (search.layout as string) || "card";
+  const show = (search.show as string) || "image,time,organizer,location,description,categories,tickets,cta";
+  const theme = (search.theme as string) || "event";
 
- return (
-  <EventThemeProvider themeJson={event.eventTheme}>
-   <EmbedClient
-    event={event}
-    layout={layout}
-    show={show}
-    theme={theme}
-   />
-  </EventThemeProvider>
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const eventPageUrl = `${baseUrl}/events/${event.eventUrl || event.id}`;
+
+  return (
+   <EventThemeProvider themeJson={event.eventTheme}>
+    <EmbedClient
+     event={event}
+     layout={layout}
+     show={show}
+     theme={theme}
+     eventPageUrl={eventPageUrl}
+    />
+   </EventThemeProvider>
  );
 }
