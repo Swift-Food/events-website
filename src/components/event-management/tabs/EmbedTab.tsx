@@ -70,10 +70,15 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
    });
    setCustomWidth("100%");
    setCustomHeight("150");
-  } else {
-   setCustomWidth("100%");
-   setCustomHeight("800");
-  }
+   } else {
+    setEnabledSections((prev) => {
+     const next = new Set(prev);
+     CARD_DISABLED_SECTIONS.forEach((s) => next.add(s));
+     return next;
+    });
+    setCustomWidth("100%");
+    setCustomHeight("800");
+   }
  }, [layout]);
 
  const toggleSection = useCallback((sectionId: string) => {
