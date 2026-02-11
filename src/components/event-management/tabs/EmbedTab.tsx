@@ -223,43 +223,65 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
       {/* Divider */}
       <div className="border-t border-white/5" />
 
-      {/* Theme */}
-      <div className="space-y-3">
-       <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Theme</h3>
-       <div className="grid grid-cols-3 gap-2">
-        {([
-         { id: "event", label: "Event", colors: ["#7c3aed", "#a78bfa"] },
-         { id: "light", label: "Light", colors: ["#ffffff", "#e5e7eb"] },
-         { id: "dark", label: "Dark", colors: ["#18181b", "#3f3f46"] },
-        ] as const).map((opt) => (
-         <button
-          key={opt.id}
-          onClick={() => setTheme(opt.id)}
-          className={`flex items-center gap-2 rounded-lg border-2 px-3 py-2 transition-all ${
-           theme === opt.id
-            ? "border-primary bg-primary/5"
-            : "border-white/10 hover:border-white/20"
-          }`}
-         >
-          <div className="flex -space-x-1.5">
-           {opt.colors.map((c, i) => (
-            <div
-             key={i}
-             className="h-4 w-4 rounded-full border border-white/20"
-             style={{ backgroundColor: c }}
-            />
-           ))}
-          </div>
-          <span className={`text-xs font-medium ${theme === opt.id ? "text-primary" : "text-muted-foreground"}`}>
+       {/* Theme */}
+       <div className="space-y-3">
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Visual Style</h3>
+        <div className="flex rounded-lg bg-white/[0.06] p-0.5">
+         {([
+          { id: "event", label: "Event" },
+          { id: "light", label: "Light" },
+          { id: "dark", label: "Dark" },
+         ] as const).map((opt) => (
+          <button
+           key={opt.id}
+           onClick={() => setTheme(opt.id)}
+           className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+            theme === opt.id
+             ? "bg-white/[0.1] text-foreground shadow-sm"
+             : "text-muted-foreground hover:text-foreground/70"
+           }`}
+          >
            {opt.label}
-          </span>
-         </button>
-        ))}
+          </button>
+         ))}
+        </div>
+       </div>
+
+       {/* Divider */}
+       <div className="border-t border-white/5" />
+
+       {/* Dimensions */}
+       <div className="space-y-3">
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Dimensions</h3>
+        <div className="grid grid-cols-2 gap-3">
+         <div>
+          <label className="text-xs text-muted-foreground/70 mb-1 block">Width</label>
+          <input
+           type="text"
+           value={customWidth}
+           onChange={(e) => setCustomWidth(e.target.value)}
+           className="w-full rounded-lg border border-white/10 bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+           placeholder="100%"
+          />
+         </div>
+         <div>
+          <label className="text-xs text-muted-foreground/70 mb-1 block">Height</label>
+          <input
+           type="text"
+           value={customHeight}
+           onChange={(e) => setCustomHeight(e.target.value)}
+           className="w-full rounded-lg border border-white/10 bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+           placeholder="150"
+          />
+         </div>
+        </div>
+        <p className="text-[11px] text-muted-foreground/50">
+         The resize script auto-adjusts height to fit content.
+        </p>
        </div>
       </div>
-     </div>
 
-     {/* Sections */}
+      {/* Sections */}
      <div className="rounded-2xl border border-white/5 bg-card-background p-5 space-y-3">
       <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Sections</h3>
       <div className="flex flex-wrap gap-1.5">
@@ -287,35 +309,7 @@ export function EmbedTab({ eventData }: EmbedTabProps) {
       </div>
      </div>
 
-     {/* Dimensions */}
-     <div className="rounded-2xl border border-white/5 bg-card-background p-5 space-y-3">
-      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Dimensions</h3>
-      <div className="grid grid-cols-2 gap-3">
-       <div>
-        <label className="text-xs text-muted-foreground/70 mb-1 block">Width</label>
-        <input
-         type="text"
-         value={customWidth}
-         onChange={(e) => setCustomWidth(e.target.value)}
-         className="w-full rounded-lg border border-white/10 bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-         placeholder="100%"
-        />
-       </div>
-       <div>
-        <label className="text-xs text-muted-foreground/70 mb-1 block">Height</label>
-        <input
-         type="text"
-         value={customHeight}
-         onChange={(e) => setCustomHeight(e.target.value)}
-         className="w-full rounded-lg border border-white/10 bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-         placeholder="150"
-        />
-       </div>
-      </div>
-      <p className="text-[11px] text-muted-foreground/50">
-       The resize script auto-adjusts height to fit content.
-      </p>
-     </div>
+
     </div>
 
     {/* Right: Preview + Code */}
