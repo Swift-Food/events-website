@@ -2,7 +2,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { X, Shuffle, Check, Loader2, Upload } from "lucide-react";
+import { X, Shuffle, Check, Loader2, Upload, Star } from "lucide-react";
 import { eventCoverService } from "@/services/event-cover.service";
 
 interface EventCoverPickerProps {
@@ -12,6 +12,8 @@ interface EventCoverPickerProps {
   onUploadClick: () => void;
   currentCover: string | null;
 }
+
+const RECOMMENDED_KEY = "__recommended__";
 
 function formatCategoryName(category: string): string {
   return category
@@ -31,7 +33,10 @@ export default function EventCoverPicker({
     Record<string, string[]>
   >({});
   const [categories, setCategories] = useState<string[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [featuredCategories, setFeaturedCategories] = useState<Set<string>>(
+    new Set()
+  );
+  const [activeCategory, setActiveCategory] = useState<string>(RECOMMENDED_KEY);
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(
     currentCover
@@ -40,6 +45,8 @@ export default function EventCoverPicker({
 
   const modalRef = useRef<HTMLDivElement>(null);
   const imageGridRef = useRef<HTMLDivElement>(null);
+
+  const isRecommendedView = activeCategory === RECOMMENDED_KEY;
 
   // Fetch all covers in one request
   useEffect(() => {
@@ -50,15 +57,16 @@ export default function EventCoverPicker({
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const data = await eventCoverService.getAll();
+        const [data, featured] = await Promise.all([
+          eventCoverService.getAll(),
+          eventCoverService.getFeaturedCategories(),
+        ]);
         setImagesByCategory(data);
+        setFeaturedCategories(featured);
         const cats = Object.keys(data).sort((a, b) =>
           formatCategoryName(a).localeCompare(formatCategoryName(b))
         );
         setCategories(cats);
-        if (cats.length > 0) {
-          setActiveCategory(cats[0]);
-        }
       } catch (error) {
         console.error("Failed to fetch cover images:", error);
       } finally {
@@ -81,6 +89,13 @@ export default function EventCoverPicker({
     if (isOpen) {
       setIsAnimating(true);
       requestAnimationFrame(() => setIsAnimating(false));
+    }
+  }, [isOpen]);
+
+  // Reset to recommended view when reopening
+  useEffect(() => {
+    if (isOpen) {
+      setActiveCategory(RECOMMENDED_KEY);
     }
   }, [isOpen]);
 
@@ -135,9 +150,73 @@ export default function EventCoverPicker({
 
   if (!isOpen) return null;
 
-  const currentImages = activeCategory
-    ? imagesByCategory[activeCategory] || []
-    : [];
+  const currentImages =
+    !isRecommendedView && activeCategory
+      ? imagesByCategory[activeCategory] || []
+      : [];
+
+  const featuredCategoryList = categories.filter((cat) =>
+    featuredCategories.has(cat)
+  );
+
+  // Sidebar/pill items: Recommended first, then all categories
+  const sidebarItems = [RECOMMENDED_KEY, ...categories];
+
+  const getSidebarLabel = (item: string) =>
+    item === RECOMMENDED_KEY ? "Recommended" : formatCategoryName(item);
+
+  // --- Content renderers ---
+
+  const featuredGrid = (cols: string) =>
+    loading ? (
+      <div className={`grid ${cols} gap-3`}>
+        {Array.from({ length: cols === "grid-cols-3" ? 9 : 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="aspect-[4/3] rounded-xl bg-white/5 animate-pulse"
+          />
+        ))}
+      </div>
+    ) : featuredCategoryList.length === 0 ? (
+      <div className="flex items-center justify-center h-full text-white/60 text-sm">
+        No featured categories
+      </div>
+    ) : (
+      <div className={`grid ${cols} gap-3`}>
+        {featuredCategoryList.map((category) => {
+          const images = imagesByCategory[category] || [];
+          const thumbnail = images[0];
+          return (
+            <button
+              key={category}
+              type="button"
+              onClick={() => setActiveCategory(category)}
+              className="relative aspect-[4/3] rounded-xl overflow-hidden group transition-all cursor-pointer hover:ring-2 hover:ring-white/20"
+            >
+              {thumbnail ? (
+                <img
+                  src={thumbnail}
+                  alt={formatCategoryName(category)}
+                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="h-full w-full bg-white/5" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-3">
+                <span className="text-sm font-semibold text-white">
+                  {formatCategoryName(category)}
+                </span>
+                <span className="block text-xs text-white/60">
+                  {images.length} {images.length === 1 ? "cover" : "covers"}
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    );
 
   const imageGrid = (cols: string) =>
     loading ? (
@@ -181,6 +260,9 @@ export default function EventCoverPicker({
         ))}
       </div>
     );
+
+  const contentGrid = (cols: string) =>
+    isRecommendedView ? featuredGrid(cols) : imageGrid(cols);
 
   return (
     <div
@@ -247,18 +329,21 @@ export default function EventCoverPicker({
                 ))}
               </div>
             ) : (
-              categories.map((category) => (
+              sidebarItems.map((item) => (
                 <button
-                  key={category}
+                  key={item}
                   type="button"
-                  onClick={() => setActiveCategory(category)}
-                  className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-all ${
-                    activeCategory === category
+                  onClick={() => setActiveCategory(item)}
+                  className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-all flex items-center gap-2 ${
+                    activeCategory === item
                       ? "bg-accent text-accent-dark border-r-2 border-accent-dark"
                       : "text-white/60 hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  {formatCategoryName(category)}
+                  {item === RECOMMENDED_KEY && (
+                    <Star className="h-3.5 w-3.5 shrink-0" />
+                  )}
+                  {getSidebarLabel(item)}
                 </button>
               ))
             )}
@@ -274,18 +359,21 @@ export default function EventCoverPicker({
                       className="h-8 w-20 rounded-full bg-white/5 animate-pulse shrink-0"
                     />
                   ))
-                : categories.map((category) => (
+                : sidebarItems.map((item) => (
                     <button
-                      key={category}
+                      key={item}
                       type="button"
-                      onClick={() => setActiveCategory(category)}
-                      className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
-                        activeCategory === category
+                      onClick={() => setActiveCategory(item)}
+                      className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all flex items-center gap-1 ${
+                        activeCategory === item
                           ? "bg-accent-dark text-white"
                           : "bg-white/10 text-white/60 hover:bg-white/15"
                       }`}
                     >
-                      {formatCategoryName(category)}
+                      {item === RECOMMENDED_KEY && (
+                        <Star className="h-3 w-3 shrink-0" />
+                      )}
+                      {getSidebarLabel(item)}
                     </button>
                   ))}
             </div>
@@ -304,7 +392,7 @@ export default function EventCoverPicker({
               </button>
             </div>
             <div ref={imageGridRef} className="flex-1 overflow-y-auto p-4">
-              {imageGrid("grid-cols-2")}
+              {contentGrid("grid-cols-2")}
             </div>
           </div>
 
@@ -313,7 +401,7 @@ export default function EventCoverPicker({
             ref={imageGridRef}
             className="hidden md:block flex-1 overflow-y-auto p-5"
           >
-            {imageGrid("grid-cols-3")}
+            {contentGrid("grid-cols-3")}
           </div>
         </div>
       </div>

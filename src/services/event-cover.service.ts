@@ -5,26 +5,45 @@ interface EventCoverResponse {
   id: string;
   images: string[];
   category: string;
+  featured: boolean;
 }
 
 class EventCoverService {
   private readonly baseUrl = '/event-covers';
   private cache: Record<string, string[]> | null = null;
+  private featuredCategories: Set<string> | null = null;
+
+  private async fetchAll(): Promise<EventCoverResponse[]> {
+    const response: AxiosResponse<EventCoverResponse[]> = await apiClient.get(
+      `${this.baseUrl}/all`
+    );
+    return response.data;
+  }
 
   async getAll(): Promise<Record<string, string[]>> {
     if (this.cache) return this.cache;
 
-    const response: AxiosResponse<EventCoverResponse[]> = await apiClient.get(
-      `${this.baseUrl}/all`
-    );
+    const data = await this.fetchAll();
 
     const result: Record<string, string[]> = {};
-    for (const entry of response.data) {
+    const featured = new Set<string>();
+
+    for (const entry of data) {
       result[entry.category] = entry.images;
+      if (entry.featured) {
+        featured.add(entry.category);
+      }
     }
 
     this.cache = result;
+    this.featuredCategories = featured;
     return result;
+  }
+
+  async getFeaturedCategories(): Promise<Set<string>> {
+    if (this.featuredCategories) return this.featuredCategories;
+    await this.getAll();
+    return this.featuredCategories!;
   }
 }
 
