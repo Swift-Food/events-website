@@ -329,23 +329,33 @@ export default function EventCoverPicker({
                 ))}
               </div>
             ) : (
-              sidebarItems.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setActiveCategory(item)}
-                  className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-all flex items-center gap-2 ${
-                    activeCategory === item
-                      ? "bg-accent text-accent-dark border-r-2 border-accent-dark"
-                      : "text-white/60 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  {item === RECOMMENDED_KEY && (
-                    <Star className="h-3.5 w-3.5 shrink-0" />
-                  )}
-                  {getSidebarLabel(item)}
-                </button>
-              ))
+              <>
+                {sidebarItems.map((item) => {
+                  const isRecommended = item === RECOMMENDED_KEY;
+                  const isActive = activeCategory === item;
+                  return (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => setActiveCategory(item)}
+                      className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-all flex items-center gap-2 ${
+                        isRecommended
+                          ? isActive
+                            ? "bg-amber-500/20 text-amber-400 border-r-2 border-amber-400"
+                            : "bg-amber-500/10 text-amber-400/80 hover:bg-amber-500/15 hover:text-amber-400"
+                          : isActive
+                            ? "bg-accent text-accent-dark border-r-2 border-accent-dark"
+                            : "text-white/60 hover:bg-white/5 hover:text-white"
+                      }`}
+                    >
+                      {isRecommended && (
+                        <Star className="h-3.5 w-3.5 shrink-0" />
+                      )}
+                      {getSidebarLabel(item)}
+                    </button>
+                  );
+                })}
+              </>
             )}
           </div>
 
@@ -359,23 +369,31 @@ export default function EventCoverPicker({
                       className="h-8 w-20 rounded-full bg-white/5 animate-pulse shrink-0"
                     />
                   ))
-                : sidebarItems.map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      onClick={() => setActiveCategory(item)}
-                      className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all flex items-center gap-1 ${
-                        activeCategory === item
-                          ? "bg-accent-dark text-white"
-                          : "bg-white/10 text-white/60 hover:bg-white/15"
-                      }`}
-                    >
-                      {item === RECOMMENDED_KEY && (
-                        <Star className="h-3 w-3 shrink-0" />
-                      )}
-                      {getSidebarLabel(item)}
-                    </button>
-                  ))}
+                : sidebarItems.map((item) => {
+                    const isRecommended = item === RECOMMENDED_KEY;
+                    const isActive = activeCategory === item;
+                    return (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => setActiveCategory(item)}
+                        className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all flex items-center gap-1 ${
+                          isRecommended
+                            ? isActive
+                              ? "bg-amber-500 text-white"
+                              : "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+                            : isActive
+                              ? "bg-accent-dark text-white"
+                              : "bg-white/10 text-white/60 hover:bg-white/15"
+                        }`}
+                      >
+                        {isRecommended && (
+                          <Star className="h-3 w-3 shrink-0" />
+                        )}
+                        {getSidebarLabel(item)}
+                      </button>
+                    );
+                  })}
             </div>
             {/* Mobile upload button */}
             <div className="px-4 py-3 border-b border-white/10 sm:hidden">
