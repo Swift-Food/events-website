@@ -107,13 +107,17 @@ export default function EventCoverPicker({
   const handleRandom = useCallback(() => {
     if (categories.length === 0) return;
 
-    const randomCategory =
-      categories[Math.floor(Math.random() * categories.length)];
-    const images = imagesByCategory[randomCategory] || [];
+    // Find the "general" category key (case-insensitive, handles formatting)
+    const generalCategory = categories.find(
+      (cat) => cat.toLowerCase() === "general"
+    );
+    if (!generalCategory) return;
+
+    const images = imagesByCategory[generalCategory] || [];
 
     if (images.length > 0) {
       const randomImage = images[Math.floor(Math.random() * images.length)];
-      setActiveCategory(randomCategory);
+      setActiveCategory(generalCategory);
       setSelectedImage(randomImage);
       onSelect(randomImage);
     }
