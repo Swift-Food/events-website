@@ -203,11 +203,12 @@ function EventFormInner({
     const preselectRandomCover = async () => {
       try {
         const allCovers = await eventCoverService.getAll();
-        const categories = Object.keys(allCovers);
-        if (categories.length === 0) return;
-        const randomCategory =
-          categories[Math.floor(Math.random() * categories.length)];
-        const images = allCovers[randomCategory];
+        // Only pick from the "general" category
+        const generalKey = Object.keys(allCovers).find(
+          (cat) => cat.toLowerCase() === "general"
+        );
+        if (!generalKey) return;
+        const images = allCovers[generalKey];
         if (!images || images.length === 0) return;
         const randomImage = images[Math.floor(Math.random() * images.length)];
         setCoverPreview(randomImage);
