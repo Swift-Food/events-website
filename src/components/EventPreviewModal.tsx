@@ -1038,32 +1038,51 @@ export default function EventPreviewModal({
                       )}
 
                       {/* Register/Join Waitlist Button */}
-                      {canRegister && event.eventTickets.some(t => t.isAvailable) && (
-                        <button
-                          onClick={() =>
-                            selectedTicketId && handleRegisterClick(selectedTicketId)
-                          }
-                          disabled={!selectedTicketId || isRegistering}
-                          className="w-full mt-3 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                        >
-                          {isRegistering ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              {(() => {
+                      {canRegister && event.eventTickets.some(t => t.isAvailable) && (() => {
+                        const selectedTicket = selectedTicketId ? event.eventTickets.find(t => t.id === selectedTicketId) : null;
+                        const externalUrl = selectedTicket?.externalTicketUrl || event.externalEventUrl;
+
+                        if (externalUrl && selectedTicketId) {
+                          return (
+                            <a
+                              href={formatExternalUrl(externalUrl)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-full mt-3 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-primary/80 flex items-center justify-center gap-2"
+                            >
+                              Register
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          );
+                        }
+
+                        return (
+                          <button
+                            onClick={() =>
+                              selectedTicketId && handleRegisterClick(selectedTicketId)
+                            }
+                            disabled={!selectedTicketId || isRegistering}
+                            className="w-full mt-3 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                          >
+                            {isRegistering ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                {(() => {
+                                  const ticket = event.eventTickets.find(t => t.id === selectedTicketId);
+                                  return ticket?.isSoldOut ? "Joining waitlist..." : "Registering...";
+                                })()}
+                              </>
+                            ) : selectedTicketId ? (
+                              (() => {
                                 const ticket = event.eventTickets.find(t => t.id === selectedTicketId);
-                                return ticket?.isSoldOut ? "Joining waitlist..." : "Registering...";
-                              })()}
-                            </>
-                          ) : selectedTicketId ? (
-                            (() => {
-                              const ticket = event.eventTickets.find(t => t.id === selectedTicketId);
-                              return ticket?.isSoldOut ? "Join Waitlist" : "Register";
-                            })()
-                          ) : (
-                            "Select a ticket"
-                          )}
-                        </button>
-                      )}
+                                return ticket?.isSoldOut ? "Join Waitlist" : "Register";
+                              })()
+                            ) : (
+                              "Select a ticket"
+                            )}
+                          </button>
+                        );
+                      })()}
                     </div>
                   );
                 })()}

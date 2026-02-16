@@ -32,6 +32,8 @@ export interface EventTicketResponseDto {
   isNearlySoldOut: boolean;
   /** Maximum group size for group ticket purchases */
   maxGroupSize?: number;
+  /** External URL for tickets sold outside the platform */
+  externalTicketUrl?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
