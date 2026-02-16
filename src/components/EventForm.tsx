@@ -315,6 +315,7 @@ function EventFormInner({
             quantity: ticket.quantityTotal || 100,
             questionForm,
             maxGroupSize: ticket.maxGroupSize ?? 1,
+            externalTicketUrl: ticket.externalTicketUrl || undefined,
           };
         });
 
@@ -427,6 +428,7 @@ function EventFormInner({
         })),
         isPrivate: false,
         maxGroupSize: ticket.maxGroupSize ?? 1,
+        externalTicketUrl: ticket.externalTicketUrl || undefined,
       }));
 
       const eventData: CreateEventDto | UpdateEventDto = {
