@@ -291,7 +291,8 @@ export default function EditProfilePage() {
        </div>
       </div>
 
-      {/* Profile Banner */}
+      {/* Profile Banner - temporarily hidden */}
+      {false && (
       <div>
        <label className="block text-sm font-medium text-foreground mb-2">
         Profile Banner
@@ -368,6 +369,7 @@ export default function EditProfilePage() {
 
        {/* TODO: Add crop modal here - see EventForm.tsx for react-easy-crop pattern */}
       </div>
+      )}
      </div>
 
      {/* Personal Info */}
