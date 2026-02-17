@@ -392,7 +392,7 @@ export default function EventPreviewModal({
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-50 bg-white/5 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`fixed inset-0 z-[100] bg-white/5 backdrop-blur-sm transition-opacity duration-300 ${
           isAnimating ? "opacity-100" : "opacity-0"
         }`}
         onClick={handleClose}
@@ -401,7 +401,7 @@ export default function EventPreviewModal({
       {/* Modal - Desktop: slide from right, Mobile: slide from bottom */}
       <div
         style={{ background: modalBackground }}
-        className={`fixed z-50 shadow-2xl overflow-hidden transition-transform duration-300 ease-out
+        className={`fixed z-[100] shadow-2xl overflow-hidden transition-transform duration-300 ease-out
           /* Mobile: bottom sheet */
           inset-x-0 bottom-0 top-16 rounded-t-3xl
           /* Desktop: right slide-out */
@@ -1086,6 +1086,38 @@ export default function EventPreviewModal({
                     </div>
                   );
                 })()}
+
+              {/* External Ticketing Fallback (when no tickets exist but externalEventUrl is set) */}
+              {(!event.eventTickets || event.eventTickets.length === 0) &&
+                event.externalEventUrl && (
+                  <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 mb-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h2 className="text-lg font-semibold text-foreground">
+                        Tickets
+                      </h2>
+                    </div>
+                    <div className="rounded-xl bg-card-secondary-background p-3 flex items-start gap-3">
+                      <ExternalLink className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">
+                          External Ticketing
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Tickets for this event are managed on another platform.
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href={formatExternalUrl(event.externalEventUrl)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full mt-3 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-primary/80 flex items-center justify-center gap-2"
+                    >
+                      Get Tickets
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </div>
+                )}
 
               {/* Description */}
               <div className="mb-4">
