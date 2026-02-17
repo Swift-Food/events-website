@@ -412,7 +412,7 @@ export default function EventPreviewModal({
           }`}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-6 sm:py-4 backdrop-blur-md">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 px-4 py-2 sm:px-6 sm:py-2.5 backdrop-blur-md">
           <button
             onClick={handleViewFullPage}
             className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
