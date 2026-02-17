@@ -457,7 +457,7 @@ export default function EventManagementPage() {
      {/* Slide-out Panel */}
      <div className="fixed right-0 top-0 z-50 h-full w-full max-w-4xl overflow-y-auto overscroll-contain shadow-2xl animate-in slide-in-from-right duration-300" style={{ background: editModalBackground }}>
       {/* Modal Header */}
-      <div className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-6 sm:py-4 backdrop-blur-md">
+      <div className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 py-2 sm:px-6 sm:py-2.5 backdrop-blur-md">
        <button
         onClick={() => router.push(`/events/${eventId}`)}
         className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
