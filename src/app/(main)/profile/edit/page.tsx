@@ -237,7 +237,7 @@ export default function EditProfilePage() {
     username: formData.username.trim() || undefined,
     organizationName: formData.organizationName.trim() || undefined,
     bio: formData.bio.trim() || undefined,
-    profilePicture: profilePicture.trim() || undefined,
+    profilePicture: profilePicture.trim() || null,
     profileBannerImageUrl: formData.profileBannerImageUrl.trim() || undefined,
     website: formData.website.trim() || undefined,
     twitterHandle: buildSocialUrl(formData.twitterHandle, "twitter") || undefined,
@@ -267,7 +267,6 @@ export default function EditProfilePage() {
    await refreshProfile();
 
    toast.success("Profile updated successfully");
-   router.push("/profile");
   } catch (error: any) {
    console.error("Failed to update profile:", error);
    toast.error(error.response?.data?.message || "Failed to update profile");
