@@ -314,12 +314,12 @@ export default function EditProfilePage() {
     <form onSubmit={handleSubmit} className="space-y-6">
      {/* Avatar Section */}
      <div className="rounded-2xl bg-card-background backdrop-blur-xl p-6 space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-5">
        <button
         type="button"
         onClick={() => avatarInputRef.current?.click()}
         disabled={isUploadingAvatar}
-        className="relative h-20 w-20 rounded-full ring-4 ring-primary/20 overflow-hidden group flex-shrink-0"
+        className="relative h-24 w-24 rounded-full ring-4 ring-primary/20 overflow-hidden group flex-shrink-0 cursor-pointer"
        >
         {profilePicture ? (
          <img
@@ -328,37 +328,50 @@ export default function EditProfilePage() {
           className="h-full w-full object-cover"
          />
         ) : (
-         <div className="h-full w-full bg-primary/20 flex items-center justify-center">
-          <User className="h-10 w-10 text-primary" />
+         <div className="h-full w-full bg-primary/10 flex items-center justify-center">
+          <User className="h-10 w-10 text-primary/60" />
          </div>
         )}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-200 flex flex-col items-center justify-center gap-1">
          {isUploadingAvatar ? (
-          <Loader2 className="h-6 w-6 text-white animate-spin" />
+          <Loader2 className="h-5 w-5 text-white animate-spin" />
          ) : (
-          <Camera className="h-6 w-6 text-white" />
+          <>
+           <Camera className="h-5 w-5 text-white" />
+           <span className="text-[10px] font-medium text-white/90">
+            {profilePicture ? "Change" : "Upload"}
+           </span>
+          </>
          )}
         </div>
        </button>
-       <div>
-        <p className="text-sm text-muted-foreground">Profile Picture</p>
-        <button
-         type="button"
-         onClick={() => avatarInputRef.current?.click()}
-         disabled={isUploadingAvatar}
-         className="text-xs text-primary hover:text-primary/80 transition-colors mt-1"
-        >
-         {isUploadingAvatar ? "Uploading..." : profilePicture ? "Change photo" : "Upload photo"}
-        </button>
-        {profilePicture && (
+       <div className="space-y-1.5">
+        <p className="text-sm font-medium text-foreground">Profile Picture</p>
+        <p className="text-xs text-muted-foreground/60">
+         JPG, PNG or GIF. Max 5MB.
+        </p>
+        <div className="flex items-center gap-2 pt-0.5">
          <button
           type="button"
-          onClick={() => setProfilePicture("")}
-          className="text-xs text-red-400 hover:text-red-300 transition-colors mt-1 ml-3"
+          onClick={() => avatarInputRef.current?.click()}
+          disabled={isUploadingAvatar}
+          className="text-xs font-medium text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
          >
-          Remove
+          {isUploadingAvatar ? "Uploading..." : profilePicture ? "Change photo" : "Upload photo"}
          </button>
-        )}
+         {profilePicture && (
+          <>
+           <span className="text-muted-foreground/30">|</span>
+           <button
+            type="button"
+            onClick={() => setProfilePicture("")}
+            className="text-xs font-medium text-red-400 hover:text-red-300 transition-colors"
+           >
+            Remove
+           </button>
+          </>
+         )}
+        </div>
        </div>
        <input
         ref={avatarInputRef}
