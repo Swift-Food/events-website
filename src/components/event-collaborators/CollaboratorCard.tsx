@@ -70,7 +70,7 @@ export const CollaboratorCard = ({
   };
 
   return (
-    <div className="group rounded-xl bg-card-secondary-background p-4 transition-all hover:bg-white/15">
+    <div className="group rounded-xl bg-white/5 p-4 transition-all hover:bg-white/15">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           {/* Avatar */}
