@@ -81,18 +81,17 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Logo and Links */}
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-            <Link href="/">
+            <Link href="/" className="flex items-center leading-none">
               {isLanding ? (
                 <Image
                   src="/logo.svg"
                   alt="Prismo logo"
-                  width={32}
-                  height={32}
-                  className="sm:w-5 sm:h-5"
+                  width={20}
+                  height={20}
                 />
               ) : (
                 <div
-                  className="w-8 h-8 sm:w-5 sm:h-5 bg-foreground"
+                  className="w-5 h-5 bg-foreground"
                   style={
                     {
                       WebkitMaskImage: "url(/logo.svg)",
@@ -173,11 +172,11 @@ export default function Footer() {
         <div className={`mt-6 text-center text-xs ${mutedTextColor}`}>
           <Link
             href="/event-creation"
-            className="transition-colors hover:opacity-80"
+            className="text-sm transition-colors hover:opacity-80"
           >
             <span className="inline-flex items-center gap-1 bg-gradient-to-r from-blue-500 via-purple-500 to-violet-600 bg-clip-text text-transparent">Host your <span className="font-bold italic">events</span> with us<svg className="h-3 w-3 text-violet-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7" /><path d="M7 7h10v10" /></svg></span>
           </Link>
-          <p>&copy; 2026 Prismo. All rights reserved.</p>
+          {/* <p>&copy; 2026 Prismo. All rights reserved.</p> */}
         </div>
       </div>
     </footer>
