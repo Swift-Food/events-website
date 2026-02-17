@@ -1908,6 +1908,38 @@ export default function EventClient({
          );
         })()}
 
+       {/* External Ticketing Fallback (when no tickets exist but externalEventUrl is set) */}
+       {(!event.eventTickets || event.eventTickets.length === 0) &&
+        event.externalEventUrl && (
+         <div className="rounded-xl bg-card-background backdrop-blur-sm p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+           <h2 className="text-2xl font-semibold text-foreground">
+            Tickets
+           </h2>
+          </div>
+          <div className="rounded-xl bg-card-secondary-background p-4 flex items-start gap-3">
+           <ExternalLink className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+           <div>
+            <p className="text-sm font-medium text-foreground">
+             External Ticketing
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+             Tickets for this event are managed on another platform.
+            </p>
+           </div>
+          </div>
+          <a
+           href={formatExternalUrl(event.externalEventUrl)}
+           target="_blank"
+           rel="noopener noreferrer"
+           className="w-full mt-4 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/80 flex items-center justify-center gap-2"
+          >
+           Get Tickets
+           <ExternalLink className="h-4 w-4" />
+          </a>
+         </div>
+        )}
+
        {/* Description */}
        <div className="py-6">
         <h2 className="mb-4 text-lg font-semibold text-muted-foreground">
