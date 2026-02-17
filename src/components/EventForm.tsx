@@ -123,6 +123,7 @@ function EventFormInner({
     setLongitude,
     setSelectedCategoryIds,
     setSelectedSubcategoryIds,
+    setExternalEventUrl,
   } = useEventCreation();
 
   const { eventUser, isAuthenticated } = useAuth();
@@ -243,6 +244,7 @@ function EventFormInner({
       setIsPrivate(initialData.isPrivate || false);
       setRequireApproval(initialData.requiresApproval || false);
       setHideFullAddress(initialData.hideFullAddress || false);
+      setExternalEventUrl(initialData.externalEventUrl || "");
       setEventFormat(initialData.format || EventFormat.IN_PERSON);
       setVirtualMeetingUrl(initialData.virtualMeetingUrl || "");
 
