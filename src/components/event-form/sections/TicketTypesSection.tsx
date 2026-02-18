@@ -364,6 +364,14 @@ const TicketTypesSection = forwardRef<HTMLDivElement, TicketTypesSectionProps>(
                         {ticket.description}
                       </p>
                     )}
+                    {ticket.externalTicketUrl && (
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <ExternalLink className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-xs text-primary truncate max-w-[200px]">
+                          {ticket.externalTicketUrl}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-3 mt-2">
                       <p className="text-sm font-medium text-foreground">
                         {ticket.isFree ? "Free" : `£${ticket.price.toFixed(2)}`}

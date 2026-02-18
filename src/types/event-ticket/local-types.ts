@@ -16,4 +16,6 @@ export interface TicketType {
   questionForm?: FormField[];
   /** Maximum group size for group ticket purchases */
   maxGroupSize?: number;
+  /** External URL for tickets sold outside the platform */
+  externalTicketUrl?: string;
 }

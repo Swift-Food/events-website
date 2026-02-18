@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, Ticket, Plus, Edit, Trash2, ChevronUp, ChevronDown, ChevronRight, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Infinity, Users, Settings } from "lucide-react";
+import { X, Ticket, Plus, Edit, Trash2, ChevronUp, ChevronDown, ChevronRight, HelpCircle, MessageSquare, AlignLeft, CircleDot, CheckSquare, Infinity, Users, Settings, ExternalLink } from "lucide-react";
 import { TicketType, FormField } from "@/types";
 import FormFieldModal from "./FormFieldModal";
 
@@ -75,6 +75,7 @@ export default function TicketTypeModal({
   const [localIsUnlimited, setLocalIsUnlimited] = useState(true);
   const [localQuestions, setLocalQuestions] = useState<FormField[]>([]);
   const [localMaxGroupSize, setLocalMaxGroupSize] = useState(1);
+  const [localExternalTicketUrl, setLocalExternalTicketUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -120,8 +121,9 @@ export default function TicketTypeModal({
         setLocalQuantity(isUnlimited ? "100" : qty.toString());
         setLocalQuestions(ticketToEdit.questionForm || []);
         setLocalMaxGroupSize(ticketToEdit.maxGroupSize || 1);
+        setLocalExternalTicketUrl(ticketToEdit.externalTicketUrl || "");
         // Smart auto-expand: expand sections with non-default values
-        const hasAdvancedSettings = ticketToEdit.isSingleUse || (ticketToEdit.maxGroupSize || 1) > 1;
+        const hasAdvancedSettings = ticketToEdit.isSingleUse || (ticketToEdit.maxGroupSize || 1) > 1 || !!ticketToEdit.externalTicketUrl;
         const hasQuestions = ticketToEdit.questionForm && ticketToEdit.questionForm.length > 0;
         setSettingsExpanded(hasAdvancedSettings);
         setQuestionsExpanded(!!hasQuestions);
@@ -136,6 +138,7 @@ export default function TicketTypeModal({
         setLocalIsUnlimited(true);
         setLocalQuestions([]);
         setLocalMaxGroupSize(1);
+        setLocalExternalTicketUrl("");
         setSettingsExpanded(false);
         setQuestionsExpanded(false);
       }
@@ -180,6 +183,7 @@ export default function TicketTypeModal({
       isSingleUse: localIsSingleUse,
       questionForm: localQuestions,
       maxGroupSize: localMaxGroupSize,
+      externalTicketUrl: localExternalTicketUrl.trim() || undefined,
     };
 
     setIsSaving(true);
@@ -485,9 +489,9 @@ export default function TicketTypeModal({
               <div className="flex items-center gap-2">
                 <Settings className="h-4 w-4 text-white/60" />
                 <span className="text-sm font-medium text-white">Additional Settings</span>
-                {(localIsSingleUse || localMaxGroupSize > 1) && (
+                {(localIsSingleUse || localMaxGroupSize > 1 || localExternalTicketUrl) && (
                   <span className="text-xs text-accent bg-accent/10 px-2 py-0.5 rounded-full">
-                    {[localIsSingleUse && "Single-use", localMaxGroupSize > 1 && "Group"].filter(Boolean).join(", ")}
+                    {[localIsSingleUse && "Single-use", localMaxGroupSize > 1 && "Group", localExternalTicketUrl && "External"].filter(Boolean).join(", ")}
                   </span>
                 )}
               </div>
@@ -567,6 +571,26 @@ export default function TicketTypeModal({
                       onChange={setLocalMaxGroupSize}
                     />
                   )}
+                </div>
+
+                {/* External Ticket URL */}
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <ExternalLink className="h-4 w-4 text-white/60" />
+                    <p className="text-sm font-medium text-white">
+                      External Ticket URL
+                    </p>
+                  </div>
+                  <p className="text-xs text-white/60 mb-2">
+                    If tickets are sold on another platform, paste the link here. Attendees will be redirected to this URL.
+                  </p>
+                  <input
+                    type="url"
+                    value={localExternalTicketUrl}
+                    onChange={(e) => setLocalExternalTicketUrl(e.target.value)}
+                    className="w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all placeholder:text-white/40"
+                    placeholder="https://eventbrite.com/e/your-event"
+                  />
                 </div>
               </div>
             )}

@@ -829,13 +829,13 @@ export default function EventClient({
      </div>
 
      {/* Main Content - Responsive Layout */}
-     <div className="flex flex-col gap-6 lg:flex-row-reverse">
+     <div className="flex flex-col gap-6 sm:flex-row-reverse">
       {/* Left Column - Image and Sidebar */}
-      <section className="flex flex-col gap-6 lg:w-96 lg:shrink-0 event-page-stagger-2">
-       {/* 2×2 Grid on sm-md, Flex column on lg+ */}
-       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:flex lg:flex-col">
+      <section className="flex flex-col gap-6 sm:w-56 md:w-72 lg:w-96 sm:shrink-0 event-page-stagger-2">
+       {/* Flex column at all sizes */}
+       <div className="flex flex-col gap-6">
         {/* Top Left: Image with Status Badge */}
-        <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+        <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-card-background">
          {event.eventImage ? (
           <Image
            src={event.eventImage}
@@ -853,8 +853,8 @@ export default function EventClient({
         </div>
 
         {/* Event Title & Categories - Show on mobile & tablet, hide on desktop */}
-        <div className="block lg:hidden sm:col-span-1 sm:row-span-1 sm:flex sm:flex-col sm:items-center sm:justify-center">
-         <h1 className="mb-4 text-2xl sm:text-3xl font-bold tracking-tight text-foreground sm:text-center">
+        <div className="block sm:hidden">
+         <h1 className="mb-4 text-2xl font-bold tracking-tight text-foreground">
           {event.name}
          </h1>
 
@@ -862,7 +862,7 @@ export default function EventClient({
          {((event.categories && event.categories.length > 0) ||
           (event.subcategories &&
            event.subcategories.length > 0)) && (
-          <div className="flex flex-wrap gap-2 sm:justify-center">
+          <div className="flex flex-wrap gap-2">
            {event.categories?.map((category) => (
             <Link
              key={category.id}
@@ -897,7 +897,7 @@ export default function EventClient({
 
          {/* Organizer - Mobile/Tablet */}
          <div className="mt-6 h-px bg-foreground/10" />
-         <div className="py-4 flex items-center gap-3 sm:justify-center">
+         <div className="py-4 flex items-center gap-3">
           {event.owner?.user ? (
            <Link
             href={`/user/${event.owner.id}`}
@@ -950,7 +950,7 @@ export default function EventClient({
         </div>
 
         {/* Date & Time Card - Bottom left on tablet, normal on mobile/desktop */}
-        <div className="rounded-xl bg-card-background backdrop-blur-sm p-4 sm:p-6 sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+        <div className="rounded-xl bg-card-background backdrop-blur-sm p-4 sm:p-6">
          <h3 className="mb-4 text-lg font-semibold text-foreground">
           Date & Time
          </h3>
@@ -1145,7 +1145,7 @@ export default function EventClient({
         </div>
 
         {/* Location Card - Bottom right */}
-        <div className="rounded-xl bg-card-background backdrop-blur-sm overflow-hidden sm:col-span-1 sm:row-span-1 lg:col-span-1 lg:row-span-1">
+        <div className="rounded-xl bg-card-background backdrop-blur-sm overflow-hidden">
          {isVirtualEvent(event.format) ? (
           <div className="p-4 sm:p-6">
            <div className="h-32 w-full bg-primary/10 rounded-lg flex flex-col items-center justify-center gap-2 mb-4">
@@ -1326,8 +1326,8 @@ export default function EventClient({
       {/* Right Column - Main Content */}
       <section className="flex-1 space-y-6 event-page-stagger-3">
        {/* Event Title and Categories - Only show on desktop */}
-       <div className="hidden lg:block">
-        <h1 className="mb-4 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+       <div className="hidden sm:block">
+        <h1 className="mb-4 text-2xl md:text-3xl lg:text-5xl font-bold tracking-tight text-foreground">
          {event.name}
         </h1>
 
@@ -1838,45 +1838,96 @@ export default function EventClient({
            {!hasValidInvitation &&
             !event.isPrivate &&
             canRegister &&
-            event.eventTickets.some((t) => t.isAvailable) && (
-             <button
-              onClick={() =>
-               selectedTicketId &&
-               handleRegisterClick(selectedTicketId)
-              }
-              disabled={!selectedTicketId || isRegistering}
-              className="w-full mt-4 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-             >
-              {isRegistering ? (
-               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {(() => {
+            event.eventTickets.some((t) => t.isAvailable) && (() => {
+             const selectedTicket = selectedTicketId ? event.eventTickets.find(t => t.id === selectedTicketId) : null;
+             const externalUrl = selectedTicket?.externalTicketUrl || event.externalEventUrl;
+
+             if (externalUrl && selectedTicketId) {
+              return (
+               <a
+                href={formatExternalUrl(externalUrl)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full mt-4 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/80 flex items-center justify-center gap-2"
+               >
+                Register
+                <ExternalLink className="h-4 w-4" />
+               </a>
+              );
+             }
+
+             return (
+              <button
+               onClick={() =>
+                selectedTicketId &&
+                handleRegisterClick(selectedTicketId)
+               }
+               disabled={!selectedTicketId || isRegistering}
+               className="w-full mt-4 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+               {isRegistering ? (
+                <>
+                 <Loader2 className="h-4 w-4 animate-spin" />
+                 {(() => {
+                  const ticket = event.eventTickets.find(
+                   (t) => t.id === selectedTicketId
+                  );
+                  return ticket?.isSoldOut
+                   ? "Joining waitlist..."
+                   : "Registering...";
+                 })()}
+                </>
+               ) : selectedTicketId ? (
+                (() => {
                  const ticket = event.eventTickets.find(
                   (t) => t.id === selectedTicketId
                  );
                  return ticket?.isSoldOut
-                  ? "Joining waitlist..."
-                  : "Registering...";
-                })()}
-               </>
-              ) : selectedTicketId ? (
-               (() => {
-                const ticket = event.eventTickets.find(
-                 (t) => t.id === selectedTicketId
-                );
-                return ticket?.isSoldOut
-                 ? "Join Waitlist"
-                 : "Register";
-               })()
-              ) : (
-               "Select a ticket"
-              )}
-             </button>
-            )}
+                  ? "Join Waitlist"
+                  : "Register";
+                })()
+               ) : (
+                "Select a ticket"
+               )}
+              </button>
+             );
+            })()}
            </>)}
           </div>
          );
         })()}
+
+       {/* External Ticketing Fallback (when no tickets exist but externalEventUrl is set) */}
+       {(!event.eventTickets || event.eventTickets.length === 0) &&
+        event.externalEventUrl && (
+         <div className="rounded-xl bg-card-background backdrop-blur-sm p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+           <h2 className="text-2xl font-semibold text-foreground">
+            Tickets
+           </h2>
+          </div>
+          <div className="rounded-xl bg-card-secondary-background p-4 flex items-start gap-3">
+           <ExternalLink className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+           <div>
+            <p className="text-sm font-medium text-foreground">
+             External Ticketing
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+             Tickets for this event are managed on another platform.
+            </p>
+           </div>
+          </div>
+          <a
+           href={formatExternalUrl(event.externalEventUrl)}
+           target="_blank"
+           rel="noopener noreferrer"
+           className="w-full mt-4 rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/80 flex items-center justify-center gap-2"
+          >
+           Get Tickets
+           <ExternalLink className="h-4 w-4" />
+          </a>
+         </div>
+        )}
 
        {/* Description */}
        <div className="py-6">

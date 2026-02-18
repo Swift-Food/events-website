@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { eventUserService, UpdateEventUserDto } from "@/services/event-user.service";
 import { imageService } from "@/services/image.service";
-import { ArrowLeft, Loader2, User, Save, Instagram, Linkedin, Globe, Upload, X } from "lucide-react";
+import { ArrowLeft, Loader2, User, Save, Instagram, Linkedin, Globe, Upload, X, Camera } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -85,6 +85,11 @@ export default function EditProfilePage() {
  const [isLoading, setIsLoading] = useState(false);
  const [isSaving, setIsSaving] = useState(false);
 
+ // Profile picture upload state
+ const [profilePicture, setProfilePicture] = useState<string>("");
+ const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+ const avatarInputRef = useRef<HTMLInputElement>(null);
+
  // Banner upload state
  const [isDraggingBanner, setIsDraggingBanner] = useState(false);
  const [isUploadingBanner, setIsUploadingBanner] = useState(false);
@@ -100,6 +105,7 @@ export default function EditProfilePage() {
  // Load existing profile data
  useEffect(() => {
   if (user && eventUser) {
+   setProfilePicture(user.profilePicture || "");
    setFormData({
     firstName: eventUser.firstName || "",
     lastName: eventUser.lastName || "",
@@ -130,6 +136,34 @@ export default function EditProfilePage() {
  ) => {
   const { name, value } = e.target;
   setFormData((prev) => ({ ...prev, [name]: value }));
+ };
+
+ // Profile picture upload handler
+ const handleAvatarUpload = useCallback(async (file: File) => {
+  if (!file.type.startsWith("image/")) {
+   toast.error("Please upload an image file");
+   return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+   toast.error("Image must be less than 5MB");
+   return;
+  }
+  setIsUploadingAvatar(true);
+  try {
+   const uploadedUrl = await imageService.uploadImage(file);
+   setProfilePicture(uploadedUrl);
+   toast.success("Profile picture uploaded!");
+  } catch (error) {
+   console.error("Failed to upload profile picture:", error);
+   toast.error("Failed to upload profile picture");
+  } finally {
+   setIsUploadingAvatar(false);
+  }
+ }, []);
+
+ const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (file) handleAvatarUpload(file);
  };
 
  // Banner upload handlers
@@ -203,6 +237,7 @@ export default function EditProfilePage() {
     username: formData.username.trim() || undefined,
     organizationName: formData.organizationName.trim() || undefined,
     bio: formData.bio.trim() || undefined,
+    profilePicture: profilePicture.trim() || null,
     profileBannerImageUrl: formData.profileBannerImageUrl.trim() || undefined,
     website: formData.website.trim() || undefined,
     twitterHandle: buildSocialUrl(formData.twitterHandle, "twitter") || undefined,
@@ -232,7 +267,6 @@ export default function EditProfilePage() {
    await refreshProfile();
 
    toast.success("Profile updated successfully");
-   router.push("/profile");
   } catch (error: any) {
    console.error("Failed to update profile:", error);
    toast.error(error.response?.data?.message || "Failed to update profile");
@@ -279,19 +313,76 @@ export default function EditProfilePage() {
     <form onSubmit={handleSubmit} className="space-y-6">
      {/* Avatar Section */}
      <div className="rounded-2xl bg-card-background backdrop-blur-xl p-6 space-y-6">
-      <div className="flex items-center gap-4">
-       <div className="h-20 w-20 rounded-full bg-primary/20 flex items-center justify-center ring-4 ring-primary/20">
-        <User className="h-10 w-10 text-primary" />
-       </div>
-       <div>
-        <p className="text-sm text-muted-foreground">Profile Picture</p>
-        <p className="text-xs text-muted-foreground/60 mt-1">
-         Profile picture uploads coming soon
+      <div className="flex items-center gap-5">
+       <button
+        type="button"
+        onClick={() => avatarInputRef.current?.click()}
+        disabled={isUploadingAvatar}
+        className="relative h-24 w-24 rounded-full ring-4 ring-primary/20 overflow-hidden group flex-shrink-0 cursor-pointer"
+       >
+        {profilePicture ? (
+         <img
+          src={profilePicture}
+          alt="Profile"
+          className="h-full w-full object-cover"
+         />
+        ) : (
+         <div className="h-full w-full bg-primary/10 flex items-center justify-center">
+          <User className="h-10 w-10 text-primary/60" />
+         </div>
+        )}
+        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-200 flex flex-col items-center justify-center gap-1">
+         {isUploadingAvatar ? (
+          <Loader2 className="h-5 w-5 text-white animate-spin" />
+         ) : (
+          <>
+           <Camera className="h-5 w-5 text-white" />
+           <span className="text-[10px] font-medium text-white/90">
+            {profilePicture ? "Change" : "Upload"}
+           </span>
+          </>
+         )}
+        </div>
+       </button>
+       <div className="space-y-1.5">
+        <p className="text-sm font-medium text-foreground">Profile Picture</p>
+        <p className="text-xs text-muted-foreground/60">
+         JPG, PNG or GIF. Max 5MB.
         </p>
+        <div className="flex items-center gap-2 pt-0.5">
+         <button
+          type="button"
+          onClick={() => avatarInputRef.current?.click()}
+          disabled={isUploadingAvatar}
+          className="text-xs font-medium text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
+         >
+          {isUploadingAvatar ? "Uploading..." : profilePicture ? "Change photo" : "Upload photo"}
+         </button>
+         {profilePicture && (
+          <>
+           <span className="text-muted-foreground/30">|</span>
+           <button
+            type="button"
+            onClick={() => setProfilePicture("")}
+            className="text-xs font-medium text-red-400 hover:text-red-300 transition-colors"
+           >
+            Remove
+           </button>
+          </>
+         )}
+        </div>
        </div>
+       <input
+        ref={avatarInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleAvatarFileChange}
+        className="hidden"
+       />
       </div>
 
-      {/* Profile Banner */}
+      {/* Profile Banner - temporarily hidden */}
+      {false && (
       <div>
        <label className="block text-sm font-medium text-foreground mb-2">
         Profile Banner
@@ -368,6 +459,7 @@ export default function EditProfilePage() {
 
        {/* TODO: Add crop modal here - see EventForm.tsx for react-easy-crop pattern */}
       </div>
+      )}
      </div>
 
      {/* Personal Info */}

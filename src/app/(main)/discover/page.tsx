@@ -9,6 +9,7 @@ import { ChevronRight as ArrowRight, icons, LucideProps } from "lucide-react";
 import SquareCalendarCard from "@/components/SquareCalendarCard";
 import UpcomingEventsSection from "@/components/UpcomingEventsSection";
 import Link from "next/link";
+import BrowseByLocation from "@/components/BrowseByLocation";
 
 // Dynamic icon component for Lucide icons
 const DynamicIcon = ({ name, ...props }: { name: string } & LucideProps) => {
@@ -28,7 +29,9 @@ export default function DiscoverPage() {
   const [loadingCalendars, setLoadingCalendars] = useState(true);
 
   // Categories
-  const [allCategories, setAllCategories] = useState<EventCategoryResponseDto[]>([]);
+  const [allCategories, setAllCategories] = useState<
+    EventCategoryResponseDto[]
+  >([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
   // Fetch all categories
@@ -61,7 +64,9 @@ export default function DiscoverPage() {
   };
 
   const getCategoryLabel = (categoryName: string) => {
-    return categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase();
+    return (
+      categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase()
+    );
   };
 
   // Fetch calendars and categories on mount
@@ -75,7 +80,9 @@ export default function DiscoverPage() {
       {/* Original gradient background - unchanged */}
       <div
         className="fixed inset-0 -z-10"
-        style={{ background: "linear-gradient(to bottom, #41296e 0%, #000000 15%)" }}
+        style={{
+          background: "linear-gradient(to bottom, #41296e 0%, #000000 15%)",
+        }}
       />
 
       {/* Subtle ambient glow */}
@@ -142,7 +149,10 @@ export default function DiscoverPage() {
             <div className="h-6 w-40 skeleton-shimmer mb-4" />
             <div className="flex gap-3">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="flex flex-col items-center gap-2 w-14 sm:w-18">
+                <div
+                  key={i}
+                  className="flex flex-col items-center gap-2 w-14 sm:w-18"
+                >
                   <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full skeleton-shimmer" />
                   <div className="w-10 h-3 skeleton-shimmer" />
                 </div>
@@ -161,7 +171,7 @@ export default function DiscoverPage() {
           <div className="mb-8 discover-stagger-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground discover-section-header">
-                Browse Calendars
+                Featured Calendars
               </h2>
               <Link
                 href="/calendars"
@@ -196,11 +206,19 @@ export default function DiscoverPage() {
             <div className="h-6 w-40 skeleton-shimmer mb-4" />
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="aspect-square skeleton-shimmer rounded-xl" />
+                <div
+                  key={i}
+                  className="aspect-square skeleton-shimmer rounded-xl"
+                />
               ))}
             </div>
           </div>
         )}
+
+        {/* Browse by Location Section - stagger 5 */}
+        <div className="discover-stagger-5">
+          <BrowseByLocation />
+        </div>
       </div>
     </div>
   );

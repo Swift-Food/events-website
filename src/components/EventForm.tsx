@@ -123,6 +123,7 @@ function EventFormInner({
     setLongitude,
     setSelectedCategoryIds,
     setSelectedSubcategoryIds,
+    setExternalEventUrl,
   } = useEventCreation();
 
   const { eventUser, isAuthenticated } = useAuth();
@@ -203,11 +204,12 @@ function EventFormInner({
     const preselectRandomCover = async () => {
       try {
         const allCovers = await eventCoverService.getAll();
-        const categories = Object.keys(allCovers);
-        if (categories.length === 0) return;
-        const randomCategory =
-          categories[Math.floor(Math.random() * categories.length)];
-        const images = allCovers[randomCategory];
+        // Only pick from the "general" category
+        const generalKey = Object.keys(allCovers).find(
+          (cat) => cat.toLowerCase() === "general"
+        );
+        if (!generalKey) return;
+        const images = allCovers[generalKey];
         if (!images || images.length === 0) return;
         const randomImage = images[Math.floor(Math.random() * images.length)];
         setCoverPreview(randomImage);
@@ -242,6 +244,7 @@ function EventFormInner({
       setIsPrivate(initialData.isPrivate || false);
       setRequireApproval(initialData.requiresApproval || false);
       setHideFullAddress(initialData.hideFullAddress || false);
+      setExternalEventUrl(initialData.externalEventUrl || "");
       setEventFormat(initialData.format || EventFormat.IN_PERSON);
       setVirtualMeetingUrl(initialData.virtualMeetingUrl || "");
 
@@ -314,6 +317,7 @@ function EventFormInner({
             quantity: ticket.quantityTotal || 100,
             questionForm,
             maxGroupSize: ticket.maxGroupSize ?? 1,
+            externalTicketUrl: ticket.externalTicketUrl || undefined,
           };
         });
 
@@ -426,6 +430,7 @@ function EventFormInner({
         })),
         isPrivate: false,
         maxGroupSize: ticket.maxGroupSize ?? 1,
+        externalTicketUrl: ticket.externalTicketUrl || undefined,
       }));
 
       const eventData: CreateEventDto | UpdateEventDto = {

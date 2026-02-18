@@ -17,6 +17,7 @@ import {
  Scan,
  AlertTriangle,
  EyeOff,
+ ExternalLink,
 } from "lucide-react";
 
 // Tab components
@@ -26,9 +27,10 @@ import {
  RegistrationTab,
  TeamTab,
  CateringTab,
+ EmbedTab,
 } from "@/components/event-management/tabs";
 
-type TabType = "overview" | "guests" | "registration" | "team" | "catering";
+type TabType = "overview" | "guests" | "registration" | "team" | "catering" | "embed";
 
 // User role for this event - determines what they can see/do
 type UserRole = "owner" | "admin" | "scanner" | null;
@@ -309,6 +311,7 @@ export default function EventManagementPage() {
   { id: "registration", label: "Registration" },
   { id: "team", label: "Team" },
   { id: "catering", label: "Catering" },
+  { id: "embed", label: "Embed" },
  ];
 
  // Scanner role can only see overview tab
@@ -438,8 +441,9 @@ export default function EventManagementPage() {
     {currentTab === "team" && (
      <TeamTab eventId={eventId} ownerId={eventData.owner?.user?.id} />
     )}
-    {currentTab === "catering" && <CateringTab eventData={eventData} />}
-   </div>
+     {currentTab === "catering" && <CateringTab eventData={eventData} />}
+     {currentTab === "embed" && <EmbedTab eventData={eventData} />}
+    </div>
 
    {/* Edit Event Slide-out Modal */}
    {showEditModal && (
@@ -453,8 +457,15 @@ export default function EventManagementPage() {
      {/* Slide-out Panel */}
      <div className="fixed right-0 top-0 z-50 h-full w-full max-w-4xl overflow-y-auto overscroll-contain shadow-2xl animate-in slide-in-from-right duration-300" style={{ background: editModalBackground }}>
       {/* Modal Header */}
-      <div className="sticky top-0 z-10 flex items-center justify-end px-6 py-4">
-       {/* <h2 className="text-lg font-semibold text-foreground">Edit Event</h2> */}
+      <div className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 py-2 sm:px-6 sm:py-2.5 backdrop-blur-md">
+       <button
+        onClick={() => router.push(`/events/${eventId}`)}
+        className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
+       >
+        <ExternalLink className="h-4 w-4" />
+        <span className="hidden sm:inline">View Full Page</span>
+        <span className="sm:hidden">Full Page</span>
+       </button>
        <button
         onClick={() => setShowEditModal(false)}
         className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
@@ -463,6 +474,7 @@ export default function EventManagementPage() {
        </button>
       </div>
 
+      <div className="pt-4" />
       {/* Event Form */}
       <EventForm
        mode="edit"

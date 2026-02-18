@@ -67,15 +67,17 @@ class NotificationService {
   /**
    * Accept a follow request
    */
-  async acceptFollowRequest(userId: string): Promise<void> {
-    await apiClient.post(`/event-users/follow-requests/user/${userId}/accept`);
+  async acceptFollowRequest(userId: string): Promise<{ success: boolean; message?: string }> {
+    const response = await apiClient.post(`/event-users/follow-requests/user/${userId}/accept`);
+    return response.data;
   }
 
   /**
    * Reject a follow request
    */
-  async rejectFollowRequest(userId: string): Promise<void> {
-    await apiClient.delete(`/event-users/follow-requests/user/${userId}`);
+  async rejectFollowRequest(userId: string): Promise<{ success: boolean; message?: string }> {
+    const response = await apiClient.delete(`/event-users/follow-requests/user/${userId}`);
+    return response.data;
   }
 
   /**

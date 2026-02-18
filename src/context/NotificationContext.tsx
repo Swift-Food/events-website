@@ -161,11 +161,11 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
           // Follow actions
           case NotificationActionType.ACCEPT_FOLLOW:
             if (notification.relatedUserId) {
-              await notificationService.acceptFollowRequest(
+              const acceptRes = await notificationService.acceptFollowRequest(
                 notification.relatedUserId
               );
-              toast.success("Follow request accepted");
-              // Update notification to show post-action state
+              const wasAlreadyAccepted = acceptRes?.message === 'Follow request already processed';
+              toast.success(wasAlreadyAccepted ? "Follow request was already accepted" : "Follow request accepted");
               setNotifications((prev) =>
                 prev.map((n) =>
                   n.id === notification.id
@@ -179,15 +179,15 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
 
           case NotificationActionType.REJECT_FOLLOW:
             if (notification.relatedUserId) {
-              await notificationService.rejectFollowRequest(
+              const rejectRes = await notificationService.rejectFollowRequest(
                 notification.relatedUserId
               );
-              toast.success("Follow request rejected");
-              // Update notification to show post-action state
+              const wasAlreadyProcessed = rejectRes?.message === 'Follow request already processed';
+              toast.success(wasAlreadyProcessed ? "Follow request was already processed" : "Follow request rejected");
               setNotifications((prev) =>
                 prev.map((n) =>
                   n.id === notification.id
-                    ? { ...n, body: "You have rejected this request", availableActions: [], readAt: new Date().toISOString() }
+                    ? { ...n, body: wasAlreadyProcessed ? "This request was already processed" : "You have rejected this request", availableActions: [], readAt: new Date().toISOString() }
                     : n
                 )
               );

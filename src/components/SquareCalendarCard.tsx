@@ -9,7 +9,7 @@ interface SquareCalendarCardProps {
 }
 
 export default function SquareCalendarCard({ calendar, size }: SquareCalendarCardProps) {
-  const eventCount = calendar.eventCount ?? 0;
+  const eventCount = calendar.upcomingEventCount ?? 0;
 
   return (
     <Link
