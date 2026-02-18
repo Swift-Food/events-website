@@ -895,7 +895,8 @@ export default function EventPreviewModal({
               </div>
 
               {/* Tickets */}
-              {event.eventTickets &&
+              {!event.externalEventUrl &&
+                event.eventTickets &&
                 event.eventTickets.length > 0 &&
                 (() => {
                   const isEventEnded = new Date(event.endDateTime) < new Date();
@@ -1083,9 +1084,8 @@ export default function EventPreviewModal({
                   );
                 })()}
 
-              {/* External Ticketing Fallback (when no tickets exist but externalEventUrl is set) */}
-              {(!event.eventTickets || event.eventTickets.length === 0) &&
-                event.externalEventUrl && (
+              {/* External Ticketing (when externalEventUrl is set) */}
+              {event.externalEventUrl && (
                   <div className="rounded-xl bg-card-background backdrop-blur-xl p-4 mb-4">
                     <div className="flex items-center justify-between mb-3">
                       <h2 className="text-lg font-semibold text-foreground">

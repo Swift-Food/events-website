@@ -1496,7 +1496,8 @@ export default function EventClient({
        )}
 
        {/* Tickets */}
-       {event.eventTickets &&
+       {!event.externalEventUrl &&
+        event.eventTickets &&
         event.eventTickets.length > 0 &&
         (() => {
          const isEventEnded = new Date(event.endDateTime) < new Date();
@@ -1897,9 +1898,8 @@ export default function EventClient({
          );
         })()}
 
-       {/* External Ticketing Fallback (when no tickets exist but externalEventUrl is set) */}
-       {(!event.eventTickets || event.eventTickets.length === 0) &&
-        event.externalEventUrl && (
+       {/* External Ticketing (when externalEventUrl is set) */}
+       {event.externalEventUrl && (
          <div className="rounded-xl bg-card-background backdrop-blur-sm p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
            <h2 className="text-2xl font-semibold text-foreground">
