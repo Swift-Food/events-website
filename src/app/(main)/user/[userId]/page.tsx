@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import UserProfileClient from "./UserProfileClient";
 import { OrganizerProfile } from "@/types/organizer";
+import { getDefaultProfilePic } from "@/utils/defaultProfilePic";
 
 interface PageProps {
  params: Promise<{ userId: string }>;
@@ -44,7 +45,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
  const personalName = [profile.firstName, profile.lastName].filter(Boolean).join(" ");
  const displayName = personalName || profile.user?.username || profile.organizationName || "User";
 
- const profileImage = profile.profilePicture || profile.user?.profilePicture;
+ const profileImage = profile.profilePicture || profile.user?.profilePicture ||
+  `${process.env.NEXT_PUBLIC_APP_URL}${getDefaultProfilePic(userId)}`;
  const description = `View events by ${displayName}. ${profile.totalEventsCreated} events created.`;
 
  return {
@@ -53,14 +55,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   openGraph: {
    title: `${displayName} | Profile`,
    description,
-   images: profileImage ? [profileImage] : [],
+   images: [profileImage],
    type: "profile",
   },
   twitter: {
    card: "summary",
    title: `${displayName} | Profile`,
    description,
-   images: profileImage ? [profileImage] : [],
+   images: [profileImage],
   },
  };
 }
@@ -78,13 +80,14 @@ export default async function UserProfilePage({ params }: PageProps) {
  const personalName = [profile.firstName, profile.lastName].filter(Boolean).join(" ");
  const displayName = personalName || profile.user?.username || profile.organizationName || "User";
 
- const profileImage = profile.profilePicture || profile.user?.profilePicture;
+ const profileImage = profile.profilePicture || profile.user?.profilePicture ||
+  `${process.env.NEXT_PUBLIC_APP_URL}${getDefaultProfilePic(userId)}`;
 
  const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
   name: displayName,
-  image: profileImage || undefined,
+  image: profileImage,
  };
 
  return (

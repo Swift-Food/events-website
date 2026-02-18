@@ -30,6 +30,7 @@ import EventsTimeline from "@/components/EventsTimeline";
 import AddEventsToCalendarModal from "@/components/AddEventsToCalendarModal";
 import { HighlightsBar, AddHighlightModal } from "@/components/highlights";
 import EventCalendarWidget from "@/components/EventCalendarWidget";
+import { getDefaultProfilePic } from "@/utils/defaultProfilePic";
 
 interface CalendarClientProps {
  initialCalendar: Calendar;
@@ -673,26 +674,20 @@ export default function CalendarClient({
          href={`/user/${calendar.ownerEventUserId}`}
          className="flex items-center gap-3 transition-opacity hover:opacity-80"
         >
-         {calendar.owner.user.profilePicture ? (
-          <Image
-           src={calendar.owner.user.profilePicture}
-           alt={
-            calendar.owner.firstName || calendar.owner.lastName
-             ? [calendar.owner.firstName, calendar.owner.lastName]
-               .filter(Boolean)
-               .join(" ")
-             : calendar.owner.user.username || "Organizer"
-           }
-           width={48}
-           height={48}
-           className="rounded-full"
-           unoptimized
-          />
-         ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-           <User className="h-6 w-6 text-primary" />
-          </div>
-         )}
+         <Image
+          src={calendar.owner.user.profilePicture || getDefaultProfilePic(calendar.ownerEventUserId)}
+          alt={
+           calendar.owner.firstName || calendar.owner.lastName
+            ? [calendar.owner.firstName, calendar.owner.lastName]
+              .filter(Boolean)
+              .join(" ")
+            : calendar.owner.user.username || "Organizer"
+          }
+          width={48}
+          height={48}
+          className="rounded-full"
+          unoptimized
+         />
          <div>
           <p className="font-medium text-foreground">
            {calendar.owner.firstName || calendar.owner.lastName

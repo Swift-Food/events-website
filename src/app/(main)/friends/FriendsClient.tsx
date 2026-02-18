@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth/authContext";
 import { followService } from "@/services/follow.service";
 import { FollowerResponse } from "@/types/follower";
 import { User, Loader2 } from "lucide-react";
+import { getDefaultProfilePic } from "@/utils/defaultProfilePic";
 import Link from "next/link";
 
 type Tab = "followers" | "following";
@@ -190,26 +191,11 @@ export default function FriendsClient() {
        >
         {/* Avatar */}
         <div className="h-12 w-12 rounded-full overflow-hidden bg-primary/10 flex-shrink-0">
-         {user.profilePicture ? (
-          <img
-           src={user.profilePicture}
-           alt={user.username}
-           className="h-full w-full object-cover"
-           onError={(e) => {
-            e.currentTarget.style.display = "none";
-            e.currentTarget.nextElementSibling?.classList.remove(
-             "hidden"
-            );
-           }}
-          />
-         ) : null}
-         <div
-          className={`h-full w-full flex items-center justify-center ${
-           user.profilePicture ? "hidden" : ""
-          }`}
-         >
-          <User className="h-6 w-6 text-primary" />
-         </div>
+         <img
+          src={user.profilePicture || getDefaultProfilePic(user.id)}
+          alt={user.username}
+          className="h-full w-full object-cover"
+         />
         </div>
 
         {/* User Info */}

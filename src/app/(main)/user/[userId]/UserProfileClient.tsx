@@ -21,6 +21,7 @@ import {
  Instagram,
  Loader2,
 } from "lucide-react";
+import { getDefaultProfilePic } from "@/utils/defaultProfilePic";
 
 type EventTab = "upcoming" | "past";
 
@@ -251,26 +252,11 @@ export default function UserProfileClient({
      <div className="flex flex-col items-center text-center">
       {/* Avatar */}
       <div className="h-32 w-32 sm:h-36 sm:w-36 rounded-full overflow-hidden bg-primary/10">
-       {profileImage ? (
-        <img
-         src={profileImage}
-         alt={displayName}
-         className="h-full w-full object-cover"
-         onError={(e) => {
-          e.currentTarget.style.display = "none";
-          e.currentTarget.nextElementSibling?.classList.remove(
-           "hidden"
-          );
-         }}
-        />
-       ) : null}
-       <div
-        className={`h-full w-full flex items-center justify-center ${
-         profileImage ? "hidden" : ""
-        }`}
-       >
-        <User className="h-14 w-14 sm:h-16 sm:w-16 text-primary" />
-       </div>
+       <img
+        src={profileImage || getDefaultProfilePic(userId)}
+        alt={displayName}
+        className="h-full w-full object-cover"
+       />
       </div>
 
       {/* Name */}
