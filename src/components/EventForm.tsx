@@ -414,24 +414,29 @@ function EventFormInner({
     setIsSubmitting(true);
 
     try {
-      const ticketsPayload = ticketTypes.map((ticket) => ({
-        id: mode === "edit" && originalTickets.some((t) => t.id === ticket.id) ? ticket.id : undefined,
-        name: ticket.name,
-        description: ticket.description || "",
-        price: ticket.isFree ? 0 : ticket.price,
-        isPaid: !ticket.isFree,
-        isSingleUse: ticket.isSingleUse ?? true,
-        quantityTotal: ticket.quantity || 100,
-        questionForm: (ticket.questionForm || []).map((field) => ({
-          question: field.question,
-          type: mapFieldTypeToQuestionType(field.type),
-          options: field.options,
-          required: field.required,
-        })),
-        isPrivate: false,
-        maxGroupSize: ticket.maxGroupSize ?? 1,
-        externalTicketUrl: ticket.externalTicketUrl || undefined,
-      }));
+      // When creating with an external event URL, don't send default tickets
+      const shouldOmitTickets = isCreateMode && !!externalEventUrl;
+
+      const ticketsPayload = shouldOmitTickets
+        ? []
+        : ticketTypes.map((ticket) => ({
+            id: mode === "edit" && originalTickets.some((t) => t.id === ticket.id) ? ticket.id : undefined,
+            name: ticket.name,
+            description: ticket.description || "",
+            price: ticket.isFree ? 0 : ticket.price,
+            isPaid: !ticket.isFree,
+            isSingleUse: ticket.isSingleUse ?? true,
+            quantityTotal: ticket.quantity || 100,
+            questionForm: (ticket.questionForm || []).map((field) => ({
+              question: field.question,
+              type: mapFieldTypeToQuestionType(field.type),
+              options: field.options,
+              required: field.required,
+            })),
+            isPrivate: false,
+            maxGroupSize: ticket.maxGroupSize ?? 1,
+            externalTicketUrl: ticket.externalTicketUrl || undefined,
+          }));
 
       const eventData: CreateEventDto | UpdateEventDto = {
         name: eventName,
