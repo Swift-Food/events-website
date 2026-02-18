@@ -10,6 +10,7 @@ import {
   AlertCircle,
   X,
 } from "lucide-react";
+import { getDefaultProfilePic } from "@/utils/defaultProfilePic";
 import {
   EventNotificationResponse,
   EventNotificationType,
@@ -59,19 +60,15 @@ export default function NotificationItem({
   };
 
   const getAvatarContent = () => {
-    if (notification.relatedUser?.profilePicture) {
+    if (notification.relatedUser) {
       return (
         <img
-          src={notification.relatedUser.profilePicture}
+          src={notification.relatedUser.profilePicture || getDefaultProfilePic(notification.relatedUser.id)}
           alt={
             notification.relatedUser.firstName ||
             notification.relatedUser.username
           }
           className="h-full w-full object-cover"
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-            e.currentTarget.nextElementSibling?.classList.remove("hidden");
-          }}
         />
       );
     }

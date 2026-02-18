@@ -45,6 +45,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import GoogleMap from "@/components/GoogleMap";
+import { getDefaultProfilePic } from "@/utils/defaultProfilePic";
 import { toast } from "sonner";
 import PaymentModal, {
  PaymentSuccessModal,
@@ -902,26 +903,20 @@ export default function EventClient({
             href={`/user/${event.owner.id}`}
             className="flex items-center gap-3 group"
            >
-            {event.owner.user.profilePicture ? (
-             <Image
-              src={event.owner.user.profilePicture}
-              alt={
-               event.owner.firstName || event.owner.lastName
-                ? [event.owner.firstName, event.owner.lastName]
-                  .filter(Boolean)
-                  .join(" ")
-                : event.owner.user.username || "Organizer"
-              }
-              width={48}
-              height={48}
-              className="rounded-full"
-              unoptimized
-             />
-            ) : (
-             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground/10">
-              <User className="h-6 w-6 text-muted-foreground" />
-             </div>
-            )}
+            <Image
+             src={event.owner.user.profilePicture || getDefaultProfilePic(event.owner.id)}
+             alt={
+              event.owner.firstName || event.owner.lastName
+               ? [event.owner.firstName, event.owner.lastName]
+                 .filter(Boolean)
+                 .join(" ")
+               : event.owner.user.username || "Organizer"
+             }
+             width={48}
+             height={48}
+             className="rounded-full"
+             unoptimized
+            />
             <div>
              <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
               {event.owner.firstName || event.owner.lastName
@@ -1380,26 +1375,20 @@ export default function EventClient({
            href={`/user/${event.owner.id}`}
            className="flex items-center gap-3 group"
           >
-           {event.owner.user.profilePicture ? (
-            <Image
-             src={event.owner.user.profilePicture}
-             alt={
-              event.owner.firstName || event.owner.lastName
-               ? [event.owner.firstName, event.owner.lastName]
-                 .filter(Boolean)
-                 .join(" ")
-               : event.owner.user.username || "Organizer"
-             }
-             width={48}
-             height={48}
-             className="rounded-full"
-             unoptimized
-            />
-           ) : (
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground/10">
-             <User className="h-6 w-6 text-muted-foreground" />
-            </div>
-           )}
+           <Image
+            src={event.owner.user.profilePicture || getDefaultProfilePic(event.owner.id)}
+            alt={
+             event.owner.firstName || event.owner.lastName
+              ? [event.owner.firstName, event.owner.lastName]
+                .filter(Boolean)
+                .join(" ")
+              : event.owner.user.username || "Organizer"
+            }
+            width={48}
+            height={48}
+            className="rounded-full"
+            unoptimized
+           />
            <div>
             <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
              {event.owner.firstName || event.owner.lastName

@@ -11,7 +11,6 @@ import {
   HelpCircle,
   ExternalLink,
   Ticket,
-  User,
   Users,
 } from "lucide-react";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
@@ -23,6 +22,7 @@ import {
 } from "@/types/search";
 import { Calendar } from "@/types/calendar";
 import { EventResponseDto } from "@/types/event";
+import { getDefaultProfilePic } from "@/utils/defaultProfilePic";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -545,20 +545,11 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-white transition-colors group ${isSelected ? "bg-white/10" : "hover:bg-white/5"}`}
                     >
                       <div className="h-10 w-10 rounded-full overflow-hidden bg-white/10 flex-shrink-0">
-                        {user.profilePicture ? (
-                          <img
-                            src={user.profilePicture}
-                            alt={user.username}
-                            className="h-full w-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                            }}
-                          />
-                        ) : null}
-                        <div className={`h-full w-full flex items-center justify-center bg-white/20 ${user.profilePicture ? 'hidden' : ''}`}>
-                          <User className="h-5 w-5 text-white" />
-                        </div>
+                        <img
+                          src={user.profilePicture || getDefaultProfilePic(user.id)}
+                          alt={user.username}
+                          className="h-full w-full object-cover"
+                        />
                       </div>
                       <div className="flex-1 text-left min-w-0">
                         <p className="text-sm font-medium truncate">

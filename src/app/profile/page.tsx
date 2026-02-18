@@ -15,7 +15,6 @@ import { EventResponseDto, EventFormat } from "@/types/event";
 import EventCard from "@/components/EventCard";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
 import {
- User,
  Calendar,
  Ticket,
  LogOut,
@@ -31,6 +30,7 @@ import {
 import StripeConnectCard from "@/components/payments/StripeConnectCard";
 import { toast } from "sonner";
 import Link from "next/link";
+import { getDefaultProfilePic } from "@/utils/defaultProfilePic";
 
 type TabType = "upcoming" | "hosting" | "attended" | "past";
 
@@ -342,8 +342,12 @@ export default function ProfilePage() {
      <div className="flex items-center gap-4 lg:gap-6">
       {/* Avatar */}
       <div className="relative shrink-0">
-       <div className="h-16 w-16 lg:h-24 lg:w-24 rounded-full bg-primary/20 flex items-center justify-center ring-4 ring-primary/20">
-        <User className="h-8 w-8 lg:h-12 lg:w-12 text-primary" />
+       <div className="h-16 w-16 lg:h-24 lg:w-24 rounded-full overflow-hidden ring-4 ring-primary/20">
+        <img
+         src={user.profilePicture || getDefaultProfilePic(user.id)}
+         alt={user.username || user.email}
+         className="h-full w-full object-cover"
+        />
        </div>
       </div>
 
