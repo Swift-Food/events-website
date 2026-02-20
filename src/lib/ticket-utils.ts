@@ -5,8 +5,8 @@ import { GuestTicketStatus } from "@/types/guest-ticket";
  * Handles the gap between when an event starts/ends and when the backend
  * cleanup job updates the DB status.
  *
- * - Event ended + ACTIVE/CHECKED_IN → EXPIRED
- * - Event started + PENDING_*/WAITLISTED → EXPIRED
+ * - Event ended + ACTIVE/CHECKED_IN -> EXPIRED
+ * - Event started + PENDING or WAITLISTED -> EXPIRED
  */
 export function getEffectiveTicketStatus(
   status: GuestTicketStatus,
