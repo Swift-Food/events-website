@@ -8,6 +8,8 @@ import { imageService } from "@/services/image.service";
 import { ArrowLeft, Loader2, User, Save, Instagram, Linkedin, Globe, Upload, X, Camera } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useImageCropper } from "@/components/event-form/hooks/useImageCropper";
+import ImageCropModal from "@/components/event-form/ImageCropModal";
 
 // X (Twitter) icon - not available in lucide-react
 const XIcon = ({ className }: { className?: string }) => (
@@ -87,8 +89,10 @@ export default function EditProfilePage() {
 
  // Profile picture upload state
  const [profilePicture, setProfilePicture] = useState<string>("");
- const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
- const avatarInputRef = useRef<HTMLInputElement>(null);
+ const avatarCropper = useImageCropper({
+  aspect: 1,
+  onCropComplete: (imageUrl) => setProfilePicture(imageUrl),
+ });
 
  // Banner upload state
  const [isDraggingBanner, setIsDraggingBanner] = useState(false);
@@ -136,34 +140,6 @@ export default function EditProfilePage() {
  ) => {
   const { name, value } = e.target;
   setFormData((prev) => ({ ...prev, [name]: value }));
- };
-
- // Profile picture upload handler
- const handleAvatarUpload = useCallback(async (file: File) => {
-  if (!file.type.startsWith("image/")) {
-   toast.error("Please upload an image file");
-   return;
-  }
-  if (file.size > 5 * 1024 * 1024) {
-   toast.error("Image must be less than 5MB");
-   return;
-  }
-  setIsUploadingAvatar(true);
-  try {
-   const uploadedUrl = await imageService.uploadImage(file);
-   setProfilePicture(uploadedUrl);
-   toast.success("Profile picture uploaded!");
-  } catch (error) {
-   console.error("Failed to upload profile picture:", error);
-   toast.error("Failed to upload profile picture");
-  } finally {
-   setIsUploadingAvatar(false);
-  }
- }, []);
-
- const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (file) handleAvatarUpload(file);
  };
 
  // Banner upload handlers
@@ -316,8 +292,8 @@ export default function EditProfilePage() {
       <div className="flex items-center gap-5">
        <button
         type="button"
-        onClick={() => avatarInputRef.current?.click()}
-        disabled={isUploadingAvatar}
+        onClick={avatarCropper.triggerFileInput}
+        disabled={avatarCropper.isUploading}
         className="relative h-24 w-24 rounded-full ring-4 ring-primary/20 overflow-hidden group flex-shrink-0 cursor-pointer"
        >
         {profilePicture ? (
@@ -332,7 +308,7 @@ export default function EditProfilePage() {
          </div>
         )}
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-200 flex flex-col items-center justify-center gap-1">
-         {isUploadingAvatar ? (
+         {avatarCropper.isUploading ? (
           <Loader2 className="h-5 w-5 text-white animate-spin" />
          ) : (
           <>
@@ -352,11 +328,11 @@ export default function EditProfilePage() {
         <div className="flex items-center gap-2 pt-0.5">
          <button
           type="button"
-          onClick={() => avatarInputRef.current?.click()}
-          disabled={isUploadingAvatar}
+          onClick={avatarCropper.triggerFileInput}
+          disabled={avatarCropper.isUploading}
           className="text-xs font-medium text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
          >
-          {isUploadingAvatar ? "Uploading..." : profilePicture ? "Change photo" : "Upload photo"}
+          {avatarCropper.isUploading ? "Uploading..." : profilePicture ? "Change photo" : "Upload photo"}
          </button>
          {profilePicture && (
           <>
@@ -373,10 +349,10 @@ export default function EditProfilePage() {
         </div>
        </div>
        <input
-        ref={avatarInputRef}
+        ref={avatarCropper.fileInputRef}
         type="file"
         accept="image/*"
-        onChange={handleAvatarFileChange}
+        onChange={avatarCropper.handleImageSelect}
         className="hidden"
        />
       </div>
@@ -975,6 +951,21 @@ export default function EditProfilePage() {
       </button>
      </div>
     </form>
+
+    {/* Profile Picture Crop Modal - outside form to avoid stacking context */}
+    <ImageCropModal
+     isOpen={avatarCropper.isCropModalOpen}
+     imageToCrop={avatarCropper.imageToCrop}
+     crop={avatarCropper.crop}
+     zoom={avatarCropper.zoom}
+     isUploading={avatarCropper.isUploading}
+     aspect={1}
+     onCropChange={avatarCropper.setCrop}
+     onZoomChange={avatarCropper.setZoom}
+     onCropComplete={avatarCropper.onCropAreaComplete}
+     onSave={avatarCropper.handleSave}
+     onCancel={avatarCropper.handleCancel}
+    />
    </div>
   </div>
  );

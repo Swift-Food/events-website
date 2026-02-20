@@ -34,7 +34,7 @@ export default function ImageCropModal({
   if (!isOpen || !imageToCrop) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="relative w-full max-w-lg rounded-2xl bg-[#1a1a1a]/70 backdrop-blur-sm border border-white/10 shadow-2xl overflow-hidden">
         <div className="px-6 pt-6 pb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-foreground">Crop Image</h2>
