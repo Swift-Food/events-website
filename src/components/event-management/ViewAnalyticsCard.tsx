@@ -7,9 +7,10 @@ import { ViewAnalyticsResponse, DailyViewData } from "@/types";
 
 interface ViewAnalyticsCardProps {
   eventId: string;
+  isExpired?: boolean;
 }
 
-export function ViewAnalyticsCard({ eventId }: ViewAnalyticsCardProps) {
+export function ViewAnalyticsCard({ eventId, isExpired }: ViewAnalyticsCardProps) {
   const [analytics, setAnalytics] = useState<ViewAnalyticsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -103,7 +104,7 @@ export function ViewAnalyticsCard({ eventId }: ViewAnalyticsCardProps) {
       {!analytics.isTrackingActive && (
         <div className="mb-4 px-3 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
           <p className="text-xs text-yellow-500">
-            Tracking paused — event has started
+            Tracking paused — event has {isExpired ? "ended" : "started"}
           </p>
         </div>
       )}

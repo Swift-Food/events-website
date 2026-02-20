@@ -587,7 +587,7 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
       />
 
       {canViewStats && (
-        <ViewAnalyticsCard eventId={eventData.id} />
+        <ViewAnalyticsCard eventId={eventData.id} isExpired={isExpired} />
       )}
 
       {canViewStats && (
