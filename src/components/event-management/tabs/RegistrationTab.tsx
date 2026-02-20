@@ -46,6 +46,9 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
       price: price,
       isSingleUse: ticket.isSingleUse ?? true,
       quantity: ticket.quantityTotal ?? 0,
+      questionForm: (ticket.questionForm || []).map((q, i) => convertQuestionBlockToFormField(q, i)),
+      maxGroupSize: ticket.maxGroupSize,
+      externalTicketUrl: ticket.externalTicketUrl || undefined,
     };
   };
 
