@@ -12,6 +12,7 @@ import {
 } from "@/types/guest-ticket";
 import type { PaymentFlowState } from "@/types/payment";
 import { TicketCard } from "@/components/tickets";
+import { getEffectiveTicketStatus } from "@/lib/ticket-utils";
 import PaymentModal, {
   PaymentSuccessModal,
 } from "@/components/payments/PaymentModal";
@@ -22,11 +23,12 @@ import {
   Loader2,
   Sparkles,
   Search,
+  History,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 
-type FilterType = "all" | "active" | "pending" | "cancelled" | "checked_in";
+type FilterType = "all" | "active" | "pending" | "cancelled" | "checked_in" | "past";
 
 function MyTicketsContent() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -237,8 +239,6 @@ function MyTicketsContent() {
     setSuccessTicketDetails(null);
   };
 
-  const now = new Date();
-
   // Calculate counts for each filter
   const filterCounts = useMemo(() => {
     const counts = {
@@ -247,27 +247,33 @@ function MyTicketsContent() {
       pending: 0,
       cancelled: 0,
       checked_in: 0,
+      past: 0,
     };
 
     tickets.forEach((ticket) => {
-      const eventEndDate = new Date(ticket.eventEndDateTime);
-      const hasEnded = eventEndDate < now;
+      const effective = getEffectiveTicketStatus(
+        ticket.status,
+        ticket.eventStartDateTime,
+        ticket.eventEndDateTime,
+      );
 
-      if (ticket.status === GuestTicketStatus.ACTIVE && !hasEnded) {
+      if (effective === GuestTicketStatus.ACTIVE) {
         counts.active++;
       } else if (
-        ticket.status === GuestTicketStatus.PENDING_APPROVAL ||
-        ticket.status === GuestTicketStatus.PENDING_PAYMENT ||
-        ticket.status === GuestTicketStatus.WAITLISTED
+        effective === GuestTicketStatus.PENDING_APPROVAL ||
+        effective === GuestTicketStatus.PENDING_PAYMENT ||
+        effective === GuestTicketStatus.WAITLISTED
       ) {
         counts.pending++;
       } else if (
-        ticket.status === GuestTicketStatus.CANCELLED ||
-        ticket.status === GuestTicketStatus.REFUNDED
+        effective === GuestTicketStatus.CANCELLED ||
+        effective === GuestTicketStatus.REFUNDED
       ) {
         counts.cancelled++;
-      } else if (ticket.status === GuestTicketStatus.CHECKED_IN) {
+      } else if (effective === GuestTicketStatus.CHECKED_IN) {
         counts.checked_in++;
+      } else if (effective === GuestTicketStatus.EXPIRED) {
+        counts.past++;
       }
     });
 
@@ -277,25 +283,30 @@ function MyTicketsContent() {
   const filteredTickets = useMemo(() => {
     return tickets
       .filter((ticket) => {
-        const eventEndDate = new Date(ticket.eventEndDateTime);
-        const hasEnded = eventEndDate < now;
+        const effective = getEffectiveTicketStatus(
+          ticket.status,
+          ticket.eventStartDateTime,
+          ticket.eventEndDateTime,
+        );
 
         switch (filter) {
           case "active":
-            return ticket.status === GuestTicketStatus.ACTIVE && !hasEnded;
+            return effective === GuestTicketStatus.ACTIVE;
           case "pending":
             return (
-              ticket.status === GuestTicketStatus.PENDING_APPROVAL ||
-              ticket.status === GuestTicketStatus.PENDING_PAYMENT ||
-              ticket.status === GuestTicketStatus.WAITLISTED
+              effective === GuestTicketStatus.PENDING_APPROVAL ||
+              effective === GuestTicketStatus.PENDING_PAYMENT ||
+              effective === GuestTicketStatus.WAITLISTED
             );
           case "cancelled":
             return (
-              ticket.status === GuestTicketStatus.CANCELLED ||
-              ticket.status === GuestTicketStatus.REFUNDED
+              effective === GuestTicketStatus.CANCELLED ||
+              effective === GuestTicketStatus.REFUNDED
             );
           case "checked_in":
-            return ticket.status === GuestTicketStatus.CHECKED_IN;
+            return effective === GuestTicketStatus.CHECKED_IN;
+          case "past":
+            return effective === GuestTicketStatus.EXPIRED;
           default:
             return true;
         }
@@ -319,8 +330,9 @@ function MyTicketsContent() {
       icon: <CheckCircle2 className="h-4 w-4" />,
     },
     { id: "pending", label: "Pending", icon: <Clock className="h-4 w-4" /> },
-    { id: "cancelled", label: "Cancelled", icon: <Ticket className="h-4 w-4" /> },
     { id: "checked_in", label: "Checked In", icon: <CheckCircle2 className="h-4 w-4" /> },
+    { id: "past", label: "Past", icon: <History className="h-4 w-4" /> },
+    { id: "cancelled", label: "Cancelled", icon: <Ticket className="h-4 w-4" /> },
     { id: "all", label: "All", icon: <Ticket className="h-4 w-4" /> },
   ];
 
@@ -381,7 +393,7 @@ function MyTicketsContent() {
               <div className="tickets-stagger-2">
                 {/* Skeleton for filters */}
                 <div className="mb-6 flex flex-wrap gap-2">
-                  {[...Array(5)].map((_, i) => (
+                  {[...Array(6)].map((_, i) => (
                     <div
                       key={i}
                       className="h-10 w-24 rounded-full skeleton-shimmer"
@@ -444,6 +456,8 @@ function MyTicketsContent() {
                           ? "No cancelled or refunded tickets"
                           : filter === "checked_in"
                           ? "You haven't checked into any events yet"
+                          : filter === "past"
+                          ? "No past event tickets"
                           : "No tickets match this filter"}
                       </p>
                       <Link

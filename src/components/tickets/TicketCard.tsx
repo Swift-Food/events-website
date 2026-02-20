@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import TicketQRCode from "./TicketQRCode";
 import { format } from "date-fns";
 import { guestTicketService } from "@/services/guest-ticket.service";
+import { getEffectiveTicketStatus } from "@/lib/ticket-utils";
 
 interface TicketCardProps {
   ticket: GuestTicketWithEventResponseDto;
@@ -160,9 +161,15 @@ export default function TicketCard({
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [showLeaveWaitlistModal, setShowLeaveWaitlistModal] = useState(false);
 
-  const status = statusConfig[ticket.status];
   const eventDate = new Date(ticket.eventStartDateTime);
   const isUpcoming = eventDate > new Date();
+
+  const effectiveStatus = getEffectiveTicketStatus(
+    ticket.status,
+    ticket.eventStartDateTime,
+    ticket.eventEndDateTime,
+  );
+  const status = statusConfig[effectiveStatus];
   const canShowQR = ticket.status === GuestTicketStatus.ACTIVE && ticket.qrCode;
   const isPendingPayment = ticket.status === GuestTicketStatus.PENDING_PAYMENT;
   const isActive = ticket.status === GuestTicketStatus.ACTIVE;
