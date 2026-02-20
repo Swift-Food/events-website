@@ -96,7 +96,7 @@ export default function RegistrationConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-lg p-4">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-lg p-4">
       <div className="w-full max-w-md max-h-[80vh] rounded-2xl bg-card-background/80 shadow-2xl overflow-hidden flex flex-col">
         {step === 'summary' ? (
           /* Summary Panel */

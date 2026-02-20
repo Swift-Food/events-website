@@ -88,7 +88,7 @@ function PaymentForm({ onClose, onSuccess, ticketDetails, amount, currency }: Pa
   const isSubmitDisabled = !stripe || !elements || isProcessing || !isReady;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto">
       <div className="bg-background rounded-2xl sm:rounded-3xl border border-white/10 w-full max-w-md max-h-[90vh] overflow-hidden my-auto">
         {/* Header */}
         <div className="relative p-4 sm:p-6 pb-3 sm:pb-4">
@@ -233,7 +233,7 @@ export function PaymentSuccessModal({ isOpen, onClose, ticketDetails }: PaymentS
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto">
       <div className="bg-background rounded-2xl sm:rounded-3xl border border-white/10 w-full max-w-md overflow-hidden text-center p-6 sm:p-8 my-auto">
         <div className="rounded-full bg-green-500/20 p-3 sm:p-4 w-fit mx-auto mb-3 sm:mb-4">
           <Check className="h-6 w-6 sm:h-8 sm:w-8 text-green-400" />
