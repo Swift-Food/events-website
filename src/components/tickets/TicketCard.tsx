@@ -28,7 +28,7 @@ interface TicketCardProps {
   onQRClose?: () => void;
 }
 
-// Confirmation Modal Component
+// Confirmation Modal Component - portaled to body
 function ConfirmModal({
   isOpen,
   onClose,
@@ -52,36 +52,34 @@ function ConfirmModal({
 }) {
   if (!isOpen) return null;
 
-  const iconBg = variant === "danger" ? "bg-red-500/20" : "bg-amber-500/20";
+  const iconBg = variant === "danger" ? "bg-red-500/10" : "bg-amber-500/10";
   const iconColor = variant === "danger" ? "text-red-400" : "text-amber-400";
-  const buttonBg = variant === "danger" ? "bg-red-500 hover:bg-red-600" : "bg-amber-500 hover:bg-amber-600";
+  const buttonBg = variant === "danger"
+    ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20"
+    : "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20";
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="bg-card-background rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-white/5">
-        <div className="flex items-center gap-3 mb-4">
-          <div className={`p-2.5 rounded-full ${iconBg}`}>
+  return createPortal(
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget && !isLoading) onClose(); }}
+    >
+      <div className="bg-card-background rounded-t-2xl sm:rounded-2xl p-5 w-full sm:max-w-xs shadow-2xl border border-white/10 animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+        <div className="flex flex-col items-center text-center">
+          <div className={`p-3 rounded-full ${iconBg} mb-3`}>
             {variant === "danger" ? (
               <AlertTriangle className={`h-5 w-5 ${iconColor}`} />
             ) : (
               <RotateCcw className={`h-5 w-5 ${iconColor}`} />
             )}
           </div>
-          <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+          <h3 className="text-base font-semibold text-foreground">{title}</h3>
+          <p className="text-muted-foreground text-sm mt-1.5 leading-relaxed">{message}</p>
         </div>
-        <p className="text-muted-foreground text-sm mb-6 leading-relaxed">{message}</p>
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            disabled={isLoading}
-            className="flex-1 px-4 py-2.5 bg-foreground/10 text-foreground rounded-xl text-sm font-medium hover:bg-foreground/20 transition-colors disabled:opacity-50"
-          >
-            Go Back
-          </button>
+        <div className="flex flex-col gap-2 mt-5">
           <button
             onClick={onConfirm}
             disabled={isLoading}
-            className={`flex-1 px-4 py-2.5 ${buttonBg} text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2`}
+            className={`w-full px-4 py-2.5 ${buttonBg} rounded-xl text-sm font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2`}
           >
             {isLoading ? (
               <>
@@ -92,9 +90,17 @@ function ConfirmModal({
               confirmText
             )}
           </button>
+          <button
+            onClick={onClose}
+            disabled={isLoading}
+            className="w-full px-4 py-2.5 text-muted-foreground rounded-xl text-sm font-medium hover:text-foreground hover:bg-white/5 transition-colors disabled:opacity-50"
+          >
+            Go Back
+          </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
