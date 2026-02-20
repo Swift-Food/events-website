@@ -9,6 +9,7 @@ export enum EventStatus {
   ONGOING = 'ongoing',
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
+  EXPIRED = 'expired',
 }
 
 /**

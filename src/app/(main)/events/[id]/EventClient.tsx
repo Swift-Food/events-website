@@ -685,6 +685,7 @@ export default function EventClient({
   [EventStatus.ONGOING]: "bg-purple-500/20 text-purple-400",
   [EventStatus.CANCELLED]: "bg-red-500/20 text-red-400",
   [EventStatus.COMPLETED]: "bg-blue-500/20 text-blue-400",
+  [EventStatus.EXPIRED]: "bg-gray-500/20 text-gray-400",
  };
 
  return (

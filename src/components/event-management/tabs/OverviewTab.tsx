@@ -42,6 +42,7 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
   const canViewStats = userRole === "owner" || userRole === "admin";
   const canPublish = userRole === "owner" || userRole === "admin";
   const isPublished = eventData.status === EventStatus.PUBLISHED;
+  const isExpired = eventData.status === EventStatus.EXPIRED;
   const themePalette = useMemo(() => {
     if (!eventData.eventTheme) return null;
     try {
@@ -295,9 +296,11 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
-                      isPublished
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-amber-500/20 text-amber-400"
+                      isExpired
+                        ? "bg-gray-500/20 text-gray-400"
+                        : isPublished
+                          ? "bg-green-500/20 text-green-400"
+                          : "bg-amber-500/20 text-amber-400"
                     }`}>
                       {eventData.status}
                     </span>
@@ -525,7 +528,7 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
           </div>
           </div>
 
-          {canEdit && (
+          {canEdit && !isExpired && (
             <div className="flex items-center gap-2">
               {/* Publish/Unpublish Button */}
               {canPublish && onPublishToggle && (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { EventResponseDto } from "@/types";
+import { EventResponseDto, EventStatus } from "@/types";
 import { cateringService } from "@/services/catering.service";
 import {
   CateringBundle,
@@ -552,6 +552,16 @@ export function CateringTab({ eventData }: CateringTabProps) {
 
   if (existingOrder) {
     return <ExistingOrderView order={existingOrder} />;
+  }
+
+  if (eventData.status === EventStatus.EXPIRED) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <Clock className="h-10 w-10 text-muted-foreground mb-3" />
+        <h3 className="text-lg font-semibold text-foreground mb-1">Event has expired</h3>
+        <p className="text-sm text-muted-foreground">Catering orders cannot be placed on expired events.</p>
+      </div>
+    );
   }
 
   return (
