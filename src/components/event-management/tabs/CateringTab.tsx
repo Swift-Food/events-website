@@ -519,8 +519,10 @@ export function CateringTab({ eventData }: CateringTabProps) {
     } catch (error: any) {
       console.error("Error creating order:", error);
 
-      // Check for London delivery validation error
-      if (error.response?.status === 400 && error.response?.data?.message === "We only deliver within London currently") {
+      // Check for specific validation errors
+      if (error.response?.status === 400 && error.response?.data?.message?.includes("catering portions limit")) {
+        toast.error("A restaurant in your order has reached its catering capacity. Please adjust your order or try again later.", { duration: 8000 });
+      } else if (error.response?.status === 400 && error.response?.data?.message === "We only deliver within London currently") {
         toast.error("We only deliver within London currently. Please update your event address to a London location.");
       } else {
         toast.error(error.response?.data?.message || "Failed to create catering order");

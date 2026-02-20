@@ -2,9 +2,10 @@
 
 import { Suspense } from "react";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { CheckCircle, XCircle, Loader2, ArrowRight, Sparkles, PartyPopper, CloudRain, RefreshCw } from "lucide-react";
 import Link from "next/link";
+import { paymentService } from "@/services/payment.service";
 
 // Confetti piece component
 function ConfettiPiece({ delay, left, color }: { delay: number; left: number; color: string }) {
@@ -60,10 +61,16 @@ function SadClouds() {
 
 function StripeCallbackContent() {
  const router = useRouter();
- const searchParams = useSearchParams();
- const success = searchParams.get("success") === "true";
+ const [success, setSuccess] = useState<boolean | null>(null);
  const [countdown, setCountdown] = useState(10);
  const [showConfetti, setShowConfetti] = useState(false);
+
+ // Verify actual status with Stripe instead of trusting URL params
+ useEffect(() => {
+  paymentService.getStripeConnectStatus()
+   .then((status) => setSuccess(status.onboardingComplete))
+   .catch(() => setSuccess(false));
+ }, []);
 
  useEffect(() => {
   if (success) {
@@ -83,6 +90,10 @@ function StripeCallbackContent() {
    return () => clearInterval(timer);
   }
  }, [success, router]);
+
+ if (success === null) {
+  return <LoadingState />;
+ }
 
  if (success) {
   return (
@@ -280,7 +291,7 @@ function LoadingState() {
   <div className="min-h-screen flex items-center justify-center p-4">
    <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
     <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
-    <p className="text-gray-600">Loading...</p>
+    <p className="text-gray-600">Verifying your Stripe setup...</p>
    </div>
   </div>
  );
