@@ -28,7 +28,7 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 
-type TabType = "upcoming" | "all";
+type TabType = "upcoming" | "archive";
 type SubFilterType = "all" | "past" | "cancelled";
 
 function MyTicketsContent() {
@@ -259,7 +259,7 @@ function MyTicketsContent() {
   const tabCounts = useMemo(() => {
     const counts = {
       upcoming: 0,
-      all: 0,
+      archive: 0,
       past: 0,
       cancelled: 0,
     };
@@ -276,7 +276,7 @@ function MyTicketsContent() {
       }
 
       if (isRestStatus(effective)) {
-        counts.all++;
+        counts.archive++;
         if (
           effective === GuestTicketStatus.CANCELLED ||
           effective === GuestTicketStatus.REFUNDED
@@ -352,7 +352,7 @@ function MyTicketsContent() {
       label: "Upcoming",
       icon: <CheckCircle2 className="h-4 w-4" />,
     },
-    { id: "all", label: "All", icon: <Ticket className="h-4 w-4" /> },
+    { id: "archive", label: "Archive", icon: <Ticket className="h-4 w-4" /> },
   ];
 
   const subFilters: { id: SubFilterType; label: string }[] = [
@@ -444,7 +444,7 @@ function MyTicketsContent() {
                       key={t.id}
                       onClick={() => {
                         setActiveTab(t.id);
-                        if (t.id !== "all") setSubFilter("all");
+                        if (t.id !== "archive") setSubFilter("all");
                       }}
                       className={`flex-shrink-0 flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95 ${
                         activeTab === t.id
@@ -468,7 +468,7 @@ function MyTicketsContent() {
                 </div>
 
                 {/* Sub-filters for "All" tab */}
-                {activeTab === "all" && (
+                {activeTab === "archive" && (
                   <div className="mb-6 flex gap-1.5 tickets-stagger-2">
                     {subFilters.map((sf) => (
                       <button

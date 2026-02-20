@@ -11,6 +11,7 @@ interface TicketTypeModalProps {
   onClose: () => void;
   onSave: (ticket: TicketType) => void | Promise<void>;
   ticketToEdit?: TicketType | null;
+  readOnly?: boolean;
 }
 
 // Small component for group size input with validation warning
@@ -65,6 +66,7 @@ export default function TicketTypeModal({
   onClose,
   onSave,
   ticketToEdit,
+  readOnly = false,
 }: TicketTypeModalProps) {
   const [localName, setLocalName] = useState("");
   const [localDescription, setLocalDescription] = useState("");
@@ -319,7 +321,7 @@ export default function TicketTypeModal({
               <Ticket className="h-5 w-5 text-accent" />
             </div>
             <h2 className="text-xl md:text-2xl font-bold">
-              {ticketToEdit ? "Edit Ticket" : "Add Ticket Type"}
+              {readOnly ? "Ticket Details" : ticketToEdit ? "Edit Ticket" : "Add Ticket Type"}
             </h2>
           </div>
           <button
@@ -342,7 +344,8 @@ export default function TicketTypeModal({
               type="text"
               value={localName}
               onChange={(e) => setLocalName(e.target.value)}
-              className="w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all placeholder:text-white/40"
+              readOnly={readOnly}
+              className={`w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all placeholder:text-white/40 ${readOnly ? "opacity-70 cursor-default" : ""}`}
               placeholder="e.g., General Admission, VIP, Early Bird"
             />
           </div>
@@ -355,8 +358,9 @@ export default function TicketTypeModal({
             <textarea
               value={localDescription}
               onChange={(e) => setLocalDescription(e.target.value)}
+              readOnly={readOnly}
               rows={3}
-              className="w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all resize-none placeholder:text-white/40"
+              className={`w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all resize-none placeholder:text-white/40 ${readOnly ? "opacity-70 cursor-default" : ""}`}
               placeholder="Optional description of this ticket type..."
             />
           </div>
@@ -386,7 +390,8 @@ export default function TicketTypeModal({
                         step="0.01"
                         value={localPrice}
                         onChange={(e) => setLocalPrice(e.target.value)}
-                        className="w-full h-11 rounded-xl bg-white/10 pl-8 pr-4 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all"
+                        readOnly={readOnly}
+                        className={`w-full h-11 rounded-xl bg-white/10 pl-8 pr-4 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all ${readOnly ? "opacity-70 cursor-default" : ""}`}
                         placeholder="0.30"
                       />
                     </div>
@@ -399,23 +404,23 @@ export default function TicketTypeModal({
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setLocalIsFree(true)}
+                  onClick={() => !readOnly && setLocalIsFree(true)}
                   className={`h-11 rounded-xl px-4 text-sm font-medium transition-all ${
                     localIsFree
                       ? "bg-accent-dark text-white"
                       : "bg-white/10 text-white/60 hover:bg-white/15"
-                  }`}
+                  } ${readOnly ? "cursor-default" : ""}`}
                 >
                   Free
                 </button>
                 <button
                   type="button"
-                  onClick={() => setLocalIsFree(false)}
+                  onClick={() => !readOnly && setLocalIsFree(false)}
                   className={`h-11 rounded-xl px-4 text-sm font-medium transition-all ${
                     !localIsFree
                       ? "bg-accent-dark text-white"
                       : "bg-white/10 text-white/60 hover:bg-white/15"
-                  }`}
+                  } ${readOnly ? "cursor-default" : ""}`}
                 >
                   Paid
                 </button>
@@ -433,12 +438,12 @@ export default function TicketTypeModal({
                 <span className="text-xs text-white/60">Unlimited</span>
                 <button
                   type="button"
-                  onClick={() => setLocalIsUnlimited(!localIsUnlimited)}
+                  onClick={() => !readOnly && setLocalIsUnlimited(!localIsUnlimited)}
                   className={`h-6 w-11 rounded-full transition-all flex-shrink-0 ${
                     localIsUnlimited
                       ? "bg-accent-dark"
                       : "bg-white/10"
-                  }`}
+                  } ${readOnly ? "cursor-default opacity-70" : ""}`}
                 >
                   <span
                     className={`block h-5 w-5 rounded-full transition-all ${
@@ -465,7 +470,8 @@ export default function TicketTypeModal({
                   max="100000"
                   value={localQuantity}
                   onChange={(e) => setLocalQuantity(e.target.value)}
-                  className="w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all"
+                  readOnly={readOnly}
+                  className={`w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all ${readOnly ? "opacity-70 cursor-default" : ""}`}
                   placeholder="100"
                 />
                 <p className="text-xs text-white/60 mt-1.5">
@@ -512,12 +518,12 @@ export default function TicketTypeModal({
                   </div>
                   <button
                     type="button"
-                    onClick={() => setLocalIsSingleUse(!localIsSingleUse)}
+                    onClick={() => !readOnly && setLocalIsSingleUse(!localIsSingleUse)}
                     className={`h-6 w-11 rounded-full transition-all ${
                       localIsSingleUse
                         ? "bg-accent-dark"
                         : "bg-white/10"
-                    }`}
+                    } ${readOnly ? "cursor-default opacity-70" : ""}`}
                   >
                     <span
                       className={`block h-5 w-5 rounded-full transition-all ${
@@ -547,12 +553,12 @@ export default function TicketTypeModal({
                     </div>
                     <button
                       type="button"
-                      onClick={() => setLocalMaxGroupSize(localMaxGroupSize > 1 ? 1 : 5)}
+                      onClick={() => !readOnly && setLocalMaxGroupSize(localMaxGroupSize > 1 ? 1 : 5)}
                       className={`h-6 w-11 rounded-full transition-all flex-shrink-0 ${
                         localMaxGroupSize > 1
                           ? "bg-accent-dark"
                           : "bg-white/10"
-                      }`}
+                      } ${readOnly ? "cursor-default opacity-70" : ""}`}
                     >
                       <span
                         className={`block h-5 w-5 rounded-full transition-all ${
@@ -588,7 +594,8 @@ export default function TicketTypeModal({
                     type="url"
                     value={localExternalTicketUrl}
                     onChange={(e) => setLocalExternalTicketUrl(e.target.value)}
-                    className="w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all placeholder:text-white/40"
+                    readOnly={readOnly}
+                    className={`w-full rounded-xl bg-white/10 px-4 py-3 text-white text-base md:text-sm outline-none focus:ring-2 focus:ring-accent/50 border border-white/10 transition-all placeholder:text-white/40 ${readOnly ? "opacity-70 cursor-default" : ""}`}
                     placeholder="https://eventbrite.com/e/your-event"
                   />
                 </div>
@@ -617,16 +624,18 @@ export default function TicketTypeModal({
 
             {questionsExpanded && (
               <div className="px-4 py-3 border-t border-white/10">
-                <div className="flex items-center justify-end mb-3">
-                  <button
-                    type="button"
-                    onClick={handleAddQuestion}
-                    className="flex items-center gap-1.5 rounded-lg bg-accent/20 px-2.5 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent-dark/30"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    Add Question
-                  </button>
-                </div>
+                {!readOnly && (
+                  <div className="flex items-center justify-end mb-3">
+                    <button
+                      type="button"
+                      onClick={handleAddQuestion}
+                      className="flex items-center gap-1.5 rounded-lg bg-accent/20 px-2.5 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent-dark/30"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Add Question
+                    </button>
+                  </div>
+                )}
 
                 {localQuestions.length > 0 ? (
                   <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -636,26 +645,28 @@ export default function TicketTypeModal({
                     className="flex items-start gap-2 rounded-lg bg-white/10 p-3 group"
                   >
                     {/* Mobile ordering buttons - left side, vertically stacked */}
-                    <div className="flex flex-col gap-0.5 md:hidden">
-                      <button
-                        type="button"
-                        onClick={() => handleMoveQuestion(index, "up")}
-                        disabled={index === 0}
-                        className="rounded p-0.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Move up"
-                      >
-                        <ChevronUp className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleMoveQuestion(index, "down")}
-                        disabled={index === localQuestions.length - 1}
-                        className="rounded p-0.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Move down"
-                      >
-                        <ChevronDown className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
+                    {!readOnly && (
+                      <div className="flex flex-col gap-0.5 md:hidden">
+                        <button
+                          type="button"
+                          onClick={() => handleMoveQuestion(index, "up")}
+                          disabled={index === 0}
+                          className="rounded p-0.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Move up"
+                        >
+                          <ChevronUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleMoveQuestion(index, "down")}
+                          disabled={index === localQuestions.length - 1}
+                          className="rounded p-0.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Move down"
+                        >
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    )}
 
                     <div className="flex items-center justify-center rounded bg-accent/10 p-1.5 text-accent flex-shrink-0">
                       {getQuestionTypeIcon(question.type)}
@@ -680,43 +691,45 @@ export default function TicketTypeModal({
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex items-center gap-0.5 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex-shrink-0">
-                      {/* Desktop ordering buttons */}
-                      <button
-                        type="button"
-                        onClick={() => handleMoveQuestion(index, "up")}
-                        disabled={index === 0}
-                        className="hidden md:block rounded p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Move up"
-                      >
-                        <ChevronUp className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleMoveQuestion(index, "down")}
-                        disabled={index === localQuestions.length - 1}
-                        className="hidden md:block rounded p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Move down"
-                      >
-                        <ChevronDown className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleEditQuestion(index)}
-                        className="rounded p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
-                        title="Edit question"
-                      >
-                        <Edit className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteQuestion(index)}
-                        className="rounded p-1 text-white/60 transition-colors hover:bg-red-500/20 hover:text-red-400"
-                        title="Delete question"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
+                    {!readOnly && (
+                      <div className="flex items-center gap-0.5 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex-shrink-0">
+                        {/* Desktop ordering buttons */}
+                        <button
+                          type="button"
+                          onClick={() => handleMoveQuestion(index, "up")}
+                          disabled={index === 0}
+                          className="hidden md:block rounded p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Move up"
+                        >
+                          <ChevronUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleMoveQuestion(index, "down")}
+                          disabled={index === localQuestions.length - 1}
+                          className="hidden md:block rounded p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Move down"
+                        >
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleEditQuestion(index)}
+                          className="rounded p-1 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                          title="Edit question"
+                        >
+                          <Edit className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteQuestion(index)}
+                          className="rounded p-1 text-white/60 transition-colors hover:bg-red-500/20 hover:text-red-400"
+                          title="Delete question"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                     ))}
                   </div>
@@ -731,22 +744,34 @@ export default function TicketTypeModal({
         </div>
 
         <div className="mt-6 flex gap-3">
-          <button
-            type="button"
-            onClick={handleCancel}
-            disabled={isSaving}
-            className="flex-1 rounded-xl bg-white/10 py-2.5 text-center text-sm font-medium text-white transition-all hover:bg-white/15 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={isSaving}
-            className="flex-1 rounded-xl bg-accent-dark py-2.5 text-center text-sm font-semibold text-white transition-all hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSaving ? "Saving..." : ticketToEdit ? "Update Ticket" : "Add Ticket"}
-          </button>
+          {readOnly ? (
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="flex-1 rounded-xl bg-white/10 py-2.5 text-center text-sm font-medium text-white transition-all hover:bg-white/15"
+            >
+              Close
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={isSaving}
+                className="flex-1 rounded-xl bg-white/10 py-2.5 text-center text-sm font-medium text-white transition-all hover:bg-white/15 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="flex-1 rounded-xl bg-accent-dark py-2.5 text-center text-sm font-semibold text-white transition-all hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSaving ? "Saving..." : ticketToEdit ? "Update Ticket" : "Add Ticket"}
+              </button>
+            </>
+          )}
         </div>
       </div>
 

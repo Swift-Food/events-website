@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { EventResponseDto, TicketType, FormField, QuestionType } from "@/types";
+import { EventResponseDto, EventStatus, TicketType, FormField, QuestionType } from "@/types";
 import { EventTicketResponseDto, QuestionBlock } from "@/types/event-ticket/response/ticket.dto";
-import { Ticket, Plus, Edit, Lock, Unlock, Trash2, MessageSquare, AlignLeft, CircleDot, CheckSquare, HelpCircle, ScanLine, ChevronUp, ChevronDown } from "lucide-react";
+import { Ticket, Plus, Edit, Lock, Unlock, Trash2, MessageSquare, AlignLeft, CircleDot, CheckSquare, HelpCircle, ScanLine, ChevronUp, ChevronDown, Eye } from "lucide-react";
 import TicketTypeModal from "@/components/event-edit/TicketTypeModal";
 import FormFieldModal from "@/components/event-edit/FormFieldModal";
 import ConfirmModal from "@/components/ui/ConfirmModal";
@@ -17,6 +17,7 @@ interface RegistrationTabProps {
 }
 
 export function RegistrationTab({ eventData, onRefresh, onScanClick }: RegistrationTabProps) {
+  const isExpired = eventData.status === EventStatus.EXPIRED;
   const [tickets, setTickets] = useState<EventTicketResponseDto[]>(eventData.eventTickets || []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ticketToEdit, setTicketToEdit] = useState<TicketType | null>(null);
@@ -376,13 +377,15 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
               <ScanLine className="h-4 w-4" />
               <span className="hidden sm:inline">Scan</span>
             </button>
-            <button
-              onClick={handleCreateTicket}
-              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add Ticket</span>
-            </button>
+            {!isExpired && (
+              <button
+                onClick={handleCreateTicket}
+                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Add Ticket</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -393,15 +396,19 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
             </div>
             <h3 className="text-foreground font-medium mb-2">No ticket types yet</h3>
             <p className="text-muted-foreground text-sm mb-4">
-              Create your first ticket type to start accepting registrations.
+              {isExpired
+                ? "This event had no ticket types."
+                : "Create your first ticket type to start accepting registrations."}
             </p>
-            <button
-              onClick={handleCreateTicket}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              <Plus className="h-4 w-4" />
-              Create Ticket Type
-            </button>
+            {!isExpired && (
+              <button
+                onClick={handleCreateTicket}
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                <Plus className="h-4 w-4" />
+                Create Ticket Type
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
@@ -450,25 +457,35 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  {isExpired ? (
                     <button
                       onClick={() => handleEditTicket(ticket.id)}
                       className="flex items-center gap-2 rounded-md border border-white/10 bg-card-secondary-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
                     >
-                      <Edit className="h-4 w-4" />
-                      <span className="hidden sm:inline">Edit</span>
+                      <Eye className="h-4 w-4" />
+                      <span className="hidden sm:inline">View</span>
                     </button>
-                    <button
-                      onClick={() => handleDeleteTicket(ticket.id)}
-                      disabled={isDeleting === ticket.id}
-                      className="flex items-center gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span className="hidden sm:inline">
-                        {isDeleting === ticket.id ? "Deleting..." : "Delete"}
-                      </span>
-                    </button>
-                  </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleEditTicket(ticket.id)}
+                        className="flex items-center gap-2 rounded-md border border-white/10 bg-card-secondary-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card-secondary-background/80"
+                      >
+                        <Edit className="h-4 w-4" />
+                        <span className="hidden sm:inline">Edit</span>
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTicket(ticket.id)}
+                        disabled={isDeleting === ticket.id}
+                        className="flex items-center gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="hidden sm:inline">
+                          {isDeleting === ticket.id ? "Deleting..." : "Delete"}
+                        </span>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Registration Questions */}
@@ -480,13 +497,15 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                         Registration Questions ({ticket.questionForm?.length || 0})
                       </span>
                     </div>
-                    <button
-                      onClick={() => handleAddQuestion(ticket.id)}
-                      className="flex items-center gap-1.5 rounded-md bg-primary/20 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/30"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                      Add Question
-                    </button>
+                    {!isExpired && (
+                      <button
+                        onClick={() => handleAddQuestion(ticket.id)}
+                        className="flex items-center gap-1.5 rounded-md bg-primary/20 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/30"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        Add Question
+                      </button>
+                    )}
                   </div>
                   {ticket.questionForm && ticket.questionForm.length > 0 ? (
                     <div className="space-y-2">
@@ -496,24 +515,26 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                           className="flex items-start gap-2 sm:gap-3 rounded-md bg-card-secondary-background p-3 group"
                         >
                           {/* Mobile ordering buttons - left side, vertically stacked */}
-                          <div className="flex flex-col gap-0.5 sm:hidden">
-                            <button
-                              onClick={() => handleMoveQuestion(ticket.id, index, "up")}
-                              disabled={index === 0}
-                              className="rounded p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
-                              title="Move up"
-                            >
-                              <ChevronUp className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => handleMoveQuestion(ticket.id, index, "down")}
-                              disabled={index === (ticket.questionForm?.length || 0) - 1}
-                              className="rounded p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
-                              title="Move down"
-                            >
-                              <ChevronDown className="h-4 w-4" />
-                            </button>
-                          </div>
+                          {!isExpired && (
+                            <div className="flex flex-col gap-0.5 sm:hidden">
+                              <button
+                                onClick={() => handleMoveQuestion(ticket.id, index, "up")}
+                                disabled={index === 0}
+                                className="rounded p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                                title="Move up"
+                              >
+                                <ChevronUp className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleMoveQuestion(ticket.id, index, "down")}
+                                disabled={index === (ticket.questionForm?.length || 0) - 1}
+                                className="rounded p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                                title="Move down"
+                              >
+                                <ChevronDown className="h-4 w-4" />
+                              </button>
+                            </div>
+                          )}
 
                           <div className="flex items-center justify-center rounded bg-primary/10 p-1.5 text-primary">
                             {getQuestionTypeIcon(question.type)}
@@ -538,39 +559,41 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
                           </div>
 
                           {/* Action buttons - edit/delete always, ordering on desktop only */}
-                          <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                            {/* Desktop ordering buttons */}
-                            <button
-                              onClick={() => handleMoveQuestion(ticket.id, index, "up")}
-                              disabled={index === 0}
-                              className="hidden sm:block rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                              title="Move up"
-                            >
-                              <ChevronUp className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleMoveQuestion(ticket.id, index, "down")}
-                              disabled={index === (ticket.questionForm?.length || 0) - 1}
-                              className="hidden sm:block rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                              title="Move down"
-                            >
-                              <ChevronDown className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleEditQuestion(ticket.id, index)}
-                              className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
-                              title="Edit question"
-                            >
-                              <Edit className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteQuestion(ticket.id, index)}
-                              className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-red-500/20 hover:text-red-400"
-                              title="Delete question"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
+                          {!isExpired && (
+                            <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                              {/* Desktop ordering buttons */}
+                              <button
+                                onClick={() => handleMoveQuestion(ticket.id, index, "up")}
+                                disabled={index === 0}
+                                className="hidden sm:block rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                title="Move up"
+                              >
+                                <ChevronUp className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleMoveQuestion(ticket.id, index, "down")}
+                                disabled={index === (ticket.questionForm?.length || 0) - 1}
+                                className="hidden sm:block rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                title="Move down"
+                              >
+                                <ChevronDown className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleEditQuestion(ticket.id, index)}
+                                className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+                                title="Edit question"
+                              >
+                                <Edit className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteQuestion(ticket.id, index)}
+                                className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-red-500/20 hover:text-red-400"
+                                title="Delete question"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -590,6 +613,7 @@ export function RegistrationTab({ eventData, onRefresh, onScanClick }: Registrat
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveTicket}
         ticketToEdit={ticketToEdit}
+        readOnly={isExpired}
       />
 
       <FormFieldModal
