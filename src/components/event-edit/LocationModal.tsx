@@ -8,7 +8,7 @@ import { GOOGLE_MAPS_CONFIG } from "@/constants/google-maps";
 import { loadGoogleMapsScript } from "@/utils/google-maps-loader";
 
 // UK Postcode validation regex
-const UK_POSTCODE_REGEX = /^([A-Z]{1,2}\d{1,2}[A-Z]?)\s?(\d[A-Z]{2})$/i;
+const UK_POSTCODE_REGEX = /^([A-Z]{1,2}\d{1,2}[A-Z]?)(\s?\d[A-Z]{2})?$/i;
 
 const validateUKPostcode = (postcode: string): boolean => {
   if (!postcode) return false;
