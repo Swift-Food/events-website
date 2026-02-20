@@ -21,6 +21,14 @@ export const calendarsApi = {
   },
 
   /**
+   * Get featured calendars
+   */
+  findFeatured: async (): Promise<Calendar[]> => {
+    const response = await apiClient.get<Calendar[]>("/calendars/featured");
+    return response.data;
+  },
+
+  /**
    * Get calendar by ID
    */
   findById: async (calendarId: string): Promise<Calendar> => {

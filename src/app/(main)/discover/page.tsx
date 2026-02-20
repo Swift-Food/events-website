@@ -47,17 +47,15 @@ export default function DiscoverPage() {
     }
   };
 
-  // Fetch calendars
+  // Fetch featured calendars
   const fetchCalendars = async () => {
     try {
       setLoadingCalendars(true);
-      const result = await calendarsApi.findAll({
-        isPublic: true,
-        take: 10,
-      });
-      setCalendars(result.calendars ?? []);
+      const result = await calendarsApi.findFeatured();
+      console.log("Featured calendars:", result?.length, result?.map((c: CalendarType) => c.name));
+      setCalendars(result ?? []);
     } catch (err) {
-      console.error("Failed to fetch calendars:", err);
+      console.error("Failed to fetch featured calendars:", err);
     } finally {
       setLoadingCalendars(false);
     }
