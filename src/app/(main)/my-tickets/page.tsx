@@ -23,12 +23,13 @@ import {
   Loader2,
   Sparkles,
   Search,
-  History,
+  Filter,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 
-type FilterType = "all" | "active" | "pending" | "cancelled" | "checked_in" | "past";
+type TabType = "upcoming" | "all";
+type SubFilterType = "all" | "past" | "cancelled";
 
 function MyTicketsContent() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -45,7 +46,8 @@ function MyTicketsContent() {
 
   const [tickets, setTickets] = useState<GuestTicketWithEventResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterType>("active");
+  const [activeTab, setActiveTab] = useState<TabType>("upcoming");
+  const [subFilter, setSubFilter] = useState<SubFilterType>("all");
   const [refundingTicketId, setRefundingTicketId] = useState<string | null>(null);
   const [cancellingTicketId, setCancellingTicketId] = useState<string | null>(null);
   const [leavingWaitlistTicketId, setLeavingWaitlistTicketId] = useState<string | null>(null);
@@ -239,15 +241,27 @@ function MyTicketsContent() {
     setSuccessTicketDetails(null);
   };
 
-  // Calculate counts for each filter
-  const filterCounts = useMemo(() => {
+  const isPendingStatus = (status: GuestTicketStatus) =>
+    status === GuestTicketStatus.PENDING_APPROVAL ||
+    status === GuestTicketStatus.PENDING_PAYMENT ||
+    status === GuestTicketStatus.WAITLISTED;
+
+  const isUpcomingStatus = (status: GuestTicketStatus) =>
+    status === GuestTicketStatus.ACTIVE ||
+    status === GuestTicketStatus.CHECKED_IN;
+
+  const isRestStatus = (status: GuestTicketStatus) =>
+    status === GuestTicketStatus.EXPIRED ||
+    status === GuestTicketStatus.CANCELLED ||
+    status === GuestTicketStatus.REFUNDED;
+
+  // Calculate counts for each tab
+  const tabCounts = useMemo(() => {
     const counts = {
-      all: tickets.length,
-      active: 0,
-      pending: 0,
-      cancelled: 0,
-      checked_in: 0,
+      upcoming: 0,
+      all: 0,
       past: 0,
+      cancelled: 0,
     };
 
     tickets.forEach((ticket) => {
@@ -257,30 +271,55 @@ function MyTicketsContent() {
         ticket.eventEndDateTime,
       );
 
-      if (effective === GuestTicketStatus.ACTIVE) {
-        counts.active++;
-      } else if (
-        effective === GuestTicketStatus.PENDING_APPROVAL ||
-        effective === GuestTicketStatus.PENDING_PAYMENT ||
-        effective === GuestTicketStatus.WAITLISTED
-      ) {
-        counts.pending++;
-      } else if (
-        effective === GuestTicketStatus.CANCELLED ||
-        effective === GuestTicketStatus.REFUNDED
-      ) {
-        counts.cancelled++;
-      } else if (effective === GuestTicketStatus.CHECKED_IN) {
-        counts.checked_in++;
-      } else if (effective === GuestTicketStatus.EXPIRED) {
-        counts.past++;
+      if (isUpcomingStatus(effective) || isPendingStatus(effective)) {
+        counts.upcoming++;
+      }
+
+      if (isRestStatus(effective)) {
+        counts.all++;
+        if (
+          effective === GuestTicketStatus.CANCELLED ||
+          effective === GuestTicketStatus.REFUNDED
+        ) {
+          counts.cancelled++;
+        } else if (effective === GuestTicketStatus.EXPIRED) {
+          counts.past++;
+        }
       }
     });
 
     return counts;
   }, [tickets]);
 
+  // For the upcoming tab, split into pending and active sections
+  const { pendingTickets, activeTickets } = useMemo(() => {
+    const pending: GuestTicketWithEventResponseDto[] = [];
+    const active: GuestTicketWithEventResponseDto[] = [];
+
+    tickets.forEach((ticket) => {
+      const effective = getEffectiveTicketStatus(
+        ticket.status,
+        ticket.eventStartDateTime,
+        ticket.eventEndDateTime,
+      );
+      if (isPendingStatus(effective)) pending.push(ticket);
+      else if (isUpcomingStatus(effective)) active.push(ticket);
+    });
+
+    const sortAsc = (a: GuestTicketWithEventResponseDto, b: GuestTicketWithEventResponseDto) =>
+      new Date(a.eventStartDateTime).getTime() - new Date(b.eventStartDateTime).getTime();
+
+    return {
+      pendingTickets: pending.sort(sortAsc),
+      activeTickets: active.sort(sortAsc),
+    };
+  }, [tickets]);
+
   const filteredTickets = useMemo(() => {
+    if (activeTab === "upcoming") {
+      return [...pendingTickets, ...activeTickets];
+    }
+
     return tickets
       .filter((ticket) => {
         const effective = getEffectiveTicketStatus(
@@ -289,51 +328,37 @@ function MyTicketsContent() {
           ticket.eventEndDateTime,
         );
 
-        switch (filter) {
-          case "active":
-            return effective === GuestTicketStatus.ACTIVE;
-          case "pending":
-            return (
-              effective === GuestTicketStatus.PENDING_APPROVAL ||
-              effective === GuestTicketStatus.PENDING_PAYMENT ||
-              effective === GuestTicketStatus.WAITLISTED
-            );
-          case "cancelled":
-            return (
-              effective === GuestTicketStatus.CANCELLED ||
-              effective === GuestTicketStatus.REFUNDED
-            );
-          case "checked_in":
-            return effective === GuestTicketStatus.CHECKED_IN;
-          case "past":
-            return effective === GuestTicketStatus.EXPIRED;
-          default:
-            return true;
-        }
+        if (!isRestStatus(effective)) return false;
+        if (subFilter === "past") return effective === GuestTicketStatus.EXPIRED;
+        if (subFilter === "cancelled")
+          return (
+            effective === GuestTicketStatus.CANCELLED ||
+            effective === GuestTicketStatus.REFUNDED
+          );
+        return true;
       })
       .sort((a, b) => {
         const dateA = new Date(a.eventStartDateTime).getTime();
         const dateB = new Date(b.eventStartDateTime).getTime();
-        if (filter === "active" || filter === "pending") {
-          return dateA - dateB;
-        }
         return dateB - dateA;
       });
-  }, [tickets, filter]);
+  }, [tickets, activeTab, subFilter, pendingTickets, activeTickets]);
 
   const formatCount = (count: number) => (count > 99 ? "99+" : count);
 
-  const filters: { id: FilterType; label: string; icon: React.ReactNode }[] = [
+  const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
     {
-      id: "active",
-      label: "Active",
+      id: "upcoming",
+      label: "Upcoming",
       icon: <CheckCircle2 className="h-4 w-4" />,
     },
-    { id: "pending", label: "Pending", icon: <Clock className="h-4 w-4" /> },
-    { id: "checked_in", label: "Checked In", icon: <CheckCircle2 className="h-4 w-4" /> },
-    { id: "past", label: "Past", icon: <History className="h-4 w-4" /> },
-    { id: "cancelled", label: "Cancelled", icon: <Ticket className="h-4 w-4" /> },
     { id: "all", label: "All", icon: <Ticket className="h-4 w-4" /> },
+  ];
+
+  const subFilters: { id: SubFilterType; label: string }[] = [
+    { id: "all", label: "All" },
+    { id: "past", label: "Past" },
+    { id: "cancelled", label: "Cancelled" },
   ];
 
   // Check if user has no tickets at all
@@ -393,7 +418,7 @@ function MyTicketsContent() {
               <div className="tickets-stagger-2">
                 {/* Skeleton for filters */}
                 <div className="mb-6 flex flex-wrap gap-2">
-                  {[...Array(6)].map((_, i) => (
+                  {[...Array(2)].map((_, i) => (
                     <div
                       key={i}
                       className="h-10 w-24 rounded-full skeleton-shimmer"
@@ -412,53 +437,77 @@ function MyTicketsContent() {
               </div>
             ) : (
               <>
-                {/* Filters with counts - horizontal scroll on mobile */}
-                <div className="mb-6 flex gap-2 overflow-x-auto pb-2 tickets-stagger-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                  {filters.map((f) => (
+                {/* Tabs */}
+                <div className="mb-4 flex gap-2 overflow-x-auto pb-2 tickets-stagger-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  {tabs.map((t) => (
                     <button
-                      key={f.id}
-                      onClick={() => setFilter(f.id)}
+                      key={t.id}
+                      onClick={() => {
+                        setActiveTab(t.id);
+                        if (t.id !== "all") setSubFilter("all");
+                      }}
                       className={`flex-shrink-0 flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95 ${
-                        filter === f.id
+                        activeTab === t.id
                           ? "bg-primary text-white shadow-lg shadow-primary/25 border border-primary/50"
                           : "bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground border border-white/5 hover:border-white/10"
                       }`}
                     >
-                      {f.icon}
-                      {f.label}
+                      {t.icon}
+                      {t.label}
                       <span
                         className={`rounded-full px-1.5 py-0.5 text-xs ${
-                          filter === f.id
+                          activeTab === t.id
                             ? "bg-white/20 text-white"
                             : "bg-white/10 text-muted-foreground"
                         }`}
                       >
-                        {formatCount(filterCounts[f.id])}
+                        {formatCount(tabCounts[t.id])}
                       </span>
                     </button>
                   ))}
                 </div>
 
-                {/* Empty Filter State */}
+                {/* Sub-filters for "All" tab */}
+                {activeTab === "all" && (
+                  <div className="mb-6 flex gap-1.5 tickets-stagger-2">
+                    {subFilters.map((sf) => (
+                      <button
+                        key={sf.id}
+                        onClick={() => setSubFilter(sf.id)}
+                        className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all duration-200 active:scale-95 ${
+                          subFilter === sf.id
+                            ? "bg-white/15 text-foreground border border-white/20"
+                            : "text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent"
+                        }`}
+                      >
+                        {sf.id !== "all" && <Filter className="h-3 w-3" />}
+                        {sf.label}
+                        {sf.id !== "all" && (
+                          <span className="text-[10px] opacity-70">
+                            {formatCount(tabCounts[sf.id])}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Empty State */}
                 {filteredTickets.length === 0 ? (
-                  <div key={filter} className="tickets-content-animate">
+                  <div key={`${activeTab}-${subFilter}`} className="tickets-content-animate">
                     <div className="rounded-xl border border-white/10 bg-card-background/50 p-10 text-center">
                       <Ticket className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
                       <h3 className="mb-2 text-lg font-semibold text-foreground">
-                        No {filter === "all" ? "" : filter.replace("_", " ")} tickets
+                        No {activeTab === "upcoming" ? "upcoming" : subFilter === "all" ? "past" : subFilter} tickets
                       </h3>
                       <p className="text-sm text-muted-foreground mb-6">
-                        {filter === "active"
-                          ? "You don't have any active tickets right now"
-                          : filter === "pending"
-                          ? "No tickets awaiting action"
-                          : filter === "cancelled"
-                          ? "No cancelled or refunded tickets"
-                          : filter === "checked_in"
-                          ? "You haven't checked into any events yet"
-                          : filter === "past"
+                        {activeTab === "upcoming"
+                          ? "You don't have any upcoming tickets right now"
+                          : subFilter === "past"
                           ? "No past event tickets"
-                          : "No tickets match this filter"}
+                          : subFilter === "cancelled"
+                          ? "No cancelled or refunded tickets"
+                          : "No past or cancelled tickets"}
                       </p>
                       <Link
                         href="/discover"
@@ -469,9 +518,87 @@ function MyTicketsContent() {
                       </Link>
                     </div>
                   </div>
+                ) : activeTab === "upcoming" ? (
+                  /* Upcoming tab: sectioned layout */
+                  <div key="upcoming" className="space-y-6 tickets-content-animate">
+                    {/* Pending section */}
+                    {pendingTickets.length > 0 && (
+                      <div>
+                        <div className="mb-3 flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-yellow-500" />
+                          <h3 className="text-sm font-medium text-muted-foreground">
+                            Pending
+                          </h3>
+                          <span className="rounded-full bg-yellow-500/10 px-2 py-0.5 text-xs font-medium text-yellow-500">
+                            {pendingTickets.length}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {pendingTickets.map((ticket, index) => (
+                            <div
+                              key={ticket.id}
+                              className="ticket-card-animate"
+                              style={{ animationDelay: `${index * 50}ms` }}
+                            >
+                              <TicketCard
+                                ticket={ticket}
+                                onRefund={handleRefund}
+                                isRefunding={refundingTicketId === ticket.id}
+                                onCompletePayment={handleCompletePayment}
+                                isProcessingPayment={processingPaymentTicketId === ticket.id}
+                                onCancel={handleCancel}
+                                isCancelling={cancellingTicketId === ticket.id}
+                                onLeaveWaitlist={handleLeaveWaitlist}
+                                isLeavingWaitlist={leavingWaitlistTicketId === ticket.id}
+                                autoShowQR={ticket.id === highlightTicketId}
+                                onQRClose={ticket.id === highlightTicketId ? clearTicketIdParam : undefined}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Active section */}
+                    {activeTickets.length > 0 && (
+                      <div>
+                        {pendingTickets.length > 0 && (
+                          <div className="mb-3 flex items-center gap-2">
+                            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                            <h3 className="text-sm font-medium text-muted-foreground">
+                              Confirmed
+                            </h3>
+                          </div>
+                        )}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {activeTickets.map((ticket, index) => (
+                            <div
+                              key={ticket.id}
+                              className="ticket-card-animate"
+                              style={{ animationDelay: `${(pendingTickets.length + index) * 50}ms` }}
+                            >
+                              <TicketCard
+                                ticket={ticket}
+                                onRefund={handleRefund}
+                                isRefunding={refundingTicketId === ticket.id}
+                                onCompletePayment={handleCompletePayment}
+                                isProcessingPayment={processingPaymentTicketId === ticket.id}
+                                onCancel={handleCancel}
+                                isCancelling={cancellingTicketId === ticket.id}
+                                onLeaveWaitlist={handleLeaveWaitlist}
+                                isLeavingWaitlist={leavingWaitlistTicketId === ticket.id}
+                                autoShowQR={ticket.id === highlightTicketId}
+                                onQRClose={ticket.id === highlightTicketId ? clearTicketIdParam : undefined}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ) : (
-                  /* Tickets Grid */
-                  <div key={filter} className="grid grid-cols-1 sm:grid-cols-2 gap-4 tickets-content-animate">
+                  /* All tab: flat grid */
+                  <div key={`all-${subFilter}`} className="grid grid-cols-1 sm:grid-cols-2 gap-4 tickets-content-animate">
                     {filteredTickets.map((ticket, index) => (
                       <div
                         key={ticket.id}
