@@ -52,7 +52,6 @@ export default function DiscoverPage() {
     try {
       setLoadingCalendars(true);
       const result = await calendarsApi.findFeatured();
-      console.log("Featured calendars:", result?.length, result?.map((c: CalendarType) => c.name));
       setCalendars(result ?? []);
     } catch (err) {
       console.error("Failed to fetch featured calendars:", err);
