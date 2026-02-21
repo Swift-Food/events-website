@@ -49,12 +49,14 @@ export default function BrowseByLocation() {
               <Link
                 key={location.id}
                 href={`/locations/${location.id}`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-foreground transition-colors hover:bg-white/10 hover:border-white/20 flex-shrink-0"
+                className="inline-flex flex-col items-start gap-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground transition-colors hover:bg-white/10 hover:border-white/20 flex-shrink-0"
               >
-                <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                <span>{location.name}</span>
-                <span className="text-muted-foreground text-xs">
-                  {location.eventCount}
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>{location.name}</span>
+                </div>
+                <span className="text-muted-foreground text-xs pl-[calc(0.875rem+0.5rem)]">
+                  {location.eventCount} {location.eventCount === 1 ? "Event" : "Events"}
                 </span>
               </Link>
             ))}
