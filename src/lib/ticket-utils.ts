@@ -10,8 +10,8 @@ import { GuestTicketStatus } from "@/types/guest-ticket";
  */
 export function getEffectiveTicketStatus(
   status: GuestTicketStatus,
-  eventStartDateTime: string,
-  eventEndDateTime: string,
+  eventStartDateTime: string | Date,
+  eventEndDateTime: string | Date,
 ): GuestTicketStatus {
   const now = new Date();
   const hasStarted = new Date(eventStartDateTime) <= now;
