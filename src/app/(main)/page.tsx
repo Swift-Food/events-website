@@ -58,8 +58,8 @@ export default function LandingPage() {
  }, []);
 
  return (
-  <div className="relative h-screen overflow-hidden">
-   <div className="gradient-bg fixed inset-0 z-[1]" />
+  <div className="relative min-h-screen">
+   <div className="gradient-bg fixed inset-0 -z-[1]" />
 
    {/* Grid overlay */}
    {/* <div className="fixed inset-0 bg-grid-landing pointer-events-none z-0" /> */}
