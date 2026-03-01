@@ -408,24 +408,24 @@ body[data-page="landing"] .layout-bg { display: none; }
 @property --gy1 { syntax: '<percentage>'; initial-value: 25%; inherits: false; }
 @property --gx2 { syntax: '<percentage>'; initial-value: 75%; inherits: false; }
 @property --gy2 { syntax: '<percentage>'; initial-value: 65%; inherits: false; }
-@property --gx3 { syntax: '<percentage>'; initial-value: 50%; inherits: false; }
-@property --gy3 { syntax: '<percentage>'; initial-value: 80%; inherits: false; }
 
 .gradient-bg {
   background:
     radial-gradient(ellipse 120% 100% at var(--gx1) var(--gy1), #8b78cc 0%, #a899e0 40%, transparent 70%),
     radial-gradient(ellipse 70% 60% at var(--gx2) var(--gy2), #b8c8f0 0%, transparent 60%),
-    radial-gradient(ellipse 55% 45% at var(--gx3) var(--gy3), #e8c898 0%, transparent 55%),
     linear-gradient(150deg, #b8aee8 0%, #c8c0f0 40%, #d4daf8 100%);
-  animation: fluid-gradient 10s ease-in-out infinite alternate;
+  animation: fluid-gradient 40s ease-in-out infinite;
 }
 
 @keyframes fluid-gradient {
-  0%   { --gx1: 25%; --gy1: 45%; --gx2: 80%; --gy2: 20%; --gx3: 8%;  --gy3: 85%; }
-  25%  { --gx1: 35%; --gy1: 55%; --gx2: 70%; --gy2: 30%; --gx3: 18%; --gy3: 78%; }
-  50%  { --gx1: 20%; --gy1: 35%; --gx2: 85%; --gy2: 45%; --gx3: 12%; --gy3: 90%; }
-  75%  { --gx1: 40%; --gy1: 60%; --gx2: 68%; --gy2: 22%; --gx3: 5%;  --gy3: 82%; }
-  100% { --gx1: 28%; --gy1: 48%; --gx2: 75%; --gy2: 18%; --gx3: 10%; --gy3: 87%; }
+  0%   { --gx1: 20%; --gy1: 30%; --gx2: 85%; --gy2: 15%; }
+  15%  { --gx1: 55%; --gy1: 70%; --gx2: 30%; --gy2: 60%; }
+  30%  { --gx1: 75%; --gy1: 25%; --gx2: 10%; --gy2: 80%; }
+  45%  { --gx1: 30%; --gy1: 80%; --gx2: 70%; --gy2: 10%; }
+  60%  { --gx1: 65%; --gy1: 50%; --gx2: 15%; --gy2: 40%; }
+  75%  { --gx1: 10%; --gy1: 60%; --gx2: 80%; --gy2: 75%; }
+  90%  { --gx1: 50%; --gy1: 15%; --gx2: 40%; --gy2: 30%; }
+  100% { --gx1: 20%; --gy1: 30%; --gx2: 85%; --gy2: 15%; }
 }
 
 @keyframes reveal-up {
