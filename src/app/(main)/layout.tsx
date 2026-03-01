@@ -19,7 +19,7 @@ export default function MainLayout({
      <SearchModalProvider>
       <div className="relative h-dvh overflow-hidden">
        <div
-        className="fixed inset-0 -z-10"
+        className="layout-bg fixed inset-0 -z-10"
         style={{
          background:
           "linear-gradient(to bottom, #41296e 0%, #000000 15%)",

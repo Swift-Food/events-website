@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
-import { ShaderGradient, ShaderGradientCanvas } from "@shadergradient/react";
 
 // Animated word component with letter-by-letter reveal
 const AnimatedWord: React.FC<{ text: string; delayOffset: number }> = ({
@@ -14,7 +13,7 @@ const AnimatedWord: React.FC<{ text: string; delayOffset: number }> = ({
    {text.split("").map((char, i) => (
     <span
      key={i}
-     className="inline-block cursor-default text-white will-change-[transform,opacity]"
+     className="inline-block cursor-default text-white"
      style={{
       opacity: 0,
       animationName: "reveal-up-color",
@@ -47,75 +46,20 @@ const AnimatedWord: React.FC<{ text: string; delayOffset: number }> = ({
 };
 
 export default function LandingPage() {
- const [mounted, setMounted] = useState(false);
- const [shaderReady, setShaderReady] = useState(false);
-
  useEffect(() => {
-  setMounted(true);
-
-  // Prevent elastic/bounce overscroll on the home page
   document.documentElement.style.overscrollBehavior = "none";
   document.body.style.overscrollBehavior = "none";
-
-  // Give the shader canvas a moment to render its first frame
-  const timer = setTimeout(() => setShaderReady(true), 100);
-
+  document.body.dataset.page = "landing";
   return () => {
-   clearTimeout(timer);
    document.documentElement.style.overscrollBehavior = "";
    document.body.style.overscrollBehavior = "";
+   delete document.body.dataset.page;
   };
  }, []);
 
  return (
   <div className="relative h-screen overflow-hidden">
-   {/* Static gradient placeholder (matches shader colors, visible immediately) */}
-   <div
-    className="fixed inset-0 z-[-2]"
-    style={{
-     background: "linear-gradient(135deg, #b8e7f5 0%, #d9ccff 50%, #faf9f6 100%)",
-    }}
-   />
-   {/* Animated gradient background — fades in once shader is ready */}
-   {mounted && (
-   <div
-    className="fixed inset-0 z-[-1] transition-opacity duration-700"
-    style={{ opacity: shaderReady ? 1 : 0 }}
-   >
-    <ShaderGradientCanvas>
-     <ShaderGradient
-      animate="on"
-      brightness={1.2}
-      cAzimuthAngle={180}
-      cDistance={2.9}
-      cPolarAngle={120}
-      cameraZoom={1}
-      color1="#b8e7f5"
-      color2="#d9ccff"
-      color3="#faf9f6"
-      envPreset="city"
-      grain="off"
-      lightType="3d"
-      positionX={0}
-      positionY={1.8}
-      positionZ={0}
-      reflection={0.1}
-      rotationX={0}
-      rotationY={0}
-      rotationZ={-90}
-      type="waterPlane"
-      uAmplitude={0}
-      uDensity={1}
-      uFrequency={5.5}
-      uSpeed={0.1}
-      uStrength={3}
-      uTime={0.2}
-      wireframe={false}
-     />
-    </ShaderGradientCanvas>
-   </div>
-   )}
-   <div className="scanline" />
+   <div className="gradient-bg fixed inset-0 z-[1]" />
 
    {/* Grid overlay */}
    {/* <div className="fixed inset-0 bg-grid-landing pointer-events-none z-0" /> */}
