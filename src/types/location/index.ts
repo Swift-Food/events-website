@@ -4,6 +4,7 @@ export interface EventLocationResponseDto {
   id: string;
   name: string;
   image: string | null;
+  bannerImage: string | null;
   minLat: number;
   maxLat: number;
   minLng: number;

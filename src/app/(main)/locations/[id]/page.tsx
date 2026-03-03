@@ -4,9 +4,9 @@ import { useState, useEffect, useRef, useCallback, useMemo, use } from "react";
 import { locationsApi } from "@/services/locations";
 import { EventLocationResponseDto } from "@/types/location";
 import { EventResponseDto } from "@/types/event";
-import { Search, X, Calendar, MapPin, ArrowLeft } from "lucide-react";
+import { Search, X, Calendar } from "lucide-react";
 import EventsTimeline from "@/components/EventsTimeline";
-import Link from "next/link";
+import Image from "next/image";
 
 export default function LocationEventsPage({
   params,
@@ -110,35 +110,60 @@ export default function LocationEventsPage({
 
   return (
     <div className="min-h-screen">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
-        {/* Header */}
-        <div className="mb-6">
-          <Link
-            href="/discover"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Discover
-          </Link>
-          {location ? (
-            <>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-primary" />
-                <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground">
+      {/* Banner Section - full width until lg, then constrained */}
+      <div className="mx-auto lg:max-w-5xl lg:px-6 mb-6">
+        <div className="relative aspect-[2/1] w-full overflow-hidden lg:rounded-2xl bg-card-background">
+          {/* Background - Banner Image */}
+          {location?.bannerImage && (
+            <Image
+              src={location.bannerImage}
+              alt={`${location.name} banner`}
+              fill
+              className="object-cover"
+              priority
+            />
+          )}
+          {/* Left blur overlay - fading gradient */}
+          <div className="absolute inset-0 backdrop-blur-xl [mask-image:linear-gradient(to_right,black_20%,transparent_60%)]" />
+          <div className="absolute inset-0 bg-black/40 [mask-image:linear-gradient(to_right,black_10%,transparent_50%)]" />
+          {/* Text content */}
+          <div className="relative z-10 flex flex-col justify-end h-full px-5 sm:px-8 pb-6 sm:pb-10 max-w-[60%]">
+            {location ? (
+              <>
+                {/* Location Image */}
+                {location.image && (
+                  <div className="relative h-14 w-14 sm:h-20 sm:w-20 rounded-lg overflow-hidden border-2 border-white/20 mb-3">
+                    <Image
+                      src={location.image}
+                      alt={location.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+                <p className="text-xs sm:text-sm text-white/60 mb-0.5">
+                  What&apos;s Happening in
+                </p>
+                <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-white">
                   {location.name}
                 </h1>
-              </div>
-              <p className="mt-2 text-sm sm:text-md text-muted-foreground">
-                {location.eventCount} upcoming event{location.eventCount !== 1 ? "s" : ""}
-              </p>
-            </>
-          ) : loading ? (
-            <>
-              <div className="h-8 w-48 bg-card-background rounded animate-pulse" />
-              <div className="mt-2 h-5 w-32 bg-card-background rounded animate-pulse" />
-            </>
-          ) : null}
+                <p className="mt-2 text-xs sm:text-sm text-white/50">
+                  {location.eventCount} upcoming event{location.eventCount !== 1 ? "s" : ""}
+                </p>
+              </>
+            ) : loading ? (
+              <>
+                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white/10 animate-pulse mb-3" />
+                <div className="h-4 w-32 bg-white/10 rounded animate-pulse mb-2" />
+                <div className="h-8 w-48 bg-white/10 rounded animate-pulse" />
+                <div className="mt-3 h-4 w-24 bg-white/10 rounded animate-pulse" />
+              </>
+            ) : null}
+          </div>
         </div>
+      </div>
+
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 pb-8">
 
         {/* Sticky Search Bar */}
         <div className="sticky top-0 z-40 -mx-4 px-4 sm:-mx-6 sm:px-6 mb-4">
