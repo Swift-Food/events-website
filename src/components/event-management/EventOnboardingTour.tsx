@@ -15,7 +15,6 @@ const TOUR_STEPS: TourStep[] = [
     target: "edit-button",
     title: "Edit Your Event",
     description: "Customize your event details — name, date, location, tickets, and more.",
-    tab: "overview",
   },
   {
     target: "tab-guests",
@@ -49,6 +48,13 @@ export function EventOnboardingTour({ setTab }: EventOnboardingTourProps) {
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState<"top" | "bottom">("bottom");
   const rafRef = useRef<number>(0);
+  const setTabRef = useRef(setTab);
+  const lastTabRef = useRef<string | null>(null);
+
+  // Keep ref in sync without triggering re-renders
+  useEffect(() => {
+    setTabRef.current = setTab;
+  }, [setTab]);
 
   useEffect(() => {
     const seen = localStorage.getItem(STORAGE_KEY);
@@ -63,6 +69,10 @@ export function EventOnboardingTour({ setTab }: EventOnboardingTourProps) {
     const el = document.querySelector(`[data-tour="${step.target}"]`);
     if (!el) return;
 
+    // Scroll the element into view (especially for horizontally scrollable tab bars)
+    el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+
+    // Re-measure after scroll settles
     const rect = el.getBoundingClientRect();
     setTargetRect(rect);
 
@@ -74,18 +84,26 @@ export function EventOnboardingTour({ setTab }: EventOnboardingTourProps) {
     if (!isActive) return;
 
     const step = TOUR_STEPS[currentStep];
-    if (step.tab) {
-      setTab(step.tab);
+    if (step.tab && step.tab !== lastTabRef.current) {
+      lastTabRef.current = step.tab;
+      setTabRef.current(step.tab);
     }
 
+    // Initial measure after tab switch
     rafRef.current = requestAnimationFrame(() => {
       rafRef.current = requestAnimationFrame(() => {
         measureTarget();
       });
     });
 
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [isActive, currentStep, setTab, measureTarget]);
+    // Re-measure after smooth scroll settles
+    const scrollTimer = setTimeout(() => measureTarget(), 350);
+
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      clearTimeout(scrollTimer);
+    };
+  }, [isActive, currentStep, measureTarget]);
 
   useEffect(() => {
     if (!isActive) return;
@@ -109,7 +127,8 @@ export function EventOnboardingTour({ setTab }: EventOnboardingTourProps) {
   const handleComplete = () => {
     localStorage.setItem(STORAGE_KEY, "true");
     setIsActive(false);
-    setTab("overview");
+    lastTabRef.current = "overview";
+    setTabRef.current("overview");
   };
 
   const handleSkip = () => {
@@ -120,12 +139,13 @@ export function EventOnboardingTour({ setTab }: EventOnboardingTourProps) {
     const handleRestart = () => {
       localStorage.removeItem(STORAGE_KEY);
       setCurrentStep(0);
-      setTab("overview");
+      lastTabRef.current = null;
+      setTabRef.current("overview");
       setTimeout(() => setIsActive(true), 300);
     };
     window.addEventListener("restart-onboarding-tour", handleRestart);
     return () => window.removeEventListener("restart-onboarding-tour", handleRestart);
-  }, [setTab]);
+  }, []);
 
   if (!isActive || !targetRect) return null;
 
@@ -137,7 +157,7 @@ export function EventOnboardingTour({ setTab }: EventOnboardingTourProps) {
     width: targetRect.width + padding * 2,
     height: targetRect.height + padding * 2,
     borderRadius: "16px",
-    boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.7)",
+    boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.45), 0 0 0 3px rgba(59, 130, 246, 0.8), 0 0 15px 2px rgba(59, 130, 246, 0.4)",
     zIndex: 9998,
     pointerEvents: "none" as const,
   };
