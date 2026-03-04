@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Calendar, Clock, MapPin, Ticket, Video, Lock } from "lucide-react";
 import { EventResponseDto } from "@/types/event";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import {
   isVirtualEvent,
   isHybridEvent,
@@ -207,6 +208,10 @@ export default function HorizontalEventCard({
             <span className="max-w-0 overflow-hidden text-[10px] font-semibold text-white transition-all duration-200 group-hover/virtual:max-w-[50px] group-hover/virtual:ml-0.5">Online</span>
           </div>
         )} */}
+        {/* Verified Badge */}
+        {event.isVerified && (
+          <VerifiedBadge size="sm" />
+        )}
         {/* Ongoing Badge */}
         {isOngoing && (
           <div className="flex items-center gap-1 rounded-full bg-green-500/90 px-1.5 py-0.5 backdrop-blur-sm">

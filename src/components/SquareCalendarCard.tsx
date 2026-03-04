@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/types/calendar";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 interface SquareCalendarCardProps {
   calendar: Calendar;
@@ -31,6 +32,13 @@ export default function SquareCalendarCard({ calendar, size }: SquareCalendarCar
           style={{ backgroundColor: calendar.calendarColor || "#6366f1" }}
         >
           <CalendarIcon className="h-12 w-12 text-white/30" />
+        </div>
+      )}
+
+      {/* Verified Badge */}
+      {calendar.isVerified && (
+        <div className="absolute right-2 top-2 z-10 flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 shadow-sm backdrop-blur-sm">
+          <VerifiedBadge size="sm" showLabel />
         </div>
       )}
 

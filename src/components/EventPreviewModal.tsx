@@ -36,6 +36,7 @@ import PaymentModal, { PaymentSuccessModal } from "@/components/payments/Payment
 import ExternalLinkConfirmModal from "@/components/ExternalLinkConfirmModal";
 import RegistrationConfirmModal from "@/components/RegistrationConfirmModal";
 import SaveToCalendarModal from "@/components/SaveToCalendarModal";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { getTicketStatusText, getTicketStatusBadgeClasses, isTicketUsable } from "@/utils/ticket-status";
 import {
   generateGoogleCalendarUrl,
@@ -504,8 +505,9 @@ export default function EventPreviewModal({
               </div>
 
               {/* Event Title */}
-              <h1 className="mb-3 text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+              <h1 className="mb-3 text-2xl sm:text-3xl font-bold tracking-tight text-foreground inline-flex items-center gap-2">
                 {event.name}
+                {event.isVerified && <VerifiedBadge size="md" />}
               </h1>
 
               {/* Categories & Subcategories */}

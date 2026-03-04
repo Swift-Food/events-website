@@ -11,5 +11,6 @@ export interface EventOwnerResponseDto {
   firstName?: string;
   lastName?: string;
   organizationName: string | null;
+  isVerified?: boolean;
   user: User;
 }

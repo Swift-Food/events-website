@@ -31,6 +31,7 @@ import AddEventsToCalendarModal from "@/components/AddEventsToCalendarModal";
 import { HighlightsBar, AddHighlightModal } from "@/components/highlights";
 import EventCalendarWidget from "@/components/EventCalendarWidget";
 import { getDefaultProfilePic } from "@/utils/defaultProfilePic";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 interface CalendarClientProps {
  initialCalendar: Calendar;
@@ -532,8 +533,9 @@ export default function CalendarClient({
 
     {/* Calendar Name and Description */}
     <div className="mb-6 mt-4 calendar-stagger-3">
-     <h1 className="mb-2 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+     <h1 className="mb-2 text-3xl md:text-5xl font-bold tracking-tight text-foreground inline-flex items-center gap-2">
       {calendar.name}
+      {calendar.isVerified && <VerifiedBadge size="md" />}
      </h1>
 
      {calendar.description && (

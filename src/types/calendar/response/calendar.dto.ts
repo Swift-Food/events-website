@@ -28,6 +28,7 @@ export interface EventUser {
   firstName?: string;
   lastName?: string;
   organizationName?: string;
+  isVerified?: boolean;
   bio?: string;
   website?: string;
   user: {
@@ -53,6 +54,7 @@ export interface Calendar {
   addressId?: string;
   subscriberCount: number;
   showSubscriberCount: boolean;
+  isVerified?: boolean;
   upcomingEventCount?: number;
   autoDeletePastEventsAfterDays?: number | null; // null = never, 0 = immediately, 7 = 7 days after
   createdAt: string; // ISO date

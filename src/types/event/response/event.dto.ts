@@ -43,6 +43,7 @@ export interface EventResponseDto {
   acceptingNewTickets: boolean;
   stopAcceptingOnStart: boolean;
   hideFullAddress: boolean;
+  isVerified?: boolean;
   registrationNotifyFrequency?: RegistrationNotifyFrequency;
   createdAt: string | Date;
   updatedAt: string | Date;

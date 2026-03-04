@@ -67,6 +67,7 @@ import ExternalLinkConfirmModal from "@/components/ExternalLinkConfirmModal";
 import RegistrationConfirmModal from "@/components/RegistrationConfirmModal";
 import GroupPurchaseModal from "@/components/GroupPurchaseModal";
 import SaveToCalendarModal from "@/components/SaveToCalendarModal";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { usePathname } from "next/navigation";
 import { useEventTheme } from "@/context/EventThemeContext";
 import { getThemeCSSVariables } from "@/lib/theme-presets";
@@ -855,8 +856,9 @@ export default function EventClient({
 
         {/* Event Title & Categories - Show on mobile & tablet, hide on desktop */}
         <div className="block sm:hidden">
-         <h1 className="mb-4 text-2xl font-bold tracking-tight text-foreground">
+         <h1 className="mb-4 text-2xl font-bold tracking-tight text-foreground inline-flex items-center gap-2">
           {event.name}
+          {event.isVerified && <VerifiedBadge size="md" />}
          </h1>
 
          {/* Categories & Subcategories */}
@@ -1328,8 +1330,9 @@ export default function EventClient({
       <section className="flex-1 space-y-6 event-page-stagger-3">
        {/* Event Title and Categories - Only show on desktop */}
        <div className="hidden sm:block">
-        <h1 className="mb-4 text-2xl md:text-3xl lg:text-5xl font-bold tracking-tight text-foreground">
+        <h1 className="mb-4 text-2xl md:text-3xl lg:text-5xl font-bold tracking-tight text-foreground inline-flex items-center gap-2">
          {event.name}
+         {event.isVerified && <VerifiedBadge size="md" />}
         </h1>
 
         {/* Categories & Subcategories */}
