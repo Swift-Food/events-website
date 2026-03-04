@@ -28,8 +28,8 @@ export default function VerifiedBadge({
   showLabel = false,
   className = "",
 }: VerifiedBadgeProps) {
-  const iconSize = size === "sm" ? "h-4 w-4" : "h-6 w-6";
-  const labelSize = size === "sm" ? "text-xs" : "text-sm";
+  const iconSize = size === "sm" ? "h-5 w-5" : "h-6 w-6";
+  const labelSize = size === "sm" ? "text-sm" : "text-sm";
 
   return (
     <span

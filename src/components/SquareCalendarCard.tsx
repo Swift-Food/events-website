@@ -35,13 +35,6 @@ export default function SquareCalendarCard({ calendar, size }: SquareCalendarCar
         </div>
       )}
 
-      {/* Verified Badge */}
-      {calendar.isVerified && (
-        <div className="absolute right-2 top-2 z-10 flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 shadow-sm backdrop-blur-sm">
-          <VerifiedBadge size="sm" showLabel />
-        </div>
-      )}
-
       {/* Gradient Overlay */}
       <div
         className="absolute bottom-0 left-0 right-0 h-[60%]"
@@ -52,8 +45,9 @@ export default function SquareCalendarCard({ calendar, size }: SquareCalendarCar
 
       {/* Content */}
       <div className="absolute bottom-0 left-0 right-0 p-3">
-        <h3 className="text-white text-base font-semibold line-clamp-2">
+        <h3 className="text-white text-base font-semibold line-clamp-2 inline-flex items-center gap-1">
           {calendar.name}
+          {calendar.isVerified && <VerifiedBadge size="sm" />}
         </h3>
         <p className="text-white/70 text-sm mt-0.5">
           {eventCount} event{eventCount !== 1 ? "s" : ""}
