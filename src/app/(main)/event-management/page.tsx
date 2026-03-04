@@ -141,20 +141,36 @@ function EventManagementContent() {
     }
   };
 
-  // Fetch events
+  // Fetch all events in batches
   const fetchEvents = async () => {
     if (!isAuthenticated) return;
 
     setLoadingEvents(true);
     setEventsError(null);
     try {
-      const result = await eventService.getManagedEvents();
-      setEvents(result.events ?? []);
-      console.log(result);
+      const batchSize = 50;
+      let skip = 0;
+      let allEvents: EventResponseDto[] = [];
+
+      // Fetch first batch
+      const first = await eventService.getManagedEvents({ skip, take: batchSize });
+      allEvents = first.events ?? [];
+      setEvents(allEvents);
+      setLoadingEvents(false);
+
+      // Keep fetching remaining batches
+      const total = first.total;
+      skip += batchSize;
+
+      while (skip < total) {
+        const batch = await eventService.getManagedEvents({ skip, take: batchSize });
+        allEvents = [...allEvents, ...(batch.events ?? [])];
+        setEvents(allEvents);
+        skip += batchSize;
+      }
     } catch (err) {
       console.error("Failed to fetch events:", err);
       setEventsError("Failed to load events");
-    } finally {
       setLoadingEvents(false);
     }
   };
