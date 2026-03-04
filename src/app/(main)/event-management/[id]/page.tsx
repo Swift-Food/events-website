@@ -29,6 +29,7 @@ import {
  CateringTab,
  EmbedTab,
 } from "@/components/event-management/tabs";
+import { EventOnboardingTour, TourReplayButton } from "@/components/event-management/EventOnboardingTour";
 
 type TabType = "overview" | "guests" | "registration" | "team" | "catering" | "embed";
 
@@ -369,14 +370,17 @@ export default function EventManagementPage() {
         </span>
        )}
       </div>
-      {/* Preview Button - Desktop only */}
-      <button
-       onClick={() => router.push(`/events/${eventId}`)}
-       className="hidden sm:flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-sm font-semibold text-purple-400 transition-colors hover:bg-purple-500/20"
-      >
-       <Eye className="h-4 w-4" />
-       Preview
-      </button>
+      <div className="flex items-center gap-2">
+       <TourReplayButton />
+       {/* Preview Button - Desktop only */}
+       <button
+        onClick={() => router.push(`/events/${eventId}`)}
+        className="hidden sm:flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-sm font-semibold text-purple-400 transition-colors hover:bg-purple-500/20"
+       >
+        <Eye className="h-4 w-4" />
+        Preview
+       </button>
+      </div>
      </div>
 
      {/* Tabs */}
@@ -386,6 +390,7 @@ export default function EventManagementPage() {
        return (
         <button
          key={tab.id}
+         data-tour={`tab-${tab.id}`}
          onClick={() => setTab(tab.id)}
          className={`relative shrink-0 whitespace-nowrap pb-3 text-sm font-medium transition-colors ${
           isActive
@@ -444,6 +449,8 @@ export default function EventManagementPage() {
      {currentTab === "catering" && <CateringTab eventData={eventData} />}
      {currentTab === "embed" && <EmbedTab eventData={eventData} />}
     </div>
+
+   <EventOnboardingTour setTab={(tab) => setTab(tab as TabType)} />
 
    {/* Edit Event Slide-out Modal */}
    {showEditModal && (

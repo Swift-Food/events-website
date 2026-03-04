@@ -554,6 +554,7 @@ export function OverviewTab({ eventData, onEditClick, onScanClick, onTeamClick, 
                 </button>
               )}
               <button
+                data-tour="edit-button"
                 onClick={onEditClick}
                 className="flex items-center gap-2 rounded-xl bg-white/5 px-3 sm:px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10"
               >

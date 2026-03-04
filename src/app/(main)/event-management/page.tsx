@@ -1,19 +1,20 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, useCallback, Suspense } from "react";
+import {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+  Suspense,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { eventService } from "@/services/event.service";
 import { calendarService } from "@/services/calendar.service";
 import { EventResponseDto } from "@/types/event";
 import { Calendar as CalendarType } from "@/types/calendar";
-import {
-  Calendar,
-  CalendarDays,
-  Plus,
-  Loader2,
-  Sparkles,
-} from "lucide-react";
+import { Calendar, CalendarDays, Plus, Loader2, Sparkles } from "lucide-react";
 import CalendarCard from "@/components/CalendarCard";
 import EventsTimeline from "@/components/EventsTimeline";
 import Link from "next/link";
@@ -43,7 +44,7 @@ function EventManagementContent() {
   // Primary tab from URL or default to events
   const tabParam = searchParams.get("tab");
   const [primaryTab, setPrimaryTab] = useState<PrimaryTab>(
-    tabParam === "calendars" ? "calendars" : "events"
+    tabParam === "calendars" ? "calendars" : "events",
   );
 
   // Events state
@@ -66,7 +67,10 @@ function EventManagementContent() {
   const primaryTabContainerRef = useRef<HTMLDivElement>(null);
   const eventsTabRef = useRef<HTMLButtonElement>(null);
   const calendarsTabRef = useRef<HTMLButtonElement>(null);
-  const [primaryIndicator, setPrimaryIndicator] = useState({ left: 0, width: 0 });
+  const [primaryIndicator, setPrimaryIndicator] = useState({
+    left: 0,
+    width: 0,
+  });
 
   const updateFilterIndicator = useCallback(() => {
     const activeRef = eventsFilter === "upcoming" ? upcomingTabRef : pastTabRef;
@@ -146,6 +150,7 @@ function EventManagementContent() {
     try {
       const result = await eventService.getManagedEvents();
       setEvents(result.events ?? []);
+      console.log(result);
     } catch (err) {
       console.error("Failed to fetch events:", err);
       setEventsError("Failed to load events");
@@ -166,7 +171,7 @@ function EventManagementContent() {
 
   const upcomingEvents = useMemo(
     () => events.filter((event) => new Date(event.endDateTime) >= now),
-    [events]
+    [events],
   );
 
   const pastEvents = useMemo(
@@ -175,9 +180,10 @@ function EventManagementContent() {
         .filter((event) => new Date(event.endDateTime) < now)
         .sort(
           (a, b) =>
-            new Date(b.endDateTime).getTime() - new Date(a.endDateTime).getTime()
+            new Date(b.endDateTime).getTime() -
+            new Date(a.endDateTime).getTime(),
         ),
-    [events]
+    [events],
   );
 
   const filteredEvents =
@@ -268,24 +274,25 @@ function EventManagementContent() {
           <>
             {/* Primary Tabs - Underline Style */}
             <div className="mb-8 manage-stagger-2">
-              <div ref={primaryTabContainerRef} className="relative flex gap-8 border-b border-white/10">
+              <div
+                ref={primaryTabContainerRef}
+                className="relative flex gap-8 border-b border-white/10"
+              >
                 <button
                   ref={eventsTabRef}
                   onClick={() => handlePrimaryTabChange("events")}
-                  className={`pb-3 text-sm font-medium transition-colors ${
-                    primaryTab === "events"
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
+                  className={`pb-3 text-sm font-medium transition-colors ${primaryTab === "events"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                    }`}
                 >
                   <span className="flex items-center gap-2">
                     Events
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs ${
-                        primaryTab === "events"
-                          ? "bg-primary/20 text-primary"
-                          : "bg-white/5 text-muted-foreground"
-                      }`}
+                      className={`rounded-full px-2 py-0.5 text-xs ${primaryTab === "events"
+                        ? "bg-primary/20 text-primary"
+                        : "bg-white/5 text-muted-foreground"
+                        }`}
                     >
                       {formatCount(totalEventsCount)}
                     </span>
@@ -294,20 +301,18 @@ function EventManagementContent() {
                 <button
                   ref={calendarsTabRef}
                   onClick={() => handlePrimaryTabChange("calendars")}
-                  className={`pb-3 text-sm font-medium transition-colors ${
-                    primaryTab === "calendars"
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
+                  className={`pb-3 text-sm font-medium transition-colors ${primaryTab === "calendars"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                    }`}
                 >
                   <span className="flex items-center gap-2">
                     Calendars
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs ${
-                        primaryTab === "calendars"
-                          ? "bg-primary/20 text-primary"
-                          : "bg-white/5 text-muted-foreground"
-                      }`}
+                      className={`rounded-full px-2 py-0.5 text-xs ${primaryTab === "calendars"
+                        ? "bg-primary/20 text-primary"
+                        : "bg-white/5 text-muted-foreground"
+                        }`}
                     >
                       {formatCount(calendarsCount)}
                     </span>
@@ -329,7 +334,10 @@ function EventManagementContent() {
               <div className="manage-stagger-3">
                 {/* Secondary Tabs + Create Button */}
                 <div className="mb-6 flex items-center justify-between">
-                  <div ref={eventsTabContainerRef} className="relative flex rounded-full bg-card-background p-0.5">
+                  <div
+                    ref={eventsTabContainerRef}
+                    className="relative flex rounded-full bg-card-background p-0.5"
+                  >
                     {/* Animated background indicator */}
                     <div
                       className="absolute top-0.5 bottom-0.5 rounded-full bg-primary transition-all duration-300 ease-out"
@@ -341,22 +349,20 @@ function EventManagementContent() {
                     <button
                       ref={upcomingTabRef}
                       onClick={() => setEventsFilter("upcoming")}
-                      className={`relative z-10 flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors duration-300 ${
-                        eventsFilter === "upcoming"
-                          ? "text-primary-foreground"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
+                      className={`relative z-10 flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors duration-300 ${eventsFilter === "upcoming"
+                        ? "text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                        }`}
                     >
                       Upcoming ({formatCount(upcomingEvents.length)})
                     </button>
                     <button
                       ref={pastTabRef}
                       onClick={() => setEventsFilter("past")}
-                      className={`relative z-10 flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors duration-300 ${
-                        eventsFilter === "past"
-                          ? "text-primary-foreground"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
+                      className={`relative z-10 flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors duration-300 ${eventsFilter === "past"
+                        ? "text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                        }`}
                     >
                       Past ({formatCount(pastEvents.length)})
                     </button>
@@ -396,39 +402,43 @@ function EventManagementContent() {
                 )}
 
                 {/* Events Empty State */}
-                {!loadingEvents && !eventsError && filteredEvents.length === 0 && (
-                  <div className="rounded-xl border border-white/10 bg-card-background/50 p-10 text-center">
-                    <Calendar className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                    <h3 className="mb-2 text-lg font-semibold text-foreground">
-                      {eventsFilter === "upcoming"
-                        ? "No upcoming events"
-                        : "No past events"}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-6">
-                      {eventsFilter === "upcoming"
-                        ? "Create an event to get started"
-                        : "Events you've hosted will appear here"}
-                    </p>
-                    {eventsFilter === "upcoming" && (
-                      <Link
-                        href="/event-creation"
-                        className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                      >
-                        <Plus className="h-4 w-4" />
-                        Create Event
-                      </Link>
-                    )}
-                  </div>
-                )}
+                {!loadingEvents &&
+                  !eventsError &&
+                  filteredEvents.length === 0 && (
+                    <div className="rounded-xl border border-white/10 bg-card-background/50 p-10 text-center">
+                      <Calendar className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                      <h3 className="mb-2 text-lg font-semibold text-foreground">
+                        {eventsFilter === "upcoming"
+                          ? "No upcoming events"
+                          : "No past events"}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-6">
+                        {eventsFilter === "upcoming"
+                          ? "Create an event to get started"
+                          : "Events you've hosted will appear here"}
+                      </p>
+                      {eventsFilter === "upcoming" && (
+                        <Link
+                          href="/event-creation"
+                          className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Create Event
+                        </Link>
+                      )}
+                    </div>
+                  )}
 
                 {/* Events Timeline */}
-                {!loadingEvents && !eventsError && filteredEvents.length > 0 && (
-                  <EventsTimeline
-                    events={filteredEvents}
-                    linkToManagement={true}
-                    enablePreviewModal={false}
-                  />
-                )}
+                {!loadingEvents &&
+                  !eventsError &&
+                  filteredEvents.length > 0 && (
+                    <EventsTimeline
+                      events={filteredEvents}
+                      linkToManagement={true}
+                      enablePreviewModal={false}
+                    />
+                  )}
               </div>
             )}
 
@@ -477,33 +487,37 @@ function EventManagementContent() {
                 )}
 
                 {/* Calendars Empty State */}
-                {!loadingCalendars && !calendarsError && calendars.length === 0 && (
-                  <div className="rounded-xl border border-white/10 bg-card-background/50 p-10 text-center">
-                    <CalendarDays className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                    <h3 className="mb-2 text-lg font-semibold text-foreground">
-                      No calendars yet
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-6">
-                      Organize your events into calendars
-                    </p>
-                    <Link
-                      href="/calendars/create"
-                      className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Create Calendar
-                    </Link>
-                  </div>
-                )}
+                {!loadingCalendars &&
+                  !calendarsError &&
+                  calendars.length === 0 && (
+                    <div className="rounded-xl border border-white/10 bg-card-background/50 p-10 text-center">
+                      <CalendarDays className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                      <h3 className="mb-2 text-lg font-semibold text-foreground">
+                        No calendars yet
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-6">
+                        Organize your events into calendars
+                      </p>
+                      <Link
+                        href="/calendars/create"
+                        className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Create Calendar
+                      </Link>
+                    </div>
+                  )}
 
                 {/* Calendars Grid */}
-                {!loadingCalendars && !calendarsError && calendars.length > 0 && (
-                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    {calendars.map((calendar) => (
-                      <CalendarCard key={calendar.id} calendar={calendar} />
-                    ))}
-                  </div>
-                )}
+                {!loadingCalendars &&
+                  !calendarsError &&
+                  calendars.length > 0 && (
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      {calendars.map((calendar) => (
+                        <CalendarCard key={calendar.id} calendar={calendar} />
+                      ))}
+                    </div>
+                  )}
               </div>
             )}
           </>
