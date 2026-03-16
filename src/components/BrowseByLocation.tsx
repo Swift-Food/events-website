@@ -33,28 +33,19 @@ export default function BrowseByLocation() {
       </h2>
 
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className="aspect-square skeleton-shimmer rounded-xl"
+              className="h-[72px] rounded-lg skeleton-shimmer"
             />
           ))}
         </div>
       ) : (
         <>
-          {/* Mobile: horizontal scroll */}
-          <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3 lg:grid-cols-4">
             {locations.map((location) => (
-              <div key={location.id} className="flex-shrink-0 discover-card">
-                <SquareLocationCard location={location} size={200} />
-              </div>
-            ))}
-          </div>
-          {/* Desktop: responsive grid */}
-          <div className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {locations.map((location) => (
-              <div key={location.id} className="discover-card">
+              <div key={location.id}>
                 <SquareLocationCard location={location} />
               </div>
             ))}

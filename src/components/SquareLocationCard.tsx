@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { EventLocationResponseDto } from "@/types/location";
 
 interface SquareLocationCardProps {
@@ -14,38 +14,29 @@ export default function SquareLocationCard({ location, size }: SquareLocationCar
   return (
     <Link
       href={`/locations/${location.id}`}
-      className={`group relative block overflow-hidden rounded-2xl ${!size ? "w-full aspect-square" : ""}`}
-      style={size ? { width: size, height: size } : undefined}
+      className="group flex min-h-[72px] w-full items-center gap-3 rounded-2xl p-2 transition-all duration-300 hover:translateY(-1px) hover:bg-white/[0.08]"
+      style={size ? { width: size, minWidth: size } : undefined}
     >
-      {/* Background Image or Fallback */}
-      {location.image ? (
-        <Image
-          src={location.image}
-          alt={location.name}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center bg-primary/20">
-          <MapPin className="h-12 w-12 text-white/30" />
-        </div>
-      )}
+      <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e84c67] transition-transform duration-300 group-hover:scale-105">
+        {location.image ? (
+          <Image
+            src={location.image}
+            alt={location.name}
+            fill
+            className="object-cover"
+            sizes="44px"
+          />
+        ) : (
+          <Building2 className="h-5 w-5 text-white" strokeWidth={2.1} />
+        )}
+      </div>
 
-      {/* Gradient Overlay */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-[60%]"
-        style={{
-          background: "linear-gradient(to top, rgba(0,0,0,0.8), transparent)",
-        }}
-      />
-
-      {/* Content */}
-      <div className="absolute bottom-0 left-0 right-0 p-3">
-        <h3 className="text-white text-base font-semibold line-clamp-2">
+      <div className="min-w-0">
+        <h3 className="truncate text-[0.95rem] font-semibold leading-none tracking-[-0.03em] text-white sm:text-[1.1rem]">
           {location.name}
         </h3>
-        <p className="text-white/70 text-sm mt-0.5">
-          {eventCount} event{eventCount !== 1 ? "s" : ""}
+        <p className="mt-1 text-sm font-medium tracking-[-0.02em] text-white/58 sm:text-[0.95rem]">
+          {eventCount} Event{eventCount !== 1 ? "s" : ""}
         </p>
       </div>
     </Link>
