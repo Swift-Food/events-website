@@ -2,23 +2,27 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { eventsApi } from "@/services/events";
+import { eventService } from "@/services/event.service";
 import { EventResponseDto } from "@/types/event";
 import { ChevronRight } from "lucide-react";
 import HorizontalEventCard from "@/components/HorizontalEventCard";
 import EventPreviewModal from "@/components/EventPreviewModal";
 
-interface UpcomingEventsSectionProps {
+interface EventsSectionProps {
   title?: string;
   subtitle?: string;
   maxEvents?: number;
+  viewAllHref?: string;
+  fetchEvents?: (take: number) => Promise<EventResponseDto[]>;
 }
 
-export default function UpcomingEventsSection({
+export default function EventsSection({
   title = "Upcoming Events",
   subtitle = "Don't miss out on these exciting events",
   maxEvents = 6,
-}: UpcomingEventsSectionProps) {
+  viewAllHref = "/events",
+  fetchEvents = (take) => eventService.getUpcomingEvents(take),
+}: EventsSectionProps) {
   const [events, setEvents] = useState<EventResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,30 +30,23 @@ export default function UpcomingEventsSection({
   // Modal state
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
-  // Fetch upcoming events
   useEffect(() => {
-    const fetchUpcomingEvents = async () => {
+    const loadEvents = async () => {
       setLoading(true);
       setError(null);
       try {
-        // const now = new Date().toISOString();
-        const result = await eventsApi.findAll({
-          // startDate: now,
-          sortBy: "startDateTime",
-          sortOrder: "asc",
-          take: maxEvents,
-        });
-        setEvents(result.events ?? []);
+        const result = await fetchEvents(maxEvents);
+        setEvents(result ?? []);
       } catch (err) {
-        console.error("Failed to fetch upcoming events:", err);
+        console.error(`Failed to fetch section events for "${title}":`, err);
         setError("Failed to load events");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUpcomingEvents();
-  }, [maxEvents]);
+    loadEvents();
+  }, [fetchEvents, maxEvents, title]);
 
   const handleEventClick = (_e: React.MouseEvent, event: EventResponseDto) => {
     setSelectedEventId(event.id);
@@ -91,7 +88,7 @@ export default function UpcomingEventsSection({
           <p className="text-sm text-muted-foreground">{subtitle}</p>
         </div>
         <Link
-          href="/events"
+          href={viewAllHref}
           className="view-all-link text-sm text-primary hover:text-primary/80"
         >
           View All

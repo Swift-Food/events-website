@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { calendarsApi } from "@/services/calendars";
 import { categoriesApi } from "@/services/categories";
+import { eventService } from "@/services/event.service";
 import { Calendar as CalendarType } from "@/types/calendar";
 import { EventCategoryResponseDto } from "@/types/category";
 import { ChevronRight as ArrowRight, icons, LucideProps } from "lucide-react";
 import SquareCalendarCard from "@/components/SquareCalendarCard";
-import UpcomingEventsSection from "@/components/UpcomingEventsSection";
+import EventsSection from "@/components/EventsSection";
 import Link from "next/link";
 import BrowseByLocation from "@/components/BrowseByLocation";
 
@@ -65,6 +66,10 @@ export default function DiscoverPage() {
       categoryName.charAt(0).toUpperCase() + categoryName.slice(1).toLowerCase()
     );
   };
+
+  const fetchPopularEvents = useCallback((take: number) => {
+    return eventService.getTrendingEvents(take);
+  }, []);
 
   // Fetch calendars and categories on mount
   useEffect(() => {
@@ -158,9 +163,13 @@ export default function DiscoverPage() {
           </div>
         )}
 
-        {/* Upcoming Events Section - stagger 3 */}
+        {/* Popular Events Section - stagger 3 */}
         <div className="discover-stagger-3">
-          <UpcomingEventsSection />
+          <EventsSection
+            title="Popular Events"
+            subtitle="See what people are checking out right now"
+            fetchEvents={fetchPopularEvents}
+          />
         </div>
 
         {/* Calendars Section - stagger 4 */}
