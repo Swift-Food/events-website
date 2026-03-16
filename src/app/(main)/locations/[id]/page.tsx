@@ -132,7 +132,7 @@ export default function LocationEventsPage({
               <>
                 {/* Location Image */}
                 {location.image && (
-                  <div className="relative h-14 w-14 sm:h-20 sm:w-20 rounded-lg overflow-hidden border-2 border-white/20 mb-3">
+                  <div className="relative h-14 w-14 sm:h-20 sm:w-20 rounded-full overflow-hidden border border-white/20 mb-3">
                     <Image
                       src={location.image}
                       alt={location.name}
