@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Calendar, Clock, MapPin, Ticket, Video, Lock } from "lucide-react";
+import { Calendar, Clock, MapPin, Ticket, Video, Lock, Users } from "lucide-react";
 import { EventResponseDto } from "@/types/event";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import {
@@ -285,21 +285,31 @@ export default function HorizontalEventCard({
           </div>
         )}
 
-        {/* Row 2: Price */}
-        {formatPrice() && (
-          <div
-            className={`mt-1 flex items-center gap-1.5 text-sm ${
-              isSoldOut
-                ? "text-red-400"
-                : minPrice === 0
-                ? "text-green-400"
-                : "text-warning"
-            }`}
-          >
-            <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
-            <span className={isSoldOut ? "font-medium" : ""}>
-              {formatPrice()}
-            </span>
+        {/* Row 2: Price + Attendees */}
+        {!!(formatPrice() || event.attendeesCount) && (
+          <div className="mt-1 flex items-center gap-3">
+            {formatPrice() && (
+              <div
+                className={`flex items-center gap-1.5 text-sm ${
+                  isSoldOut
+                    ? "text-red-400"
+                    : minPrice === 0
+                    ? "text-green-400"
+                    : "text-warning"
+                }`}
+              >
+                <Ticket className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className={isSoldOut ? "font-medium" : ""}>
+                  {formatPrice()}
+                </span>
+              </div>
+            )}
+            {event.attendeesCount != null && event.attendeesCount > 0 && (
+              <div className={`flex items-center gap-1.5 text-sm ${textMuted}`}>
+                <Users className="h-3.5 w-3.5 flex-shrink-0" />
+                <span>{event.attendeesCount.toLocaleString()} going</span>
+              </div>
+            )}
           </div>
         )}
 

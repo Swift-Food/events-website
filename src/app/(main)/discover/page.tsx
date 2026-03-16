@@ -68,7 +68,10 @@ export default function DiscoverPage() {
   };
 
   const fetchPopularEvents = useCallback((take: number) => {
-    return eventService.getTrendingEvents(take);
+    return eventService.getTrendingEvents(take).then((res) => {
+      console.log("Popular events response:", res);
+      return res;
+    });
   }, []);
 
   // Fetch calendars and categories on mount
