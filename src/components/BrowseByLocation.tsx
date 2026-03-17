@@ -1,30 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { locationsApi } from "@/services/locations";
-import { EventLocationResponseDto } from "@/types/location";
+import { continentsApi } from "@/services/locations";
+import { EventContinentResponseDto } from "@/types/location";
 import SquareLocationCard from "@/components/SquareLocationCard";
 
 export default function BrowseByLocation() {
-  const [locations, setLocations] = useState<EventLocationResponseDto[]>([]);
+  const [continents, setContinents] = useState<EventContinentResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchLocations = async () => {
+    const fetchContinents = async () => {
       try {
         setLoading(true);
-        const data = await locationsApi.findAll();
-        setLocations(data);
+        const data = await continentsApi.findAll();
+        setContinents(data.filter((c) => c.locations.length > 0));
       } catch (err) {
-        console.error("Failed to fetch locations:", err);
+        console.error("Failed to fetch continents:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchLocations();
+    fetchContinents();
   }, []);
 
-  if (!loading && locations.length === 0) return null;
+  if (!loading && continents.length === 0) return null;
 
   return (
     <div className="mb-8">
@@ -42,15 +42,22 @@ export default function BrowseByLocation() {
           ))}
         </div>
       ) : (
-        <>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3 lg:grid-cols-4">
-            {locations.map((location) => (
-              <div key={location.id}>
-                <SquareLocationCard location={location} />
+        <div className="space-y-6">
+          {continents.map((continent) => (
+            <div key={continent.id}>
+              <h3 className="text-sm font-medium text-muted-foreground mb-3">
+                {continent.name}
+              </h3>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3 lg:grid-cols-4">
+                {continent.locations.map((location) => (
+                  <div key={location.id}>
+                    <SquareLocationCard location={location} />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
