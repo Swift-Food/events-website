@@ -30,6 +30,38 @@ export const locationsApi = {
     );
     return response.data;
   },
+
+  getPopular: async (limit?: number): Promise<EventLocationResponseDto[]> => {
+    const response = await apiClient.get<EventLocationResponseDto[]>(
+      "/event-locations/popular",
+      { params: limit !== undefined ? { limit } : undefined }
+    );
+    return response.data;
+  },
+
+  getNearbyLocations: async (
+    lat: number,
+    lng: number,
+    limit?: number
+  ): Promise<EventLocationResponseDto[]> => {
+    const response = await apiClient.get<EventLocationResponseDto[]>(
+      "/event-locations/nearby-locations",
+      { params: { lat, lng, ...(limit !== undefined && { limit }) } }
+    );
+    return response.data;
+  },
+
+  getEventsNearby: async (
+    lat: number,
+    lng: number,
+    params?: { page?: number; limit?: number }
+  ): Promise<LocationEventsResponseDto> => {
+    const response = await apiClient.get<LocationEventsResponseDto>(
+      "/event-locations/nearby",
+      { params: { lat, lng, ...params } }
+    );
+    return response.data;
+  },
 };
 
 export const continentsApi = {
