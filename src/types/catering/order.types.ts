@@ -188,6 +188,9 @@ export interface CateringPricingRequest {
   mealSessions: MealSessionRequest[];
   promoCodes?: string[];
   deliveryLocation?: { latitude: number; longitude: number };
+  // Optional — when supplied the backend enforces `maxUsesPerUser` per promo
+  // code before quoting a discount. Anonymous callers can omit it.
+  userId?: string;
 }
 
 export interface DeliveryFeeBreakdown {
